@@ -2,7 +2,7 @@
 The idea behind this project is to give people an option to exchange products and services without money (barter).  
 
 # Tech doc in user stories
-As a user I open an app and write services I can offer this kind of service. 
+As a user I open an app and write services I can offer. 
 
 As a user I open an app and write services or products I am interested in.
 
