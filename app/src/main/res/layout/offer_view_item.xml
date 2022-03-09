@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="person"
+            type="ru.home.swap.model.PersonView" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="84dp"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/offer_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:text="@{person.component2()}"
+            tools:text="I offer software engineering for Android" />
+
+        <Space
+            android:id="@+id/space"
+            android:layout_height="8dp"
+            android:layout_width="match_parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/offer_title"
+            app:layout_constraintBottom_toTopOf="@id/offer_date_range" />
+
+        <TextView
+            android:id="@+id/offer_date_range"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@{person.component3()}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/space"
+            tools:text="till May 2022" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
