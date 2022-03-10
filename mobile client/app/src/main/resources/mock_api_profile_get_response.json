@@ -1,0 +1,26 @@
+{
+  "payload" : {
+    "name" : "Jane Digital",
+    "offers" : [
+      {
+        "name" : "Cooking dinner",
+        "date" : "2025",
+        "index" : [
+          "Cooking dinner"
+        ]
+      },
+      {
+        "name" : "Have a nice chat with you",
+        "date" : "May 2025",
+        "index" : [
+          "a nice chat",
+          "chat",
+          "chatting",
+          "talk",
+          "talking"
+        ]
+      }
+    ],
+    "demands" : []
+  }
+}
