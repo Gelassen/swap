@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Swap</string>
+
+    <string name="default_error_message">Something went wrong</string>
+    <string name="error_message_with_server_response">Something went wrong with server response: \n %1$s</string>
+
 </resources>

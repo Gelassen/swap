@@ -1,7 +1,6 @@
 package ru.home.swap.ui.main
 
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -15,7 +14,6 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import ru.home.swap.App
 import ru.home.swap.AppApplication
 import ru.home.swap.R
 import ru.home.swap.databinding.MainFragmentBinding

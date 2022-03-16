@@ -2,7 +2,9 @@ package ru.home.swap.network
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import okhttp3.*
+import ru.home.swap.App
 
 class MockInterceptor(val context: Context): Interceptor {
 
@@ -11,10 +13,12 @@ class MockInterceptor(val context: Context): Interceptor {
     }
 
     override fun intercept(chain: Interceptor.Chain): Response {
+        Log.d(App.TAG, "[0] Network interceptor is called")
         var request = chain.request()
         val url = request.url().uri().toString()
 
         val msg = getMessage(getMockFileName(url, request.method()!!))
+        Log.d(App.TAG, "[0] $msg")
         val body = getBody(msg)
 
         return okhttp3.Response.Builder()
@@ -31,7 +35,7 @@ class MockInterceptor(val context: Context): Interceptor {
         var msg = ""
         val uri = Uri.parse(url)
         if (matchPath(uri.pathSegments, API_ACCOUNT.split("?").first())
-            && matchQuery(uri.queryParameterNames, API_ACCOUNT.split("?").last())
+//            && matchQuery(uri.queryParameterNames, API_ACCOUNT.split("?").last())
             && method.equals("POST")) {
             msg = "mock_api_profile_post_response.json"
         } else if (matchPath(uri.pathSegments, API_ACCOUNT.split("?").first())
@@ -46,7 +50,8 @@ class MockInterceptor(val context: Context): Interceptor {
     }
 
     private fun getMessage(jsonName: String): String {
-        return context.assets.open(jsonName).bufferedReader().use { it.readText() }
+        val str = context.assets.open(jsonName).bufferedReader().use { it.readText() }
+        return str
     }
 
     private fun getBody(msg: String): ResponseBody {

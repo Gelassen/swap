@@ -2,7 +2,9 @@ package ru.home.swap
 
 import android.app.Application
 import ru.home.swap.di.AppComponent
+import ru.home.swap.di.AppModule
 import ru.home.swap.di.DaggerAppComponent
+import ru.home.swap.di.NetworkModule
 
 class AppApplication: Application() {
 
@@ -13,8 +15,8 @@ class AppApplication: Application() {
 
         component = DaggerAppComponent
             .builder()
-//            .appModule(AppModule(baseContext))
-//            .repositoryModule(RepositoryModule(this))
+            .appModule(AppModule(this))
+            .networkModule(NetworkModule(this))
             .build()
     }
 

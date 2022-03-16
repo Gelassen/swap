@@ -7,6 +7,7 @@ import dagger.Provides
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import ru.home.swap.network.IApi
 import ru.home.swap.network.MockInterceptor
 import javax.inject.Singleton
@@ -20,6 +21,7 @@ class NetworkModule(val context: Context) {
 //        val customGson = GsonBuilder().registerTypeAdapterFactory(CustomTypeAdapterFactory()).create()
         val retrofit = Retrofit.Builder()
 //            .addConverterFactory(GsonConverterFactory.create(customGson))
+            .addConverterFactory(GsonConverterFactory.create())
             .client(httpClient)
             .baseUrl("https://google.com")
             .build()

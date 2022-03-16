@@ -1,0 +1,103 @@
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable
+            name="state"
+            type="ru.home.swap.ui.profile.Model" />
+    </data>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/blue_dark">
+
+        <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="24dp"
+            android:layout_gravity="center"
+            android:background="@color/blue_dark">
+
+            <TextView
+                android:id="@+id/sign_in"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp"
+                android:layout_marginBottom="16dp"
+                android:textSize="24sp"
+                android:text="Sign in"
+                android:textColor="@color/white" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/contact_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp"
+                android:paddingBottom="16dp"
+                android:layout_below="@id/sign_in">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/contact"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:singleLine="true"
+                    android:hint="Enter your cell or email"
+                    android:text="@{state.contact}"
+                    tools:text="+7 910 900 87 70" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/secret_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="16dp"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp"
+                android:layout_below="@+id/contact_container">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/secret"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Enter your secret"
+                    android:inputType="textPassword"
+                    android:singleLine="true"
+                    android:text="@{state.secret}"
+                    tools:text="God is love" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/confirm"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/secret_container"
+                android:layout_centerHorizontal="true"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:minEms="8"
+                android:text="Confirm"
+                android:textColor="@color/white"
+                app:backgroundTint="@color/blue_dark"
+                app:strokeColor="@color/white" />
+            <!--        <TextView-->
+            <!--            android:layout_width="match_parent"-->
+            <!--            android:layout_height="64dp"-->
+            <!--            android:layout_below="@id/secret_container"-->
+            <!--            android:background="@color/blue_light"-->
+            <!--            android:gravity="center"-->
+            <!--            android:text="CONFIRM"-->
+            <!--            android:textColor="@color/white" />-->
+
+        </RelativeLayout>
+    </FrameLayout>
+</layout>
+

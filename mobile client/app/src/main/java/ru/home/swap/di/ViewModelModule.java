@@ -8,6 +8,7 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.multibindings.IntoMap;
 import ru.home.swap.ui.main.MainViewModel;
+import ru.home.swap.ui.profile.ProfileViewModel;
 
 @Module
 public abstract class ViewModelModule {
@@ -22,5 +23,10 @@ public abstract class ViewModelModule {
     abstract ViewModel mainViewModel(MainViewModel vm);
 
     //Others ViewModels
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(ProfileViewModel.class)
+    abstract ViewModel profileViewModel(ProfileViewModel vm);
 }
 

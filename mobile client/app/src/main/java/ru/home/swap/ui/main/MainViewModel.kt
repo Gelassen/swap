@@ -30,9 +30,9 @@ class MainViewModel @Inject constructor(): ViewModel() {
     val model: StateFlow<List<PersonView>> = _model
 
     init {
-        viewModelScope.launch {
-            _model.value = PersonRepository().getOffers()
-        }
+/*        viewModelScope.launch {
+            _model.value = PersonRepository(api, cache).getOffers()
+        }*/
     }
 
 }
