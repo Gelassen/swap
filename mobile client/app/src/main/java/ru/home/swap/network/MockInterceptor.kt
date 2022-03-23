@@ -35,11 +35,11 @@ class MockInterceptor(val context: Context): Interceptor {
         var msg = ""
         val uri = Uri.parse(url)
         if (matchPath(uri.pathSegments, API_ACCOUNT.split("?").first())
-//            && matchQuery(uri.queryParameterNames, API_ACCOUNT.split("?").last())
+            /*&& matchQuery(uri.queryParameterNames, API_ACCOUNT.split("?").last())*/
             && method.equals("POST")) {
             msg = "mock_api_profile_post_response.json"
         } else if (matchPath(uri.pathSegments, API_ACCOUNT.split("?").first())
-            && matchQuery(uri.queryParameterNames, API_ACCOUNT.split("?").last())
+            /*&& matchQuery(uri.queryParameterNames, API_ACCOUNT.split("?").last())*/
             && method.equals("GET")
         ) {
             msg = "mock_api_profile_get_response.json"

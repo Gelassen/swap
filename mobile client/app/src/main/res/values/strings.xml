@@ -3,5 +3,7 @@
 
     <string name="default_error_message">Something went wrong</string>
     <string name="error_message_with_server_response">Something went wrong with server response: \n %1$s</string>
+    <string name="default_error_title_dialog">Error</string>
+    <string name="empty_credentials_error">Please check your contact and secret. They should not be empty.</string>
 
 </resources>

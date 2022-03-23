@@ -8,15 +8,16 @@ import retrofit2.http.POST
 import ru.home.swap.model.Person
 import ru.home.swap.model.PersonProfile
 import ru.home.swap.network.model.ApiResponse
+import ru.home.swap.network.model.EmptyPayload
 import ru.home.swap.network.model.ProfileResponse
 
 interface IApi {
 
     @Headers("Content-Type: application/json; charset=utf-8")
     @POST("/api/account")
-    suspend fun createProfile(@Body person: PersonProfile): Response<ProfileResponse>
+    suspend fun createProfile(@Body person: PersonProfile): Response<ProfileResponse<EmptyPayload>>
 
     @Headers("Content-Type: application/json; charset=utf-8")
     @GET("/api/account")
-    suspend fun getProfile() : Response<ApiResponse<PersonProfile>>
+    suspend fun getProfile() : Response<ProfileResponse<PersonProfile>>
 }

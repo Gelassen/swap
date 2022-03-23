@@ -5,6 +5,7 @@ import android.view.View
 import androidx.fragment.app.DialogFragment
 import ru.home.swap.R
 
+@Deprecated(message = "Legacy code. Should be removed.")
 class LoginDialogFragment(): DialogFragment(R.layout.signin_fragment) {
 
 //    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {

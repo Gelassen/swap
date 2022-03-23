@@ -10,7 +10,10 @@ import ru.home.swap.model.Person
 import ru.home.swap.model.PersonProfile
 import ru.home.swap.model.PersonView
 import ru.home.swap.network.IApi
+import ru.home.swap.network.model.EmptyPayload
+import ru.home.swap.network.model.ProfileResponse
 import ru.home.swap.stub.Stubs
+import java.lang.RuntimeException
 
 class PersonRepository(val api: IApi, val cache: Cache) {
 
@@ -28,7 +31,7 @@ class PersonRepository(val api: IApi, val cache: Cache) {
         return result
     }
 
-    fun createAccount(person: PersonProfile): Flow<Response<String>> {
+    fun createAccount(person: PersonProfile): Flow<Response<EmptyPayload>> {
         return flow {
             Log.d(App.TAG, "[a] createProfile() call")
             val response = api.createProfile(person)
@@ -36,14 +39,14 @@ class PersonRepository(val api: IApi, val cache: Cache) {
             if (response.isSuccessful) {
                 Log.d(App.TAG, "[c] response is ok")
                 val payload = response.body()!!
-                emit(Response.Data(""))
+                emit(Response.Data(payload.payload))
             } else {
                 Log.d(App.TAG, "[d] response is not ok")
                 emit(Response.Error.Message(response.message()))
             }
         }
             .catch { ex ->
-                Response.Error.Exception(ex)
+                emit(Response.Error.Exception(ex))
             }
     }
 
@@ -60,16 +63,21 @@ class PersonRepository(val api: IApi, val cache: Cache) {
 
     fun getAccount(person: PersonProfile): Flow<Response<PersonProfile>> {
         return flow {
+            Log.d(App.TAG, "[a] getProfile() call")
             val response = api.getProfile()
             if (response.isSuccessful) {
+                Log.d(App.TAG, "[b1] get body and emit")
                 val payload = response.body()!!
                 emit(Response.Data(payload.payload))
             } else {
+                Log.d(App.TAG, "[b2] get error and emit")
                 emit(Response.Error.Message(response.message()))
             }
         }
             .catch { ex ->
-                Response.Error.Exception(ex)
+                Log.d(App.TAG, "[c] get an exception")
+                Log.e(App.TAG, "Exception on getAccount() call", ex)
+                emit(Response.Error.Exception(ex))
             }
     }
 

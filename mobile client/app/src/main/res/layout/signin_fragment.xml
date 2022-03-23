@@ -4,8 +4,11 @@
 
     <data>
         <variable
-            name="state"
-            type="ru.home.swap.ui.profile.Model" />
+            name="model"
+            type="ru.home.swap.ui.profile.ProfileViewModel" />
+        <variable
+            name="provider"
+            type="ru.home.swap.providers.PersonProvider" />
     </data>
 
     <FrameLayout
@@ -40,7 +43,8 @@
                 android:paddingStart="24dp"
                 android:paddingEnd="24dp"
                 android:paddingBottom="16dp"
-                android:layout_below="@id/sign_in">
+                android:layout_below="@id/sign_in"
+                >
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/contact"
@@ -48,7 +52,7 @@
                     android:layout_height="wrap_content"
                     android:singleLine="true"
                     android:hint="Enter your cell or email"
-                    android:text="@{state.contact}"
+                    android:text="@={model.state.secret}"
                     tools:text="+7 910 900 87 70" />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -69,7 +73,7 @@
                     android:hint="Enter your secret"
                     android:inputType="textPassword"
                     android:singleLine="true"
-                    android:text="@{state.secret}"
+                    android:text="@{model.state.secret}"
                     tools:text="God is love" />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -86,6 +90,7 @@
                 android:minEms="8"
                 android:text="Confirm"
                 android:textColor="@color/white"
+                android:onClick="onConfirm"
                 app:backgroundTint="@color/blue_dark"
                 app:strokeColor="@color/white" />
             <!--        <TextView-->

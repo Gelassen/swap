@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
@@ -17,19 +18,13 @@ import kotlinx.coroutines.launch
 import ru.home.swap.App
 import ru.home.swap.AppApplication
 import ru.home.swap.R
-import ru.home.swap.databinding.SigninFragmentBinding
+import ru.home.swap.databinding.LauncherFragmentBinding
 import ru.home.swap.di.ViewModelFactory
-import ru.home.swap.providers.PersonProvider
-import ru.home.swap.ui.common.ErrorDialogFragment
 import javax.inject.Inject
 
-class SignInFragment: Fragment() {
+class LauncherFragment: Fragment() {
 
-    companion object {
-        fun newInstance() = SignInFragment()
-    }
-
-    private lateinit var binding: SigninFragmentBinding
+    private lateinit var binding: LauncherFragmentBinding
 
     @Inject
     lateinit var viewModelFactory: ViewModelFactory
@@ -45,9 +40,9 @@ class SignInFragment: Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding = SigninFragmentBinding.inflate(inflater, container, false)
-        binding.provider = PersonProvider()
         viewModel = ViewModelProvider(this, viewModelFactory).get(ProfileViewModel::class.java)
+        binding = LauncherFragmentBinding.inflate(inflater, container, false)
+        binding.state = viewModel.uiState.value
         return binding.root
     }
 
@@ -55,42 +50,39 @@ class SignInFragment: Fragment() {
         super.onViewCreated(view, savedInstanceState)
         (activity as AppCompatActivity).supportActionBar!!.hide()
 
-        binding.model = viewModel/*viewModel.uiState.value*/
-        binding.lifecycleOwner = this
-        binding.confirm.setOnClickListener {
-            viewModel.createAnAccount()
-        }
-
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 viewModel.uiState.collect { it ->
                     when(it.status) {
                         StateFlag.CREDENTIALS -> {
-                            Log.d(App.TAG, "[6a] UI state: credentials")
+                            findNavController().navigate(R.id.action_launcherFragment_to_signInFragment)
                         }
                         StateFlag.PROFILE -> {
-                            Log.d(App.TAG, "[6b] UI state: profile")
-                            findNavController().navigate(R.id.action_signInFragment_to_profileFragment)
+                            Log.d(App.TAG, "[navigation] call navigation action from launcher fragment")
+                            findNavController().navigate(R.id.action_launcherFragment_to_profileFragment)
                         }
                         StateFlag.NONE -> {
-                            Log.d(App.TAG, "[6c] UI state: none ")
+                            // TODO remove error from list after showing it up
+                            if (it.errors.isNotEmpty()) {
+                                val error = it.errors.first()
+                                Toast.makeText(requireContext(),
+                                    "There is an error: $error",
+                                    Toast.LENGTH_SHORT)
+                                    .show()
+//                                it.errors = it.errors.filter { it -> !error.equals(it) }
+                                viewModel.removeShownError()
+                            }
+
                         }
-                    }
-                    // TODO add check for hidden fragment dialog to remove error that has been shown already
-                    if (it.errors.isNotEmpty()) {
-                        ErrorDialogFragment.newInstance(
-                            getString(R.string.default_error_title_dialog),
-                            it.errors.first()
-                        ).show(childFragmentManager, ErrorDialogFragment.TAG)
                     }
                 }
             }
         }
-        // DONE enter data and send on server
-        // DONE cache account on device
-        // DONE add validator and bottom sheet with error message
-        // TODO add check on account existence to show or not SignInFragment
+        viewModel.checkAnExistingAccount()
+/*        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                uiState.
+            }
+        }*/
     }
-
-
 }
