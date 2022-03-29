@@ -16,4 +16,8 @@ class PersonProvider {
                 && Patterns.EMAIL_ADDRESS.matcher(str).matches()
     }
 
+    fun isInputEmpty(input: String): Boolean {
+        return input.isEmpty()
+    }
+
 }

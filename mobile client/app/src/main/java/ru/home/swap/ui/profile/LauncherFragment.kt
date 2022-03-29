@@ -62,14 +62,12 @@ class LauncherFragment: Fragment() {
                             findNavController().navigate(R.id.action_launcherFragment_to_profileFragment)
                         }
                         StateFlag.NONE -> {
-                            // TODO remove error from list after showing it up
                             if (it.errors.isNotEmpty()) {
                                 val error = it.errors.first()
                                 Toast.makeText(requireContext(),
                                     "There is an error: $error",
                                     Toast.LENGTH_SHORT)
                                     .show()
-//                                it.errors = it.errors.filter { it -> !error.equals(it) }
                                 viewModel.removeShownError()
                             }
 
@@ -79,10 +77,5 @@ class LauncherFragment: Fragment() {
             }
         }
         viewModel.checkAnExistingAccount()
-/*        lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                uiState.
-            }
-        }*/
     }
 }

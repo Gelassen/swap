@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
+import kotlinx.android.synthetic.main.profile_fragment.*
 import ru.home.swap.App
 import ru.home.swap.databinding.ProfileFragmentBinding
 
@@ -31,6 +32,14 @@ class ProfileFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        fab.apply {
+            setOnClickListener {
+                childFragmentManager.let {
+                    AddItemBottomSheetDialogFragment.newInstance(Bundle.EMPTY)
+                        .show(it, AddItemBottomSheetDialogFragment.TAG)
+                }
+            }
+        }
     }
 
     override fun onAttach(context: Context) {
@@ -42,5 +51,11 @@ class ProfileFragment : Fragment() {
             }
         }
         requireActivity().onBackPressedDispatcher.addCallback(this, callback)
+    }
+
+    fun onFabClick(view: View) {
+        childFragmentManager.let {
+            AddItemBottomSheetDialogFragment.newInstance(Bundle.EMPTY).show(it, tag)
+        }
     }
 }

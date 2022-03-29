@@ -6,6 +6,7 @@ import androidx.databinding.InverseMethod
 import androidx.databinding.ObservableField
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import ru.home.swap.App
@@ -104,6 +105,8 @@ class ProfileViewModel
     val uiState: StateFlow<Model> = state
         .stateIn(viewModelScope, SharingStarted.Eagerly, state.value)
 
+    val proposal: ObservableField<String> = ObservableField<String>("")
+
     fun addOffer() {
         // TODO complete me
     }
@@ -121,8 +124,6 @@ class ProfileViewModel
     }
 
     fun createAnAccount() {
-//        Log.d(App.TAG, "Update name ${name.value}")
-//        Log.d(App.TAG, "Test name value ${name.value}")
         Log.d(App.TAG, "[check] contact value (${state.value.contact}) and secret value(${state.value.secret})")
         if (PersonProvider().isCredentialsEmpty(state.value.contact, state.value.secret)) {
             state.update { state ->
@@ -143,8 +144,6 @@ class ProfileViewModel
 
     fun createAnAccount(person: PersonProfile) {
         Log.d(App.TAG, "[1] create account call (cache)")
-        // TODO just cache account before push it on server as it was done in car share app;
-        //  the issue with another flow within chain put in schedule to explore
         viewModelScope.launch {
             repository.cacheAccount(person)
                 .flatMapConcat { it->
@@ -185,57 +184,6 @@ class ProfileViewModel
                         }
                     }
                 }
-/*            repository.createAccount(person)
-                .flatMapConcat { it ->
-                    if (it is PersonRepository.Response.Error) {
-                        Log.d(App.TAG, "[2a] get error from server")
-                        *//*flow {
-                            emit(it)
-                        }.stateIn(viewModelScope)*//*
-                        flowOf(it).stateIn(viewModelScope)
-                    } else {
-                        Log.d(App.TAG, "[2b] get response from server, try to cache account")
-*//*                        flow {
-                            repository.cacheAccount(person)
-                            emit(it)
-                        }.stateIn(viewModelScope)*//*
-                        repository.cacheAccount(person)
-                        flowOf(it).stateIn(viewModelScope)
-                    }
-                }
-                .catch { e ->
-                    Log.d(App.TAG, "[3] get an exception in catch block")
-                    state.update { state ->
-                        val errors = state.errors + getErrorMessage(PersonRepository.Response.Error.Exception(e))
-                        state.copy(errors = errors, isLoading = false)
-                    }
-                }
-                .collect { it ->
-                    Log.d(App.TAG, "[4] collect the result")
-                    when (it) {
-                        is PersonRepository.Response.Data -> {
-                            Log.d(App.TAG, "[5a] collect the data")
-                            state.update { state ->
-                                state.copy(
-                                    contact = person.contact,
-                                    secret = person.secret,
-                                    name = person.person.name,
-                                    status = StateFlag.PROFILE,
-                                    isLoading = false
-                                )
-                            }
-                        }
-                        is PersonRepository.Response.Error -> {
-                            Log.d(App.TAG, "[5b] collect the error")
-                            state.update { state ->
-                                state.copy(
-                                    errors = state.errors + getErrorMessage(it),
-                                    isLoading = false
-                                )
-                            }
-                        }
-                    }
-                }*/
         }
     }
 
@@ -320,5 +268,9 @@ class ProfileViewModel
                 errors = it.errors.filter { str -> !str.equals(it.errors.first()) }
             )
         }
+    }
+
+    fun addItem() {
+        // TODO complete me
     }
 }

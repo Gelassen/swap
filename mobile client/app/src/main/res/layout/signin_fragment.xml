@@ -40,18 +40,17 @@
                 android:id="@+id/contact_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_below="@id/sign_in"
                 android:paddingStart="24dp"
                 android:paddingEnd="24dp"
-                android:paddingBottom="16dp"
-                android:layout_below="@id/sign_in"
-                >
+                android:paddingBottom="16dp">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/contact"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:singleLine="true"
                     android:hint="Enter your cell or email"
+                    android:singleLine="true"
                     android:text="@={model.state.secret}"
                     tools:text="+7 910 900 87 70" />
 

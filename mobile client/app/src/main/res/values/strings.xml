@@ -6,4 +6,8 @@
     <string name="default_error_title_dialog">Error</string>
     <string name="empty_credentials_error">Please check your contact and secret. They should not be empty.</string>
 
+    <!-- Profile screen -->
+    <string name="offers_title">Offers</string>
+    <string name="demands_title">Demands</string>
+    <string name="offer_demand_hint">Enter what do you offer or need</string>
 </resources>
