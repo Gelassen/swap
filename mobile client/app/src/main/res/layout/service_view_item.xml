@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="service"
+            type="ru.home.swap.model.Service" />
+    </data>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="72dp"
+        android:padding="16dp"
+        android:background="@color/blue_dark">
+
+        <TextView
+            android:id="@+id/text_service"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:gravity="start|center_vertical"
+            android:textColor="@color/white"
+            android:text="@{service.title}"
+            tools:text="I offer software engineering"
+            />
+
+        <View
+            android:id="@+id/remove_service"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:padding="12dp"
+            android:layout_gravity="end"
+            android:background="@drawable/ic_close"
+            />
+
+    </FrameLayout>
+</layout>

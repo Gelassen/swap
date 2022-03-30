@@ -8,16 +8,26 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
+import ru.home.swap.model.Service
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.profile_fragment.*
+import kotlinx.coroutines.launch
 import ru.home.swap.App
+import ru.home.swap.AppApplication
 import ru.home.swap.databinding.ProfileFragmentBinding
+import ru.home.swap.di.ViewModelFactory
+import javax.inject.Inject
 
 
-class ProfileFragment : Fragment() {
+class ProfileFragment : Fragment(), ItemAdapter.Listener {
 
-    companion object {
-        fun newInstance() = ProfileFragment()
-    }
+    @Inject
+    lateinit var viewModelFactory: ViewModelFactory
+    lateinit var viewModel: ProfileViewModel
 
     private lateinit var binding: ProfileFragmentBinding
 
@@ -26,15 +36,46 @@ class ProfileFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        (requireActivity().application as AppApplication).getComponent().inject(this)
+        // keep an eye on owner parameter, it should be the same scope for view model which is shared among components
+        viewModel = ViewModelProvider(this, viewModelFactory).get(ProfileViewModel::class.java)
         binding = ProfileFragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        offers_list.layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
+        offers_list.adapter = ItemAdapter(true)
+        (offers_list.adapter as ItemAdapter).setListener(this)
+
+        demands_list.layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
+        demands_list.adapter = ItemAdapter(false)
+        (demands_list.adapter as ItemAdapter).setListener(this)
+
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                Log.d(App.TAG, "[collect] UI state collect is called")
+                viewModel.uiState.collect { it ->
+                    Log.d(App.TAG, "[collect] collected #${it.offers.count()} offers items")
+                    (offers_list.adapter as ItemAdapter).update(it.offers)
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                viewModel.uiState.collect { it ->
+                    Log.d(App.TAG, "[collect] collected #${it.demands.count()} demands items")
+                    (demands_list.adapter as ItemAdapter).update(it.demands)
+                }
+            }
+        }
+
         fab.apply {
             setOnClickListener {
                 childFragmentManager.let {
+                    Log.d(App.TAG, "[fab click] Offers count: ${viewModel.uiState.value.offers.count()}")
                     AddItemBottomSheetDialogFragment.newInstance(Bundle.EMPTY)
                         .show(it, AddItemBottomSheetDialogFragment.TAG)
                 }
@@ -53,9 +94,12 @@ class ProfileFragment : Fragment() {
         requireActivity().onBackPressedDispatcher.addCallback(this, callback)
     }
 
-    fun onFabClick(view: View) {
-        childFragmentManager.let {
-            AddItemBottomSheetDialogFragment.newInstance(Bundle.EMPTY).show(it, tag)
+    override fun onRemove(item: Service, isOffers: Boolean) {
+        if (isOffers) {
+            viewModel.removeOffer(item)
+        } else {
+            viewModel.removeDemand(item)
         }
     }
+
 }

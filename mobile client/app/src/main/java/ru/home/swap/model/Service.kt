@@ -1,3 +1,9 @@
 package ru.home.swap.model
 
-data class Service(val title: String, val date: Long, val index: List<String>)
+import com.google.gson.annotations.SerializedName
+
+data class Service(
+    @SerializedName("name")
+    val title: String,
+    val date: Long,
+    val index: List<String>)

@@ -4,6 +4,8 @@ package ru.home.swap.di;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
+import javax.inject.Singleton;
+
 import dagger.Binds;
 import dagger.Module;
 import dagger.multibindings.IntoMap;
@@ -27,6 +29,7 @@ public abstract class ViewModelModule {
     @Binds
     @IntoMap
     @ViewModelKey(ProfileViewModel.class)
+    @Singleton
     abstract ViewModel profileViewModel(ProfileViewModel vm);
 }
 

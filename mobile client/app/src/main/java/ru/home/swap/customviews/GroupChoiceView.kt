@@ -62,6 +62,10 @@ class GroupChoiceView : LinearLayout {
         super.onDraw(canvas)
     }
 
+    fun isOfferSelected() : Boolean {
+        return isOfferChosen
+    }
+
     fun onOfferClick() {
         isOfferChosen = true
         updateColors()

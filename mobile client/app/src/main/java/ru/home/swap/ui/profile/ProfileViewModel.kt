@@ -2,22 +2,18 @@ package ru.home.swap.ui.profile
 
 import android.content.Context
 import android.util.Log
-import androidx.databinding.InverseMethod
 import androidx.databinding.ObservableField
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import ru.home.swap.App
-import ru.home.swap.AppApplication
 import ru.home.swap.R
 import ru.home.swap.model.Person
 import ru.home.swap.model.PersonProfile
 import ru.home.swap.model.Service
 import ru.home.swap.providers.PersonProvider
 import ru.home.swap.repository.PersonRepository
-import java.util.*
 import javax.inject.Inject
 
 sealed interface IModel {
@@ -32,7 +28,33 @@ sealed interface IModel {
         override val isLoading: Boolean = false,
         override val errors: List<String> = emptyList(),
         override val status: StateFlag = StateFlag.PROFILE
-    ) : IModel
+    ) : IModel {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as ProfileState
+
+            if (name != other.name) return false
+            if (offers != other.offers) return false
+            if (demands != other.demands) return false
+            if (isLoading != other.isLoading) return false
+            if (errors != other.errors) return false
+            if (status != other.status) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = name.hashCode()
+            result = 31 * result + offers.hashCode()
+            result = 31 * result + demands.hashCode()
+            result = 31 * result + isLoading.hashCode()
+            result = 31 * result + errors.hashCode()
+            result = 31 * result + status.hashCode()
+            return result
+        }
+    }
 
     data class CredentialsState(
         var contact: String,
@@ -101,26 +123,70 @@ class ProfileViewModel
     private val application: Context
 ): ViewModel()  {
 
-    /*private*/ val state: MutableStateFlow<Model>  = MutableStateFlow(Model())
+    init {
+        Log.d(App.TAG, "ProfileViewModel::init call")
+    }
+
+    /*private*/ val state: MutableStateFlow<Model> = MutableStateFlow(Model())
     val uiState: StateFlow<Model> = state
+        .asStateFlow()
         .stateIn(viewModelScope, SharingStarted.Eagerly, state.value)
 
     val proposal: ObservableField<String> = ObservableField<String>("")
 
-    fun addOffer() {
-        // TODO complete me
+    fun addItem(isOfferSelected: Boolean) {
+        if (proposal.get()!!.isEmpty()) return
+        if (isOfferSelected) {
+            addOffer()
+        } else {
+            addDemand()
+        }
     }
 
-    fun removeOffer() {
-        // TODO complete me
+    fun addOffer() {
+        val newService = Service(proposal.get()!!, 0L, listOf())
+        state.update { state ->
+            val updatedOffers = mutableListOf<Service>()
+            updatedOffers.addAll(state.offers)
+            updatedOffers.add(newService)
+            Log.d(App.TAG, "[items] add new service")
+            proposal.set("")
+            state.copy(offers = updatedOffers)
+        }
+        Log.d(App.TAG, "[items] add offer end ${state.value.offers}")
+    }
+
+    fun removeOffer(item: Service) {
+        state.update { state ->
+            val updatedOffers = mutableListOf<Service>()
+            updatedOffers.addAll(state.offers)
+            updatedOffers.remove(item)
+            Log.d(App.TAG, "[state] offers after removed item ${updatedOffers.count()}")
+            Log.d(App.TAG, "[items] remove offer call")
+            state.copy(offers = updatedOffers)
+        }
+        Log.d(App.TAG, "[state] end (${state.value.offers})")
+        Log.d(App.TAG, "[items] remove offer end call ${state.value.offers.count()}")
     }
 
     fun addDemand() {
-        // TODO complete me
+        val newService = Service(proposal.get()!!, 0L, listOf())
+        state.update { state ->
+            val updatedDemands = mutableListOf<Service>()
+            updatedDemands.addAll(state.demands)
+            updatedDemands.add(newService)
+            proposal.set("")
+            state.copy(demands = updatedDemands)
+        }
     }
 
-    fun removeDemand() {
-        // TODO complete me
+    fun removeDemand(item: Service) {
+        state.update { state ->
+            val updatedDemands = mutableListOf<Service>()
+            updatedDemands.addAll(state.demands)
+            updatedDemands.remove(item)
+            state.copy(demands = updatedDemands)
+        }
     }
 
     fun createAnAccount() {
@@ -225,6 +291,8 @@ class ProfileViewModel
                             offers.addAll(it.data.person.offers)
                             val demands = mutableListOf<Service>()
                             demands.addAll(it.data.person.demands)
+                            Log.d(App.TAG, "[offers] ${offers.count()}")
+                            Log.d(App.TAG, "[offers] ${offers.toString()}")
                             state.update { state ->
                                 state.copy(
                                     contact = it.data.contact,
@@ -268,9 +336,5 @@ class ProfileViewModel
                 errors = it.errors.filter { str -> !str.equals(it.errors.first()) }
             )
         }
-    }
-
-    fun addItem() {
-        // TODO complete me
     }
 }

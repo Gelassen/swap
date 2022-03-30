@@ -36,7 +36,8 @@ class AddItemBottomSheetDialogFragment: BottomSheetDialogFragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        viewModel = ViewModelProvider(this, viewModelFactory).get(ProfileViewModel::class.java)
+        // keep an eye on owner parameter, it should be the same scope for view model which is shared among component
+        viewModel = ViewModelProvider(requireParentFragment(), viewModelFactory).get(ProfileViewModel::class.java)
         binding = AddItemFragmentBinding.inflate(inflater, container, false)
         binding.model = viewModel
         return binding.root
@@ -44,6 +45,7 @@ class AddItemBottomSheetDialogFragment: BottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         view.findViewById<TextView>(R.id.offer_option)
             .setOnClickListener {
                 group_choice.onOfferClick()
@@ -56,10 +58,11 @@ class AddItemBottomSheetDialogFragment: BottomSheetDialogFragment() {
 
         save.setOnClickListener {
             Log.d(App.TAG, "${viewModel.proposal.get()}")
-            viewModel.addItem()
+            viewModel.addItem(binding.groupChoice.isOfferSelected())
             dismiss()
         }
     }
+
 
     companion object {
 
