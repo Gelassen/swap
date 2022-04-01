@@ -46,19 +46,17 @@ class ProfileFragment : Fragment(), ItemAdapter.Listener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         offers_list.layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
-        offers_list.adapter = ItemAdapter(true)
-        (offers_list.adapter as ItemAdapter).setListener(this)
+        offers_list.adapter = ItemAdapter(true, this)
 
         demands_list.layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
-        demands_list.adapter = ItemAdapter(false)
-        (demands_list.adapter as ItemAdapter).setListener(this)
+        demands_list.adapter = ItemAdapter(false, this)
 
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 Log.d(App.TAG, "[collect] UI state collect is called")
                 viewModel.uiState.collect { it ->
                     Log.d(App.TAG, "[collect] collected #${it.offers.count()} offers items")
-                    (offers_list.adapter as ItemAdapter).update(it.offers)
+                    (offers_list.adapter as ItemAdapter).submitList(it.offers)
                 }
             }
         }
@@ -67,7 +65,7 @@ class ProfileFragment : Fragment(), ItemAdapter.Listener {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 viewModel.uiState.collect { it ->
                     Log.d(App.TAG, "[collect] collected #${it.demands.count()} demands items")
-                    (demands_list.adapter as ItemAdapter).update(it.demands)
+                    (demands_list.adapter as ItemAdapter).submitList(it.demands)
                 }
             }
         }
