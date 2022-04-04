@@ -40,6 +40,7 @@ class ProfileFragment : Fragment(), ItemAdapter.Listener {
         // keep an eye on owner parameter, it should be the same scope for view model which is shared among components
         viewModel = ViewModelProvider(this, viewModelFactory).get(ProfileViewModel::class.java)
         binding = ProfileFragmentBinding.inflate(inflater, container, false)
+        binding.viewmodel = viewModel
         return binding.root
     }
 

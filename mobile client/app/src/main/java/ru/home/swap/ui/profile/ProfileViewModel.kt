@@ -1,6 +1,7 @@
 package ru.home.swap.ui.profile
 
 import android.content.Context
+import android.provider.ContactsContract
 import android.util.Log
 import androidx.databinding.ObservableField
 import androidx.lifecycle.ViewModel
@@ -14,6 +15,7 @@ import ru.home.swap.model.PersonProfile
 import ru.home.swap.model.Service
 import ru.home.swap.providers.PersonProvider
 import ru.home.swap.repository.PersonRepository
+import ru.home.swap.repository.PersonRepository.*
 import javax.inject.Inject
 
 sealed interface IModel {
@@ -145,7 +147,28 @@ class ProfileViewModel
 
     fun addOffer() {
         val newService = Service(proposal.get()!!, 0L, listOf())
-        state.update { state ->
+        viewModelScope.launch {
+            repository.addOffer(uiState.value.contact, uiState.value.secret, newService)
+                .collect { it ->
+                    when(it) {
+                        is Response.Data<PersonProfile> -> {
+                            state.update { state ->
+                                state.copy(
+                                    offers = it.data.person.offers.toMutableList()
+                                )
+                            }
+                        }
+                        is Response.Error -> {
+                            state.update { state ->
+                                state.copy(
+                                    errors = state.errors + getErrorMessage(it)
+                                )
+                            }
+                        }
+                    }
+                }
+        }
+/*        state.update { state ->
             val updatedOffers = mutableListOf<Service>()
             updatedOffers.addAll(state.offers)
             updatedOffers.add(newService)
@@ -153,7 +176,7 @@ class ProfileViewModel
             proposal.set("")
             state.copy(offers = updatedOffers)
         }
-        Log.d(App.TAG, "[items] add offer end ${state.value.offers}")
+        Log.d(App.TAG, "[items] add offer end ${state.value.offers}")*/
     }
 
     fun removeOffer(item: Service) {
@@ -320,12 +343,12 @@ class ProfileViewModel
         }
     }
 
-    protected fun getErrorMessage(errorResponse: PersonRepository.Response.Error): String {
+    protected fun getErrorMessage(errorResponse: Response.Error): String {
         var errorMessage = ""
-        if (errorResponse is PersonRepository.Response.Error.Exception) {
+        if (errorResponse is Response.Error.Exception) {
             errorMessage = "Something went wrong"
         } else {
-            errorMessage = "Something went wrong with server response: \\n ${(errorResponse as PersonRepository.Response.Error.Message).msg}"
+            errorMessage = "Something went wrong with server response: \\n ${(errorResponse as Response.Error.Message).msg}"
         }
         return errorMessage
     }

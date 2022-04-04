@@ -10,7 +10,9 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-
+        <variable
+            name="viewmodel"
+            type="ru.home.swap.ui.profile.ProfileViewModel" />
     </data>
 
     <FrameLayout
@@ -102,7 +104,8 @@
                     android:layout_below="@id/demands_title"
                     android:layout_marginStart="@dimen/base_margin_extra"
                     android:layout_marginEnd="@dimen/base_margin_extra"
-                    android:layout_marginBottom="@dimen/component_margin" />
+                    android:layout_marginBottom="@dimen/component_margin"
+                    />
 
             </RelativeLayout>
 

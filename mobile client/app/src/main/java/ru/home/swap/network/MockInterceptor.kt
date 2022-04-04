@@ -10,6 +10,8 @@ class MockInterceptor(val context: Context): Interceptor {
 
     companion object {
         const val API_ACCOUNT = "/api/account"
+        const val API_OFFERS = "/api/account/offers"
+        const val API_DEMANDS = "/api/account/demands"
     }
 
     override fun intercept(chain: Interceptor.Chain): Response {
@@ -43,6 +45,14 @@ class MockInterceptor(val context: Context): Interceptor {
             && method.equals("GET")
         ) {
             msg = "mock_api_profile_get_response.json"
+        } else if(matchPath(uri.pathSegments, API_OFFERS.split("?").first())
+            && method.equals("POST")
+        ) {
+            msg = "mock_api_profile_post_offer_response.json"
+        } else if (matchPath(uri.pathSegments, API_DEMANDS.split("?").first())
+            && method.equals("POST")
+        ) {
+            msg = "mock_api_profile_post_demand_response.json"
         } else {
             throw IllegalArgumentException("Url $url is not supported by interceptor")
         }
@@ -64,7 +74,8 @@ class MockInterceptor(val context: Context): Interceptor {
     private fun matchPath(pathSegments: List<String>, urlPattern: String): Boolean {
         var patternTokens = urlPattern.split("/")
         patternTokens = patternTokens.subList(1, patternTokens.size)
-        return pathSegments.intersect(patternTokens.toSet()).size == patternTokens.size
+        return pathSegments.size == patternTokens.size
+                && pathSegments.intersect(patternTokens.toSet()).size == patternTokens.size
     }
 
     private fun matchQuery(queryParameterNames: MutableSet<String>, urlPattern: String): Boolean {

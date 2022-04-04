@@ -9,10 +9,12 @@ import ru.home.swap.convertors.PersonConvertor
 import ru.home.swap.model.Person
 import ru.home.swap.model.PersonProfile
 import ru.home.swap.model.PersonView
+import ru.home.swap.model.Service
 import ru.home.swap.network.IApi
 import ru.home.swap.network.model.EmptyPayload
 import ru.home.swap.network.model.ProfileResponse
 import ru.home.swap.stub.Stubs
+import ru.home.swap.utils.AppCredentials
 import java.lang.RuntimeException
 
 class PersonRepository(val api: IApi, val cache: Cache) {
@@ -77,6 +79,26 @@ class PersonRepository(val api: IApi, val cache: Cache) {
             .catch { ex ->
                 Log.d(App.TAG, "[c] get an exception")
                 Log.e(App.TAG, "Exception on getAccount() call", ex)
+                emit(Response.Error.Exception(ex))
+            }
+    }
+
+    fun addOffer(contact: String, secret: String, newService: Service):  Flow<Response<PersonProfile>> {
+        // TODO mock response for this web request and add processing it on the viewmodel layer
+        return flow {
+            val response = api.addOffer(
+                credentials = AppCredentials.basic(contact, secret),
+                service = newService
+            )
+            if (response.isSuccessful) {
+                val payload = response.body()!!
+                emit(Response.Data(payload.payload))
+            } else {
+                emit(Response.Error.Message(response.message()))
+            }
+        }
+            .catch { ex ->
+                Log.e(App.TAG, "Exception on addOffer() call", ex)
                 emit(Response.Error.Exception(ex))
             }
     }
