@@ -10,7 +10,7 @@ class ModelUnitTest {
 
     @Test
     fun compareModel_modelsAreEqual_theSameModel() {
-        val offers = mutableListOf(Service("cooking", 10L, listOf<String>()))
+        val offers = mutableListOf(Service(0L,"cooking", 10L, listOf<String>()))
         val model = Model(
             contact = "Jennifer@list.ru",
             secret = "",
@@ -29,7 +29,7 @@ class ModelUnitTest {
 
     @Test
     fun compareModel_modelsAreDifferent_theDifferentModel() {
-        val offers = mutableListOf(Service("Forging steel", 10L, listOf<String>()))
+        val offers = mutableListOf(Service(0L,"Forging steel", 10L, listOf<String>()))
         val model = Model(
             contact = "Jennifer@list.ru",
             secret = "",
@@ -43,7 +43,7 @@ class ModelUnitTest {
 
         val updatedOffers = mutableListOf<Service>()
         updatedOffers.addAll(offers)
-        updatedOffers.add(Service("Carpenting", 10L, listOf()))
+        updatedOffers.add(Service(0L,"Carpenting", 10L, listOf()))
         val theSameModel = model.copy(offers = updatedOffers)
 
         Assert.assertNotEquals(model, theSameModel)
@@ -51,7 +51,7 @@ class ModelUnitTest {
 
     @Test
     fun compareModel_modelsAreDifferentTheSameObject_theDifferentModel() {
-        val offers = mutableListOf(Service("Forging steel", 10L, listOf<String>()))
+        val offers = mutableListOf(Service(0L,"Forging steel", 10L, listOf<String>()))
         val model = Model(
             contact = "Jennifer@list.ru",
             secret = "",
@@ -64,7 +64,7 @@ class ModelUnitTest {
         )
 
         val offersTmp = model.offers
-        offersTmp.add(Service("Carpenting", 10L, listOf()))
+        offersTmp.add(Service(0L,"Carpenting", 10L, listOf()))
         val theSameModel = model.copy(offers = offersTmp)
 
         Assert.assertNotEquals(model, theSameModel)

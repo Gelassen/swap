@@ -7,14 +7,6 @@
       "offers" : [
         {
           "id" : "1",
-          "name" : "Cooking dinner",
-          "date" : "1735689600",
-          "index" : [
-            "Cooking dinner"
-          ]
-        },
-        {
-          "id" : "2",
           "name" : "Have a nice chat with you",
           "date" : "1746057600",
           "index" : [
@@ -23,6 +15,14 @@
             "chatting",
             "talk",
             "talking"
+          ]
+        },
+        {
+          "id" : "2",
+          "name" : "Hacking servers by nights",
+          "date" : "1746057600",
+          "index" : [
+            "hacking servers"
           ]
         }
       ],

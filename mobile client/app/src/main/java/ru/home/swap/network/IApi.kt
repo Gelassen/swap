@@ -24,4 +24,22 @@ interface IApi {
     suspend fun addOffer(
         @Header("Authorization") credentials: String,
         @Body service: Service): Response<ProfileResponse<PersonProfile>>
+
+    @Headers("Content-Type: application/json; charset=utf-8")
+    @POST("/api/account/demands")
+    suspend fun addDemand(
+        @Header("Authorization") credentials: String,
+        @Body service: Service): Response<ProfileResponse<PersonProfile>>
+
+    @Headers("Content-Type: application/json; charset=utf-8")
+    @DELETE("/api/account/offers")
+    suspend fun removeOffer(
+        @Header("Authorization") credentials: String,
+        @Query("id") serviceId: Long): Response<ProfileResponse<PersonProfile>>
+
+    @Headers("Content-Type: application/json; charset=utf-8")
+    @DELETE("/api/account/offers")
+    suspend fun removeDemand(
+        @Header("Authorization") credentials: String,
+        @Query("id") serviceId: Long): Response<ProfileResponse<PersonProfile>>
 }

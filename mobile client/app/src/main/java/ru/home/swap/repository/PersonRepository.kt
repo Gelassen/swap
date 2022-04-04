@@ -84,7 +84,6 @@ class PersonRepository(val api: IApi, val cache: Cache) {
     }
 
     fun addOffer(contact: String, secret: String, newService: Service):  Flow<Response<PersonProfile>> {
-        // TODO mock response for this web request and add processing it on the viewmodel layer
         return flow {
             val response = api.addOffer(
                 credentials = AppCredentials.basic(contact, secret),
@@ -103,12 +102,69 @@ class PersonRepository(val api: IApi, val cache: Cache) {
             }
     }
 
+    fun addDemand(contact: String, secret: String, newService: Service): Flow<Response<PersonProfile>> {
+        return flow {
+            val response = api.addDemand(
+                credentials = AppCredentials.basic(contact, secret),
+                service = newService
+            )
+            if (response.isSuccessful) {
+                val payload = response.body()!!
+                emit(Response.Data(payload.payload))
+            } else {
+                emit(Response.Error.Message(response.message()))
+            }
+        }
+            .catch { ex ->
+                Log.e(App.TAG, "Exception on addDemand() call", ex)
+                emit(Response.Error.Exception(ex))
+            }
+    }
+
+    fun removeOffer(contact: String, secret: String, id: Long): Flow<Response<PersonProfile>> {
+        return flow {
+            val response = api.removeOffer(
+                credentials = AppCredentials.basic(contact, secret),
+                serviceId = id
+            )
+            if (response.isSuccessful) {
+                val payload = response.body()!!
+                emit(Response.Data(payload.payload))
+            } else {
+                emit(Response.Error.Message(response.message()))
+            }
+        }
+            .catch { ex ->
+                Log.e(App.TAG, "Exception on removeOffer() call", ex)
+                emit(Response.Error.Exception(ex))
+            }
+    }
+
+    fun removeDemand(contact: String, secret: String, id: Long): Flow<Response<PersonProfile>>  {
+        return flow {
+            val response = api.removeDemand(
+                credentials = AppCredentials.basic(contact, secret),
+                serviceId = id
+            )
+            if (response.isSuccessful) {
+                val payload = response.body()!!
+                emit(Response.Data(payload.payload))
+            } else {
+                emit(Response.Error.Message(response.message()))
+            }
+        }
+            .catch { ex ->
+                Log.e(App.TAG, "Exception on removeOffer() call", ex)
+                emit(Response.Error.Exception(ex))
+            }
+    }
+
     sealed class Response<out T: Any> {
         data class Data<out T: Any>(val data: T): Response<T>()
         sealed class Error: Response<Nothing>() {
             data class Exception(val error: Throwable): Error()
             data class Message(val msg: String): Error()
         }
-        data class Loading<Boolean>(val isLoading: Boolean): Response<kotlin.Boolean>()
+        /*data class Loading<Boolean>(val isLoading: Boolean): Response<kotlin.Boolean>()*/
     }
 }

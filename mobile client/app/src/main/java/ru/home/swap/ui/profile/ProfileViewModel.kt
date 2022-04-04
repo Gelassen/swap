@@ -1,7 +1,6 @@
 package ru.home.swap.ui.profile
 
 import android.content.Context
-import android.provider.ContactsContract
 import android.util.Log
 import androidx.databinding.ObservableField
 import androidx.lifecycle.ViewModel
@@ -146,26 +145,11 @@ class ProfileViewModel
     }
 
     fun addOffer() {
-        val newService = Service(proposal.get()!!, 0L, listOf())
+        val newService = Service(title = proposal.get()!!, date = 0L, index = listOf())
         viewModelScope.launch {
             repository.addOffer(uiState.value.contact, uiState.value.secret, newService)
                 .collect { it ->
-                    when(it) {
-                        is Response.Data<PersonProfile> -> {
-                            state.update { state ->
-                                state.copy(
-                                    offers = it.data.person.offers.toMutableList()
-                                )
-                            }
-                        }
-                        is Response.Error -> {
-                            state.update { state ->
-                                state.copy(
-                                    errors = state.errors + getErrorMessage(it)
-                                )
-                            }
-                        }
-                    }
+                    processAddOfferResponse(it)
                 }
         }
 /*        state.update { state ->
@@ -180,7 +164,13 @@ class ProfileViewModel
     }
 
     fun removeOffer(item: Service) {
-        state.update { state ->
+        viewModelScope.launch {
+            repository.removeOffer(uiState.value.contact, uiState.value.secret, item.id)
+                .collect { it ->
+                    processRemoveOfferResponse(it)
+                }
+        }
+/*        state.update { state ->
             val updatedOffers = mutableListOf<Service>()
             updatedOffers.addAll(state.offers)
             updatedOffers.remove(item)
@@ -189,27 +179,39 @@ class ProfileViewModel
             state.copy(offers = updatedOffers)
         }
         Log.d(App.TAG, "[state] end (${state.value.offers})")
-        Log.d(App.TAG, "[items] remove offer end call ${state.value.offers.count()}")
+        Log.d(App.TAG, "[items] remove offer end call ${state.value.offers.count()}")*/
     }
 
     fun addDemand() {
-        val newService = Service(proposal.get()!!, 0L, listOf())
-        state.update { state ->
+        val newService = Service(title = proposal.get()!!, date = 0L, index = listOf())
+        viewModelScope.launch {
+            repository.addDemand(uiState.value.contact, uiState.value.secret, newService)
+                .collect { it ->
+                    processAddDemandResponse(it)
+                }
+        }
+/*        state.update { state ->
             val updatedDemands = mutableListOf<Service>()
             updatedDemands.addAll(state.demands)
             updatedDemands.add(newService)
             proposal.set("")
             state.copy(demands = updatedDemands)
-        }
+        }*/
     }
 
     fun removeDemand(item: Service) {
-        state.update { state ->
+        viewModelScope.launch {
+            repository.removeDemand(uiState.value.contact, uiState.value.secret, item.id)
+                .collect { it ->
+                    processRemoveDemandsResponse(it)
+                }
+        }
+/*        state.update { state ->
             val updatedDemands = mutableListOf<Service>()
             updatedDemands.addAll(state.demands)
             updatedDemands.remove(item)
             state.copy(demands = updatedDemands)
-        }
+        }*/
     }
 
     fun createAnAccount() {
@@ -358,6 +360,88 @@ class ProfileViewModel
             it.copy(
                 errors = it.errors.filter { str -> !str.equals(it.errors.first()) }
             )
+        }
+    }
+
+    private fun processAddOfferResponse(response: Response<PersonProfile>) {
+        when(response) {
+            is Response.Data<PersonProfile> -> {
+                state.update { state ->
+                    state.copy(
+                        offers = response.data.person.offers.toMutableList()
+                    )
+                }
+            }
+            is Response.Error -> {
+                state.update { state ->
+                    state.copy(
+                        errors = state.errors + getErrorMessage(response)
+                    )
+                }
+            }
+        }
+    }
+
+    private fun processAddDemandResponse(response: Response<PersonProfile>) {
+        when(response) {
+            is Response.Data -> {
+                state.update { state ->
+                    state.copy(
+                        isLoading = false,
+                        demands = response.data.person.demands.toMutableList()
+                    )
+                }
+            }
+            is Response.Error -> {
+                state.update { state ->
+                    state.copy(
+                        isLoading = false,
+                        errors = state.errors + getErrorMessage(response)
+                    )
+                }
+            }
+        }
+    }
+
+    private fun processRemoveOfferResponse(response: Response<PersonProfile>) {
+        when(response) {
+            is Response.Data -> {
+                state.update { state ->
+                    state.copy(
+                        isLoading = false,
+                        offers = response.data.person.offers.toMutableList()
+                    )
+                }
+            }
+            is Response.Error -> {
+                state.update { state ->
+                    state.copy(
+                        isLoading = false,
+                        errors = state.errors + getErrorMessage(response)
+                    )
+                }
+            }
+        }
+    }
+
+    private fun processRemoveDemandsResponse(response: Response<PersonProfile>) {
+        when(response) {
+            is Response.Data -> {
+                state.update { state ->
+                    state.copy(
+                        isLoading = false,
+                        demands = response.data.person.demands.toMutableList()
+                    )
+                }
+            }
+            is Response.Error -> {
+                state.update { state ->
+                    state.copy(
+                        isLoading = false,
+                        errors = state.errors + getErrorMessage(response)
+                    )
+                }
+            }
         }
     }
 }

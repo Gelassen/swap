@@ -24,6 +24,7 @@ class ExampleUnitTest {
             "Jenny",
             listOf(
                 Service(
+                    -1L,
                     "Software Engineering on Android",
                     Stubs.getDate(2022, 6, 18), listOf("Software Engineering")
                 )
@@ -34,6 +35,7 @@ class ExampleUnitTest {
             "Jenny",
             listOf(
                 Service(
+                    0L,
                     "Software Engineering on Android",
                     Stubs.getDate(2022, 6, 18), listOf("Software Engineering")
                 )
@@ -50,6 +52,7 @@ class ExampleUnitTest {
             "Jane Ostin",
             listOf(
                 Service(
+                    0L,
                     "Software Engineering on Android",
                     Stubs.getDate(2022, 6, 18), listOf("Software Engineering")
                 )
@@ -60,6 +63,7 @@ class ExampleUnitTest {
             "Jenny",
             listOf(
                 Service(
+                    0L,
                     "Software Engineering on Android",
                     Stubs.getDate(2022, 6, 18), listOf("Software Engineering")
                 )
@@ -76,6 +80,7 @@ class ExampleUnitTest {
             "Jenny",
             listOf(
                 Service(
+                    0L,
                     "Software Engineering on Android",
                     Stubs.getDate(2022, 6, 18), listOf("Software Engineering")
                 )
@@ -86,6 +91,7 @@ class ExampleUnitTest {
             "Jenny",
             listOf(
                 Service(
+                    0L,
                     "Selling flowers",
                     Stubs.getDate(2022, 6, 18), listOf("Selling flowers")
                 )
@@ -102,6 +108,7 @@ class ExampleUnitTest {
             "Jenny",
             listOf(
                 Service(
+                    0L,
                     "Software Engineering on Android",
                     Stubs.getDate(2022, 6, 18), listOf("Software Engineering")
                 )
@@ -112,6 +119,7 @@ class ExampleUnitTest {
             "Jenny",
             listOf(
                 Service(
+                    0L,
                     "Software Engineering on Android",
                     Stubs.getDate(2022, 6, 10), listOf("Software Engineering")
                 )

@@ -17,6 +17,7 @@ object Stubs {
             Person(
                 "Jane Ostin", listOf(
                     Service(
+                        0L,
                         "Software Engineering on Android",
                         getDate(2022, 6, 18), listOf("Software Engineering")
                     )
@@ -38,6 +39,7 @@ object Stubs {
             val result: MutableList<Service> = ArrayList()
             result.add(
                 Service(
+                    0L,
                     "Software Engineering",
                     getDate(2022, 12, 31), listOf("Software Engineering")
                 )
@@ -49,12 +51,14 @@ object Stubs {
             val result: MutableList<Service> = ArrayList()
             result.add(
                 Service(
+                    0L,
                     "Fresh apples",
                     getDate(2022, 10, 18), listOf("apples")
                 )
             )
             result.add(
                 Service(
+                    0L,
                     "Potatoes",
                     getDate(2022, 10, 18), listOf("potatoes")
                 )

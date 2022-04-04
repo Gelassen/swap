@@ -6,6 +6,7 @@
       "name" : "Jane Digital",
       "offers" : [
         {
+          "id" : "1",
           "name" : "Cooking dinner",
           "date" : "1735689600",
           "index" : [
@@ -13,6 +14,7 @@
           ]
         },
         {
+          "id" : "2",
           "name" : "Have a nice chat with you",
           "date" : "1746057600",
           "index" : [
@@ -24,6 +26,7 @@
           ]
         },
         {
+          "id" : "3",
           "name" : "Hacking servers by nights",
           "date" : "1746057600",
           "index" : [

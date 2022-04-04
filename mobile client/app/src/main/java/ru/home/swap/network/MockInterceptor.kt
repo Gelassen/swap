@@ -12,6 +12,9 @@ class MockInterceptor(val context: Context): Interceptor {
         const val API_ACCOUNT = "/api/account"
         const val API_OFFERS = "/api/account/offers"
         const val API_DEMANDS = "/api/account/demands"
+
+        const val API_OFFERS_DELETE = "/api/account/offers?id=0"
+        const val API_DEMANDS_DELETE = "/api/account/demands?id=0"
     }
 
     override fun intercept(chain: Interceptor.Chain): Response {
@@ -53,6 +56,14 @@ class MockInterceptor(val context: Context): Interceptor {
             && method.equals("POST")
         ) {
             msg = "mock_api_profile_post_demand_response.json"
+        } else if (matchPath(uri.pathSegments, API_OFFERS_DELETE.split("?").first())
+            && matchQuery(uri.queryParameterNames, API_OFFERS_DELETE.split("?").last())
+            && method.equals("DELETE")) {
+            msg = "mock_api_profile_delete_offer_response.json"
+        } else if (matchPath(uri.pathSegments, API_DEMANDS_DELETE.split("?").first())
+            && matchQuery(uri.queryParameterNames, API_DEMANDS_DELETE.split("?").last())
+            && method.equals("DELETE")) {
+            msg = "mock_api_profile_delete_demand_response.json"
         } else {
             throw IllegalArgumentException("Url $url is not supported by interceptor")
         }
