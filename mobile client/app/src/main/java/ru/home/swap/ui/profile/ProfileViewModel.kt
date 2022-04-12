@@ -227,7 +227,7 @@ class ProfileViewModel
                 PersonProfile(
                     contact = state.value.contact,
                     secret = state.value.secret,
-                    person = Person()
+                    person = Person(name = state.value.name)
                 )
             )
         }

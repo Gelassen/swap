@@ -24,7 +24,7 @@ class ExampleUnitTest {
             "Jenny",
             listOf(
                 Service(
-                    -1L,
+                    0L,
                     "Software Engineering on Android",
                     Stubs.getDate(2022, 6, 18), listOf("Software Engineering")
                 )

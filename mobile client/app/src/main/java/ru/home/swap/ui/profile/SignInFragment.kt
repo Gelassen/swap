@@ -89,7 +89,7 @@ class SignInFragment: Fragment() {
         // DONE enter data and send on server
         // DONE cache account on device
         // DONE add validator and bottom sheet with error message
-        // TODO add check on account existence to show or not SignInFragment
+        // DONE add check on account existence to show or not SignInFragment
     }
 
 

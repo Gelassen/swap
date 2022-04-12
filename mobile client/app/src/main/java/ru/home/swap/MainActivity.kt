@@ -6,9 +6,6 @@ import android.util.Log
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupActionBarWithNavController
-import ru.home.swap.ui.main.MainFragment
-import ru.home.swap.ui.profile.ProfileFragment
-import ru.home.swap.ui.profile.SignInFragment
 
 class MainActivity : AppCompatActivity() {
 
