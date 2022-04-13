@@ -12,7 +12,7 @@ import ru.home.swap.network.model.ProfileResponse
 interface IApi {
 
     @Headers("Content-Type: application/json; charset=utf-8")
-    @POST("/api/account")
+    @POST("/api/v1/account")
     suspend fun createProfile(@Body person: PersonProfile): Response<ProfileResponse<EmptyPayload>>
 
     @Headers("Content-Type: application/json; charset=utf-8")
