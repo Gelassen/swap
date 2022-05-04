@@ -8,6 +8,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import ru.home.swap.R
 import ru.home.swap.network.IApi
 import ru.home.swap.network.MockInterceptor
 import javax.inject.Singleton
@@ -19,11 +20,12 @@ class NetworkModule(val context: Context) {
     @Provides
     fun providesApi(httpClient: OkHttpClient): IApi {
 //        val customGson = GsonBuilder().registerTypeAdapterFactory(CustomTypeAdapterFactory()).create()
+        val url = context.getString(R.string.url)
         val retrofit = Retrofit.Builder()
 //            .addConverterFactory(GsonConverterFactory.create(customGson))
             .addConverterFactory(GsonConverterFactory.create())
             .client(httpClient)
-            .baseUrl("https://google.com")
+            .baseUrl(url)
             .build()
 
         return retrofit.create(IApi::class.java)
@@ -37,7 +39,7 @@ class NetworkModule(val context: Context) {
 
         val httpClient = OkHttpClient
             .Builder()
-            .addInterceptor(MockInterceptor(context))
+//            .addInterceptor(MockInterceptor(context))
             .addInterceptor(logging)
             .build()
 

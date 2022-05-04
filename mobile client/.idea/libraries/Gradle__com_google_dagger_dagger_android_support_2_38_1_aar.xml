@@ -1,9 +1,10 @@
 <component name="libraryTable">
   <library name="Gradle: com.google.dagger:dagger-android-support:2.38.1@aar">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/d2c905ee38630ebe13fd2901aa82af8b/transformed/dagger-android-support-2.38.1/jars/classes.jar!/" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-3/d2c905ee38630ebe13fd2901aa82af8b/transformed/dagger-android-support-2.38.1/res" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/d2c905ee38630ebe13fd2901aa82af8b/transformed/dagger-android-support-2.38.1/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/25b47268121ee2b8531bb56e1aadcb1d/transformed/dagger-android-support-2.38.1/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/25b47268121ee2b8531bb56e1aadcb1d/transformed/dagger-android-support-2.38.1/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/25b47268121ee2b8531bb56e1aadcb1d/transformed/dagger-android-support-2.38.1/AndroidManifest.xml" />
     </CLASSES>
     <JAVADOC>
       <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.google.dagger/dagger-android-support/2.38.1/ce666233e8fb0efa662c250f4af40825bfedd7bc/dagger-android-support-2.38.1-javadoc.jar!/" />

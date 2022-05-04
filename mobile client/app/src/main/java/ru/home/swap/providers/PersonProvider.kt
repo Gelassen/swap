@@ -2,7 +2,6 @@ package ru.home.swap.providers
 
 import android.text.TextUtils
 import android.util.Patterns
-import ru.home.swap.model.Person
 
 class PersonProvider {
 

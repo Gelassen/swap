@@ -1,53 +1,42 @@
 package ru.home.swap.repository
 
+import android.content.Context
 import android.util.Log
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import ru.home.swap.App
-import ru.home.swap.convertors.PersonConvertor
-import ru.home.swap.model.Person
+import ru.home.swap.R
 import ru.home.swap.model.PersonProfile
-import ru.home.swap.model.PersonView
 import ru.home.swap.model.Service
 import ru.home.swap.network.IApi
 import ru.home.swap.network.model.EmptyPayload
 import ru.home.swap.network.model.ProfileResponse
-import ru.home.swap.stub.Stubs
 import ru.home.swap.utils.AppCredentials
-import java.lang.RuntimeException
+import java.net.HttpURLConnection
 
-class PersonRepository(val api: IApi, val cache: Cache) {
-
-    fun getPersons(): List<Person> {
-        return Stubs.generatePersons()
-    }
-
-    private val convertor: PersonConvertor = PersonConvertor()
-
-    fun getOffers(): List<PersonView> {
-        val result = mutableListOf<PersonView>()
-        for (person in getPersons()) {
-            result.addAll(convertor.toView(person))
-        }
-        return result
-    }
+class PersonRepository(val api: IApi, val cache: Cache, val context: Context) {
 
     fun createAccount(person: PersonProfile): Flow<Response<EmptyPayload>> {
         return flow {
             Log.d(App.TAG, "[a] createProfile() call")
-            val response = api.createProfile(person)
+            val response = api.createProfile(
+                credentials = AppCredentials.basic(person.contact, person.secret),
+                person = person
+            )
             Log.d(App.TAG, "[b] get profile response")
             if (response.isSuccessful) {
                 Log.d(App.TAG, "[c] response is ok")
-                val payload = response.body()!!
+                var payload = response.body()!!
+                payload = if (payload.payload == null) ProfileResponse(EmptyPayload()) else payload
                 emit(Response.Data(payload.payload))
             } else {
                 Log.d(App.TAG, "[d] response is not ok")
-                emit(Response.Error.Message(response.message()))
+                emit(Response.Error.Message("${response.message()}\n${response.errorBody()?.string()}"))
             }
         }
             .catch { ex ->
+                Log.e(App.TAG, "Failed to create account and process result on network layer", ex)
                 emit(Response.Error.Exception(ex))
             }
     }
@@ -66,11 +55,17 @@ class PersonRepository(val api: IApi, val cache: Cache) {
     fun getAccount(person: PersonProfile): Flow<Response<PersonProfile>> {
         return flow {
             Log.d(App.TAG, "[a] getProfile() call")
-            val response = api.getProfile()
+            val response = api.getProfile(
+                credentials = AppCredentials.basic(person.contact, person.secret)
+            )
             if (response.isSuccessful) {
                 Log.d(App.TAG, "[b1] get body and emit")
-                val payload = response.body()!!
-                emit(Response.Data(payload.payload))
+                if (response.code() == HttpURLConnection.HTTP_NO_CONTENT) {
+                    emit(Response.Error.Message(context.getString(R.string.error_no_data_for_your_params)))
+                } else {
+                    val payload = response.body()!!
+                    emit(Response.Data(payload.payload))
+                }
             } else {
                 Log.d(App.TAG, "[b2] get error and emit")
                 emit(Response.Error.Message(response.message()))
@@ -157,6 +152,10 @@ class PersonRepository(val api: IApi, val cache: Cache) {
                 Log.e(App.TAG, "Exception on removeOffer() call", ex)
                 emit(Response.Error.Exception(ex))
             }
+    }
+
+    fun cleanCachedAccount(): Flow<Any> {
+        return cache.cleanProfile()
     }
 
     sealed class Response<out T: Any> {

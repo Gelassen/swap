@@ -40,7 +40,7 @@ class ViewModelUnitTest {
     fun setUp() {
         Dispatchers.setMain(mainThreadSurrogate)
         autoCloseable = MockitoAnnotations.openMocks(this)
-        repository = PersonRepository(api, cache)
+        repository = PersonRepository(api, cache, context)
 
         subject = ProfileViewModel(repository, context)
 

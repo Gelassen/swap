@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">Swap</string>
 
-    <string name="default_error_message">Something went wrong</string>
-    <string name="error_message_with_server_response">Something went wrong with server response: \n %1$s</string>
+    <string name="default_error_message">Something went wrong. Please try to return back later.\n\nIn case of the issue remains, please write to developer with your device brand and Android version.</string>
+    <string name="error_message_with_server_response">Something went wrong with the server response: \n %1$s</string>
     <string name="default_error_title_dialog">Error</string>
     <string name="empty_credentials_error">Please check your contact and secret. They should not be empty.</string>
 
@@ -10,4 +10,5 @@
     <string name="offers_title">Offers</string>
     <string name="demands_title">Demands</string>
     <string name="offer_demand_hint">Enter what do you offer or need</string>
+    <string name="error_no_data_for_your_params">"There is no data for this cell or secret. "</string>
 </resources>

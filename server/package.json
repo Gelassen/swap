@@ -6,11 +6,17 @@
   "scripts": {
     "start": "node app.js",
     "test": "jest",
-    "install": "npm install --save-dev eslint && npm install --save-dev mysql && npm install --save-dev express && npm install --save-dev jest supertest && npm install @sentry/node@5.15.5"
+    "install": "npm install --save-dev eslint && npm install --save-dev mysql && npm install --save-dev express && npm install --save-dev jest supertest && npm install --save-dev jest supertest"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Gelassen/swap.git"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "coveragePathIgnorePatterns": [
+      "/node_modules/"
+    ]
   },
   "author": "dkazakov",
   "license": "MIT",
@@ -19,13 +25,10 @@
   },
   "homepage": "https://github.com/Gelassen/swap#readme",
   "devDependencies": {
-    "eslint": "^8.13.0",
-    "express": "^4.17.3",
+    "eslint": "^8.14.0",
+    "express": "^4.18.0",
     "jest": "^27.5.1",
     "mysql": "^2.18.1",
-    "supertest": "^6.2.2"
-  },
-  "dependencies": {
-    "@sentry/node": "^5.15.5"
+    "supertest": "^6.2.3"
   }
 }

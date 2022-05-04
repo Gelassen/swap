@@ -9,9 +9,9 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import ru.home.swap.App
 import ru.home.swap.R
-import ru.home.swap.model.Person
 import ru.home.swap.model.PersonProfile
 import ru.home.swap.model.Service
+import ru.home.swap.network.model.EmptyPayload
 import ru.home.swap.providers.PersonProvider
 import ru.home.swap.repository.PersonRepository
 import ru.home.swap.repository.PersonRepository.*
@@ -73,6 +73,7 @@ sealed interface IModel {
     ) : IModel
 }
 data class Model(
+    var id: Long? = null,
     var contact: String = "",
     var secret: String = "",
     var name: String = "",
@@ -152,15 +153,6 @@ class ProfileViewModel
                     processAddOfferResponse(it)
                 }
         }
-/*        state.update { state ->
-            val updatedOffers = mutableListOf<Service>()
-            updatedOffers.addAll(state.offers)
-            updatedOffers.add(newService)
-            Log.d(App.TAG, "[items] add new service")
-            proposal.set("")
-            state.copy(offers = updatedOffers)
-        }
-        Log.d(App.TAG, "[items] add offer end ${state.value.offers}")*/
     }
 
     fun removeOffer(item: Service) {
@@ -170,16 +162,6 @@ class ProfileViewModel
                     processRemoveOfferResponse(it)
                 }
         }
-/*        state.update { state ->
-            val updatedOffers = mutableListOf<Service>()
-            updatedOffers.addAll(state.offers)
-            updatedOffers.remove(item)
-            Log.d(App.TAG, "[state] offers after removed item ${updatedOffers.count()}")
-            Log.d(App.TAG, "[items] remove offer call")
-            state.copy(offers = updatedOffers)
-        }
-        Log.d(App.TAG, "[state] end (${state.value.offers})")
-        Log.d(App.TAG, "[items] remove offer end call ${state.value.offers.count()}")*/
     }
 
     fun addDemand() {
@@ -190,13 +172,6 @@ class ProfileViewModel
                     processAddDemandResponse(it)
                 }
         }
-/*        state.update { state ->
-            val updatedDemands = mutableListOf<Service>()
-            updatedDemands.addAll(state.demands)
-            updatedDemands.add(newService)
-            proposal.set("")
-            state.copy(demands = updatedDemands)
-        }*/
     }
 
     fun removeDemand(item: Service) {
@@ -206,12 +181,6 @@ class ProfileViewModel
                     processRemoveDemandsResponse(it)
                 }
         }
-/*        state.update { state ->
-            val updatedDemands = mutableListOf<Service>()
-            updatedDemands.addAll(state.demands)
-            updatedDemands.remove(item)
-            state.copy(demands = updatedDemands)
-        }*/
     }
 
     fun createAnAccount() {
@@ -225,9 +194,12 @@ class ProfileViewModel
         } else {
             createAnAccount(
                 PersonProfile(
+                    id = state.value.id,
                     contact = state.value.contact,
                     secret = state.value.secret,
-                    person = Person(name = state.value.name)
+                    name = state.value.name,
+                    offers = state.value.offers,
+                    demands = state.value.demands
                 )
             )
         }
@@ -251,29 +223,7 @@ class ProfileViewModel
                 }
                 .collect { it ->
                     Log.d(App.TAG, "[4] collect the result")
-                    when (it) {
-                        is PersonRepository.Response.Data -> {
-                            Log.d(App.TAG, "[5a] collect the data")
-                            state.update { state ->
-                                state.copy(
-                                    contact = person.contact,
-                                    secret = person.secret,
-                                    name = person.person.name,
-                                    status = StateFlag.PROFILE,
-                                    isLoading = false
-                                )
-                            }
-                        }
-                        is PersonRepository.Response.Error -> {
-                            Log.d(App.TAG, "[5b] collect the error")
-                            state.update { state ->
-                                state.copy(
-                                    errors = state.errors + getErrorMessage(it),
-                                    isLoading = false
-                                )
-                            }
-                        }
-                    }
+                    updateStateProfile(it)
                 }
         }
     }
@@ -285,8 +235,8 @@ class ProfileViewModel
                 .flatMapConcat { it ->
                     if (it.contact.isEmpty() && it.secret.isEmpty()) {
                         Log.d(App.TAG, "[b1] Get cached account as an empty")
-                        flow<PersonRepository.Response<PersonProfile>> {
-                            emit(PersonRepository.Response.Data(it))
+                        flow<Response<PersonProfile>> {
+                            emit(Response.Data(it))
                         }.stateIn(viewModelScope)
                     } else {
                         Log.d(App.TAG, "[b2] Get cached account call and request server for an actual one")
@@ -309,39 +259,73 @@ class ProfileViewModel
                 }
                 .collect { it ->
                     Log.d(App.TAG, "[c] Get the result")
-                    when (it) {
-                        is PersonRepository.Response.Data -> {
-                            Log.d(App.TAG, "[c1] Get the result as a data")
-                            val offers = mutableListOf<Service>()
-                            offers.addAll(it.data.person.offers)
-                            val demands = mutableListOf<Service>()
-                            demands.addAll(it.data.person.demands)
-                            Log.d(App.TAG, "[offers] ${offers.count()}")
-                            Log.d(App.TAG, "[offers] ${offers.toString()}")
-                            state.update { state ->
-                                state.copy(
-                                    contact = it.data.contact,
-                                    secret = it.data.secret,
-                                    name = it.data.person.name,
-                                    offers = offers,
-                                    demands = demands,
-                                    status = if (it.data.contact.isEmpty() && it.data.secret.isEmpty()) StateFlag.CREDENTIALS else StateFlag.PROFILE,
-                                    isLoading = false
-                                )
-                            }
-                        }
-                        is PersonRepository.Response.Error -> {
-                            Log.d(App.TAG, "[c2] Get the result as an error ${getErrorMessage(it)}")
-                            state.update { state ->
-                                state.copy(
-                                    errors = state.errors + getErrorMessage(it),
-                                    status = StateFlag.NONE,
-                                    isLoading = false
-                                )
-                            }
-                        }
-                    }
+                    updateState(it)
                 }
+        }
+    }
+
+    private fun updateStateProfile(it: Response<EmptyPayload>) {
+        when (it) {
+            is Response.Data -> {
+                Log.d(App.TAG, "[5a] collect the data")
+                state.update { state ->
+                    state.copy(
+                        status = StateFlag.PROFILE,
+                        isLoading = false
+                    )
+                }
+            }
+            is Response.Error -> {
+                Log.d(App.TAG, "[5b] collect the error")
+                state.update { state ->
+                    state.copy(
+                        errors = state.errors + getErrorMessage(it),
+                        isLoading = false
+                    )
+                }
+                viewModelScope.launch {
+                    repository.cleanCachedAccount()
+                        .collect { it ->
+                            /* no op */
+                            Log.d(App.TAG, "Receive callback from cache clean")
+                        }
+                }
+            }
+        }
+    }
+
+    private fun updateState(it: Response<PersonProfile>) {
+        when (it) {
+            is Response.Data -> {
+                Log.d(App.TAG, "[c1] Get the result as a data")
+                val offers = mutableListOf<Service>()
+                offers.addAll(it.data.offers)
+                val demands = mutableListOf<Service>()
+                demands.addAll(it.data.demands)
+                Log.d(App.TAG, "[offers] ${offers.count()}")
+                Log.d(App.TAG, "[offers] ${offers.toString()}")
+                state.update { state ->
+                    state.copy(
+                        contact = it.data.contact,
+                        secret = it.data.secret,
+                        name = it.data.name,
+                        offers = offers,
+                        demands = demands,
+                        status = if (it.data.contact.isEmpty() && it.data.secret.isEmpty()) StateFlag.CREDENTIALS else StateFlag.PROFILE,
+                        isLoading = false
+                    )
+                }
+            }
+            is Response.Error -> {
+                Log.d(App.TAG, "[c2] Get the result as an error ${getErrorMessage(it)}")
+                state.update { state ->
+                    state.copy(
+                        errors = state.errors + getErrorMessage(it),
+                        status = StateFlag.NONE,
+                        isLoading = false
+                    )
+                }
+            }
         }
     }
 
@@ -350,7 +334,7 @@ class ProfileViewModel
         if (errorResponse is Response.Error.Exception) {
             errorMessage = "Something went wrong"
         } else {
-            errorMessage = "Something went wrong with server response: \\n ${(errorResponse as Response.Error.Message).msg}"
+            errorMessage = "Something went wrong with server response: \n\n${(errorResponse as Response.Error.Message).msg}"
         }
         return errorMessage
     }
@@ -368,7 +352,7 @@ class ProfileViewModel
             is Response.Data<PersonProfile> -> {
                 state.update { state ->
                     state.copy(
-                        offers = response.data.person.offers.toMutableList()
+                        offers = response.data.offers.toMutableList()
                     )
                 }
             }
@@ -388,7 +372,7 @@ class ProfileViewModel
                 state.update { state ->
                     state.copy(
                         isLoading = false,
-                        demands = response.data.person.demands.toMutableList()
+                        demands = response.data.demands.toMutableList()
                     )
                 }
             }
@@ -409,7 +393,7 @@ class ProfileViewModel
                 state.update { state ->
                     state.copy(
                         isLoading = false,
-                        offers = response.data.person.offers.toMutableList()
+                        offers = response.data.offers.toMutableList()
                     )
                 }
             }
@@ -430,7 +414,7 @@ class ProfileViewModel
                 state.update { state ->
                     state.copy(
                         isLoading = false,
-                        demands = response.data.person.demands.toMutableList()
+                        demands = response.data.demands.toMutableList()
                     )
                 }
             }

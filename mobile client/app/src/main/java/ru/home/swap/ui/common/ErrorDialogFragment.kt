@@ -34,7 +34,13 @@ class ErrorDialogFragment: DialogFragment() {
         return MaterialAlertDialogBuilder(requireContext())
             .setTitle(requireArguments().getString(KEY_TITLE))
             .setMessage(requireArguments().getString(KEY_MESSAGE))
-            .setPositiveButton("OK", DialogInterface.OnClickListener { dialogInterface, i -> /* no op */ })
+            .setPositiveButton(
+                "OK",
+                DialogInterface.OnClickListener { dialogInterface, i ->
+                    if (parentFragment is IDialogListener)
+                            (parentFragment as IDialogListener).onPositiveClick()
+                }
+            )
             .create()
     }
 

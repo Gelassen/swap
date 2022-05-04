@@ -218,3 +218,6 @@ server/.yarn/unplugged
 server/.yarn/build-state.yml
 server/.yarn/install-state.gz
 server/.pnp.*
+
+# configs
+server/config.js

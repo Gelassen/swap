@@ -20,9 +20,11 @@ import ru.home.swap.AppApplication
 import ru.home.swap.R
 import ru.home.swap.databinding.LauncherFragmentBinding
 import ru.home.swap.di.ViewModelFactory
+import ru.home.swap.ui.common.ErrorDialogFragment
+import ru.home.swap.ui.common.IDialogListener
 import javax.inject.Inject
 
-class LauncherFragment: Fragment() {
+class LauncherFragment: Fragment(), IDialogListener {
 
     private lateinit var binding: LauncherFragmentBinding
 
@@ -62,20 +64,23 @@ class LauncherFragment: Fragment() {
                             findNavController().navigate(R.id.action_launcherFragment_to_profileFragment)
                         }
                         StateFlag.NONE -> {
-                            if (it.errors.isNotEmpty()) {
-                                val error = it.errors.first()
-                                Toast.makeText(requireContext(),
-                                    "There is an error: $error",
-                                    Toast.LENGTH_SHORT)
-                                    .show()
-                                viewModel.removeShownError()
-                            }
-
+                            /* no op */
                         }
+                    }
+                    if (it.errors.isNotEmpty()) {
+                        Log.d(App.TAG, "Error: " + it.errors.first())
+                        ErrorDialogFragment.newInstance(getString(R.string.default_error_title_dialog), it.errors.first())
+                            .show(childFragmentManager, ErrorDialogFragment.TAG)
                     }
                 }
             }
         }
         viewModel.checkAnExistingAccount()
     }
+
+    override fun onPositiveClick() {
+        viewModel.removeShownError()
+        requireActivity().finish()
+    }
+
 }

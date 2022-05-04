@@ -3,9 +3,9 @@ let config = {
   WEBSERVICE_PORT:  3000,
   DATABASE_HOST: '127.0.0.1',
   DATABASE_PORT: 3306,
-  USER: 'name', 
+  USER: 'root', 
   PWD: 'password',
-  DATABASE: 'db_swap_schema'
+  DATABASE: 'db_swap'
 }
 
 module.exports = Object.freeze(config);

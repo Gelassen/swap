@@ -1,12 +1,12 @@
 <component name="libraryTable">
   <library name="Gradle: com.google.android.play:core:1.10.2@aar">
     <ANNOTATIONS>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/2ba50387b88be372b6b2eb155e12399f/transformed/core-1.10.2/annotations.zip!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/9fe73f5cad50299322323003fde112a3/transformed/core-1.10.2/annotations.zip!/" />
     </ANNOTATIONS>
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/2ba50387b88be372b6b2eb155e12399f/transformed/core-1.10.2/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/2ba50387b88be372b6b2eb155e12399f/transformed/core-1.10.2/res" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/2ba50387b88be372b6b2eb155e12399f/transformed/core-1.10.2/AndroidManifest.xml" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/9fe73f5cad50299322323003fde112a3/transformed/core-1.10.2/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/9fe73f5cad50299322323003fde112a3/transformed/core-1.10.2/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/9fe73f5cad50299322323003fde112a3/transformed/core-1.10.2/res" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>

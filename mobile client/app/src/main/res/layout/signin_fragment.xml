@@ -51,6 +51,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Enter your name"
+                    android:maxLines="1"
                     android:text="@={model.state.name}"
                     tools:text="Jane Ostin"/>
 
@@ -70,8 +71,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Enter your cell or email"
-                    android:singleLine="true"
-                    android:text="@={model.state.secret}"
+                    android:maxLines="1"
+                    android:text="@={model.state.contact}"
                     android:inputType="phone"
                     tools:text="+7 910 900 87 70" />
 
@@ -93,7 +94,7 @@
                     android:hint="Enter your secret"
                     android:inputType="textPassword"
                     android:singleLine="true"
-                    android:text="@{model.state.secret}"
+                    android:text="@={model.state.secret}"
                     tools:text="God is love" />
 
             </com.google.android.material.textfield.TextInputLayout>

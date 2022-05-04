@@ -3,7 +3,6 @@ package ru.home.swap.di
 import android.content.Context
 import dagger.Module
 import dagger.Provides
-import ru.home.swap.AppApplication
 import ru.home.swap.network.IApi
 import ru.home.swap.repository.Cache
 import ru.home.swap.repository.PersonRepository
@@ -20,8 +19,8 @@ class AppModule(val context: Context) {
 
     @Singleton
     @Provides
-    fun providePersonRepository(api: IApi, cache: Cache): PersonRepository {
-        return PersonRepository(api, cache)
+    fun providePersonRepository(api: IApi, cache: Cache, context: Context): PersonRepository {
+        return PersonRepository(api, cache, context)
     }
 
     @Singleton
