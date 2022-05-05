@@ -5,6 +5,9 @@ let util = require('../utils/network')
 let logger = require('../utils/logger') 
 let converter = require('../utils/converter')
 
+const offer = 1;
+const demand = 0;
+
 exports.create = function(req) {
     return new Promise((resolve) => {
         pool.getConnection(function(err, connection) {
@@ -151,7 +154,31 @@ exports.addOffer = function(req, profileId) {
             logger.log(`[add offer] profile id ${profileId}`);
             connection.query(
                 {sql: 'INSERT INTO Service SET title = ?, date = ?, offer = ?, Service.index = ?, profileId = ?;'},
-                [req.body.title, req.body.date, req.body.offer, req.body.index, profileId],
+                [req.body.title, req.body.date, offer, req.body.index, profileId],
+                function(error, rows, fields) {
+                    logger.log(`[insert offer] rows ${JSON.stringify(rows)}`)
+                    let response;
+                    if (error != null) {
+                        response = util.getErrorMsg(500, error); 
+                    } else if (rows.affectRows == 0) {
+                        response = util.getErrorMsg(401, 'No row in db is affected');
+                    } else {
+                        response = {};
+                    }
+                    resolve(response);
+                }
+            )
+        })
+    });
+}
+
+exports.addDemand = function(req, profileId) {
+    return new Promise((resolve) => {
+        pool.getConnection(function(err, connection) {
+            logger.log(`[add demand] profile id ${profileId}`);
+            connection.query(
+                {sql: 'INSERT INTO Service SET title = ?, date = ?, offer = ?, Service.index = ?, profileId = ?;'}, 
+                [req.body.title, req.body.date, demand, req.body.index, profileId],
                 function(error, rows, fields) {
                     logger.log(`[insert offer] rows ${JSON.stringify(rows)}`)
                     let response;

@@ -134,6 +134,29 @@ exports.addOffer = async function(req, res) {
     logger.log("[add offer] ends");
 }
 
+exports.addDemand = async function(req, res) {
+    logger.log('[add demand] start')
+    let result = network.getMsg(200, "Not defined");
+    if (req.get(global.authHeader) === undefined) {
+        result = network.getErrorMsg(401, "Did you forget to add authorization header?");
+    } else if (getAuthHeaderAsTokens(req).error) {
+        result = network.getErrorMsg(400, "Did you add correct authorization header?");
+    } else {
+        let credentials = getAuthNameSecretPair(
+            getAuthHeaderAsTokens(req)
+        );
+        let profileResult = await profile.getFullProfile(req, res, credentials);
+        if (noSuchData(profileResult)) {
+            result = network.getErrorMsg(401, "There is no account for this credentials. Are you authorized?")
+        } else {
+            logger.log(`[add offer] profile id ${JSON.stringify(profileResult.id)}`);
+            result = await profile.addDemand(req, profileResult.id);
+        }
+    }
+    send(req, res, result);
+    logger.log("[add demand] ends");
+}
+
 function thereIsSuchData(obj) {
     return Object.keys(obj).length
 }

@@ -49,6 +49,11 @@ app.post('/api/v1/account/offers', function(req, res) {
     profile.addOffer(req, res);
 })
 
+app.post('/api/v1/account/demands', function(req, res) {
+    pool.status();
+    profile.addDemand(req, res);
+})
+
 app.listen(3000);
 
 module.exports =  app; 
