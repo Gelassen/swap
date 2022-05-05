@@ -34,12 +34,13 @@ exports.create = function(req) {
     })
 }
 
-exports.getProfileByCell = function(req, res) {
+exports.getProfileByCell = function(req, res, credentials) {
+    logger.log(`[model] getProfileByCell ${JSON.stringify(credentials)}`);
     return new Promise((resolve) => {
         pool.getConnection(function(err, connection) {
             connection.query(
                 {sql: 'SELECT * FROM Profile WHERE contact = ?', TIMEOUT},
-                [req.body.contact],
+                [credentials[0]],
                 function(error, rows, fields) {
                     if (error != null) {
                         logger.log(`[account::create|model::getByCell)] [1] get error ${JSON.stringify(error)}`);
@@ -65,13 +66,45 @@ exports.getProfileByCell = function(req, res) {
     })
 }
 
-exports.getFullProfile = function(req, res, authAsTokens) {
-    logger.log(JSON.stringify(authAsTokens));
+exports.getProfileByCellAndSecret = function(req, res, credentials) {
+    logger.log(`[model] getProfileByCell ${JSON.stringify(credentials)}`);
+    return new Promise((resolve) => {
+        pool.getConnection(function(err, connection) {
+            connection.query(
+                {sql: 'SELECT * FROM Profile WHERE contact = ? AND secret = ?', TIMEOUT},
+                [credentials[0], credentials[1]],
+                function(error, rows, fields) {
+                    if (error != null) {
+                        logger.log(`[account::create|model::getByCell)] [1] get error ${JSON.stringify(error)}`);
+                        logger.log(JSON.stringify(error));
+                        let response = util.getErrorMsg(error);
+                        resolve(response);
+                    } else {
+                        logger.log(`[account::create|model::getByCell)] [2] rows: ${JSON.stringify(rows)}`);
+                        let profiles = converter.dbToDomainProfile(rows);
+                        if (profiles.length > 1) {
+                            logger.log(`[account::create|model::getByCell)] [3] profiles are more then one - throw error`);
+                            throw new Error("There is more than one account for this contact! Database issue.")
+                        } else if (profiles.length == 1) {
+                            logger.log(`[account::create|model::getByCell)] [4] leave only one account as an object ${JSON.stringify(profiles)}`);
+                            profiles = profiles[0];
+                        }
+                        logger.log(`[account::create|model::getByCell)] [5] prepare profile as a response ${JSON.stringify(profiles)}`);
+                        resolve(profiles);   
+                    }
+                }
+            )
+        })
+    })
+}
+
+exports.getFullProfile = function(req, res, credentials) {
+    logger.log(JSON.stringify(credentials));
     return new Promise((resolve) => {
         pool.getConnection(function(err, connection) {
             connection.query(
                 {sql: 'select profile.id as profileId, profile.name as profileName, profile.contact as profileContact, profile.secret as profileSecret, service.id as serviceId, service.title as serviceTitle, service.date as serviceDate, service.offer as serviceOffer, service.index as serviceIndex, service.profileId as serviceProfileId FROM Profile as profile  LEFT OUTER JOIN Service as service  ON profile.id = service.profileId  WHERE profile.contact = ? AND profile.secret = ?', timeout: TIMEOUT},
-                [authAsTokens[0], authAsTokens[1]],
+                [credentials[0], credentials[1]],
                 function(error, rows, fields) {
                     if (error != null) {
                         logger.log(JSON.stringify(error));
@@ -106,6 +139,30 @@ exports.deleteProfile = function(req, res, authAsTokens) {
                         let isSuccess = rows.affectedRows != 0;
                         resolve(isSuccess);
                     }
+                }
+            )
+        })
+    });
+}
+
+exports.addOffer = function(req, profileId) {
+    return new Promise((resolve) => {
+        pool.getConnection(function(err, connection) {
+            logger.log(`[add offer] profile id ${profileId}`);
+            connection.query(
+                {sql: 'INSERT INTO Service SET title = ?, date = ?, offer = ?, Service.index = ?, profileId = ?;'},
+                [req.body.title, req.body.date, req.body.offer, req.body.index, profileId],
+                function(error, rows, fields) {
+                    logger.log(`[insert offer] rows ${JSON.stringify(rows)}`)
+                    let response;
+                    if (error != null) {
+                        response = util.getErrorMsg(500, error); 
+                    } else if (rows.affectRows == 0) {
+                        response = util.getErrorMsg(401, 'No row in db is affected');
+                    } else {
+                        response = {};
+                    }
+                    resolve(response);
                 }
             )
         })

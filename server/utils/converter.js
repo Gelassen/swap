@@ -23,7 +23,7 @@ exports.dbToDomainFullProfile = function(rows) {
         service.id = rows[id].serviceId;
         service.title = rows[id].serviceTitle;
         service.date = rows[id].serviceDate;
-        service.index = rows[id].serviceIndex;
+        service.index = prepareIndex(rows[id]);
         if (rows[id].serviceOffer == 1) {
             offers.push(service);
         } else {
@@ -38,4 +38,15 @@ exports.dbToDomainFullProfile = function(rows) {
         offers: offers,
         demands: demands
     };
+}
+
+function prepareIndex(row) {
+    let index = []
+    if (row.serviceIndex != null || row.serviceIndex != undefined) {
+        let tokens = row.serviceIndex.split(",");
+        for (aId = 0; aId < tokens.length; aId++) {
+            index.push(tokens[aId]);
+        }
+    }
+    return index;
 }

@@ -7,6 +7,7 @@ var pool = require('./database');
 
 var profile = require('./controllers/profile');
 const { json } = require('express');
+const { createPoolCluster } = require('mysql');
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
@@ -36,6 +37,16 @@ app.get('/api/v1/account', function(req, res) {
 app.delete('/api/v1/account/:id', function(req, res) {
     pool.status();
     profile.delete(req, res);
+})
+
+app.get('/api/v1/account/offers', function(req, res) {
+    pool.status();
+    res.send(405, { "payload": "Only POST and DELETE requests are allowed for this resource."})
+})
+
+app.post('/api/v1/account/offers', function(req, res) {
+    pool.status();
+    profile.addOffer(req, res);
 })
 
 app.listen(3000);
