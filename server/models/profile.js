@@ -125,15 +125,14 @@ exports.getFullProfile = function(req, res, credentials) {
     })
 }
 
-exports.deleteProfile = function(req, res, authAsTokens) {
-    logger.log(`[delete] ${req.params.id} + ${authAsTokens[0]} + ${authAsTokens[1]}`);
+exports.deleteProfile = function(req, res, credentials) {
+    logger.log(`[delete] ${req.params.id} + ${credentials[0]} + ${credentials[1]}`);
     return new Promise((resolve) => {
         pool.getConnection(function(err, connection) {
             connection.query(
                 {sql: 'DELETE FROM Profile WHERE id = ? AND contact = ? AND secret = ?;'},
-                [req.params.id, authAsTokens[0], authAsTokens[1]],
+                [req.params.id, credentials[0], credentials[1]],
                 function(error, rows, fields) {
-                    // TODO later check DELETE ON CASCADE work
                     logger.log(`[delete] rows ${JSON.stringify(rows)}`);
                     if (error != null) {
                         let response = util.getErrorMsg(500, error);                        
@@ -194,4 +193,25 @@ exports.addDemand = function(req, profileId) {
             )
         })
     });
+}
+
+exports.deleteOffer = function(req) {
+    return new Promise((resolve) => {
+        pool.getConnection(function(err, connection) {
+            connection.query(
+                {sql: 'DELETE FROM Service WHERE id = ?;'},
+                [req.params.id],
+                function(error, rows, fields) {
+                    logger.log(`[delete] rows ${JSON.stringify(rows)}`);
+                    if (error != null) {
+                        let response = util.getErrorMsg(500, error);                        
+                        resolve(response);
+                    } else {
+                        let isSuccess = rows.affectedRows != 0;
+                        resolve(isSuccess);
+                    }
+                }
+            )
+        })
+    })       
 }

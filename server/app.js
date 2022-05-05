@@ -54,6 +54,11 @@ app.post('/api/v1/account/demands', function(req, res) {
     profile.addDemand(req, res);
 })
 
+app.delete('/api/v1/account/offers/:id', function(req, res) {
+    pool.status();
+    profile.deleteOffer(req, res);
+})
+
 app.listen(3000);
 
 module.exports =  app; 
