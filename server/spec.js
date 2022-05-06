@@ -416,133 +416,6 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .expect(204);
     })
-    /* account demands block */
-    it('on POST /api/v1/account/demands without authorization header receives UNAUTHORIZED code', async() => {
-        let testPayload = {"id":"3","name":"Hacking servers by nights","date":"1746057600","index":["hacking servers"]};
-        await request(app)
-            .post('/api/v1/account/demands')
-            .set('Content-Type', 'application/json; charset=utf-8')
-            .send(testPayload)
-            .expect(401, { "payload" : "Did you forget to add authorization header?" });
-    })
-    it('on POST /api/v1/account/demands with authorization in wrong format receives BAD FORMAT code', async() => {
-        let testPayload = {"id":"3","name":"Hacking servers by nights","date":"1746057600","index":["hacking servers"]};
-        await request(app)
-            .post('/api/v1/account/demands')
-            .set('Authorization', 'VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
-            .set('Content-Type', 'application/json; charset=utf-8')
-            .send(testPayload)
-            .expect(400, { "payload" : "Did you add correct authorization header?"});
-    });
-    it('on POST /api/v1/account/demands with no authorized account receives UNAUTHORIZED code', async() => {
-        let testPayload = {"id":"3","name":"Hacking servers by nights","date":"1746057600","index":["hacking servers"]};
-        await request(app)
-            .post('/api/v1/account/demands')
-            .set('Authorization', 'Basic bm9uLmV4aXN0QGdtYWlsLmNvbTpwd2Q=')
-            .set('Content-Type', 'application/json; charset=utf-8')
-            .send(testPayload)
-            .expect(401, { "payload" : "There is no account for this credentials. Are you authorized?" });
-    });
-    it('on POST /api/v1/account/demands with authorized account receives OK code', async() => {
-        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
-        let testPayload = {"title":"Hacking servers by nights","date": 1746057600,"index":["hacking servers"]};
-        // prepare initial database state
-        await request(app)
-            .get('/api/v1/account')
-            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
-            .set('Content-Type', 'application/json; charset=utf-8')
-            .expect(204, {});
-        await request(app)
-            .post('/api/v1/account')
-            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
-            .set('Content-Type', 'application/json; charset=utf-8')
-            .send(postPayload)
-            .expect('Content-Type', 'application/json; charset=utf-8')
-            .expect(200, {})
-        let response = await request(app)
-            .get('/api/v1/account')
-            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
-            .set('Content-Type', 'application/json; charset=utf-8')
-            .expect(200)
-
-        await request(app)
-            .post('/api/v1/account/demands')    
-            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
-            .set('Content-Type', 'application/json; charset=utf-8')
-            .send(testPayload)
-            .expect(200, {})
-
-        response = await request(app)
-            .get('/api/v1/account')
-            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
-            .set('Content-Type', 'application/json; charset=utf-8')
-            .expect(200)
-        postPayload.id = response.body.payload.id;
-        testPayload.id = response.body.payload.demands.at(0).id;
-        postPayload.demands.push(testPayload);
-        const newExpectedObj = postPayload;
-        expect(response.body.payload).toEqual(newExpectedObj);
-        // clean database
-        await request(app)
-            .delete(`/api/v1/account/${response.body.payload.id}`)
-            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
-            .expect(204);
-    });
-    it('on POST /api/v1/account/demands with payload profile that already exist in system receives CONFLICT code', async() => {
-        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
-        let testPayload = {"title":"Hacking servers by nights","date": 1746057600,"index":["hacking servers"]};
-        // prepare initial database state
-        await request(app)
-            .get('/api/v1/account')
-            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
-            .set('Content-Type', 'application/json; charset=utf-8')
-            .expect(204, {});
-        await request(app)
-            .post('/api/v1/account')
-            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
-            .set('Content-Type', 'application/json; charset=utf-8')
-            .send(postPayload)
-            .expect('Content-Type', 'application/json; charset=utf-8')
-            .expect(200, {})
-        let response = await request(app)
-            .get('/api/v1/account')
-            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
-            .set('Content-Type', 'application/json; charset=utf-8')
-            .expect(200)
-        postPayload.id = response.body.payload.id;
-        expect(response.body.payload).toEqual(postPayload);
-        await request(app)
-            .post('/api/v1/account/demands')    
-            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
-            .set('Content-Type', 'application/json; charset=utf-8')
-            .send(testPayload)
-            .expect(200, {})
-        response = await request(app)
-            .get('/api/v1/account')
-            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
-            .set('Content-Type', 'application/json; charset=utf-8')
-            .expect(200)
-        postPayload.id = response.body.payload.id;
-        testPayload.id = response.body.payload.demands.at(0).id;
-        postPayload.demands.push(testPayload);
-        const newExpectedObj = postPayload;
-        expect(response.body.payload).toEqual(newExpectedObj);
-
-        testPayload.id = undefined;
-        const secondPostRequest = await request(app)
-            .post('/api/v1/account/demands')    
-            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
-            .set('Content-Type', 'application/json; charset=utf-8')
-            .send(testPayload)
-            .expect(409, { "payload" : `The same demand for this profile already exist ${testPayload}`});
-        
-        // clean database
-        await request(app)
-            .delete(`/api/v1/account/${response.body.payload.id}`)
-            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
-            .expect(204);
-    })
-    /* account delete offers block */
     it('on DELETE /api/v1/account/offers without authorization header receives UNAUTHORIZED code', async() => {
         await request(app)
             .delete('/api/v1/account/offers/101')
@@ -671,7 +544,132 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .expect(204);        
     });
-    /* account delete demands block */
+    /* account demands block */
+    it('on POST /api/v1/account/demands without authorization header receives UNAUTHORIZED code', async() => {
+        let testPayload = {"id":"3","name":"Hacking servers by nights","date":"1746057600","index":["hacking servers"]};
+        await request(app)
+            .post('/api/v1/account/demands')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(testPayload)
+            .expect(401, { "payload" : "Did you forget to add authorization header?" });
+    })
+    it('on POST /api/v1/account/demands with authorization in wrong format receives BAD FORMAT code', async() => {
+        let testPayload = {"id":"3","name":"Hacking servers by nights","date":"1746057600","index":["hacking servers"]};
+        await request(app)
+            .post('/api/v1/account/demands')
+            .set('Authorization', 'VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(testPayload)
+            .expect(400, { "payload" : "Did you add correct authorization header?"});
+    });
+    it('on POST /api/v1/account/demands with no authorized account receives UNAUTHORIZED code', async() => {
+        let testPayload = {"id":"3","name":"Hacking servers by nights","date":"1746057600","index":["hacking servers"]};
+        await request(app)
+            .post('/api/v1/account/demands')
+            .set('Authorization', 'Basic bm9uLmV4aXN0QGdtYWlsLmNvbTpwd2Q=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(testPayload)
+            .expect(401, { "payload" : "There is no account for this credentials. Are you authorized?" });
+    });
+    it('on POST /api/v1/account/demands with authorized account receives OK code', async() => {
+        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
+        let testPayload = {"title":"Hacking servers by nights","date": 1746057600,"index":["hacking servers"]};
+        // prepare initial database state
+        await request(app)
+            .get('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(204, {});
+        await request(app)
+            .post('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(postPayload)
+            .expect('Content-Type', 'application/json; charset=utf-8')
+            .expect(200, {})
+        let response = await request(app)
+            .get('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(200)
+
+        await request(app)
+            .post('/api/v1/account/demands')    
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(testPayload)
+            .expect(200, {})
+
+        response = await request(app)
+            .get('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(200)
+        postPayload.id = response.body.payload.id;
+        testPayload.id = response.body.payload.demands.at(0).id;
+        postPayload.demands.push(testPayload);
+        const newExpectedObj = postPayload;
+        expect(response.body.payload).toEqual(newExpectedObj);
+        // clean database
+        await request(app)
+            .delete(`/api/v1/account/${response.body.payload.id}`)
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .expect(204);
+    });
+    it('on POST /api/v1/account/demands with payload profile that already exist in system receives CONFLICT code', async() => {
+        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
+        let testPayload = {"title":"Hacking servers by nights","date": 1746057600,"index":["hacking servers"]};
+        // prepare initial database state
+        await request(app)
+            .get('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(204, {});
+        await request(app)
+            .post('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(postPayload)
+            .expect('Content-Type', 'application/json; charset=utf-8')
+            .expect(200, {})
+        let response = await request(app)
+            .get('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(200)
+        postPayload.id = response.body.payload.id;
+        expect(response.body.payload).toEqual(postPayload);
+        await request(app)
+            .post('/api/v1/account/demands')    
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(testPayload)
+            .expect(200, {})
+        response = await request(app)
+            .get('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(200)
+        postPayload.id = response.body.payload.id;
+        testPayload.id = response.body.payload.demands.at(0).id;
+        postPayload.demands.push(testPayload);
+        const newExpectedObj = postPayload;
+        expect(response.body.payload).toEqual(newExpectedObj);
+
+        testPayload.id = undefined;
+        const secondPostRequest = await request(app)
+            .post('/api/v1/account/demands')    
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(testPayload)
+            .expect(409, { "payload" : `The same demand for this profile already exist ${testPayload}`});
+        
+        // clean database
+        await request(app)
+            .delete(`/api/v1/account/${response.body.payload.id}`)
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .expect(204);
+    })
     it('on DELETE /api/v1/account/demands without authorization header receives UNAUTHORIZED code', async() => {
         await request(app)
             .delete('/api/v1/account/demands/101')
