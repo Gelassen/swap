@@ -40,6 +40,30 @@ exports.dbToDomainFullProfile = function(rows) {
     };
 }
 
+exports.dbToDomainService = function(rows) {
+    let result = [];
+    if (rows.length == 0) return result;
+
+    for (id = 0; id < rows.length; id++) {
+        let service = {};
+        service.id = rows[id].serviceId;
+        service.title = rows[id].serviceTitle;
+        service.date = rows[id].serviceDate;
+        service.index = prepareIndex(rows[id]);
+        /* omit offer type and profile id */
+        result.push(service);
+    }
+    return result;
+}
+
+exports.requestToDomainService = function(reqBody) {
+    return {
+        "title" : reqBody.title,
+        "date" : reqBody.date,
+        "index" : reqBody.index
+    }
+}
+
 function prepareIndex(row) {
     let index = []
     if (row.serviceIndex != null || row.serviceIndex != undefined) {

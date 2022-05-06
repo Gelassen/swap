@@ -22,7 +22,7 @@ exports.create = function(req) {
                         logger.log(`[account::create (model)] [2] there is an error in result of SQL exec`);
                         logger.log(JSON.stringify(error));
                         let response = util.getErrorMsg(500, error);
-                    } else if (rows.affectRows == 0) {
+                    } else if (rows.affectedRows == 0) {
                         logger.log(`[account::create (model)] [3] no affected rows`);
                         resolve(util.getErrorMsg(401, 'No row in db is affected'));
                     } else {
@@ -63,6 +63,7 @@ exports.getProfileByCell = function(req, res, credentials) {
                         logger.log(`[account::create|model::getByCell)] [5] prepare profile as a response ${JSON.stringify(profiles)}`);
                         resolve(profiles);   
                     }
+                    connection.release();
                 }
             )
         })
@@ -95,6 +96,7 @@ exports.getProfileByCellAndSecret = function(req, res, credentials) {
                         logger.log(`[account::create|model::getByCell)] [5] prepare profile as a response ${JSON.stringify(profiles)}`);
                         resolve(profiles);   
                     }
+                    connection.release();
                 }
             )
         })
@@ -141,6 +143,7 @@ exports.deleteProfile = function(req, res, credentials) {
                         let isSuccess = rows.affectedRows != 0;
                         resolve(isSuccess);
                     }
+                    connection.release();
                 }
             )
         })
@@ -159,12 +162,13 @@ exports.addOffer = function(req, profileId) {
                     let response;
                     if (error != null) {
                         response = util.getErrorMsg(500, error); 
-                    } else if (rows.affectRows == 0) {
+                    } else if (rows.affectedRows == 0) {
                         response = util.getErrorMsg(401, 'No row in db is affected');
                     } else {
                         response = {};
                     }
                     resolve(response);
+                    connection.release();
                 }
             )
         })
@@ -183,12 +187,13 @@ exports.addDemand = function(req, profileId) {
                     let response;
                     if (error != null) {
                         response = util.getErrorMsg(500, error); 
-                    } else if (rows.affectRows == 0) {
+                    } else if (rows.affectedRows == 0) {
                         response = util.getErrorMsg(401, 'No row in db is affected');
                     } else {
                         response = {};
                     }
                     resolve(response);
+                    connection.release();
                 }
             )
         })
@@ -210,6 +215,7 @@ exports.deleteOffer = function(req) {
                         let isSuccess = rows.affectedRows != 0;
                         resolve(isSuccess);
                     }
+                    connection.release();
                 }
             )
         })

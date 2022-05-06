@@ -4,6 +4,8 @@ let auth = require('../utils/auth')
 let network = require('../utils/network')
 let validator = require('../utils/validator')
 let logger = require('../utils/logger')
+let converter = require('../utils/converter')
+const e = require('express')
 
 /*
     This method covers both cases - sign in and register a new account. It is left 
@@ -126,8 +128,12 @@ exports.addOffer = async function(req, res) {
         if (noSuchData(profileResult)) {
             result = network.getErrorMsg(401, "There is no account for this credentials. Are you authorized?")
         } else {
-            logger.log(`[add offer] profile id ${JSON.stringify(profileResult.id)}`);
-            result = await profile.addOffer(req, profileResult.id);
+            let offerFromRequest = converter.requestToDomainService(req.body);
+            if (isThereSuchService(profileResult.offers, offerFromRequest)) {
+                result = network.getErrorMsg(409, `The same offer for this profile already exist ${offerFromRequest}`);
+            } else {
+                result = await profile.addOffer(req, profileResult.id); 
+            }
         }
     }
     send(req, res, result);
@@ -149,8 +155,12 @@ exports.addDemand = async function(req, res) {
         if (noSuchData(profileResult)) {
             result = network.getErrorMsg(401, "There is no account for this credentials. Are you authorized?")
         } else {
-            logger.log(`[add offer] profile id ${JSON.stringify(profileResult.id)}`);
-            result = await profile.addDemand(req, profileResult.id);
+            let demandFromRequest = converter.requestToDomainService(req.body);
+            if (isThereSuchService(profileResult.demands, demandFromRequest)) {
+                result = network.getErrorMsg(409, `The same demand for this profile already exist ${demandFromRequest}`);
+            } else {
+                result = await profile.addDemand(req, profileResult.id); 
+            }
         }
     }
     send(req, res, result);
@@ -184,6 +194,20 @@ exports.deleteOffer = async function(req, res) {
     }
     send(req, res, result);
     logger.log('[delete offer] end');
+}
+
+function isThereSuchService(profileServices, subject) {
+    let result = false;
+    for (let id = 0; id < profileServices.length; id++) {
+        if (profileServices.at(id).title === subject.title
+            && profileServices.at(id).date === subject.date
+            && profileServices.at(id).index.length === subject.index.length
+            && profileServices.sort().every((value, index) => value === subject.index[index])); {
+            result = true;
+            break;
+        }
+    }
+    return result;
 }
 
 function thereIsNoThisOffer(profile, requestId) {
