@@ -181,7 +181,7 @@ exports.deleteOffer = async function(req, res) {
         let profileResult = await profile.getFullProfile(req, res, credentials);
         if (noSuchData(profileResult)) {
             result = network.getErrorMsg(401, "There is no account for this credentials. Are you authorized?");
-        } else if(thereIsNoThisOffer(profileResult, req.param.id)) {
+        } else if(thereIsNoThisService(profileResult.offers, req.param.id)) {
             result = network.getErrorMsg(404, `There is an account for this credentials, but there is no offer in for this id ${req.params.id}`);
         } else {
             let isSuccess = await profile.deleteOffer(req);
@@ -194,6 +194,35 @@ exports.deleteOffer = async function(req, res) {
     }
     send(req, res, result);
     logger.log('[delete offer] end');
+}
+
+exports.deleteDemand = async function(req, res) {
+    logger.log('[delete demand] start');
+    let result = network.getMsg(200, "Not defined");
+    if (req.get(global.authHeader) === undefined) {
+        result = network.getErrorMsg(401, "Did you forget to add authorization header?");
+    } else if (getAuthHeaderAsTokens(req).error) {
+        result = network.getErrorMsg(400, "Did you add correct authorization header?");
+    } else {
+        let credentials = getAuthNameSecretPair(
+            getAuthHeaderAsTokens(req)
+        );
+        let profileResult = await profile.getFullProfile(req, res, credentials);
+        if (noSuchData(profileResult)) {
+            result = network.getErrorMsg(401, "There is no account for this credentials. Are you authorized?");
+        } else if(thereIsNoThisService(profileResult.demands, req.param.id)) {
+            result = network.getErrorMsg(404, `There is an account for this credentials, but there is no demand in for this id ${req.params.id}`);
+        } else {
+            let isSuccess = await profile.deleteDemand(req);
+            if (isSuccess) {
+                result = network.getMsg(204, {});
+            } else {
+                result = network.getErrorMsg(400, "There is an account for this credentials and there is a service for this id, but there is no rows affect by executed DELETE sql statement. Generally it shouldn't ever happened.");
+            }
+        }
+    }
+    send(req, res, result);
+    logger.log('[delete demand] end');
 }
 
 function isThereSuchService(profileServices, subject) {
@@ -210,12 +239,12 @@ function isThereSuchService(profileServices, subject) {
     return result;
 }
 
-function thereIsNoThisOffer(profile, requestId) {
-    if (profile.offers.length == 0) return true;
+function thereIsNoThisService(profileServices, requestId) {
+    if (profileServices.length == 0) return true;
 
     let result = false;
-    for (let id = 0; id < profile.offers.length; id++) {
-        if (profile.offers.at(id) === requestId) {
+    for (let id = 0; id < profileServices.length; id++) {
+        if (profileServices.at(id) === requestId) {
             /* return false */
             break;
         }

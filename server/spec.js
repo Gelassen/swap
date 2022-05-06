@@ -362,6 +362,60 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .expect(204);
     });
+    it('on POST /api/v1/account/offers with payload profile that already exist in system receives CONFLICT code', async() => {
+        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
+        let testPayload = {"title":"Hacking servers by nights","date": 1746057600,"index":["hacking servers"]};
+        // prepare initial database state
+        await request(app)
+            .get('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(204, {});
+        await request(app)
+            .post('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(postPayload)
+            .expect('Content-Type', 'application/json; charset=utf-8')
+            .expect(200, {})
+        let response = await request(app)
+            .get('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(200)
+        postPayload.id = response.body.payload.id;
+        expect(response.body.payload).toEqual(postPayload);
+        await request(app)
+            .post('/api/v1/account/offers')    
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(testPayload)
+            .expect(200, {})
+        response = await request(app)
+            .get('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(200)
+        postPayload.id = response.body.payload.id;
+        testPayload.id = response.body.payload.offers.at(0).id;
+        postPayload.offers.push(testPayload);
+        const newExpectedObj = postPayload;
+        expect(response.body.payload).toEqual(newExpectedObj);
+
+        testPayload.id = undefined;
+        const secondPostRequest = await request(app)
+            .post('/api/v1/account/offers')    
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(testPayload)
+            .expect(409, { "payload" : `The same offer for this profile already exist ${testPayload}`});
+        
+        // clean database
+        await request(app)
+            .delete(`/api/v1/account/${response.body.payload.id}`)
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .expect(204);
+    })
     /* account demands block */
     it('on POST /api/v1/account/demands without authorization header receives UNAUTHORIZED code', async() => {
         let testPayload = {"id":"3","name":"Hacking servers by nights","date":"1746057600","index":["hacking servers"]};
@@ -434,6 +488,60 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .expect(204);
     });
+    it('on POST /api/v1/account/demands with payload profile that already exist in system receives CONFLICT code', async() => {
+        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
+        let testPayload = {"title":"Hacking servers by nights","date": 1746057600,"index":["hacking servers"]};
+        // prepare initial database state
+        await request(app)
+            .get('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(204, {});
+        await request(app)
+            .post('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(postPayload)
+            .expect('Content-Type', 'application/json; charset=utf-8')
+            .expect(200, {})
+        let response = await request(app)
+            .get('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(200)
+        postPayload.id = response.body.payload.id;
+        expect(response.body.payload).toEqual(postPayload);
+        await request(app)
+            .post('/api/v1/account/demands')    
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(testPayload)
+            .expect(200, {})
+        response = await request(app)
+            .get('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(200)
+        postPayload.id = response.body.payload.id;
+        testPayload.id = response.body.payload.demands.at(0).id;
+        postPayload.demands.push(testPayload);
+        const newExpectedObj = postPayload;
+        expect(response.body.payload).toEqual(newExpectedObj);
+
+        testPayload.id = undefined;
+        const secondPostRequest = await request(app)
+            .post('/api/v1/account/demands')    
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(testPayload)
+            .expect(409, { "payload" : `The same demand for this profile already exist ${testPayload}`});
+        
+        // clean database
+        await request(app)
+            .delete(`/api/v1/account/${response.body.payload.id}`)
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .expect(204);
+    })
     /* account delete offers block */
     it('on DELETE /api/v1/account/offers without authorization header receives UNAUTHORIZED code', async() => {
         await request(app)
@@ -563,15 +671,51 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .expect(204);        
     });
-    it('on POST /api/v1/account/offers with payload profile that already exist in system receives CONFLICT code', async() => {
-        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
-        let testPayload = {"title":"Hacking servers by nights","date": 1746057600,"index":["hacking servers"]};
-        // prepare initial database state
+    /* account delete demands block */
+    it('on DELETE /api/v1/account/demands without authorization header receives UNAUTHORIZED code', async() => {
         await request(app)
-            .get('/api/v1/account')
+            .delete('/api/v1/account/demands/101')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(401, { "payload" : "Did you forget to add authorization header?" });
+    });
+    it('on DELETE /api/v1/account/demands with authorization in wrong format receives BAD FORMAT code', async() => {
+        await request(app)
+            .delete('/api/v1/account/demands/101')
+            .set('Authorization', 'VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(400, { "payload" : "Did you add correct authorization header?"});
+    });
+    it('on DELETE /api/v1/account/demands no authorized account receives UNAUTHORIZED code', async() => {
+        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
+        // add account in system
+        await request(app)
+            .post('/api/v1/account')
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .set('Content-Type', 'application/json; charset=utf-8')
-            .expect(204, {});
+            .send(postPayload)
+            .expect('Content-Type', 'application/json; charset=utf-8')
+            .expect(200, {})
+
+        await request(app)
+            .delete('/api/v1/account/demands/101')
+            .set('Authorization', 'Basic bm9uLmV4aXN0QGdtYWlsLmNvbTpwd2Q=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(401, { "payload" : "There is no account for this credentials. Are you authorized?" });
+    
+        // clean database from test data
+        response = await request(app)
+            .get('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .expect('Content-Type', 'application/json; charset=utf-8')
+            .expect(200);
+        await request(app)
+            .delete(`/api/v1/account/${response.body.payload.id}`)
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .expect(204);
+    })
+    it('on DELETE /api/v1/account/demands for service which doesn\'t exist receives NOT FOUND code', async() => {
+        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
+        // add account in system
         await request(app)
             .post('/api/v1/account')
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
@@ -582,50 +726,43 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
         let response = await request(app)
             .get('/api/v1/account')
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
-            .set('Content-Type', 'application/json; charset=utf-8')
-            .expect(200)
-        postPayload.id = response.body.payload.id;
-        expect(response.body.payload).toEqual(postPayload);
+            .expect('Content-Type', 'application/json; charset=utf-8')
+            .expect(200);
+        expect(response.body.payload.demands.length).toEqual(0);
+
         await request(app)
-            .post('/api/v1/account/offers')    
+            .delete('/api/v1/account/demands/101')
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .set('Content-Type', 'application/json; charset=utf-8')
-            .send(testPayload)
-            .expect(200, {})
+            .expect(404, { "payload" : `There is an account for this credentials, but there is no demand in for this id 101` } );
+        
+        // clean database from test data
         response = await request(app)
             .get('/api/v1/account')
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
-            .set('Content-Type', 'application/json; charset=utf-8')
-            .expect(200)
-        postPayload.id = response.body.payload.id;
-        testPayload.id = response.body.payload.offers.at(0).id;
-        postPayload.offers.push(testPayload);
-        const newExpectedObj = postPayload;
-        expect(response.body.payload).toEqual(newExpectedObj);
-
-        testPayload.id = undefined;
-        const secondPostRequest = await request(app)
-            .post('/api/v1/account/offers')    
-            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
-            .set('Content-Type', 'application/json; charset=utf-8')
-            .send(testPayload)
-            .expect(409, { "payload" : `The same offer for this profile already exist ${testPayload}`});
-        
-        // clean database
+            .expect('Content-Type', 'application/json; charset=utf-8')
+            .expect(200);
         await request(app)
             .delete(`/api/v1/account/${response.body.payload.id}`)
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .expect(204);
     })
-    it('on POST /api/v1/account/demands with payload profile that already exist in system receives CONFLICT code', async() => {
-        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
-        let testPayload = {"title":"Hacking servers by nights","date": 1746057600,"index":["hacking servers"]};
-        // prepare initial database state
+    it('on DELETE /api/v1/account/demands for service and profile that are not exist receives UNAUTHORIZED CODE', async() => {
         await request(app)
             .get('/api/v1/account')
-            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
-            .set('Content-Type', 'application/json; charset=utf-8')
+            .set('Authorization', 'Basic bm9uLmV4aXN0QGdtYWlsLmNvbTpwd2Q=')
             .expect(204, {});
+        
+        await request(app)
+            .delete('/api/v1/account/demands/101')
+            .set('Authorization', 'Basic bm9uLmV4aXN0QGdtYWlsLmNvbTpwd2Q=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(401, { "payload" : "There is no account for this credentials. Are you authorized?" } );
+    });
+    it('on DELETE /api/v1/account/demands with existing profile amd correct service id receives NO CONTENT code', async() => {
+        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
+        let testPayload = {"title":"Hacking servers by nights","date": 1746057600,"index":["hacking servers"]};
+        // prepare the initial database state
         await request(app)
             .post('/api/v1/account')
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
@@ -633,44 +770,34 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .send(postPayload)
             .expect('Content-Type', 'application/json; charset=utf-8')
             .expect(200, {})
-        let response = await request(app)
-            .get('/api/v1/account')
-            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
-            .set('Content-Type', 'application/json; charset=utf-8')
-            .expect(200)
-        postPayload.id = response.body.payload.id;
-        expect(response.body.payload).toEqual(postPayload);
         await request(app)
             .post('/api/v1/account/demands')    
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .set('Content-Type', 'application/json; charset=utf-8')
             .send(testPayload)
             .expect(200, {})
-        response = await request(app)
+        const response = await request(app)
             .get('/api/v1/account')
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
-            .set('Content-Type', 'application/json; charset=utf-8')
-            .expect(200)
-        postPayload.id = response.body.payload.id;
-        testPayload.id = response.body.payload.demands.at(0).id;
-        postPayload.demands.push(testPayload);
-        const newExpectedObj = postPayload;
-        expect(response.body.payload).toEqual(newExpectedObj);
+            .expect('Content-Type', 'application/json; charset=utf-8')
+            .expect(200);
+        expect(response.body.payload.demands.length).toEqual(1);
 
-        testPayload.id = undefined;
-        const secondPostRequest = await request(app)
-            .post('/api/v1/account/demands')    
-            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
-            .set('Content-Type', 'application/json; charset=utf-8')
-            .send(testPayload)
-            .expect(409, { "payload" : `The same demand for this profile already exist ${testPayload}`});
-        
-        // clean database
         await request(app)
-            .delete(`/api/v1/account/${response.body.payload.id}`)
+            .delete(`/api/v1/account/demands/${response.body.payload.demands.at(0).id}`)
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
-            .expect(204);
-    })
-    // TODO add POST demands/offers with already existing the same data in system
-    // TODO add DELETE demands/offers with content which doesn't exist
+            .expect(204)
+        const getAccountResponse = await request(app)
+            .get('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .expect('Content-Type', 'application/json; charset=utf-8')
+            .expect(200);
+        expect(getAccountResponse.body.payload.demands.length).toEqual(0);
+        
+        // clean database from test data
+        await request(app)
+            .delete(`/api/v1/account/${getAccountResponse.body.payload.id}`)
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .expect(204);        
+    });
 });

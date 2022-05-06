@@ -221,3 +221,25 @@ exports.deleteOffer = function(req) {
         })
     })       
 }
+
+exports.deleteDemand = function(req) {
+    return new Promise((resolve) => {
+        pool.getConnection(function(err, connection) {
+            connection.query(
+                {sql: 'DELETE FROM Service WHERE id = ?;'},
+                [req.params.id],
+                function(error, rows, fields) {
+                    logger.log(`[delete] rows ${JSON.stringify(rows)}`);
+                    if (error != null) {
+                        let response = util.getErrorMsg(500, error);                        
+                        resolve(response);
+                    } else {
+                        let isSuccess = rows.affectedRows != 0;
+                        resolve(isSuccess);
+                    }
+                    connection.release();
+                }
+            )
+        })
+    })       
+}

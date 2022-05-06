@@ -59,6 +59,11 @@ app.delete('/api/v1/account/offers/:id', function(req, res) {
     profile.deleteOffer(req, res);
 })
 
+app.delete('/api/v1/account/demands/:id', function(req, res) {
+    pool.status();
+    profile.deleteDemand(req, res);
+})
+
 app.listen(3000);
 
 module.exports =  app; 
