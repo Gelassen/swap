@@ -1,0 +1,7 @@
+{
+    "dbConfig" : {
+        "user"     : "root",
+        "password" : "password",
+        "database" : "prod_db_swap"
+    }
+}

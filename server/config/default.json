@@ -1,0 +1,14 @@
+{
+    "config" : {
+        "WEBSERVICE_HOST": "127.0.0.1", 
+        "WEBSERVICE_PORT":  "3000"
+    },
+    "dbConfig" : {
+        "host"     : "127.0.0.1",
+        "port"     : "3306",
+        "user"     : "root",
+        "password" : "password",
+        "database" : "db_swap",
+        "connectionLimit" : "150"
+    }
+}

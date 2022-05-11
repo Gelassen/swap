@@ -1,15 +1,9 @@
 var mysql = require('mysql')
-var config = require('./config')
+const config = require('config');
 
-var config = {
-	host     : config.DATABASE_HOST,
-	user     : config.USER,
-    password : config.PWD,
-    database : config.DATABASE,
-    connectionLimit: '150'
-};
+const dbConfig = config.get('dbConfig');
 
-var pool = mysql.createPool(config);
+var pool = mysql.createPool(dbConfig);
 
 pool.on('connection', function(connection) {
     console.log('connected to database')
