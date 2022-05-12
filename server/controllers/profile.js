@@ -34,7 +34,6 @@ exports.create = async function(req, res) {
             logger.log(`[auth header issue] ${JSON.stringify(getAuthHeaderAsTokens(req))}`);
             let profiles = await profile.getProfileByCell(req, res, credentials);
             logger.log(`[account::create] [7] profiles result: ${JSON.stringify(profiles)}`);
-            // TODO verify logic on the same contact, different secret. Recently db query is done over name AND secret, it might be root cause of the issue
             if (isAttemptToSignIn(profiles, credentials[1])) {
                 // we have to return back to the client a full profile
                 let model = await profile.getFullProfile(req, res, credentials)
@@ -114,10 +113,14 @@ exports.delete = async function(req, res) {
 exports.addOffer = async function(req, res) {
     logger.log("[add offer] start");
     let result = network.getMsg(200, "Not defined");
+    let offerFromRequest = converter.requestToDomainService(req.body);
     if (req.get(global.authHeader) === undefined) {
         result = network.getErrorMsg(401, "Did you forget to add authorization header?");
     } else if (getAuthHeaderAsTokens(req).error) {
         result = network.getErrorMsg(400, "Did you add correct authorization header?");
+    } else if (!validator.validateOffer(offerFromRequest)) {
+        logger.log(`[add offer] offer payload ${offerFromRequest} check - failed`);
+        result = network.getErrorMsg(400, "Did you forget to add a valid profile as a payload?");
     } else {
         let credentials = getAuthNameSecretPair(
             getAuthHeaderAsTokens(req)
@@ -127,13 +130,10 @@ exports.addOffer = async function(req, res) {
         logger.log(`[add offer] profile id ${JSON.stringify(profileResult.id)}`);
         if (noSuchData(profileResult)) {
             result = network.getErrorMsg(401, "There is no account for this credentials. Are you authorized?")
+        } else if (isThereSuchService(profileResult.offers, offerFromRequest)) {
+            result = network.getErrorMsg(409, `The same offer for this profile already exist ${offerFromRequest}`);
         } else {
-            let offerFromRequest = converter.requestToDomainService(req.body);
-            if (isThereSuchService(profileResult.offers, offerFromRequest)) {
-                result = network.getErrorMsg(409, `The same offer for this profile already exist ${offerFromRequest}`);
-            } else {
-                result = await profile.addOffer(req, profileResult.id); 
-            }
+            result = await profile.addOffer(req, profileResult.id); 
         }
     }
     send(req, res, result);
