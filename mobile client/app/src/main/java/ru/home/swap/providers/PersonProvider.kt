@@ -5,9 +5,9 @@ import android.util.Patterns
 
 class PersonProvider {
 
-    fun isCredentialsEmpty(contact: String, secret: String) : Boolean {
+    fun isAnyOfCredentialsEmpty(contact: String, secret: String) : Boolean {
         return TextUtils.isEmpty(contact)
-                && TextUtils.isEmpty(secret)
+                || TextUtils.isEmpty(secret)
     }
 
     fun isValidEmail(str: String) : Boolean {

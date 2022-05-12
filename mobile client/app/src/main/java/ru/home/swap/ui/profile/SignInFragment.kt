@@ -21,9 +21,10 @@ import ru.home.swap.databinding.SigninFragmentBinding
 import ru.home.swap.di.ViewModelFactory
 import ru.home.swap.providers.PersonProvider
 import ru.home.swap.ui.common.ErrorDialogFragment
+import ru.home.swap.ui.common.IDialogListener
 import javax.inject.Inject
 
-class SignInFragment: Fragment() {
+class SignInFragment: Fragment(), IDialogListener {
 
     companion object {
         fun newInstance() = SignInFragment()
@@ -76,7 +77,6 @@ class SignInFragment: Fragment() {
                             Log.d(App.TAG, "[6c] UI state: none ")
                         }
                     }
-                    // TODO add check for hidden fragment dialog to remove error that has been shown already
                     if (it.errors.isNotEmpty()) {
                         ErrorDialogFragment.newInstance(
                             getString(R.string.default_error_title_dialog),
@@ -86,11 +86,9 @@ class SignInFragment: Fragment() {
                 }
             }
         }
-        // DONE enter data and send on server
-        // DONE cache account on device
-        // DONE add validator and bottom sheet with error message
-        // DONE add check on account existence to show or not SignInFragment
     }
 
-
+    override fun onPositiveClick() {
+        viewModel.removeShownError()
+    }
 }

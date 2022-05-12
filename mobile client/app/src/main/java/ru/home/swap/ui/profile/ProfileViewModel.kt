@@ -185,7 +185,7 @@ class ProfileViewModel
 
     fun createAnAccount() {
         Log.d(App.TAG, "[check] contact value (${state.value.contact}) and secret value(${state.value.secret})")
-        if (PersonProvider().isCredentialsEmpty(state.value.contact, state.value.secret)) {
+        if (PersonProvider().isAnyOfCredentialsEmpty(state.value.contact, state.value.secret)) {
             state.update { state ->
                 state.copy(
                     errors = state.errors + application.getString(R.string.empty_credentials_error)
