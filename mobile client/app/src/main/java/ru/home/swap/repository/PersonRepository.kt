@@ -80,16 +80,20 @@ class PersonRepository(val api: IApi, val cache: Cache, val context: Context) {
 
     fun addOffer(contact: String, secret: String, newService: Service):  Flow<Response<PersonProfile>> {
         return flow {
+            Log.d(App.TAG, "[add offer] start")
             val response = api.addOffer(
                 credentials = AppCredentials.basic(contact, secret),
                 service = newService
             )
             if (response.isSuccessful) {
+                Log.d(App.TAG, "[add offer] success case")
                 val payload = response.body()!!
                 emit(Response.Data(payload.payload))
             } else {
+                Log.d(App.TAG, "[add offer] error case")
                 emit(Response.Error.Message(response.message()))
             }
+            Log.d(App.TAG, "[add offer] end")
         }
             .catch { ex ->
                 Log.e(App.TAG, "Exception on addOffer() call", ex)

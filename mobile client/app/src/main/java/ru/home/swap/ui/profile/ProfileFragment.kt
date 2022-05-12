@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
-import androidx.fragment.app.Fragment
 import ru.home.swap.model.Service
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
@@ -19,10 +18,11 @@ import ru.home.swap.App
 import ru.home.swap.AppApplication
 import ru.home.swap.databinding.ProfileFragmentBinding
 import ru.home.swap.di.ViewModelFactory
+import ru.home.swap.ui.common.BaseFragment
 import javax.inject.Inject
 
 
-class ProfileFragment : Fragment(), ItemAdapter.Listener {
+class ProfileFragment : BaseFragment(), ItemAdapter.Listener {
 
     @Inject
     lateinit var viewModelFactory: ViewModelFactory
@@ -70,6 +70,14 @@ class ProfileFragment : Fragment(), ItemAdapter.Listener {
             }
         }
 
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                viewModel.uiState.collect { it ->
+                    onModelUpdate(it)
+                }
+            }
+        }
+
         binding.fab.apply {
             setOnClickListener {
                 childFragmentManager.let {
@@ -100,4 +108,7 @@ class ProfileFragment : Fragment(), ItemAdapter.Listener {
         }
     }
 
+    override fun onPositiveClick() {
+        viewModel.removeShownError()
+    }
 }

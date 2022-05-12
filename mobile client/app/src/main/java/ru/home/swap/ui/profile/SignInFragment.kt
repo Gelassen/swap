@@ -20,11 +20,12 @@ import ru.home.swap.R
 import ru.home.swap.databinding.SigninFragmentBinding
 import ru.home.swap.di.ViewModelFactory
 import ru.home.swap.providers.PersonProvider
+import ru.home.swap.ui.common.BaseFragment
 import ru.home.swap.ui.common.ErrorDialogFragment
 import ru.home.swap.ui.common.IDialogListener
 import javax.inject.Inject
 
-class SignInFragment: Fragment(), IDialogListener {
+class SignInFragment: BaseFragment() {
 
     companion object {
         fun newInstance() = SignInFragment()
@@ -77,12 +78,7 @@ class SignInFragment: Fragment(), IDialogListener {
                             Log.d(App.TAG, "[6c] UI state: none ")
                         }
                     }
-                    if (it.errors.isNotEmpty()) {
-                        ErrorDialogFragment.newInstance(
-                            getString(R.string.default_error_title_dialog),
-                            it.errors.first()
-                        ).show(childFragmentManager, ErrorDialogFragment.TAG)
-                    }
+                    onModelUpdate(it)
                 }
             }
         }

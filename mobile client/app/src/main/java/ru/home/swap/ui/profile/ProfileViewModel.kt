@@ -150,6 +150,7 @@ class ProfileViewModel
         viewModelScope.launch {
             repository.addOffer(uiState.value.contact, uiState.value.secret, newService)
                 .collect { it ->
+                    Log.d(App.TAG, "[add offer] start collect data in viewmodel")
                     processAddOfferResponse(it)
                 }
         }
@@ -350,6 +351,7 @@ class ProfileViewModel
     private fun processAddOfferResponse(response: Response<PersonProfile>) {
         when(response) {
             is Response.Data<PersonProfile> -> {
+                Log.d(App.TAG, "[add offer] positive case")
                 state.update { state ->
                     state.copy(
                         offers = response.data.offers.toMutableList()
@@ -357,6 +359,7 @@ class ProfileViewModel
                 }
             }
             is Response.Error -> {
+                Log.d(App.TAG, "[add offer] error case")
                 state.update { state ->
                     state.copy(
                         errors = state.errors + getErrorMessage(response)
