@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import ru.home.swap.App
 import ru.home.swap.R
+import ru.home.swap.converters.ApiResponseConverter
 import ru.home.swap.model.PersonProfile
 import ru.home.swap.model.Service
 import ru.home.swap.network.IApi
@@ -32,7 +33,8 @@ class PersonRepository(val api: IApi, val cache: Cache, val context: Context) {
                 emit(Response.Data(payload.payload))
             } else {
                 Log.d(App.TAG, "[d] response is not ok")
-                emit(Response.Error.Message("${response.message()}\n${response.errorBody()?.string()}"))
+                val errorPayload = ApiResponseConverter().toDomain(response.errorBody()?.string()!!);
+                emit(Response.Error.Message("${response.message()}:\n\n${errorPayload.payload}"))
             }
         }
             .catch { ex ->
@@ -91,7 +93,8 @@ class PersonRepository(val api: IApi, val cache: Cache, val context: Context) {
                 emit(Response.Data(payload.payload))
             } else {
                 Log.d(App.TAG, "[add offer] error case")
-                emit(Response.Error.Message(response.message()))
+                val errorPayload = ApiResponseConverter().toDomain(response.errorBody()?.string()!!);
+                emit(Response.Error.Message("${response.message()}:\n\n${errorPayload.payload}"))
             }
             Log.d(App.TAG, "[add offer] end")
         }
@@ -111,7 +114,8 @@ class PersonRepository(val api: IApi, val cache: Cache, val context: Context) {
                 val payload = response.body()!!
                 emit(Response.Data(payload.payload))
             } else {
-                emit(Response.Error.Message(response.message()))
+                val errorPayload = ApiResponseConverter().toDomain(response.errorBody()?.string()!!);
+                emit(Response.Error.Message("${response.message()}:\n\n${errorPayload.payload}"))
             }
         }
             .catch { ex ->
