@@ -33,7 +33,7 @@ exports.create = function(req) {
                     connection.release();
                 }
             );
-        })
+        });
     })
 }
 
@@ -66,8 +66,8 @@ exports.getProfileByCell = function(req, res, credentials) {
                     connection.release();
                 }
             )
-        })
-    })
+        });
+    });
 }
 
 exports.getProfileByCellAndSecret = function(req, res, credentials) {
@@ -99,8 +99,8 @@ exports.getProfileByCellAndSecret = function(req, res, credentials) {
                     connection.release();
                 }
             )
-        })
-    })
+        });
+    });
 }
 
 exports.getFullProfile = function(req, res, credentials) {
@@ -121,10 +121,10 @@ exports.getFullProfile = function(req, res, credentials) {
                         resolve(profile);
                     }
                     connection.release();
-                })
-            }
-        );
-    })
+                }
+            )
+        });
+    });
 }
 
 exports.deleteProfile = function(req, res, credentials) {
@@ -146,7 +146,7 @@ exports.deleteProfile = function(req, res, credentials) {
                     connection.release();
                 }
             )
-        })
+        });
     });
 }
 
@@ -171,7 +171,7 @@ exports.addOffer = function(req, profileId) {
                     connection.release();
                 }
             )
-        })
+        });
     });
 }
 
@@ -196,7 +196,7 @@ exports.addDemand = function(req, profileId) {
                     connection.release();
                 }
             )
-        })
+        });
     });
 }
 
@@ -218,8 +218,8 @@ exports.deleteOffer = function(req) {
                     connection.release();
                 }
             )
-        })
-    })       
+        });
+    });       
 }
 
 exports.deleteDemand = function(req) {
@@ -240,6 +240,6 @@ exports.deleteDemand = function(req) {
                     connection.release();
                 }
             )
-        })
-    })       
+        });
+    });      
 }

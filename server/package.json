@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "NODE_ENV=development node app.js",
-    "test": "NODE_ENV=test jest",
-    "install": "npm install --save-dev eslint && npm install --save-dev mysql && npm install --save-dev express && npm install --save-dev jest supertest && npm install --save-dev jest supertest && npm install --save-dev config"
+    "test": "NODE_ENV=test jest --forceExit --detectOpenHandles",
+    "install": "npm install --save-dev eslint && npm install --save-dev mysql && npm install --save-dev express && npm install --save-dev jest supertest && npm install --save-dev jest supertest && npm install --save-dev config && npm install --save-dev weak-napi"
   },
   "repository": {
     "type": "git",
@@ -30,6 +30,7 @@
     "express": "^4.18.0",
     "jest": "^27.5.1",
     "mysql": "^2.18.1",
-    "supertest": "^6.2.3"
+    "supertest": "^6.2.3",
+    "weak-napi": "^2.0.2"
   }
 }

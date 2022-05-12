@@ -1,4 +1,7 @@
 {
+    "config" : {
+        "webPort" : "0"
+    },
     "dbConfig" : {
         "user"     : "root",
         "password" : "password",

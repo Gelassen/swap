@@ -1,21 +1,6 @@
 const request = require('supertest');
 const app = require('../server/app');
 
-// beforeAll(() => {
-//     jest.setTimeout(10000);
-// })
-
-// afterAll(() => {
-//     // return app.close();
-// })
-
-afterEach(() => {
-    // TODO clean database from test data
-});
-
-// TODO add production and test environment to run test over separate db instance
-// TODO fix an issue with pending async request that prevents test suite to finish
-
 // test user: TestJames@gmail.com:jms123 (VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=)
 // test user: TestJane@gmail.com:jne123 (VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==)
 // test non in db user: non.exist@gmail.com:pwd (bm9uLmV4aXN0QGdtYWlsLmNvbTpwd2Q=)

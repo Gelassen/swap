@@ -1,13 +1,9 @@
-var express = require('express');
-var bodyParser = require('body-parser');
+const express = require('express');
 const app = express();
+const config = require('config');
 
-var config = require('./config');
 var pool = require('./database');
-
 var profile = require('./controllers/profile');
-const { json } = require('express');
-const { createPoolCluster } = require('mysql');
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
@@ -64,6 +60,6 @@ app.delete('/api/v1/account/demands/:id', function(req, res) {
     profile.deleteDemand(req, res);
 })
 
-app.listen(3000);
+app.listen(config.get('config').webPort);
 
 module.exports =  app; 
