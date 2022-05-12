@@ -1,7 +1,7 @@
 
-const debug = true;
+const config = require('config');
 
 exports.log = function(str) {
-    if (!debug) return;
+    if (!config.logs.isAllowed) return;
     console.log(str) 
 }

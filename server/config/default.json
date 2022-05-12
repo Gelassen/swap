@@ -1,7 +1,7 @@
 {
     "config" : {
         "webHost": "127.0.0.1", 
-        "webPort":  "3000"
+        "webPort":  3000
     },
     "dbConfig" : {
         "host"     : "127.0.0.1",
@@ -9,6 +9,9 @@
         "user"     : "root",
         "password" : "password",
         "database" : "db_swap",
-        "connectionLimit" : "150"
+        "connectionLimit" : 150
+    },
+    "logs" : {
+        "isAllowed" : true
     }
 }
