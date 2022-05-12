@@ -10,7 +10,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import kotlinx.android.synthetic.main.test_fragment.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import ru.home.swap.databinding.TestFragmentBinding
@@ -45,11 +44,11 @@ class TestFragment: Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        click_me.setOnClickListener {
+/*        click_me.setOnClickListener {
 //            viewModel.add(System.currentTimeMillis())
             viewModel.proposal.set("New item ${System.currentTimeMillis()}")
             viewModel.addOffer()
-        }
+        }*/
 
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {

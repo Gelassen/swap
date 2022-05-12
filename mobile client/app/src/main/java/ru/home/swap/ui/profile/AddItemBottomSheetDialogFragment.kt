@@ -9,7 +9,6 @@ import android.widget.TextView
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import kotlinx.android.synthetic.main.add_item_fragment.*
 import ru.home.swap.App
 import ru.home.swap.AppApplication
 import ru.home.swap.R
@@ -48,15 +47,17 @@ class AddItemBottomSheetDialogFragment: BottomSheetDialogFragment() {
 
         view.findViewById<TextView>(R.id.offer_option)
             .setOnClickListener {
-                group_choice.onOfferClick()
+                binding.groupChoice.onOfferClick()
+//                binding.group_choice.onOfferClick()
             }
 
         view.findViewById<TextView>(R.id.demand_option)
             .setOnClickListener {
-                group_choice.onDemandClick()
+                binding.groupChoice.onDemandClick()
+//                group_choice.onDemandClick()
             }
 
-        save.setOnClickListener {
+        binding.save.setOnClickListener {
             Log.d(App.TAG, "${viewModel.proposal.get()}")
             viewModel.addItem(binding.groupChoice.isOfferSelected())
             dismiss()

@@ -14,7 +14,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
-import kotlinx.android.synthetic.main.profile_fragment.*
 import kotlinx.coroutines.launch
 import ru.home.swap.App
 import ru.home.swap.AppApplication
@@ -46,18 +45,18 @@ class ProfileFragment : Fragment(), ItemAdapter.Listener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        offers_list.layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
-        offers_list.adapter = ItemAdapter(true, this)
+        binding.offersList.layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
+        binding.offersList.adapter = ItemAdapter(true, this)
 
-        demands_list.layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
-        demands_list.adapter = ItemAdapter(false, this)
+        binding.demandsList.layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
+        binding.demandsList.adapter = ItemAdapter(false, this)
 
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 Log.d(App.TAG, "[collect] UI state collect is called")
                 viewModel.uiState.collect { it ->
                     Log.d(App.TAG, "[collect] collected #${it.offers.count()} offers items")
-                    (offers_list.adapter as ItemAdapter).submitList(it.offers)
+                    (binding.offersList.adapter as ItemAdapter).submitList(it.offers)
                 }
             }
         }
@@ -66,12 +65,12 @@ class ProfileFragment : Fragment(), ItemAdapter.Listener {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 viewModel.uiState.collect { it ->
                     Log.d(App.TAG, "[collect] collected #${it.demands.count()} demands items")
-                    (demands_list.adapter as ItemAdapter).submitList(it.demands)
+                    (binding.demandsList.adapter as ItemAdapter).submitList(it.demands)
                 }
             }
         }
 
-        fab.apply {
+        binding.fab.apply {
             setOnClickListener {
                 childFragmentManager.let {
                     Log.d(App.TAG, "[fab click] Offers count: ${viewModel.uiState.value.offers.count()}")

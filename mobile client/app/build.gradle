@@ -2,7 +2,6 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
     id 'kotlin-kapt'
-    id 'kotlin-android-extensions'
 }
 
 android {
@@ -20,6 +19,7 @@ android {
 
     buildFeatures {
         dataBinding = true
+        viewBinding = true
     }
     buildTypes {
         release {
@@ -37,6 +37,7 @@ android {
     testOptions {
         unitTests.returnDefaultValues = true
     }
+    namespace 'ru.home.swap'
 
 }
 

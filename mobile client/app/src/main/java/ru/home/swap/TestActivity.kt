@@ -5,8 +5,6 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import kotlinx.android.synthetic.main.test_activity.*
-import kotlinx.android.synthetic.main.test_fragment.*
 import kotlinx.coroutines.flow.collect
 import ru.home.swap.di.ViewModelFactory
 import ru.home.swap.ui.profile.ProfileViewModel
