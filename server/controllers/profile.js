@@ -114,6 +114,7 @@ exports.addOffer = async function(req, res) {
     logger.log("[add offer] start");
     let result = network.getMsg(200, "Not defined");
     let offerFromRequest = converter.requestToDomainService(req.body);
+    offerFromRequest.index = prepareIndex(offerFromRequest.title);
     if (req.get(global.authHeader) === undefined) {
         result = network.getErrorMsg(401, "Did you forget to add authorization header?");
     } else if (getAuthHeaderAsTokens(req).error) {
@@ -126,14 +127,15 @@ exports.addOffer = async function(req, res) {
             getAuthHeaderAsTokens(req)
         );
         let profileResult = await profile.getFullProfile(req, res, credentials);
+        logger.log(`[add offer] offer ${JSON.stringify(offerFromRequest)}`);
         logger.log(`[add offer] full profile ${JSON.stringify(profileResult)}`);
-        logger.log(`[add offer] profile id ${JSON.stringify(profileResult.id)}`);
         if (noSuchData(profileResult)) {
             result = network.getErrorMsg(401, "There is no account for this credentials. Are you authorized?")
         } else if (isThereSuchService(profileResult.offers, offerFromRequest)) {
-            result = network.getErrorMsg(409, `The same offer for this profile already exist ${offerFromRequest}`);
+            result = network.getErrorMsg(409, `The same offer for this profile already exist ${JSON.stringify(offerFromRequest)}`);
         } else {
-            result = await profile.addOffer(req, profileResult.id); 
+            logger.log(`[add ofer] offer to insert ${JSON.stringify(offerFromRequest)}`);
+            result = await profile.addOffer(offerFromRequest, profileResult.id); 
         }
     }
     send(req, res, result);
@@ -225,13 +227,24 @@ exports.deleteDemand = async function(req, res) {
     logger.log('[delete demand] end');
 }
 
+// TODO refactor it by grouping, exposing and encapsualting methods below in separate classes
+/*
+    It is a stub for feature postponed for future. In original design it should be done on
+    client side and offered for user to pick up right keys-indexes for search
+ */
+function prepareIndex(str) {
+    let index = [];
+    index.push(str);
+    return index;
+}
+
 function isThereSuchService(profileServices, subject) {
     let result = false;
     for (let id = 0; id < profileServices.length; id++) {
         if (profileServices.at(id).title === subject.title
-            && profileServices.at(id).date === subject.date
-            && profileServices.at(id).index.length === subject.index.length
-            && profileServices.sort().every((value, index) => value === subject.index[index])); {
+        && profileServices.at(id).date === subject.date
+        && profileServices.at(id).index.length === subject.index.length
+        && profileServices.at(id).index.sort().every((value, index) => value === subject.index[index])) {
             result = true;
             break;
         }

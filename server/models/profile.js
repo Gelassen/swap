@@ -150,13 +150,13 @@ exports.deleteProfile = function(req, res, credentials) {
     });
 }
 
-exports.addOffer = function(req, profileId) {
+exports.addOffer = function(offerAsObj, profileId) {
     return new Promise((resolve) => {
         pool.getConnection(function(err, connection) {
             logger.log(`[add offer] profile id ${profileId}`);
             connection.query(
                 {sql: 'INSERT INTO Service SET title = ?, date = ?, offer = ?, Service.index = ?, profileId = ?;'},
-                [req.body.title, req.body.date, offer, req.body.index, profileId],
+                [offerAsObj.title, offerAsObj.date, offer, offerAsObj.index, profileId],
                 function(error, rows, fields) {
                     logger.log(`[insert offer] rows ${JSON.stringify(rows)}`)
                     let response;

@@ -109,6 +109,49 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .expect(204);
     });
+    it('on GET /api/v1/account with account with two offers receives account with two offers', async() => {
+        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
+        let testPayload = {"title":"Hacking servers by nights","date": 1746057600,"index":["Hacking servers by nights"]};
+        let anotherTestPayload = {"title":"Writing software by day","date": 1746057600,"index":["Writing software by day"]};
+        // prepare initial database state
+        await request(app)
+            .get('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(204, {});
+        await request(app)
+            .post('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(postPayload)
+            .expect('Content-Type', 'application/json; charset=utf-8')
+            .expect(200, {})
+        await request(app)
+            .post('/api/v1/account/offers')    
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(testPayload)
+            .expect(200, {})
+        await request(app)
+            .post('/api/v1/account/offers')    
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(anotherTestPayload)
+            .expect(200, {})
+
+        const response = await request(app)
+            .get('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(200);
+        expect(response.body.payload.offers.length).toEqual(2);
+        
+        // clean database
+        await request(app)
+            .delete(`/api/v1/account/${response.body.payload.id}`)
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .expect(204);
+    });
     it('on POST /api/v1/account without 1st mandatory field receives BAD_REQUST code', async() => {
         let postPayload = {"contact":"TestJames@gmail.com","name":"Test James","offers":[],"demands":[]};
         // check there is no such profile in system
@@ -277,7 +320,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .expect(405, { "payload" : "Only POST and DELETE requests are allowed for this resource." });
     });
     it('on POST /api/v1/account/offers without authorization header receives UNAUTHORIZED code', async() => {
-        let testPayload = {"id":"3","name":"Hacking servers by nights","date":"1746057600","index":["hacking servers"]};
+        let testPayload = {"id":"3","title":"Hacking servers by nights","date":"1746057600","index":["Hacking servers by nights"]};
         await request(app)
             .post('/api/v1/account/offers')
             .set('Content-Type', 'application/json; charset=utf-8')
@@ -285,7 +328,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .expect(401, { "payload" : "Did you forget to add authorization header?" });
     });
     it('on POST /api/v1/account/offers with authorization in wrong format receives BAD FORMAT code', async() => {
-        let testPayload = {"id":"3","name":"Hacking servers by nights","date":"1746057600","index":["hacking servers"]};
+        let testPayload = {"id":"3","title":"Hacking servers by nights","date":"1746057600","index":["Hacking servers by nights"]};
         await request(app)
             .post('/api/v1/account/offers')
             .set('Authorization', 'VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
@@ -294,7 +337,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .expect(400, { "payload" : "Did you add correct authorization header?"});
     });
     it('on POST /api/v1/account/offers with no authorized account receives UNAUTHORIZED code', async() => {
-        let testPayload = {"id":"3","name":"Hacking servers by nights","date":"1746057600","index":["hacking servers"]};
+        let testPayload = {"id":"3","title":"Hacking servers by nights","date":"1746057600","index":["Hacking servers by nights"]};
         await request(app)
             .post('/api/v1/account/offers')
             .set('Authorization', 'Basic bm9uLmV4aXN0QGdtYWlsLmNvbTpwd2Q=')
@@ -304,7 +347,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
     });
     it('on POST /api/v1/account/offers with authorized account receives OK code', async() => {
         let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
-        let testPayload = {"title":"Hacking servers by nights","date": 1746057600,"index":["hacking servers"]};
+        let testPayload = {"title":"Hacking servers by nights","date": 1746057600,"index":["Hacking servers by nights"]};
         // prepare initial database state
         await request(app)
             .get('/api/v1/account')
@@ -349,7 +392,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
     });
     it('on POST /api/v1/account/offers with payload profile that already exist in system receives CONFLICT code', async() => {
         let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
-        let testPayload = {"title":"Hacking servers by nights","date": 1746057600,"index":["hacking servers"]};
+        let testPayload = {"title":"Hacking servers by nights","date": 1746057600,"index":["Hacking servers by nights"]};
         // prepare initial database state
         await request(app)
             .get('/api/v1/account')
@@ -393,8 +436,62 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .set('Content-Type', 'application/json; charset=utf-8')
             .send(testPayload)
-            .expect(409, { "payload" : `The same offer for this profile already exist ${testPayload}`});
+            .expect(409, { "payload" : `The same offer for this profile already exist ${JSON.stringify(testPayload)}`});
         
+        // clean database
+        await request(app)
+            .delete(`/api/v1/account/${response.body.payload.id}`)
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .expect(204);
+    })
+    it('on POST /api/v1/account/offers with two consecutive requests with different offers receives OK code', async() => {
+        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
+        let testPayload = {"title":"Hacking servers by nights","date": 1746057600,"index":["Hacking servers by nights"]};
+        let anotherTestPayload = {"title":"Writing software by day","date": 1746057600,"index":["Writing software by day"]};
+        // prepare initial database state
+        await request(app)
+            .get('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(204, {});
+        await request(app)
+            .post('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(postPayload)
+            .expect('Content-Type', 'application/json; charset=utf-8')
+            .expect(200, {})
+        let response = await request(app)
+            .get('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(200)
+        postPayload.id = response.body.payload.id;
+        expect(response.body.payload).toEqual(postPayload);
+        await request(app)
+            .post('/api/v1/account/offers')    
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(testPayload)
+            .expect(200, {})
+        response = await request(app)
+            .get('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(200)
+        postPayload.id = response.body.payload.id;
+        testPayload.id = response.body.payload.offers.at(0).id;
+        postPayload.offers.push(testPayload);
+        const newExpectedObj = postPayload;
+        expect(response.body.payload).toEqual(newExpectedObj);
+
+        await request(app)
+            .post('/api/v1/account/offers')    
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(anotherTestPayload)
+            .expect(200, {})
+
         // clean database
         await request(app)
             .delete(`/api/v1/account/${response.body.payload.id}`)
@@ -488,9 +585,9 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .set('Content-Type', 'application/json; charset=utf-8')
             .expect(401, { "payload" : "There is no account for this credentials. Are you authorized?" } );
     });
-    it('on DELETE /api/v1/account/offers with existing profile amd correct service id receives NO CONTENT code', async() => {
+    it('on DELETE /api/v1/account/offers with existing profile and correct service id receives NO CONTENT code', async() => {
         let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
-        let testPayload = {"title":"Hacking servers by nights","date": 1746057600,"index":["hacking servers"]};
+        let testPayload = {"title":"Hacking servers by nights","date": 1746057600,"index":["Hacking servers by nights"]};
         // prepare the initial database state
         await request(app)
             .post('/api/v1/account')
@@ -531,7 +628,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
     });
     /* account demands block */
     it('on POST /api/v1/account/demands without authorization header receives UNAUTHORIZED code', async() => {
-        let testPayload = {"id":"3","name":"Hacking servers by nights","date":"1746057600","index":["hacking servers"]};
+        let testPayload = {"id":"3","title":"Hacking servers by nights","date":"1746057600","index":["Hacking servers by nights"]};
         await request(app)
             .post('/api/v1/account/demands')
             .set('Content-Type', 'application/json; charset=utf-8')
@@ -539,7 +636,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .expect(401, { "payload" : "Did you forget to add authorization header?" });
     })
     it('on POST /api/v1/account/demands with authorization in wrong format receives BAD FORMAT code', async() => {
-        let testPayload = {"id":"3","name":"Hacking servers by nights","date":"1746057600","index":["hacking servers"]};
+        let testPayload = {"id":"3","title":"Hacking servers by nights","date":"1746057600","index":["Hacking servers by nights"]};
         await request(app)
             .post('/api/v1/account/demands')
             .set('Authorization', 'VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
@@ -548,7 +645,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .expect(400, { "payload" : "Did you add correct authorization header?"});
     });
     it('on POST /api/v1/account/demands with no authorized account receives UNAUTHORIZED code', async() => {
-        let testPayload = {"id":"3","name":"Hacking servers by nights","date":"1746057600","index":["hacking servers"]};
+        let testPayload = {"id":"3","title":"Hacking servers by nights","date":"1746057600","index":["Hacking servers by nights"]};
         await request(app)
             .post('/api/v1/account/demands')
             .set('Authorization', 'Basic bm9uLmV4aXN0QGdtYWlsLmNvbTpwd2Q=')
@@ -558,7 +655,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
     });
     it('on POST /api/v1/account/demands with authorized account receives OK code', async() => {
         let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
-        let testPayload = {"title":"Hacking servers by nights","date": 1746057600,"index":["hacking servers"]};
+        let testPayload = {"title":"Hacking servers by nights","date": 1746057600,"index":["Hacking servers by nights"]};
         // prepare initial database state
         await request(app)
             .get('/api/v1/account')
@@ -603,7 +700,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
     });
     it('on POST /api/v1/account/demands with payload profile that already exist in system receives CONFLICT code', async() => {
         let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
-        let testPayload = {"title":"Hacking servers by nights","date": 1746057600,"index":["hacking servers"]};
+        let testPayload = {"title":"Hacking servers by nights","date": 1746057600,"index":["Hacking servers by nights"]};
         // prepare initial database state
         await request(app)
             .get('/api/v1/account')
@@ -744,7 +841,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
     });
     it('on DELETE /api/v1/account/demands with existing profile amd correct service id receives NO CONTENT code', async() => {
         let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
-        let testPayload = {"title":"Hacking servers by nights","date": 1746057600,"index":["hacking servers"]};
+        let testPayload = {"title":"Hacking servers by nights","date": 1746057600,"index":["Hacking servers by nights"]};
         // prepare the initial database state
         await request(app)
             .post('/api/v1/account')

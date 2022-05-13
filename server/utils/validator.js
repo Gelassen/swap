@@ -11,8 +11,6 @@ exports.validateString = function(str) {
     return str !== '' && str !== null && str !== undefined
 }
 exports.validateOffer = function(offer) {
-    logger.log(offer);
-    logger.log(JSON.stringify(offer));
     return this.validateString(offer.index)
         && this.validateString(offer.date)
         && this.validateString(offer.title)
