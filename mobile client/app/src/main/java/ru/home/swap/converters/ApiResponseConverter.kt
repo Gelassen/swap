@@ -1,6 +1,5 @@
 package ru.home.swap.converters
 
-import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import ru.home.swap.network.model.ApiResponse
 

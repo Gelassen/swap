@@ -87,9 +87,16 @@ class PersonRepository(val api: IApi, val cache: Cache, val context: Context) {
                 credentials = AppCredentials.basic(contact, secret),
                 service = newService
             )
+            /*
+            * architecture decision is to use server as a single source of truth and keep operations
+            * with server resources atomic at the same time
+            * */
             if (response.isSuccessful) {
                 Log.d(App.TAG, "[add offer] success case")
-                val payload = response.body()!!
+                val profileResponse = api.getProfile(
+                    credentials = AppCredentials.basic(contact, secret)
+                )
+                val payload = profileResponse.body()!!
                 emit(Response.Data(payload.payload))
             } else {
                 Log.d(App.TAG, "[add offer] error case")

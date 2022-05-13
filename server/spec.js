@@ -345,7 +345,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .send(testPayload)
             .expect(401, { "payload" : "There is no account for this credentials. Are you authorized?" });
     });
-    it('on POST /api/v1/account/offers with authorized account receives OK code', async() => {
+    it('on POST /api/v1/account/offers with authorized account receives OK code and full updated profile', async() => {
         let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
         let testPayload = {"title":"Hacking servers by nights","date": 1746057600,"index":["Hacking servers by nights"]};
         // prepare initial database state
@@ -367,12 +367,12 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .set('Content-Type', 'application/json; charset=utf-8')
             .expect(200)
 
-        await request(app)
+        response = await request(app)
             .post('/api/v1/account/offers')    
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .set('Content-Type', 'application/json; charset=utf-8')
             .send(testPayload)
-            .expect(200, {})
+            .expect(200);
 
         response = await request(app)
             .get('/api/v1/account')
