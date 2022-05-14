@@ -792,7 +792,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .set('Content-Type', 'application/json; charset=utf-8')
             .send(testPayload)
-            .expect(409, { "payload" : `The same demand for this profile already exist ${testPayload}`});
+            .expect(409, { "payload" : `The same demand for this profile already exist ${JSON.stringify(testPayload)}`});
         
         // clean database
         await request(app)

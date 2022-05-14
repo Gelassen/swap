@@ -119,7 +119,7 @@ exports.addOffer = async function(req, res) {
         result = network.getErrorMsg(401, "Did you forget to add authorization header?");
     } else if (getAuthHeaderAsTokens(req).error) {
         result = network.getErrorMsg(400, "Did you add correct authorization header?");
-    } else if (!validator.validateOffer(offerFromRequest)) {
+    } else if (!validator.validateService(offerFromRequest)) {
         logger.log(`[add offer] offer payload ${offerFromRequest} check - failed`);
         result = network.getErrorMsg(400, "Did you forget to add a valid profile as a payload?");
     } else {
@@ -143,29 +143,34 @@ exports.addOffer = async function(req, res) {
 }
 
 exports.addDemand = async function(req, res) {
-    logger.log('[add demand] start')
+    logger.log("[add demand] start");
     let result = network.getMsg(200, "Not defined");
+    let demandFromRequest = converter.requestToDomainService(req.body);
+    demandFromRequest.index = prepareIndex(demandFromRequest.title);
     if (req.get(global.authHeader) === undefined) {
         result = network.getErrorMsg(401, "Did you forget to add authorization header?");
     } else if (getAuthHeaderAsTokens(req).error) {
         result = network.getErrorMsg(400, "Did you add correct authorization header?");
+    } else if (!validator.validateService(demandFromRequest)) {
+        logger.log(`[add demand] demand payload ${demandFromRequest} check - failed`);
+        result = network.getErrorMsg(400, "Did you forget to add a valid profile as a payload?");
     } else {
         let credentials = getAuthNameSecretPair(
             getAuthHeaderAsTokens(req)
         );
         let profileResult = await profile.getFullProfile(req, res, credentials);
+        logger.log(`[add demand] offer ${JSON.stringify(demandFromRequest)}`);
+        logger.log(`[add demand] full profile ${JSON.stringify(profileResult)}`);
         if (noSuchData(profileResult)) {
             result = network.getErrorMsg(401, "There is no account for this credentials. Are you authorized?")
+        } else if (isThereSuchService(profileResult.demands, demandFromRequest)) {
+            result = network.getErrorMsg(409, `The same demand for this profile already exist ${JSON.stringify(demandFromRequest)}`);
         } else {
-            let demandFromRequest = converter.requestToDomainService(req.body);
-            if (isThereSuchService(profileResult.demands, demandFromRequest)) {
-                result = network.getErrorMsg(409, `The same demand for this profile already exist ${demandFromRequest}`);
-            } else {
-                result = await profile.addDemand(req, profileResult.id); 
-            }
+            logger.log(`[add demand] offer to insert ${JSON.stringify(demandFromRequest)}`);
+            result = await profile.addDemand(demandFromRequest, profileResult.id); 
         }
     }
-    send(req, res, result);
+    send(req, res, result); 
     logger.log("[add demand] ends");
 }
 

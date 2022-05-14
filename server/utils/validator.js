@@ -10,7 +10,7 @@ exports.validateProfilePayload = function(reqBody) {
 exports.validateString = function(str) {
     return str !== '' && str !== null && str !== undefined
 }
-exports.validateOffer = function(offer) {
+exports.validateService = function(offer) {
     return this.validateString(offer.index)
         && this.validateString(offer.date)
         && this.validateString(offer.title)

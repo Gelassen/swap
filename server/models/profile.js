@@ -175,15 +175,15 @@ exports.addOffer = function(offerAsObj, profileId) {
     });
 }
 
-exports.addDemand = function(req, profileId) {
+exports.addDemand = function(demandAsObj, profileId) {
     return new Promise((resolve) => {
         pool.getConnection(function(err, connection) {
             logger.log(`[add demand] profile id ${profileId}`);
             connection.query(
                 {sql: 'INSERT INTO Service SET title = ?, date = ?, offer = ?, Service.index = ?, profileId = ?;'}, 
-                [req.body.title, req.body.date, demand, req.body.index, profileId],
+                [demandAsObj.title, demandAsObj.date, demand, demandAsObj.index, profileId],
                 function(error, rows, fields) {
-                    logger.log(`[insert offer] rows ${JSON.stringify(rows)}`)
+                    logger.log(`[insert offer] rows ${JSON.stringify(rows)} and error ${JSON.stringify(error)}`);
                     let response;
                     if (error != null) {
                         response = util.getErrorMsg(500, error); 

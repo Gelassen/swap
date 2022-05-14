@@ -118,7 +118,11 @@ class PersonRepository(val api: IApi, val cache: Cache, val context: Context) {
                 service = newService
             )
             if (response.isSuccessful) {
-                val payload = response.body()!!
+                Log.d(App.TAG, "[add demand] success case")
+                val profileResponse = api.getProfile(
+                    credentials = AppCredentials.basic(contact, secret)
+                )
+                val payload = profileResponse.body()!!
                 emit(Response.Data(payload.payload))
             } else {
                 val errorPayload = ApiResponseConverter().toDomain(response.errorBody()?.string()!!);
