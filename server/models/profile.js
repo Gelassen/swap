@@ -207,7 +207,7 @@ exports.deleteOffer = function(req) {
                 {sql: 'DELETE FROM Service WHERE id = ?;'},
                 [req.params.id],
                 function(error, rows, fields) {
-                    logger.log(`[delete] rows ${JSON.stringify(rows)}`);
+                    logger.log(`[delete] rows ${JSON.stringify(rows)} and error ${JSON.stringify(error)}`);
                     if (error != null) {
                         let response = util.getErrorMsg(500, error);                        
                         resolve(response);

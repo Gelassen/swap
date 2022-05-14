@@ -626,6 +626,54 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .expect(204);        
     });
+    it('on DELETE /api/v1/account/offers with existing profiles and several existing offers returns NO CONTENT and next request to profile returns profile without offer that has been deleted', async() => {
+        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
+        let testPayload = {"title":"Hacking servers by nights","date": 1746057600,"index":["Hacking servers by nights"]};
+        let anotherTestPayload = {"title":"Writing software by day","date": 1746057600,"index":[]};
+        await request(app)
+            .post('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(postPayload)
+            .expect('Content-Type', 'application/json; charset=utf-8')
+            .expect(200, {})
+        await request(app)
+            .post('/api/v1/account/offers')    
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(testPayload)
+            .expect(200, {})
+        await request(app)
+            .post('/api/v1/account/offers')    
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(anotherTestPayload)
+            .expect(200, {})
+        let response = await request(app)
+            .get('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .expect('Content-Type', 'application/json; charset=utf-8')
+            .expect(200);
+
+        let offer = response.body.payload.offers.at(0);
+        await request(app)
+            .delete(`/api/v1/account/offers/${offer.id}`)
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .expect(204);
+        const getAccountResponse = await request(app)
+            .get('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .expect('Content-Type', 'application/json; charset=utf-8')
+            .expect(200);
+        expect(getAccountResponse.body.payload.offers.length).toEqual(1);
+        expect(getAccountResponse.body.payload.offers.at(0).title).not.toEqual(offer.title);
+        
+        // clean database from test data
+        await request(app)
+            .delete(`/api/v1/account/${getAccountResponse.body.payload.id}`)
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .expect(204);    
+    });
     /* account demands block */
     it('on POST /api/v1/account/demands without authorization header receives UNAUTHORIZED code', async() => {
         let testPayload = {"id":"3","title":"Hacking servers by nights","date":"1746057600","index":["Hacking servers by nights"]};
