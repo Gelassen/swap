@@ -34,14 +34,14 @@ interface IApi {
         @Body service: Service): Response<ProfileResponse<PersonProfile>>
 
     @Headers("Content-Type: application/json; charset=utf-8")
-    @DELETE("/api/v1/account/offers")
+    @DELETE("/api/v1/account/offers/{id}")
     suspend fun removeOffer(
         @Header("Authorization") credentials: String,
-        @Query("id") serviceId: Long): Response<ProfileResponse<PersonProfile>>
+        @Path("id") serviceId: Long): Response<ProfileResponse<PersonProfile>>
 
     @Headers("Content-Type: application/json; charset=utf-8")
-    @DELETE("/api/v1/account/offers")
+    @DELETE("/api/v1/account/offers/{id}")
     suspend fun removeDemand(
         @Header("Authorization") credentials: String,
-        @Query("id") serviceId: Long): Response<ProfileResponse<PersonProfile>>
+        @Path("id") serviceId: Long): Response<ProfileResponse<PersonProfile>>
 }

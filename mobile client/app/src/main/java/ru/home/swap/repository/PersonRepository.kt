@@ -138,7 +138,11 @@ class PersonRepository(val api: IApi, val cache: Cache, val context: Context) {
                 serviceId = id
             )
             if (response.isSuccessful) {
-                val payload = response.body()!!
+                Log.d(App.TAG, "[delete offer] success case")
+                val profileResponse = api.getProfile(
+                    credentials = AppCredentials.basic(contact, secret)
+                )
+                val payload = profileResponse.body()!!
                 emit(Response.Data(payload.payload))
             } else {
                 emit(Response.Error.Message(response.message()))
