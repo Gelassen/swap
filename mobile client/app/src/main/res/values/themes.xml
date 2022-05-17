@@ -12,9 +12,12 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
+    </style>
 
-<!--        <item name="textInputStyle">@style/Widget.App.TextInputLayout</item>-->
-
+    <style name="BottomNavigationViewStyle" parent="Widget.MaterialComponents.BottomNavigationView.Colored">
+        <item name="android:background">@color/white</item>
+        <item name="itemTextColor">@color/navigation_view_item_selector</item>
+        <item name="itemIconTint">@color/navigation_view_item_selector</item>
     </style>
 
     <style name="DialogStyle" parent="Theme.Design.Light.BottomSheetDialog">

@@ -5,7 +5,10 @@ import android.os.Bundle
 import android.util.Log
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.setupActionBarWithNavController
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {
 
@@ -18,8 +21,15 @@ class MainActivity : AppCompatActivity() {
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
+        val appBarConfiguration = AppBarConfiguration(
+            setOf(
+                R.id.launcherFragment, R.id.launcherFragment, R.id.launcherFragment
+            )
+        )
 
-        setupActionBarWithNavController(navController)
+        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration)
+        NavigationUI.setupWithNavController(findViewById(R.id.navigation_bar) as BottomNavigationView, navController)
+        navController.navigate(R.id.launcherFragment)
     }
 
     override fun onSupportNavigateUp(): Boolean {

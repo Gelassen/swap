@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/navigation_profile"
+        android:icon="@drawable/ic_account"
+        android:title="@string/title_profile" />
+
+    <item
+        android:id="@+id/navigation_offers"
+        android:icon="@drawable/ic_incoming_offers"
+        android:title="@string/title_offers" />
+
+    <item
+        android:id="@+id/navigation_demands"
+        android:icon="@drawable/ic_incoming_demands"
+        android:title="@string/title_demands" />
+
+    <item
+        android:id="@+id/navigation_chains"
+        android:icon="@drawable/ic_chains"
+        android:title="@string/title_chains" />
+
+</menu>
