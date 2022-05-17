@@ -56,6 +56,7 @@ class SignInFragment: BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         (activity as AppCompatActivity).supportActionBar!!.hide()
+        hideBottomNavigationView()
 
         binding.model = viewModel/*viewModel.uiState.value*/
         binding.lifecycleOwner = this

@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity() {
         )
 
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration)
-        NavigationUI.setupWithNavController(findViewById(R.id.navigation_bar) as BottomNavigationView, navController)
+        NavigationUI.setupWithNavController(findViewById<BottomNavigationView>(R.id.navigation_bar), navController)
         navController.navigate(R.id.launcherFragment)
     }
 

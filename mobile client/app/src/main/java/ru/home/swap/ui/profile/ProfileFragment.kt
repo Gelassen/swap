@@ -45,48 +45,49 @@ class ProfileFragment : BaseFragment(), ItemAdapter.Listener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-//        binding.offersList.layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
-//        binding.offersList.adapter = ItemAdapter(true, this)
-//
-//        binding.demandsList.layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
-//        binding.demandsList.adapter = ItemAdapter(false, this)
-//
-//        lifecycleScope.launch {
-//            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-//                Log.d(App.TAG, "[collect] UI state collect is called")
-//                viewModel.uiState.collect { it ->
-//                    Log.d(App.TAG, "[collect] collected #${it.offers.count()} offers items")
-//                    (binding.offersList.adapter as ItemAdapter).submitList(it.offers)
-//                }
-//            }
-//        }
-//
-//        lifecycleScope.launch {
-//            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-//                viewModel.uiState.collect { it ->
-//                    Log.d(App.TAG, "[collect] collected #${it.demands.count()} demands items")
-//                    (binding.demandsList.adapter as ItemAdapter).submitList(it.demands)
-//                }
-//            }
-//        }
-//
-//        lifecycleScope.launch {
-//            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-//                viewModel.uiState.collect { it ->
-//                    onModelUpdate(it)
-//                }
-//            }
-//        }
-//
-//        binding.fab.apply {
-//            setOnClickListener {
-//                childFragmentManager.let {
-//                    Log.d(App.TAG, "[fab click] Offers count: ${viewModel.uiState.value.offers.count()}")
-//                    AddItemBottomSheetDialogFragment.newInstance(Bundle.EMPTY)
-//                        .show(it, AddItemBottomSheetDialogFragment.TAG)
-//                }
-//            }
-//        }
+        showBottomNavigationView()
+        binding.offersList.layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
+        binding.offersList.adapter = ItemAdapter(true, this)
+
+        binding.demandsList.layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
+        binding.demandsList.adapter = ItemAdapter(false, this)
+
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                Log.d(App.TAG, "[collect] UI state collect is called")
+                viewModel.uiState.collect { it ->
+                    Log.d(App.TAG, "[collect] collected #${it.offers.count()} offers items")
+                    (binding.offersList.adapter as ItemAdapter).submitList(it.offers)
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                viewModel.uiState.collect { it ->
+                    Log.d(App.TAG, "[collect] collected #${it.demands.count()} demands items")
+                    (binding.demandsList.adapter as ItemAdapter).submitList(it.demands)
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                viewModel.uiState.collect { it ->
+                    onModelUpdate(it)
+                }
+            }
+        }
+
+        binding.fab.apply {
+            setOnClickListener {
+                childFragmentManager.let {
+                    Log.d(App.TAG, "[fab click] Offers count: ${viewModel.uiState.value.offers.count()}")
+                    AddItemBottomSheetDialogFragment.newInstance(Bundle.EMPTY)
+                        .show(it, AddItemBottomSheetDialogFragment.TAG)
+                }
+            }
+        }
     }
 
     override fun onAttach(context: Context) {
