@@ -1,8 +1,6 @@
 package ru.home.swap.di
 
 import dagger.Component
-import ru.home.swap.TestActivity
-import ru.home.swap.TestFragment
 import ru.home.swap.ui.profile.AddItemBottomSheetDialogFragment
 import ru.home.swap.ui.profile.LauncherFragment
 import ru.home.swap.ui.profile.ProfileFragment
@@ -16,6 +14,4 @@ interface AppComponent {
     fun inject(subject: LauncherFragment)
     fun inject(subject: AddItemBottomSheetDialogFragment)
     fun inject(subject: ProfileFragment)
-    fun inject(subject: TestActivity)
-    fun inject(subject: TestFragment)
 }
