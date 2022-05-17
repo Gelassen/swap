@@ -20,11 +20,12 @@ import ru.home.swap.AppApplication
 import ru.home.swap.R
 import ru.home.swap.databinding.LauncherFragmentBinding
 import ru.home.swap.di.ViewModelFactory
+import ru.home.swap.ui.common.BaseFragment
 import ru.home.swap.ui.common.ErrorDialogFragment
 import ru.home.swap.ui.common.IDialogListener
 import javax.inject.Inject
 
-class LauncherFragment: Fragment(), IDialogListener {
+class LauncherFragment: BaseFragment(), IDialogListener {
 
     private lateinit var binding: LauncherFragmentBinding
 
@@ -51,6 +52,7 @@ class LauncherFragment: Fragment(), IDialogListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         (activity as AppCompatActivity).supportActionBar!!.hide()
+        hideBottomNavigationView()
 
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
