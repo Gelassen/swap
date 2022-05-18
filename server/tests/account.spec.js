@@ -1,5 +1,5 @@
 const request = require('supertest');
-const app = require('../server/app');
+const app = require('../app');
 
 // test user: TestJames@gmail.com:jms123 (VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=)
 // test user: TestJane@gmail.com:jne123 (VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==)
