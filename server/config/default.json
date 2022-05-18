@@ -9,7 +9,8 @@
         "user"     : "root",
         "password" : "password",
         "database" : "db_swap",
-        "connectionLimit" : 150
+        "connectionLimit" : 150,
+        "timout"   : 60000
     },
     "logs" : {
         "isAllowed" : true

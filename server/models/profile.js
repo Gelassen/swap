@@ -1,12 +1,13 @@
-const TIMEOUT = 60000;
+const config = require('config')
 const { resolve } = require('path/posix');
-let pool = require('../database');
-let util = require('../utils/network')
-let logger = require('../utils/logger') 
-let converter = require('../utils/converter')
+const pool = require('../database');
+const util = require('../utils/network')
+const logger = require('../utils/logger') 
+const converter = require('../utils/converter')
 
-const offer = 1;
-const demand = 0;
+const TIMEOUT = config.dbConfig.timeout;
+const OFFER = 1;
+const DEMAND = 0;
 
 exports.create = function(req) {
     return new Promise((resolve) => {
@@ -156,7 +157,7 @@ exports.addOffer = function(offerAsObj, profileId) {
             logger.log(`[add offer] profile id ${profileId}`);
             connection.query(
                 {sql: 'INSERT INTO Service SET title = ?, date = ?, offer = ?, Service.index = ?, profileId = ?;'},
-                [offerAsObj.title, offerAsObj.date, offer, offerAsObj.index, profileId],
+                [offerAsObj.title, offerAsObj.date, OFFER, offerAsObj.index, profileId],
                 function(error, rows, fields) {
                     logger.log(`[insert offer] rows ${JSON.stringify(rows)}`)
                     let response;
@@ -181,7 +182,7 @@ exports.addDemand = function(demandAsObj, profileId) {
             logger.log(`[add demand] profile id ${profileId}`);
             connection.query(
                 {sql: 'INSERT INTO Service SET title = ?, date = ?, offer = ?, Service.index = ?, profileId = ?;'}, 
-                [demandAsObj.title, demandAsObj.date, demand, demandAsObj.index, profileId],
+                [demandAsObj.title, demandAsObj.date, DEMAND, demandAsObj.index, profileId],
                 function(error, rows, fields) {
                     logger.log(`[insert offer] rows ${JSON.stringify(rows)} and error ${JSON.stringify(error)}`);
                     let response;

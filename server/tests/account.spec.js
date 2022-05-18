@@ -61,7 +61,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .set('Content-Type', 'application/json; charset=utf-8')
             .expect(204);
     });
-    it ('on GET /api/v1/account without auth header receives UNAUTHORIZED code', async() => {
+    it('on GET /api/v1/account without auth header receives UNAUTHORIZED code', async() => {
         let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
         // check there is no such profile in system
         await request(app)
@@ -71,7 +71,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
 
 
     });
-    it ('on GET /api/v1/account with auth header in wrong format receives BAD_REQUST code', async() => {
+    it('on GET /api/v1/account with auth header in wrong format receives BAD_REQUST code', async() => {
         // check there is no such profile in system
         await request(app)
             .get('/api/v1/account')
@@ -79,7 +79,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .set('Content-Type', 'application/json; charset=utf-8')
             .expect(400, { "payload" : "Did you forget to add auth header?" });
     });
-    it ('on GET /api/v1/account without Content-Type header receives OK code for existing profile', async() => {
+    it('on GET /api/v1/account without Content-Type header receives OK code for existing profile', async() => {
         let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
         // check there is no such profile in system
         await request(app)

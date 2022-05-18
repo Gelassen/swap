@@ -5,7 +5,6 @@ let network = require('../utils/network')
 let validator = require('../utils/validator')
 let logger = require('../utils/logger')
 let converter = require('../utils/converter')
-const e = require('express')
 
 /*
     This method covers both cases - sign in and register a new account. It is left 

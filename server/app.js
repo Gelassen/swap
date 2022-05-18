@@ -2,8 +2,9 @@ const express = require('express');
 const app = express();
 const config = require('config');
 
-var pool = require('./database');
-var profile = require('./controllers/profile');
+const pool = require('./database');
+const profile = require('./controllers/profile');
+const offers = require('./controllers/offers'); 
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
@@ -16,6 +17,7 @@ app.use(function(req, res, next) {
     next()
 })
 
+/* account */
 app.get('/api/v1', function(req, res, next) {
     res.send({msg: "Hello to open exchange platform!" })
 })
@@ -59,6 +61,16 @@ app.delete('/api/v1/account/demands/:id', function(req, res) {
     pool.status();
     profile.deleteDemand(req, res);
 })
+
+/* offers part */
+app.get('/api/v1/offers', function(req, res) {
+    pool.status();
+    offers.get(req, res);
+})
+
+/* demands part */
+
+/* chains part */
 
 app.listen(config.get('config').webPort);
 
