@@ -104,7 +104,7 @@ exports.getProfileByCellAndSecret = function(req, res, credentials) {
     });
 }
 
-exports.getFullProfile = function(req, res, credentials) {
+exports.getFullProfile = function(credentials) {
     logger.log(JSON.stringify(credentials));
     return new Promise((resolve) => {
         pool.getConnection(function(err, connection) {

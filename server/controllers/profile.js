@@ -35,7 +35,7 @@ exports.create = async function(req, res) {
             logger.log(`[account::create] [7] profiles result: ${JSON.stringify(profiles)}`);
             if (isAttemptToSignIn(profiles, credentials[1])) {
                 // we have to return back to the client a full profile
-                let model = await profile.getFullProfile(req, res, credentials)
+                let model = await profile.getFullProfile(credentials)
                     .catch(e => network.getErrorMessage(e));
                 logger.log("Full profile response: " + JSON.stringify(model));
                 logger.log(`Json response keys size ${Object.keys(model).length}`);
@@ -70,7 +70,7 @@ exports.get = async function(req, res) {
         let credentials = getAuthNameSecretPair(
             getAuthHeaderAsTokens(req)
         );
-        let model = await profile.getFullProfile(req, res, credentials)
+        let model = await profile.getFullProfile(credentials)
             .catch(e => network.getErrorMessage(e));
         logger.log("Full profile response: " + JSON.stringify(model));
         logger.log(`Json response keys size ${Object.keys(model).length}`);
@@ -125,7 +125,7 @@ exports.addOffer = async function(req, res) {
         let credentials = getAuthNameSecretPair(
             getAuthHeaderAsTokens(req)
         );
-        let profileResult = await profile.getFullProfile(req, res, credentials);
+        let profileResult = await profile.getFullProfile(credentials);
         logger.log(`[add offer] offer ${JSON.stringify(offerFromRequest)}`);
         logger.log(`[add offer] full profile ${JSON.stringify(profileResult)}`);
         if (noSuchData(profileResult)) {
@@ -157,7 +157,7 @@ exports.addDemand = async function(req, res) {
         let credentials = getAuthNameSecretPair(
             getAuthHeaderAsTokens(req)
         );
-        let profileResult = await profile.getFullProfile(req, res, credentials);
+        let profileResult = await profile.getFullProfile(credentials);
         logger.log(`[add demand] offer ${JSON.stringify(demandFromRequest)}`);
         logger.log(`[add demand] full profile ${JSON.stringify(profileResult)}`);
         if (noSuchData(profileResult)) {
@@ -184,7 +184,7 @@ exports.deleteOffer = async function(req, res) {
         let credentials = getAuthNameSecretPair(
             getAuthHeaderAsTokens(req)
         );
-        let profileResult = await profile.getFullProfile(req, res, credentials);
+        let profileResult = await profile.getFullProfile(credentials);
         if (noSuchData(profileResult)) {
             result = network.getErrorMsg(401, "There is no account for this credentials. Are you authorized?");
         } else if(thereIsNoThisService(profileResult.offers, req.param.id)) {
@@ -213,7 +213,7 @@ exports.deleteDemand = async function(req, res) {
         let credentials = getAuthNameSecretPair(
             getAuthHeaderAsTokens(req)
         );
-        let profileResult = await profile.getFullProfile(req, res, credentials);
+        let profileResult = await profile.getFullProfile(credentials);
         if (noSuchData(profileResult)) {
             result = network.getErrorMsg(401, "There is no account for this credentials. Are you authorized?");
         } else if(thereIsNoThisService(profileResult.demands, req.param.id)) {
@@ -281,17 +281,24 @@ function isAttemptToSignIn(profile, reqSecret) {
     return Object.keys(profile).length && profile.secret === reqSecret;
 }
 
-/*
-    @input the result of getAuthHeaderAsTokens(req); both methods require refactoring
+/**
+ * @deprecated it was moved to the 'network' module. Use 'network' module
+ * @input the result of getAuthHeaderAsTokens(req); both methods require refactoring
  */
 function getAuthNameSecretPair(authResult) {
     return authResult.result.split(":");
 }
 
+/**
+ * @deprecated it was moved to the 'network' module. Use 'network' module
+ */
 function getAuthHeaderAsTokens(req) {
     return auth.parse(req.get(global.authHeader));
 }
 
+/**
+ * @deprecated it was moved to the 'network' module. Use 'network' module
+ */
 async function send (req, res, result) {
     if (result.code === undefined) {
         res.send(JSON.stringify(result));
