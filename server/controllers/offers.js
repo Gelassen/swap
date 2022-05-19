@@ -34,15 +34,18 @@ exports.get = async function(req, res) {
             result = network.getMsg(200, "Profile doesn't have any demands. In this case there is no need to select offers.");
         } else {
             logger.log("[4]");
-            let offersResult = offers.getOffers(profileResult);
-            if (network.noSuchData(offersResult)) {
+            let offersResult = await offers.getOffers(profileResult);
+            logger.log(`[get offers] offers ${JSON.stringify(offersResult)}`);
+            if (network.noSuchData(offersResult) || offersResult.length == 0) {
                 result = network.getMsg(200, []);
             } else {
-                result = offersResult;
+                result = network.getMsg(200, offersResult);
             }
         }
         // result = network.getErrorMsg(500, `Not implemented yet`);
     } 
 
+    logger.log(`[offers reply] ${JSON.stringify(result)}`);
     network.send(req, res, result);
+    logger.log(`[offers] end`);
 }

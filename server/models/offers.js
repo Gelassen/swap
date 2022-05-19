@@ -11,7 +11,6 @@ const OFFER = 1;
 const DEMAND = 0;
 
 exports.getOffers = function(fullProfile) {
-    logger.log(`[get offers] start`)
     return new Promise((resolve) => {
         pool.getConnection(function(err, connection) {
             const sql = `SELECT * FROM Service 
@@ -23,18 +22,18 @@ exports.getOffers = function(fullProfile) {
                 {sql: sql},
                 [],
                 function(error, rows, fields) {
+                    logger.log(`rows - ${JSON.stringify(rows)}`);
                     if (error != null) {
                         logger.log(JSON.stringify(error));
                         let response = util.getErrorMsg(500, error);
                         resolve(response);
                     } else {
-                        let services = converter.dbToDomainService(rows);
-                        logger.log(JSON.stringify(services));
-                        let response = util.getMsg(services);
+                        let services = converter.offersDbToDomainService(rows);
+                        logger.log(`[get offers] rows to domain - ${JSON.stringify(services)}`);
+                        let response = services;
                         resolve(response);
                     }
                     connection.release();
-                    logger.log(`[get offers] end`)
                 }
             )
         })
@@ -43,10 +42,8 @@ exports.getOffers = function(fullProfile) {
 
 function prepareWhereClause(...conditions) {
     let result = "";
-    logger.log(JSON.stringify(conditions));
     conditions.forEach((items) => {
         items.forEach((item) => {
-            logger.log(`[prepareWhereClause] ${item}`);
             result += ` Service.index LIKE '%${item.index}%' OR `;
         })
     });

@@ -40,6 +40,22 @@ exports.dbToDomainFullProfile = function(rows) {
     };
 }
 
+exports.offersDbToDomainService = function(rows) {
+    let result = [];
+    if (rows.length == 0) return result;
+
+    for (id = 0; id < rows.length; id++) {
+        let service = {};
+        service.id = rows[id].id;
+        service.title = rows[id].title;
+        service.date = rows[id].date;
+        service.index = rows[id].index;
+        /* omit offer type and profile id */
+        result.push(service);
+    }
+    return result;
+}
+
 exports.dbToDomainService = function(rows) {
     let result = [];
     if (rows.length == 0) return result;

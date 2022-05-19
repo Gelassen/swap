@@ -64,6 +64,7 @@ exports.noSuchData = function noSuchData(obj) {
 
 exports.send = async function send (req, res, result) {
     if (result.code === undefined) {
+        logger.log(`[reply] ${JSON.stringify(result)}`);
         res.send(JSON.stringify(result));
     } else {
         logger.log(`[reply] status code ${JSON.stringify(result.code)}, payload ${JSON.stringify(result)}`);
