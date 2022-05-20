@@ -5,6 +5,7 @@ const config = require('config');
 const pool = require('./database');
 const profile = require('./controllers/profile');
 const offers = require('./controllers/offers'); 
+const demands = require('./controllers/demands');
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
@@ -69,6 +70,10 @@ app.get('/api/v1/offers', function(req, res) {
 })
 
 /* demands part */
+app.get('/api/v1/demands', function(req, res) {
+    pool.status();
+    demands.get(req, res);
+})
 
 /* chains part */
 

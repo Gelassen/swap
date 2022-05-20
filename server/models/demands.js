@@ -9,13 +9,13 @@ const TIMEOUT = config.dbConfig.timeout;
 const OFFER = 1;
 const DEMAND = 0;
 
-exports.getOffers = function(fullProfile) {
+exports.getDemands = function(fullProfile) {
     return new Promise((resolve) => {
         pool.getConnection(function(err, connection) {
             const sql = `SELECT * FROM Service 
                 WHERE profileId != ${fullProfile.id} 
-                AND offer = ${OFFER} 
-                AND (${prepareWhereClause(fullProfile.demands)})`;
+                AND offer = ${DEMAND} 
+                AND (${prepareWhereClause(fullProfile.offers)})`;
             logger.log("sql query: " + sql);
             connection.query(
                 {sql: sql, TIMEOUT},

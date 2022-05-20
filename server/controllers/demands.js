@@ -1,12 +1,12 @@
 const profile = require('../models/profile');
-const offers = require('../models/offers');
+const demands = require('../models/demands');
 
 const network = require('../utils/network')
 const logger = require('../utils/logger')
 
 exports.get = async function(req, res) {
     let result;
-    logger.log(`[offers] get - start`);
+    logger.log(`[demands] get - start`);
     if (req.get(global.authHeader) === undefined) {
         // we do not need authorization for this request, but we use auth header 
         // to evaluate profile/user to match offers, that's why we use BAD REQUEST 
@@ -26,23 +26,21 @@ exports.get = async function(req, res) {
         } else if (profileResult.code == 500) {
             logger.log("[2]");
             result = profileResult;
-        } else if (profileResult.demands.length == 0) {
+        } else if (profileResult.offers.length == 0) {
             logger.log("[3]");
-            result = network.getMsg(200, "Profile doesn't have any demands. In this case there is no need to select offers.");
+            result = network.getMsg(200, "Profile doesn't have any offers. In this case there is no filter to match demands.");
         } else {
             logger.log("[4]");
-            let offersResult = await offers.getOffers(profileResult);
-            logger.log(`[get offers] offers ${JSON.stringify(offersResult)}`);
-            if (network.noSuchData(offersResult) || offersResult.length == 0) {
+            let demandsResult = await demands.getDemands(profileResult);
+            logger.log(`[get demands] demands ${JSON.stringify(demandsResult)}`);
+            if (network.noSuchData(demandsResult) || demandsResult.length == 0) {
                 result = network.getMsg(200, []);
             } else {
-                result = network.getMsg(200, offersResult);
+                result = network.getMsg(200, demandsResult);
             }
-        }
-        // result = network.getErrorMsg(500, `Not implemented yet`);
-    } 
+        } 
+    }
 
-    logger.log(`[offers reply] ${JSON.stringify(result)}`);
     network.send(req, res, result);
-    logger.log(`[offers] end`);
+    logger.log(`[demands] get - end`);
 }
