@@ -116,7 +116,7 @@ describe('Cover /api/v1/offers with tests', () => {
     });
     it('On GET /api/v1/offers with existing account but zero matches receives OK code with empty payload', async() => {
         let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
-        let postServicePayload = { "title" : "there is no match for this demand", "date" : 0, "index" : "there is no match for this demand"};
+        let postServicePayload = { "title" : "there is no match for this demand", "date" : 0, "index" : ["there is no match for this demand"]};
         // add account in system
         await request(app)
             .post('/api/v1/account')
@@ -151,7 +151,7 @@ describe('Cover /api/v1/offers with tests', () => {
     });
     it('On GET /api/v1/offers with existing account and avaiable matches receives OK code with services', async() => {
         let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
-        let postServicePayload = { "title" : "Develop software", "date" : 0, "index" : "Develop software"};
+        let postServicePayload = { "title" : "Develop software", "date" : 0, "index" : ["Develop software"]};
         // add account in system
         await request(app)
             .post('/api/v1/account')
@@ -167,14 +167,60 @@ describe('Cover /api/v1/offers with tests', () => {
             .send(postServicePayload)
             .expect(200, {})
 
-        const demandsResponse = await request(app)
+        const offersResponse = await request(app)
             .get('/api/v1/offers')
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .set('Content-Type', 'application/json; charset=utf-8')
             .expect(200);
-        expect(demandsResponse.body.payload.length).toEqual(1);
-        postServicePayload.id = demandsResponse.body.payload.at(0).id;
-        expect(demandsResponse.body.payload.at(0)).toEqual(postServicePayload);
+        expect(offersResponse.body.payload.length).toEqual(1);
+        postServicePayload.id = offersResponse.body.payload.at(0).id;
+        expect(offersResponse.body.payload.at(0)).toEqual(postServicePayload);
+
+        // clean database from test data
+        const response = await request(app)
+            .get('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .expect('Content-Type', 'application/json; charset=utf-8')
+            .expect(200);
+        await request(app)
+            .delete(`/api/v1/account/${response.body.payload.id}`)
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .expect(204);
+    });
+    it('On GET /api/v1/offers with existing account and two available matches receives OK code with 2 services', async() => {
+        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
+        let postServicePayload = { "title" : "Develop software", "date" : 0, "index" : ["Develop software"]};
+        let postAnotherService = { "title" : "Play tenis", "date" : 0, "index" : ["Play tenis"] };
+        await request(app)
+            .post('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(postPayload)
+            .expect('Content-Type', 'application/json; charset=utf-8')
+            .expect(200)
+        await request(app)
+            .post('/api/v1/account/demands')    
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(postServicePayload)
+            .expect(200, {})
+        await request(app)
+            .post('/api/v1/account/demands')    
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(postAnotherService)
+            .expect(200, {})
+
+        const offersResponse = await request(app)
+            .get('/api/v1/offers')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(200);
+        expect(offersResponse.body.payload.length).toEqual(2);
+        postAnotherService.id = offersResponse.body.payload.at(0).id;
+        postServicePayload.id = offersResponse.body.payload.at(1).id;
+        expect(offersResponse.body.payload.at(0)).toEqual(postAnotherService);
+        expect(offersResponse.body.payload.at(1)).toEqual(postServicePayload);
 
         // clean database from test data
         const response = await request(app)

@@ -49,7 +49,7 @@ exports.offersDbToDomainService = function(rows) {
         service.id = rows[id].id;
         service.title = rows[id].title;
         service.date = rows[id].date;
-        service.index = rows[id].index;
+        service.index = [rows[id].index];
         /* omit offer type and profile id */
         result.push(service);
     }
