@@ -10,7 +10,8 @@
         "password" : "password",
         "database" : "db_swap",
         "connectionLimit" : 150,
-        "timout"   : 60000
+        "timout"   : 60000,
+        "maxSize"  : 30
     },
     "logs" : {
         "isAllowed" : true

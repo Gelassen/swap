@@ -11,7 +11,7 @@ app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
 app.use(function(req, res, next) {
-    console.log("[REQUEST] " + JSON.stringify(req.path) + " at " + new Date().toISOString());
+    console.log(`[REQUEST] ${JSON.stringify(req.path)} with query ${JSON.stringify(req.query)} at ${new Date().toISOString()}`);
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     res.set('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')

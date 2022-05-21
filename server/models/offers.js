@@ -6,16 +6,19 @@ const logger = require('../utils/logger')
 const converter = require('../utils/converter')
 
 const TIMEOUT = config.dbConfig.timeout;
+const MAX_ITEMS = config.dbConfig.maxSize;
 const OFFER = 1;
 const DEMAND = 0;
 
-exports.getOffers = function(fullProfile) {
+exports.getOffers = function(fullProfile, page) {
+    logger.log(`[get service from model] ${page}`);
     return new Promise((resolve) => {
         pool.getConnection(function(err, connection) {
             const sql = `SELECT * FROM Service 
                 WHERE profileId != ${fullProfile.id} 
                 AND offer = ${OFFER} 
-                AND (${prepareWhereClause(fullProfile.demands)})`;
+                AND (${prepareWhereClause(fullProfile.demands)})
+                LIMIT ${prepareLimitClause(page)}`;
             logger.log("sql query: " + sql);
             connection.query(
                 {sql: sql, TIMEOUT},
@@ -37,6 +40,19 @@ exports.getOffers = function(fullProfile) {
             )
         })
     });
+}
+
+function prepareLimitClause(page) {
+    const MIN_VALUE = 1;
+    let result = '';
+    if (page < MIN_VALUE || page == MIN_VALUE) {
+        page = MIN_VALUE;
+        result = `${page * MAX_ITEMS}`;
+    } else {
+        let prevPage = page - 1;
+        result = `${prevPage * MAX_ITEMS}, ${page * MAX_ITEMS}`;
+    }
+    return result;
 }
 
 function prepareWhereClause(...conditions) {

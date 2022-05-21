@@ -81,7 +81,7 @@ describe('Cover /api/v1/offers with tests', () => {
     });
     it('On GET /api/v1/offers with non existing account receives BAD_REQUEST code', async() => {
         await request(app)
-            .get('/api/v1/offers')
+            .get(`/api/v1/offers?page=${1}`)
             .set('Authorization', 'Basic bm9uLmV4aXN0QGdtYWlsLmNvbTpwd2Q=')
             .set('Content-Type', 'application/json; charset=utf-8')
             .expect(400, { "payload" : "There is no such account." });
@@ -98,7 +98,7 @@ describe('Cover /api/v1/offers with tests', () => {
             .expect(200)
 
         await request(app)
-            .get('/api/v1/offers')
+            .get('/api/v1/offers?page=1')
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .set('Content-Type', 'application/json; charset=utf-8')
             .expect(200, { "payload" : "Profile doesn't have any demands. In this case there is no need to select offers." });
@@ -133,7 +133,7 @@ describe('Cover /api/v1/offers with tests', () => {
             .expect(200, {})
 
         await request(app)
-            .get('/api/v1/offers')
+            .get('/api/v1/offers?page=1')
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .set('Content-Type', 'application/json; charset=utf-8')
             .expect(200, { "payload" : [] });
@@ -168,7 +168,7 @@ describe('Cover /api/v1/offers with tests', () => {
             .expect(200, {})
 
         const offersResponse = await request(app)
-            .get('/api/v1/offers')
+            .get('/api/v1/offers?page=1')
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .set('Content-Type', 'application/json; charset=utf-8')
             .expect(200);
@@ -212,7 +212,7 @@ describe('Cover /api/v1/offers with tests', () => {
             .expect(200, {})
 
         const offersResponse = await request(app)
-            .get('/api/v1/offers')
+            .get('/api/v1/offers?page=1')
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .set('Content-Type', 'application/json; charset=utf-8')
             .expect(200);
@@ -233,4 +233,66 @@ describe('Cover /api/v1/offers with tests', () => {
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .expect(204);
     });
+    it('On GET /api/v1/offers without page query passed receives BAD_REQUEST with error message', async() => {
+        await request(app)
+            .get('/api/v1/offers')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .expect('Content-Type', 'application/json; charset=utf-8')
+            .expect(400, { "payload" : "Did you forget to pass page in query, e.g. ?page=1 ?"});
+    });
+    it('On GET /api/v1/offers with existing account and 10+ available matches receives OK and only first 10', async() => {
+        // prepare test data
+        const maxItemsInPage = 10;
+        const theNumberOfLastItemInQuery = '9';
+        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
+        let postServicePayload = { "title" : "Develop software", "date" : 0, "index" : ["Develop software"]};
+        await request(app)
+            .post('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(postPayload)
+            .expect('Content-Type', 'application/json; charset=utf-8')
+            .expect(200)
+        await request(app)
+            .post('/api/v1/account/demands')    
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(postServicePayload)
+            .expect(200, {})
+        const matchServiceCount = 20;
+        for (id = 0; id < matchServiceCount; id++) {
+            let postAnotherService = { "title" : `Play tenis ${id}`, "date" : 0, "index" : [`Play tenis ${id}`] };
+            await request(app)
+                .post('/api/v1/account/demands')    
+                .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+                .set('Content-Type', 'application/json; charset=utf-8')
+                .send(postAnotherService)
+                .expect(200, {})
+            await request(app)
+                .post('/api/v1/account/offers')    
+                .set('Authorization', 'Basic RXZlQGdtYWlsLmNvbTpkb250YmVldmlsZ29vZ2xl')
+                .set('Content-Type', 'application/json; charset=utf-8')
+                .send(postAnotherService)
+                .expect(200, {})
+        }
+
+        const offersResponse = await request(app)
+            .get('/api/v1/offers?page=1')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(200);
+        expect(offersResponse.body.payload.length).toEqual(maxItemsInPage);
+        expect(offersResponse.body.payload.at(9).title).toEqual(expect.stringContaining(theNumberOfLastItemInQuery));
+
+        // clean database from test data
+        const response = await request(app)
+            .get('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .expect('Content-Type', 'application/json; charset=utf-8')
+            .expect(200);
+        await request(app)
+            .delete(`/api/v1/account/${response.body.payload.id}`)
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .expect(204);
+    })
 });
