@@ -18,7 +18,7 @@ exports.getOffers = function(fullProfile, page) {
                 WHERE profileId != ${fullProfile.id} 
                 AND offer = ${OFFER} 
                 AND (${prepareWhereClause(fullProfile.demands)})
-                LIMIT ${prepareLimitClause(page)}`;
+                ${prepareLimitClause(page)}`;
             logger.log("sql query: " + sql);
             connection.query(
                 {sql: sql, TIMEOUT},
@@ -47,11 +47,8 @@ function prepareLimitClause(page) {
     let result = '';
     if (page < MIN_VALUE || page == MIN_VALUE) {
         page = MIN_VALUE;
-        result = `${page * MAX_ITEMS}`;
-    } else {
-        let prevPage = page - 1;
-        result = `${prevPage * MAX_ITEMS}, ${page * MAX_ITEMS}`;
     }
+    result = `LIMIT ${MAX_ITEMS} OFFSET ${page * MAX_ITEMS - MAX_ITEMS}`;
     return result;
 }
 

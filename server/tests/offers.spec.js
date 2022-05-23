@@ -1,5 +1,7 @@
 const request = require('supertest');
 const app = require('../app');
+const config = require('config');
+const dbConfig = config.dbConfig;
 
 /**
  *  Bob@gmail.com:bupa (Basic Qm9iQGdtYWlsLmNvbTpidXBh)
@@ -242,7 +244,7 @@ describe('Cover /api/v1/offers with tests', () => {
     });
     it('On GET /api/v1/offers with existing account and 10+ available matches receives OK and only first 10', async() => {
         // prepare test data
-        const maxItemsInPage = 10;
+        const maxItemsInPage = dbConfig.maxSize;
         const theNumberOfLastItemInQuery = '9';
         let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
         let postServicePayload = { "title" : "Develop software", "date" : 0, "index" : ["Develop software"]};
@@ -294,5 +296,121 @@ describe('Cover /api/v1/offers with tests', () => {
             .delete(`/api/v1/account/${response.body.payload.id}`)
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .expect(204);
-    })
+        // instead of removing all 20+ test services, just deop a whole profile and recreate 
+        // again based on Jest.beforeAll() implementation
+        const eveResponse = await request(app)
+            .get('/api/v1/account')
+            .set('Authorization', 'Basic RXZlQGdtYWlsLmNvbTpkb250YmVldmlsZ29vZ2xl')
+            .expect('Content-Type', 'application/json; charset=utf-8')
+            .expect(200);
+        await request(app)
+            .delete(`/api/v1/account/${eveResponse.body.payload.id}`)
+            .set('Authorization', 'Basic RXZlQGdtYWlsLmNvbTpkb250YmVldmlsZ29vZ2xl')
+            .expect(204);
+        let postEveProfile = {"contact":"Eve@gmail.com","secret":"dontbeevilgoogle","name":"Eve","offers":[],"demands":[]};
+        let postEveService = { "title" : "Develop software", "date" : 0, "index" : ["Develop software"] };
+        await request(app)
+            .post('/api/v1/account')
+            .set('Authorization', 'Basic RXZlQGdtYWlsLmNvbTpkb250YmVldmlsZ29vZ2xl')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(postEveProfile)
+            .expect('Content-Type', 'application/json; charset=utf-8')
+            .expect(200)
+        await request(app)
+            .post('/api/v1/account/offers')    
+            .set('Authorization', 'Basic RXZlQGdtYWlsLmNvbTpkb250YmVldmlsZ29vZ2xl')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(postEveService)
+            .expect(200, {})
+    });
+    it('On GET /api/v1/offers?page=2 with existing account and 10+ available matches receives OK and only second 10', async() => {
+        //verify database is not in dirty state
+        const eveAccountResponse = await request(app)
+            .get('/api/v1/account')
+            .set('Authorization', 'Basic RXZlQGdtYWlsLmNvbTpkb250YmVldmlsZ29vZ2xl')
+            .expect('Content-Type', 'application/json; charset=utf-8')
+            .expect(200);
+        expect(eveAccountResponse.body.payload.offers.length).toEqual(1);
+        // prepare initial state
+        const maxItemsInPage = dbConfig.maxSize;
+        const theNumberOfLastItemInQuery = '19';
+        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
+        let postServicePayload = { "title" : "Develop software", "date" : 0, "index" : ["Develop software"]};
+        await request(app)
+            .post('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(postPayload)
+            .expect('Content-Type', 'application/json; charset=utf-8')
+            .expect(200)
+        await request(app)
+            .post('/api/v1/account/demands')    
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(postServicePayload)
+            .expect(200, {})
+        const matchServiceCount = 20;
+        for (id = 1; id <= matchServiceCount; id++) {
+            let postAnotherService = { "title" : `Play tenis ${id}`, "date" : 0, "index" : [`Play tenis ${id}`] };
+            await request(app)
+                .post('/api/v1/account/demands')    
+                .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+                .set('Content-Type', 'application/json; charset=utf-8')
+                .send(postAnotherService)
+                .expect(200, {})
+            await request(app)
+                .post('/api/v1/account/offers')    
+                .set('Authorization', 'Basic RXZlQGdtYWlsLmNvbTpkb250YmVldmlsZ29vZ2xl')
+                .set('Content-Type', 'application/json; charset=utf-8')
+                .send(postAnotherService)
+                .expect(200, {})
+        }
+
+        const PAGE_NUMBER = 2;
+        const offersResponse = await request(app)
+            .get(`/api/v1/offers?page=${PAGE_NUMBER}`)
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(200);
+        expect(offersResponse.body.payload.length).toEqual(maxItemsInPage);
+        expect(offersResponse.body.payload.at(9).title).toEqual(expect.any(String));
+        expect(offersResponse.body.payload.at(9).title).toEqual(expect.stringContaining(`${theNumberOfLastItemInQuery}`));
+
+        // clean database from test data
+        const response = await request(app)
+            .get('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .expect('Content-Type', 'application/json; charset=utf-8')
+            .expect(200);
+        await request(app)
+            .delete(`/api/v1/account/${response.body.payload.id}`)
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .expect(204);
+        // instead of removing all 20+ test services, just deop a whole profile and recreate 
+        // again based on Jest.beforeAll() implementation
+        const eveResponse = await request(app)
+            .get('/api/v1/account')
+            .set('Authorization', 'Basic RXZlQGdtYWlsLmNvbTpkb250YmVldmlsZ29vZ2xl')
+            .expect('Content-Type', 'application/json; charset=utf-8')
+            .expect(200);
+        await request(app)
+            .delete(`/api/v1/account/${eveResponse.body.payload.id}`)
+            .set('Authorization', 'Basic RXZlQGdtYWlsLmNvbTpkb250YmVldmlsZ29vZ2xl')
+            .expect(204);
+        let postEveProfile = {"contact":"Eve@gmail.com","secret":"dontbeevilgoogle","name":"Eve","offers":[],"demands":[]};
+        let postEveService = { "title" : "Develop software", "date" : 0, "index" : ["Develop software"] };
+        await request(app)
+            .post('/api/v1/account')
+            .set('Authorization', 'Basic RXZlQGdtYWlsLmNvbTpkb250YmVldmlsZ29vZ2xl')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(postEveProfile)
+            .expect('Content-Type', 'application/json; charset=utf-8')
+            .expect(200)
+        await request(app)
+            .post('/api/v1/account/offers')    
+            .set('Authorization', 'Basic RXZlQGdtYWlsLmNvbTpkb250YmVldmlsZ29vZ2xl')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(postEveService)
+            .expect(200, {})
+    });
 });
