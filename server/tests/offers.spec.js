@@ -242,7 +242,7 @@ describe('Cover /api/v1/offers with tests', () => {
             .expect('Content-Type', 'application/json; charset=utf-8')
             .expect(400, { "payload" : "Did you forget to pass page in query, e.g. ?page=1 ?"});
     });
-    it('On GET /api/v1/offers with existing account and 10+ available matches receives OK and only first 10', async() => {
+    it('On GET /api/v1/offers?page=1 with existing account and 10+ available matches receives OK and only first 10', async() => {
         // prepare test data
         const maxItemsInPage = dbConfig.maxSize;
         const theNumberOfLastItemInQuery = '9';

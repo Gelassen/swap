@@ -14,7 +14,7 @@ exports.get = async function(req, res) {
         result = network.getErrorMsg(400, `Did you add auth header?`);
     } else if (network.getAuthHeaderAsTokens(req).error) {
         result = network.getErrorMsg(400, network.getAuthHeaderAsTokens(req).result);
-    } else if (!isTherePageParamInQuery(req.query)) {
+    } else if (!network.isTherePageParamInQuery(req.query)) {
         result = network.getErrorMsg(400, "Did you forget to pass page in query, e.g. ?page=1 ?");
     } else {
         const credentials = network.getAuthNameSecretPair(
@@ -41,14 +41,9 @@ exports.get = async function(req, res) {
                 result = network.getMsg(200, offersResult);
             }
         }
-        // result = network.getErrorMsg(500, `Not implemented yet`);
     } 
 
     logger.log(`[offers reply] ${JSON.stringify(result)}`);
     network.send(req, res, result);
     logger.log(`[offers] end`);
-}
-
-function isTherePageParamInQuery(query) {
-    return query.page != undefined && Number.isInteger(Number(query.page)); 
 }

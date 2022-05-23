@@ -14,6 +14,8 @@ exports.get = async function(req, res) {
         result = network.getErrorMsg(400, `Did you add auth header?`);
     } else if (network.getAuthHeaderAsTokens(req).error) {
         result = network.getErrorMsg(400, network.getAuthHeaderAsTokens(req).result);
+    } else if (!network.isTherePageParamInQuery(req.query)) {
+        result = network.getErrorMsg(400, "Did you forget to pass page in query, e.g. ?page=1 ?");
     } else {
         const credentials = network.getAuthNameSecretPair(
             network.getAuthHeaderAsTokens(req)
@@ -31,7 +33,7 @@ exports.get = async function(req, res) {
             result = network.getMsg(200, "Profile doesn't have any offers. In this case there is no filter to match demands.");
         } else {
             logger.log("[4]");
-            let demandsResult = await demands.getDemands(profileResult);
+            let demandsResult = await demands.getDemands(profileResult, req.query.page);
             logger.log(`[get demands] demands ${JSON.stringify(demandsResult)}`);
             if (network.noSuchData(demandsResult) || demandsResult.length == 0) {
                 result = network.getMsg(200, []);

@@ -47,6 +47,10 @@ exports.getServiceMessage = function(statusCode, message) {
     return {status: statusCode, message: message}
 }
 
+exports.isTherePageParamInQuery = function isTherePageParamInQuery(query) {
+    return query.page != undefined && Number.isInteger(Number(query.page)); 
+}
+
 /**
  * @input the result of getAuthHeaderAsTokens(req); both methods require refactoring
  */
