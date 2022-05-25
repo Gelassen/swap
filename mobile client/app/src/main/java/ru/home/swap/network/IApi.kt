@@ -44,4 +44,16 @@ interface IApi {
     suspend fun removeDemand(
         @Header("Authorization") credentials: String,
         @Path("id") serviceId: Long): Response<ProfileResponse<PersonProfile>>
+
+    @Headers("Content-Type: application/json; charset=utf-8")
+    @GET("/api/v1/offers")
+    suspend fun getOffers(
+        @Header("Authorization") credentials: String,
+        @Query("page") page: Int): Response<ProfileResponse<Collection<Service>>>
+
+    @Headers("Content-Type: application/json; charset=utf-8")
+    @GET("/api/v1/demands")
+    suspend fun getDemands(
+        @Header("Authorization") credentials: String,
+        @Query("page") page: Int): Response<ProfileResponse<Collection<Service>>>
 }

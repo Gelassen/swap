@@ -6,10 +6,17 @@ import dagger.Provides
 import ru.home.swap.network.IApi
 import ru.home.swap.repository.Cache
 import ru.home.swap.repository.PersonRepository
+import ru.home.swap.repository.pagination.OffersPagingSource
 import javax.inject.Singleton
 
 @Module(includes = [NetworkModule::class])
 class AppModule(val context: Context) {
+
+    @Singleton
+    @Provides
+    fun provideOffersPagingSource(api: IApi, cache: Cache): OffersPagingSource {
+        return OffersPagingSource(api, cache)
+    }
 
     @Singleton
     @Provides

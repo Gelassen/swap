@@ -2,7 +2,8 @@
     "dbConfig" : {
         "user"     : "root",
         "password" : "password",
-        "database" : "prod_db_swap"
+        "database" : "prod_db_swap",
+        "maxSize"  : 20
     },
     "logs" : {
         "isAllowed" : false
