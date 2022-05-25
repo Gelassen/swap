@@ -70,20 +70,20 @@ afterAll(async() => {
 describe('Cover /api/v1/offers with tests', () => {
     it('On GET /api/v1/offers without Auth header receives BAD_REQUEST code', async() => {
         await request(app)
-            .get('/api/v1/offers')
+            .get('/api/v1/offers?size=20')
             .set('Content-Type', 'application/json; charset=utf-8')
             .expect(400, { "payload" : "Did you add auth header?" })
     });
     it('On GET /api/v1/offers with mailformed auth header receives BAD_REQUEST code', async() => {
         await request(app)
-            .get('/api/v1/offers')
+            .get('/api/v1/offers?size=20')
             .set('Authorization', 'VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .set('Content-Type', 'application/json; charset=utf-8')
             .expect(400, { "payload" : "Did you forget to add auth header?" })
     });
     it('On GET /api/v1/offers with non existing account receives BAD_REQUEST code', async() => {
         await request(app)
-            .get(`/api/v1/offers?page=${1}`)
+            .get(`/api/v1/offers?page=${1}&size=20`)
             .set('Authorization', 'Basic bm9uLmV4aXN0QGdtYWlsLmNvbTpwd2Q=')
             .set('Content-Type', 'application/json; charset=utf-8')
             .expect(400, { "payload" : "There is no such account." });
@@ -100,7 +100,7 @@ describe('Cover /api/v1/offers with tests', () => {
             .expect(200)
 
         await request(app)
-            .get('/api/v1/offers?page=1')
+            .get('/api/v1/offers?page=1&size=20')
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .set('Content-Type', 'application/json; charset=utf-8')
             .expect(200, { "payload" : "Profile doesn't have any demands. In this case there is no need to select offers." });
@@ -135,7 +135,7 @@ describe('Cover /api/v1/offers with tests', () => {
             .expect(200, {})
 
         await request(app)
-            .get('/api/v1/offers?page=1')
+            .get('/api/v1/offers?page=1&size=20')
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .set('Content-Type', 'application/json; charset=utf-8')
             .expect(200, { "payload" : [] });
@@ -170,7 +170,7 @@ describe('Cover /api/v1/offers with tests', () => {
             .expect(200, {})
 
         const offersResponse = await request(app)
-            .get('/api/v1/offers?page=1')
+            .get('/api/v1/offers?page=1&size=20')
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .set('Content-Type', 'application/json; charset=utf-8')
             .expect(200);
@@ -214,7 +214,7 @@ describe('Cover /api/v1/offers with tests', () => {
             .expect(200, {})
 
         const offersResponse = await request(app)
-            .get('/api/v1/offers?page=1')
+            .get('/api/v1/offers?page=1&size=20')
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .set('Content-Type', 'application/json; charset=utf-8')
             .expect(200);
@@ -237,14 +237,14 @@ describe('Cover /api/v1/offers with tests', () => {
     });
     it('On GET /api/v1/offers without page query passed receives BAD_REQUEST with error message', async() => {
         await request(app)
-            .get('/api/v1/offers')
+            .get('/api/v1/offers?size=20')
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .expect('Content-Type', 'application/json; charset=utf-8')
             .expect(400, { "payload" : "Did you forget to pass page in query, e.g. ?page=1 ?"});
     });
     it('On GET /api/v1/offers?page=1 with existing account and 10+ available matches receives OK and only first 10', async() => {
         // prepare test data
-        const maxItemsInPage = dbConfig.maxSize;
+        const maxItemsInPage = dbConfig.maxSize; // TODO [1] remove redundant code from all test cases, [2] add validation for maximum items in page
         const theNumberOfLastItemInQuery = '9';
         let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
         let postServicePayload = { "title" : "Develop software", "date" : 0, "index" : ["Develop software"]};
@@ -278,12 +278,13 @@ describe('Cover /api/v1/offers with tests', () => {
                 .expect(200, {})
         }
 
+        const PAGE_SIZE = 10;
         const offersResponse = await request(app)
-            .get('/api/v1/offers?page=1')
+            .get(`/api/v1/offers?page=1&size=${PAGE_SIZE}`)
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .set('Content-Type', 'application/json; charset=utf-8')
             .expect(200);
-        expect(offersResponse.body.payload.length).toEqual(maxItemsInPage);
+        expect(offersResponse.body.payload.length).toEqual(PAGE_SIZE);
         expect(offersResponse.body.payload.at(9).title).toEqual(expect.stringContaining(theNumberOfLastItemInQuery));
 
         // clean database from test data
@@ -326,7 +327,7 @@ describe('Cover /api/v1/offers with tests', () => {
     it('On GET /api/v1/offers?page=2 with existing account and 10+ available matches receives OK and only second 10', async() => {
         //verify database is not in dirty state
         const eveAccountResponse = await request(app)
-            .get('/api/v1/account')
+            .get('/api/v1/account?size=20')
             .set('Authorization', 'Basic RXZlQGdtYWlsLmNvbTpkb250YmVldmlsZ29vZ2xl')
             .expect('Content-Type', 'application/json; charset=utf-8')
             .expect(200);
@@ -366,13 +367,14 @@ describe('Cover /api/v1/offers with tests', () => {
                 .expect(200, {})
         }
 
+        const PAGE_SIZE = 10;
         const PAGE_NUMBER = 2;
         const offersResponse = await request(app)
-            .get(`/api/v1/offers?page=${PAGE_NUMBER}`)
+            .get(`/api/v1/offers?page=${PAGE_NUMBER}&size=${PAGE_SIZE}`)
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .set('Content-Type', 'application/json; charset=utf-8')
             .expect(200);
-        expect(offersResponse.body.payload.length).toEqual(maxItemsInPage);
+        expect(offersResponse.body.payload.length).toEqual(PAGE_SIZE);
         expect(offersResponse.body.payload.at(9).title).toEqual(expect.any(String));
         expect(offersResponse.body.payload.at(9).title).toEqual(expect.stringContaining(`${theNumberOfLastItemInQuery}`));
 
@@ -413,4 +415,41 @@ describe('Cover /api/v1/offers with tests', () => {
             .send(postEveService)
             .expect(200, {})
     });
+    it('On GET /api/v1/offers?page=1 without page size receives BAD_REQUEST status code', async() => {
+        // prepare initial state
+        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
+        let postServicePayload = { "title" : "Develop software", "date" : 0, "index" : ["Develop software"]};
+        await request(app)
+            .post('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(postPayload)
+            .expect('Content-Type', 'application/json; charset=utf-8')
+            .expect(200)
+        await request(app)
+            .post('/api/v1/account/demands')    
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(postServicePayload)
+            .expect(200, {})
+
+        const PAGE_NUMBER = 1;
+        await request(app)
+            .get(`/api/v1/offers?page=${PAGE_NUMBER}`)
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(400, { "payload" : "Did you pass page size?" });
+
+        // clean database from test data
+        const response = await request(app)
+            .get('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .expect('Content-Type', 'application/json; charset=utf-8')
+            .expect(200);
+        await request(app)
+            .delete(`/api/v1/account/${response.body.payload.id}`)
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .expect(204);
+    });
+    // it('On GET /api/v1/')
 });

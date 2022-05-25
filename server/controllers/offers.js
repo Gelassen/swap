@@ -16,6 +16,8 @@ exports.get = async function(req, res) {
         result = network.getErrorMsg(400, network.getAuthHeaderAsTokens(req).result);
     } else if (!network.isTherePageParamInQuery(req.query)) {
         result = network.getErrorMsg(400, "Did you forget to pass page in query, e.g. ?page=1 ?");
+    } else if (!network.isTherePageSizeParamInQuery(req.query)) {
+        result = network.getErrorMsg(400, "Did you pass page size?")
     } else {
         const credentials = network.getAuthNameSecretPair(
             network.getAuthHeaderAsTokens(req)
@@ -33,7 +35,7 @@ exports.get = async function(req, res) {
             result = network.getMsg(200, "Profile doesn't have any demands. In this case there is no need to select offers.");
         } else {
             logger.log("[4]");
-            let offersResult = await offers.getOffers(profileResult, req.query.page);
+            let offersResult = await offers.getOffers(profileResult, req.query.page, req.query.size);
             logger.log(`[get offers] offers ${JSON.stringify(offersResult)}`);
             if (network.noSuchData(offersResult) || offersResult.length == 0) {
                 result = network.getMsg(200, []);

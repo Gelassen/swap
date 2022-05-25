@@ -6,11 +6,10 @@ const logger = require('../utils/logger')
 const converter = require('../utils/converter')
 
 const TIMEOUT = config.dbConfig.timeout;
-const MAX_ITEMS = config.dbConfig.maxSize;
 const OFFER = 1;
 const DEMAND = 0;
 
-exports.getOffers = function(fullProfile, page) {
+exports.getOffers = function(fullProfile, page, size) {
     logger.log(`[get service from model] ${page}`);
     return new Promise((resolve) => {
         pool.getConnection(function(err, connection) {
@@ -18,7 +17,7 @@ exports.getOffers = function(fullProfile, page) {
                 WHERE profileId != ${fullProfile.id} 
                 AND offer = ${OFFER} 
                 AND (${prepareWhereClause(fullProfile.demands)})
-                ${prepareLimitClause(page)}`;
+                ${prepareLimitClause(page, size)}`;
             logger.log("sql query: " + sql);
             connection.query(
                 {sql: sql, TIMEOUT},
@@ -42,13 +41,13 @@ exports.getOffers = function(fullProfile, page) {
     });
 }
 
-function prepareLimitClause(page) {
+function prepareLimitClause(page, size) {
     const MIN_VALUE = 1;
     let result = '';
     if (page < MIN_VALUE || page == MIN_VALUE) {
         page = MIN_VALUE;
     }
-    result = `LIMIT ${MAX_ITEMS} OFFSET ${page * MAX_ITEMS - MAX_ITEMS}`;
+    result = `LIMIT ${size} OFFSET ${page * size - size}`;
     return result;
 }
 

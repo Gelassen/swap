@@ -51,6 +51,10 @@ exports.isTherePageParamInQuery = function isTherePageParamInQuery(query) {
     return query.page != undefined && Number.isInteger(Number(query.page)); 
 }
 
+exports.isTherePageSizeParamInQuery = function isTherePageSizeParamInQuery(query) {
+    return query.size != undefined && Number.isInteger(Number(query.size));
+}
+
 /**
  * @input the result of getAuthHeaderAsTokens(req); both methods require refactoring
  */
