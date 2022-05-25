@@ -246,7 +246,6 @@ describe('Cover /api/v1/demands with tests', () => {
     });
     it('On GET /api/v1/demands?page=1 with existing account and 10+ available matches receives OK and only first 10', async() => {
         // prepare test data
-        const maxItemsInPage = dbConfig.maxSize;
         const theNumberOfLastItemInQuery = '9';
         let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
         let postServicePayload = { "title" : "Develop software", "date" : 0, "index" : ["Develop software"]};
@@ -280,12 +279,13 @@ describe('Cover /api/v1/demands with tests', () => {
                 .expect(200, {})
         }
 
+        const PAGE_SIZE = 10;
         const offersResponse = await request(app)
-            .get('/api/v1/demands?page=1&size=10')
+            .get(`/api/v1/demands?page=1&size=${PAGE_SIZE}`)
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .set('Content-Type', 'application/json; charset=utf-8')
             .expect(200);
-        expect(offersResponse.body.payload.length).toEqual(maxItemsInPage);
+        expect(offersResponse.body.payload.length).toEqual(PAGE_SIZE);
         expect(offersResponse.body.payload.at(9).title).toEqual(expect.stringContaining(theNumberOfLastItemInQuery));
 
         // clean database from test data
@@ -319,7 +319,7 @@ describe('Cover /api/v1/demands with tests', () => {
             .expect('Content-Type', 'application/json; charset=utf-8')
             .expect(200)
         await request(app)
-            .post('/api/v1/account/offers')    
+            .post('/api/v1/account/demands')    
             .set('Authorization', 'Basic RXZlQGdtYWlsLmNvbTpkb250YmVldmlsZ29vZ2xl')
             .set('Content-Type', 'application/json; charset=utf-8')
             .send(postEveService)
@@ -332,10 +332,9 @@ describe('Cover /api/v1/demands with tests', () => {
             .set('Authorization', 'Basic RXZlQGdtYWlsLmNvbTpkb250YmVldmlsZ29vZ2xl')
             .expect('Content-Type', 'application/json; charset=utf-8')
             .expect(200);
-        expect(eveAccountResponse.body.payload.offers.length).toEqual(1);
+        expect(eveAccountResponse.body.payload.demands.length).toEqual(1);
         // prepare initial state
-        const maxItemsInPage = dbConfig.maxSize;
-        const theNumberOfLastItemInQuery = '20';
+        const theNumberOfLastItemInQuery = '19';
         let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
         let postServicePayload = { "title" : "Develop software", "date" : 0, "index" : ["Develop software"]};
         await request(app)
@@ -369,12 +368,13 @@ describe('Cover /api/v1/demands with tests', () => {
         }
 
         const PAGE_NUMBER = 2;
+        const PAGE_SIZE = 10;
         const offersResponse = await request(app)
-            .get(`/api/v1/demands?page=${PAGE_NUMBER}&size=10`)
+            .get(`/api/v1/demands?page=${PAGE_NUMBER}&size=${PAGE_SIZE}`)
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .set('Content-Type', 'application/json; charset=utf-8')
             .expect(200);
-        expect(offersResponse.body.payload.length).toEqual(maxItemsInPage);
+        expect(offersResponse.body.payload.length).toEqual(PAGE_SIZE);
         expect(offersResponse.body.payload.at(9).title).toEqual(expect.any(String));
         expect(offersResponse.body.payload.at(9).title).toEqual(expect.stringContaining(`${theNumberOfLastItemInQuery}`));
 
@@ -409,7 +409,7 @@ describe('Cover /api/v1/demands with tests', () => {
             .expect('Content-Type', 'application/json; charset=utf-8')
             .expect(200)
         await request(app)
-            .post('/api/v1/account/offers')    
+            .post('/api/v1/account/demands')    
             .set('Authorization', 'Basic RXZlQGdtYWlsLmNvbTpkb250YmVldmlsZ29vZ2xl')
             .set('Content-Type', 'application/json; charset=utf-8')
             .send(postEveService)

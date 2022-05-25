@@ -246,7 +246,6 @@ describe('Cover /api/v1/offers with tests', () => {
     });
     it('On GET /api/v1/offers?page=1 with existing account and 10+ available matches receives OK and only first 10', async() => {
         // prepare test data
-        const maxItemsInPage = dbConfig.maxSize; // TODO [1] remove redundant code from all test cases, [2] add validation for maximum items in page
         const theNumberOfLastItemInQuery = '9';
         let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
         let postServicePayload = { "title" : "Develop software", "date" : 0, "index" : ["Develop software"]};
@@ -335,7 +334,6 @@ describe('Cover /api/v1/offers with tests', () => {
             .expect(200);
         expect(eveAccountResponse.body.payload.offers.length).toEqual(1);
         // prepare initial state
-        const maxItemsInPage = dbConfig.maxSize;
         const theNumberOfLastItemInQuery = '19';
         let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
         let postServicePayload = { "title" : "Develop software", "date" : 0, "index" : ["Develop software"]};
