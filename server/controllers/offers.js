@@ -1,8 +1,11 @@
+const config = require('config');
 const profile = require('../models/profile');
 const offers = require('../models/offers');
 
-const network = require('../utils/network')
-const logger = require('../utils/logger')
+const network = require('../utils/network');
+const logger = require('../utils/logger');
+
+const MAX_PAGE_SIZE = config.dbConfig.maxPageSize;
 
 exports.get = async function(req, res) {
     let result;
@@ -17,7 +20,9 @@ exports.get = async function(req, res) {
     } else if (!network.isTherePageParamInQuery(req.query)) {
         result = network.getErrorMsg(400, "Did you forget to pass page in query, e.g. ?page=1 ?");
     } else if (!network.isTherePageSizeParamInQuery(req.query)) {
-        result = network.getErrorMsg(400, "Did you pass page size?")
+        result = network.getErrorMsg(400, `Did you pass page size? Maximum values per page is ${MAX_PAGE_SIZE}`)
+    } else if (req.query.size > MAX_PAGE_SIZE) {
+        result = network.getErrorMsg(400, `Did you pass page size within allowed range? Maximum items per page is ${MAX_PAGE_SIZE}, but you passed ${req.query.size}`)
     } else {
         const credentials = network.getAuthNameSecretPair(
             network.getAuthHeaderAsTokens(req)

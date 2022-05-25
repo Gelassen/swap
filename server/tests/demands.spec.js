@@ -3,6 +3,8 @@ const app = require('../app');
 const config = require('config');
 const dbConfig = config.dbConfig;
 
+const MAX_PAGE_SIZE = dbConfig.maxPageSize;
+
 /**
  *  Bob@gmail.com:bupa (Basic Qm9iQGdtYWlsLmNvbTpidXBh)
  *  Eve@gmail.com:dontbeevilgoogle (Basic RXZlQGdtYWlsLmNvbTpkb250YmVldmlsZ29vZ2xl)
@@ -83,7 +85,7 @@ describe('Cover /api/v1/demands with tests', () => {
     });
     it('On GET /api/v1/demands with non existing account receives BAD_REQUEST code', async() => {
         await request(app)
-            .get('/api/v1/demands?page=1')
+            .get('/api/v1/demands?page=1&size=10')
             .set('Authorization', 'Basic bm9uLmV4aXN0QGdtYWlsLmNvbTpwd2Q=')
             .set('Content-Type', 'application/json; charset=utf-8')
             .expect(400, { "payload" : "There is no such account." });
@@ -100,7 +102,7 @@ describe('Cover /api/v1/demands with tests', () => {
             .expect(200)
 
         await request(app)
-            .get('/api/v1/demands?page=1')
+            .get('/api/v1/demands?page=1&size=10')
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .set('Content-Type', 'application/json; charset=utf-8')
             .expect(200, { "payload" : "Profile doesn't have any offers. In this case there is no filter to match demands." });
@@ -135,7 +137,7 @@ describe('Cover /api/v1/demands with tests', () => {
             .expect(200, {})
 
         await request(app)
-            .get('/api/v1/demands?page=1')
+            .get('/api/v1/demands?page=1&size=10')
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .set('Content-Type', 'application/json; charset=utf-8')
             .expect(200, { "payload" : [] });
@@ -170,7 +172,7 @@ describe('Cover /api/v1/demands with tests', () => {
             .expect(200, {})
 
         const demandsResponse = await request(app)
-            .get('/api/v1/demands?page=1')
+            .get('/api/v1/demands?page=1&size=10')
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .set('Content-Type', 'application/json; charset=utf-8')
             .expect(200);
@@ -214,7 +216,7 @@ describe('Cover /api/v1/demands with tests', () => {
             .expect(200, {})
 
         const demandsResponse = await request(app)
-            .get('/api/v1/demands?page=1')
+            .get('/api/v1/demands?page=1&size=10')
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .set('Content-Type', 'application/json; charset=utf-8')
             .expect(200);
@@ -279,7 +281,7 @@ describe('Cover /api/v1/demands with tests', () => {
         }
 
         const offersResponse = await request(app)
-            .get('/api/v1/demands?page=1')
+            .get('/api/v1/demands?page=1&size=10')
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .set('Content-Type', 'application/json; charset=utf-8')
             .expect(200);
@@ -368,7 +370,7 @@ describe('Cover /api/v1/demands with tests', () => {
 
         const PAGE_NUMBER = 2;
         const offersResponse = await request(app)
-            .get(`/api/v1/demands?page=${PAGE_NUMBER}`)
+            .get(`/api/v1/demands?page=${PAGE_NUMBER}&size=10`)
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .set('Content-Type', 'application/json; charset=utf-8')
             .expect(200);
@@ -412,5 +414,78 @@ describe('Cover /api/v1/demands with tests', () => {
             .set('Content-Type', 'application/json; charset=utf-8')
             .send(postEveService)
             .expect(200, {})
+    });
+    it('On GET /api/v1/demands?page=1 without page size receives BAD_REQUEST status code', async() => {
+        // prepare initial state
+        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
+        let postServicePayload = { "title" : "Develop software", "date" : 0, "index" : ["Develop software"]};
+        await request(app)
+            .post('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(postPayload)
+            .expect('Content-Type', 'application/json; charset=utf-8')
+            .expect(200)
+        await request(app)
+            .post('/api/v1/account/offers')    
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(postServicePayload)
+            .expect(200, {})
+
+        const PAGE_NUMBER = 1;
+        await request(app)
+            .get(`/api/v1/demands?page=${PAGE_NUMBER}`)
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(400, { "payload" : `Did you pass page size? Maximum values per page is ${MAX_PAGE_SIZE}` });
+
+        // clean database from test data
+        const response = await request(app)
+            .get('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .expect('Content-Type', 'application/json; charset=utf-8')
+            .expect(200);
+        await request(app)
+            .delete(`/api/v1/account/${response.body.payload.id}`)
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .expect(204);
+    });
+    it('On GET /api/v1/demands?page=1&size=101 with out of range page size receives BAD_REQUEST status code', async() => {
+        // prepare initial state
+        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
+        let postServicePayload = { "title" : "Develop software", "date" : 0, "index" : ["Develop software"]};
+        await request(app)
+            .post('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(postPayload)
+            .expect('Content-Type', 'application/json; charset=utf-8')
+            .expect(200)
+        await request(app)
+            .post('/api/v1/account/offers')    
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(postServicePayload)
+            .expect(200, {})
+
+        const PAGE_NUMBER = 1;
+        const OUT_OF_RANGE_PAGE_SIZE = 101;
+        await request(app)
+            .get(`/api/v1/demands?page=${PAGE_NUMBER}&size=${OUT_OF_RANGE_PAGE_SIZE}`)
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(400, { "payload" : `Did you pass page size within allowed range? Maximum items per page is ${MAX_PAGE_SIZE}` });
+
+        // clean database from test data
+        const response = await request(app)
+            .get('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .expect('Content-Type', 'application/json; charset=utf-8')
+            .expect(200);
+        await request(app)
+            .delete(`/api/v1/account/${response.body.payload.id}`)
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .expect(204);  
     });
 });

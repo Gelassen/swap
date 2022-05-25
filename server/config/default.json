@@ -11,7 +11,8 @@
         "database" : "db_swap",
         "connectionLimit" : 150,
         "timout"   : 60000,
-        "maxSize"  : 10
+        "maxSize"  : 10,
+        "maxPageSize" : 100
     },
     "logs" : {
         "isAllowed" : true
