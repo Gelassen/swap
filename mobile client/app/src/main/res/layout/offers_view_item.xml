@@ -3,14 +3,23 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-
+        <variable
+            name="service"
+            type="ru.home.swap.model.Service" />
+        <variable
+            name="provider"
+            type="ru.home.swap.providers.PersonProvider" />
     </data>
 
-    <FrameLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="?android:listPreferredItemHeight"
+        android:layout_height="wrap_content"
+        android:minHeight="?android:listPreferredItemHeight"
+        android:gravity="center_vertical"
         android:clickable="true"
         android:focusable="true"
+        android:paddingStart="@dimen/base_margin"
+        android:paddingEnd="@dimen/base_margin"
         android:foreground="?android:attr/selectableItemBackground"
         android:background="@color/white">
 
@@ -19,9 +28,21 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:paddingStart="@dimen/base_margin"
-            android:paddingEnd="@dimen/base_margin"
-            tools:text="I offer more this French nice soft rolls and the tea."/>
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:textColor="@color/blue_light"
+            android:text="@{service.title}"
+            tools:text="I offer more this French nice soft rolls and the tea." />
 
-    </FrameLayout>
+        <TextView
+            android:id="@+id/offer_available_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/offer_title"
+            android:text="@{provider.getDateInHumanReadableFormat(service.date)}"
+            tools:text="till May 2024"/>
+
+    </RelativeLayout>
+
+
 </layout>

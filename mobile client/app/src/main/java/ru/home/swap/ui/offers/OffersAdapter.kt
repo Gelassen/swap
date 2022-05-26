@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import ru.home.swap.databinding.OffersViewItemBinding
 import ru.home.swap.model.Service
+import ru.home.swap.providers.PersonProvider
 
 class OffersAdapter(val listener: IListener, diffCallback: DiffUtil.ItemCallback<Service> = OffersComparator())
     : PagingDataAdapter<Service, OffersAdapter.ViewHolder>(diffCallback) {
@@ -20,17 +21,19 @@ class OffersAdapter(val listener: IListener, diffCallback: DiffUtil.ItemCallback
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = getItem(position)
-        holder.binding.offerTitle.text = item?.title
+        holder.binding.service = item!!
         holder.binding.root.setOnClickListener {
-            listener.onItemClick(item!!)
+            listener.onItemClick(item)
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(
+        val holder = ViewHolder(
             OffersViewItemBinding.inflate(
                 LayoutInflater.from(parent.context), parent, false)
         )
+        holder.binding.provider = PersonProvider()
+        return holder
     }
 
     class OffersComparator: DiffUtil.ItemCallback<Service>() {
