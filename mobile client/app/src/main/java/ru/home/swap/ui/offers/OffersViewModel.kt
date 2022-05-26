@@ -8,6 +8,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.*
 import ru.home.swap.App
+import ru.home.swap.R
 import ru.home.swap.model.PersonProfile
 import ru.home.swap.model.Service
 import ru.home.swap.repository.Cache
@@ -50,9 +51,11 @@ class OffersViewModel
 
     private fun getPagingData(profile: PersonProfile): Flow<PagingData<Service>> {
         offersPagingSource.setCredentials(profile.contact, profile.secret)
+        val pageSize = application.getString(R.string.page_size).toInt()
         return Pager(
             config = PagingConfig(
-                pageSize = App.Config.getPageSize(),
+                pageSize = pageSize,
+                initialLoadSize = pageSize,
                 enablePlaceholders = false
             ),
             pagingSourceFactory = {

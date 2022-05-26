@@ -1,5 +1,6 @@
 package ru.home.swap.repository.pagination
 
+import android.util.Log
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import retrofit2.HttpException
@@ -15,7 +16,7 @@ import kotlin.collections.ArrayList
 
 const val DEFAULT_START_PAGE = 1
 
-class OffersPagingSource(private val api: IApi, private val cache: Cache)
+class OffersPagingSource(private val api: IApi, private val pageSize: Int)
     : PagingSource<Int, Service>() {
 
     private var contact: String? = null
@@ -37,15 +38,17 @@ class OffersPagingSource(private val api: IApi, private val cache: Cache)
 
             val response = api.getOffers(
                 credentials = AppCredentials.basic(contact, secret),
-                page = page
+                page = page,
+                size = pageSize
             )
             if (response.isSuccessful) {
                 val body = response.body()
                 val data = body?.payload?.asList() ?: Collections.emptyList()
+                Log.d(App.PAGING, "Paging call")
                 return LoadResult.Page(
                     data = data,
                     prevKey = if (page == DEFAULT_START_PAGE) null else  page.minus(1),
-                    nextKey = if (data.isEmpty())  null else page.plus(params.loadSize / App.Config.getPageSize())
+                    nextKey = if (data.isEmpty())  null else page.plus(params.loadSize / pageSize)
                 )
             } else {
                 return LoadResult.Error(IllegalStateException("Server returned response, but it wasn't successful."))

@@ -49,7 +49,8 @@ interface IApi {
     @GET("/api/v1/offers")
     suspend fun getOffers(
         @Header("Authorization") credentials: String,
-        @Query("page") page: Int): Response<ProfileResponse<Collection<Service>>>
+        @Query("page") page: Int,
+        @Query("size") size: Int): Response<ProfileResponse<Collection<Service>>>
 
     @Headers("Content-Type: application/json; charset=utf-8")
     @GET("/api/v1/demands")

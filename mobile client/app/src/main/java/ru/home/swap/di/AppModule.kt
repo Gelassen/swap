@@ -3,6 +3,7 @@ package ru.home.swap.di
 import android.content.Context
 import dagger.Module
 import dagger.Provides
+import ru.home.swap.R
 import ru.home.swap.network.IApi
 import ru.home.swap.repository.Cache
 import ru.home.swap.repository.PersonRepository
@@ -14,8 +15,8 @@ class AppModule(val context: Context) {
 
     @Singleton
     @Provides
-    fun provideOffersPagingSource(api: IApi, cache: Cache): OffersPagingSource {
-        return OffersPagingSource(api, cache)
+    fun provideOffersPagingSource(api: IApi, context: Context): OffersPagingSource {
+        return OffersPagingSource(api, Integer.parseInt(context.getString(R.string.page_size)))
     }
 
     @Singleton

@@ -10,6 +10,7 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:paddingBottom="?android:actionBarSize"
         android:background="@color/blue_dark">
 
         <androidx.recyclerview.widget.RecyclerView
