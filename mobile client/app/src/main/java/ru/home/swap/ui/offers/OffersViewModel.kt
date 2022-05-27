@@ -6,17 +6,17 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import kotlinx.coroutines.flow.*
-import ru.home.swap.App
 import ru.home.swap.R
 import ru.home.swap.model.PersonProfile
 import ru.home.swap.model.Service
 import ru.home.swap.repository.Cache
-import ru.home.swap.repository.PersonRepository
 import ru.home.swap.repository.pagination.OffersPagingSource
 import javax.inject.Inject
 
 data class Model(
+    val pagingData: PagingData<Service>? = null,
     val profile: PersonProfile? = null,
     val isLoading: Boolean = false,
     val errors: List<String> = emptyList(),
@@ -34,8 +34,8 @@ class OffersViewModel
         .asStateFlow()
         .stateIn(viewModelScope, SharingStarted.Eagerly, state.value)
 
-    fun getOffers(): Flow<PagingData<Service>> {
-        return if (uiState.value.profile == null) {
+    suspend fun fetchOffers() {
+        if (uiState.value.profile == null) {
             cache.getProfile()
                 .flatMapConcat { it ->
                     state.update { state ->
@@ -43,8 +43,22 @@ class OffersViewModel
                     }
                     getPagingData(state.value.profile!!)
                 }
+                .collect { it ->
+                    state.update { state ->
+                        state.copy(
+                            pagingData = it
+                        )
+                    }
+                }
         } else {
             getPagingData(state.value.profile!!)
+                .collect { it ->
+                    state.update { state ->
+                        state.copy(
+                            pagingData = it
+                        )
+                    }
+                }
         }
     }
 
@@ -62,5 +76,19 @@ class OffersViewModel
             }
         )
             .flow
+            .cachedIn(viewModelScope)
+    }
+
+    fun removeShownError() {
+        /* by convention we always show errors in the natural order (FIFO) */
+        state.update { state ->
+            state.copy(errors = state.errors.minus(state.errors[0]))
+        }
+    }
+
+    fun addError(error: String) {
+        state.update { state ->
+            state.copy(errors = state.errors.plus(error))
+        }
     }
 }

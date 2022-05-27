@@ -6,8 +6,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -48,38 +50,14 @@ class OffersFragment: BaseFragment(), OffersAdapter.IListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         fetchOffers()
+        listenUpdates()
         Log.d(App.TAG, "[offers] onViewCreated()")
+
     }
 
-    private fun fetchOffers() {
-        lifecycleScope.launch {
-            lifecycleScope.launch {
-                viewModel
-                    .getOffers()
-                    .collectLatest { it ->
-                        Log.d(App.TAG, "[offers] collectLatest()")
-                        (binding.offersList.adapter as OffersAdapter).submitData(it)
-                    }
-            }
-            lifecycleScope.launch {
-                (binding.offersList.adapter as OffersAdapter).loadStateFlow.collectLatest { loadState ->
-                    when (loadState.refresh) {
-                        is LoadState.Loading -> {
-                            // no op
-                        }
-                        is LoadState.Error -> {
-                            showErrorDialog((loadState.refresh as LoadState.Error).error.localizedMessage)
-//                            showError((loadState.refresh as LoadState.Error).error.localizedMessage)
-                        }
-                        is LoadState.NotLoading -> {
-//                            visibleProgress(false)
-                            val isNoContent = binding.offersList.adapter!!.itemCount == 0
-                            binding.noContent.visibility = if (isNoContent) View.VISIBLE else View.GONE
-                        }
-                    }
-                }
-            }
-        }
+    override fun onPositiveClick() {
+        super.onPositiveClick()
+        viewModel.removeShownError()
     }
 
     override fun onItemClick(item: Service) {
@@ -101,4 +79,44 @@ class OffersFragment: BaseFragment(), OffersAdapter.IListener {
             )
         )
     }
+
+    private fun listenUpdates() {
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                viewModel.uiState.collect { it ->
+                    Log.d(App.PAGING, "[offers] get update from viewmodel ${it.pagingData}")
+                    if (it.errors.isNotEmpty()) {
+                        showErrorDialog(it.errors.get(0))
+                    }
+                    if (it.pagingData != null) {
+                        (binding.offersList.adapter as OffersAdapter).submitData(it.pagingData)
+                    }
+                }
+            }
+        }
+        lifecycleScope.launch {
+            (binding.offersList.adapter as OffersAdapter).loadStateFlow.collectLatest { loadState ->
+                when (loadState.refresh) {
+                    is LoadState.Loading -> {
+                        // no op
+                    }
+                    is LoadState.Error -> {
+                        viewModel.addError((loadState.refresh as LoadState.Error).error.localizedMessage!!)
+                    }
+                    is LoadState.NotLoading -> {
+                        val isNoContent = binding.offersList.adapter!!.itemCount == 0
+                        binding.noContent.visibility = if (isNoContent) View.VISIBLE else View.GONE
+                    }
+                }
+            }
+        }
+    }
+
+    private fun fetchOffers() {
+        lifecycleScope.launch {
+            viewModel.fetchOffers()
+        }
+    }
+
+
 }
