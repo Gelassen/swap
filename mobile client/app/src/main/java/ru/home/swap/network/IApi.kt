@@ -56,5 +56,6 @@ interface IApi {
     @GET("/api/v1/demands")
     suspend fun getDemands(
         @Header("Authorization") credentials: String,
-        @Query("page") page: Int): Response<ProfileResponse<Collection<Service>>>
+        @Query("page") page: Int,
+        @Query("size") size: Int): Response<ProfileResponse<Collection<Service>>>
 }
