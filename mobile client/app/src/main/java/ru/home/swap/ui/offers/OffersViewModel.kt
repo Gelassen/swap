@@ -24,7 +24,6 @@ data class Model(
 
 class OffersViewModel
 @Inject constructor(
-    private val repository: PersonRepository,
     private val offersPagingSource: OffersPagingSource,
     private val cache: Cache,
     private val application: Context

@@ -9,14 +9,33 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:paddingBottom="?android:actionBarSize"
         android:background="@color/blue_dark">
 
-        <TextView
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/demands_list"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            />
+
+        <FrameLayout
+            android:id="@+id/no_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_gravity="center"
-            android:gravity="center"
-            android:text="Stub for demands screen" />
+            android:visibility="visible">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:text="There is no demands"
+                test:text="There is no demands" />
+
+        </FrameLayout>
+
 
     </FrameLayout>
 </layout>
