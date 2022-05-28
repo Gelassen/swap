@@ -6,6 +6,7 @@ const pool = require('./database');
 const profile = require('./controllers/profile');
 const offers = require('./controllers/offers'); 
 const demands = require('./controllers/demands');
+const contacts = require('./controllers/contacts');
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
@@ -76,6 +77,12 @@ app.get('/api/v1/demands', function(req, res) {
 })
 
 /* chains part */
+
+/* contacts part */
+app.get('/api/v1/contacts', function(req, res) {
+    pool.status();
+    contacts.get(req, res);
+})
 
 app.listen(config.get('config').webPort);
 

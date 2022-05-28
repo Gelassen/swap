@@ -40,6 +40,21 @@ exports.dbToDomainFullProfile = function(rows) {
     };
 }
 
+exports.contactsDbToDomain = function(rows) {
+    let result = [];
+    if (rows.length == 0) return result;
+
+    for (id = 0; id < rows.length; id++) {
+        let contact = {}
+        contact.id = rows[id].id;
+        contact.title = rows[id].name;
+        contact.contact = rows[id].contact;
+        result.push(contact);
+    }
+
+    return result;
+}
+
 exports.offersDbToDomainService = function(rows) {
     let result = [];
     if (rows.length == 0) return result;
