@@ -85,6 +85,7 @@ class DemandsFragment: BaseFragment(), OffersAdapter.IListener {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 viewModel.uiState.collect { it ->
                     Log.d(App.PAGING, "[offers] get update from viewmodel ${it.pagingData}")
+                    binding.progressIndicator.visibility = if (it.isLoading) View.VISIBLE else View.GONE
                     if (it.errors.isNotEmpty()) {
                         showErrorDialog(it.errors.get(0))
                     }
@@ -106,6 +107,7 @@ class DemandsFragment: BaseFragment(), OffersAdapter.IListener {
                     is LoadState.NotLoading -> {
                         val isNoContent = binding.demandsList.adapter!!.itemCount == 0
                         binding.noContent.visibility = if (isNoContent) View.VISIBLE else View.GONE
+                        binding.progressIndicator.visibility = View.GONE
                     }
                 }
             }
