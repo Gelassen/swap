@@ -33,7 +33,14 @@
         android:label="OffersFragment">
         <action
             android:id="@+id/action_offersFragment_to_contactsFragment"
-            app:destination="@id/contacts_fragment" />
+            app:destination="@id/contacts_fragment">
+
+            <argument
+                android:name="serviceId"
+                app:argType="integer"
+                android:defaultValue="-1" />
+
+        </action>
     </fragment>
     <fragment
         android:id="@+id/navigation_demands"
@@ -41,7 +48,14 @@
         android:label="DemandsFragment">
         <action
             android:id="@+id/action_demandsFragment_to_contactsFragment"
-            app:destination="@id/contacts_fragment" />
+            app:destination="@id/contacts_fragment">
+
+            <argument
+                android:name="serviceId"
+                app:argType="integer"
+                android:defaultValue="-1" />
+
+        </action>
     </fragment>
     <fragment
         android:id="@+id/navigation_chains"

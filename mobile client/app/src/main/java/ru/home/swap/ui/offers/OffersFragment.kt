@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.os.bundleOf
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -23,6 +24,7 @@ import ru.home.swap.databinding.OffersFragmentBinding
 import ru.home.swap.di.ViewModelFactory
 import ru.home.swap.model.Service
 import ru.home.swap.ui.common.BaseFragment
+import ru.home.swap.ui.contacts.ContactsFragment
 import javax.inject.Inject
 
 
@@ -67,7 +69,8 @@ class OffersFragment: BaseFragment(), OffersAdapter.IListener {
             requireContext(),
             "Show contacts is not implemented yet for service '${item.title}'",
             Toast.LENGTH_SHORT).show()
-        findNavController().navigate(R.id.action_offersFragment_to_contactsFragment)
+        val bundle = bundleOf(ContactsFragment.Params.EXTRA_SERVICE_ID to item.id)
+        findNavController().navigate(R.id.action_offersFragment_to_contactsFragment, bundle)
     }
 
     private fun setupList() {
