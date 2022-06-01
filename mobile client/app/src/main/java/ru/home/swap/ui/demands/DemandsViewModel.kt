@@ -39,11 +39,7 @@ class DemandsViewModel
     suspend fun fetchDemands() {
         if (uiState.value.profile == null) {
             cache.getProfile()
-                .onStart {
-                    state.update { state ->
-                        state.copy(isLoading = true)
-                    }
-                }
+                .onStart {state.update { state -> state.copy(isLoading = true) } }
                 .flatMapConcat { it ->
                     state.update { state ->
                         state.copy(profile = it)
@@ -60,6 +56,7 @@ class DemandsViewModel
                 }
         } else {
             getPagingData(state.value.profile!!)
+                .onStart {state.update { state -> state.copy(isLoading = true) } }
                 .collect { it ->
                     state.update { state ->
                         state.copy(
