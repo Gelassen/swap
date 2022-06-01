@@ -10,6 +10,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import ru.home.swap.App
 import ru.home.swap.AppApplication
+import ru.home.swap.R
 import ru.home.swap.databinding.DemandsFragmentBinding
 import ru.home.swap.di.ViewModelFactory
 import ru.home.swap.model.Service
@@ -66,6 +68,7 @@ class DemandsFragment: BaseFragment(), OffersAdapter.IListener {
             requireContext(),
             "Show contacts is not implemented yet for service '${item.title}'",
             Toast.LENGTH_SHORT).show()
+        findNavController().navigate(R.id.action_demandsFragment_to_contactsFragment)
     }
 
     private fun setupList() {

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+    </data>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/blue_dark"
+        android:layout_marginBottom="?android:actionBarSize"
+        >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/profile_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/base_margin_extra"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="@dimen/base_margin_extra"
+                android:layout_marginBottom="@dimen/component_margin"
+                android:gravity="center_vertical"
+                android:text="Dmitry Test Markovich"
+                android:textColor="@color/white"
+                android:textSize="@dimen/title_text_size"
+                tools:text="Jane Ostin" />
+
+            <View
+                android:id="@+id/divider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_below="@+id/profile_title"
+                android:layout_marginStart="@dimen/base_margin_extra"
+                android:layout_marginEnd="@dimen/base_margin_extra"
+                android:layout_marginBottom="@dimen/component_margin"
+                android:background="@color/white"
+                />
+
+            <TextView
+                android:id="@+id/contact"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:autoLink="phone"
+                android:textColor="@color/white"
+                android:text="88002000500"
+                tools:text="88002000500"
+                />
+
+        </LinearLayout>
+
+    </FrameLayout>
+</layout>

@@ -30,13 +30,25 @@
     <fragment
         android:id="@+id/navigation_offers"
         android:name="ru.home.swap.ui.offers.OffersFragment"
-        android:label="OffersFragment" />
+        android:label="OffersFragment">
+        <action
+            android:id="@+id/action_offersFragment_to_contactsFragment"
+            app:destination="@id/contacts_fragment" />
+    </fragment>
     <fragment
         android:id="@+id/navigation_demands"
         android:name="ru.home.swap.ui.demands.DemandsFragment"
-        android:label="DemandsFragment" />
+        android:label="DemandsFragment">
+        <action
+            android:id="@+id/action_demandsFragment_to_contactsFragment"
+            app:destination="@id/contacts_fragment" />
+    </fragment>
     <fragment
         android:id="@+id/navigation_chains"
         android:name="ru.home.swap.ui.chains.ChainsFragment"
         android:label="ChainsFragment" />
+    <fragment
+        android:id="@+id/contacts_fragment"
+        android:name="ru.home.swap.ui.contacts.ContactsFragment"
+        android:label="ContactsFragment" />
 </navigation>
