@@ -180,6 +180,25 @@ class PersonRepository(val api: IApi, val cache: Cache, val context: Context) {
             }
     }
 
+    fun getContacts(contact: String, secret: String, serviceId: Long): Flow<Response<PersonProfile>> {
+        return flow {
+            val response = api.getContacts(
+                credentials = AppCredentials.basic(contact, secret),
+                serviceId = serviceId
+            )
+            if (response.isSuccessful) {
+                val payload = response.body()!!
+                emit(Response.Data(payload.payload))
+            } else {
+                emit(Response.Error.Message(response.message()))
+            }
+        }
+            .catch { ex ->
+                Log.e(App.TAG, "Exception on removeOffer() call", ex)
+                emit(Response.Error.Exception(ex))
+            }
+    }
+
     fun cleanCachedAccount(): Flow<Any> {
         return cache.cleanProfile()
     }

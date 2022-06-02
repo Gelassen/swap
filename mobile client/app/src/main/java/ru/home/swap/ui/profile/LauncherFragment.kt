@@ -25,7 +25,7 @@ import ru.home.swap.ui.common.ErrorDialogFragment
 import ru.home.swap.ui.common.IDialogListener
 import javax.inject.Inject
 
-class LauncherFragment: BaseFragment(), IDialogListener {
+class LauncherFragment: BaseFragment() {
 
     private lateinit var binding: LauncherFragmentBinding
 

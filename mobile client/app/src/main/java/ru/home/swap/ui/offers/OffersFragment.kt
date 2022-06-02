@@ -58,6 +58,11 @@ class OffersFragment: BaseFragment(), OffersAdapter.IListener {
         Log.d(App.TAG, "[offers] onViewCreated()")
     }
 
+    override fun onResume() {
+        super.onResume()
+        showBottomNavigationView()
+    }
+
     override fun onPositiveClick() {
         super.onPositiveClick()
         viewModel.removeShownError()
@@ -85,6 +90,7 @@ class OffersFragment: BaseFragment(), OffersAdapter.IListener {
         )
     }
 
+    // TODO consider corner cases - do you really need to fetch items on onResume()?
     private fun listenUpdates() {
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {

@@ -9,6 +9,7 @@ import javax.inject.Singleton;
 import dagger.Binds;
 import dagger.Module;
 import dagger.multibindings.IntoMap;
+import ru.home.swap.ui.contacts.ContactsViewModel;
 import ru.home.swap.ui.demands.DemandsViewModel;
 import ru.home.swap.ui.offers.OffersViewModel;
 import ru.home.swap.ui.profile.ProfileViewModel;
@@ -39,6 +40,12 @@ public abstract class ViewModelModule {
     @ViewModelKey(DemandsViewModel.class)
     @Singleton
     abstract ViewModel demandsViewModel(DemandsViewModel vm);
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(ContactsViewModel.class)
+    @Singleton
+    abstract ViewModel contactsViewModel(ContactsViewModel vm);
 
 }
 

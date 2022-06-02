@@ -59,6 +59,11 @@ class DemandsFragment: BaseFragment(), OffersAdapter.IListener {
         Log.d(App.TAG, "[offers] onViewCreated()")
     }
 
+    override fun onResume() {
+        super.onResume()
+        showBottomNavigationView()
+    }
+
     override fun onPositiveClick() {
         super.onPositiveClick()
         viewModel.removeShownError()

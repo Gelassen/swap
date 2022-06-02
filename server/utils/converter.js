@@ -47,7 +47,7 @@ exports.contactsDbToDomain = function(rows) {
     for (id = 0; id < rows.length; id++) {
         let contact = {}
         contact.id = rows[id].id;
-        contact.title = rows[id].name;
+        contact.name = rows[id].name;
         contact.contact = rows[id].contact;
         result.push(contact);
     }

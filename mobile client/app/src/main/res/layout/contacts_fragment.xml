@@ -3,7 +3,16 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-
+        <import type="android.view.View" />
+        <variable
+            name="name"
+            type="String" />
+        <variable
+            name="contact"
+            type="String" />
+        <variable
+            name="profileProvider"
+            type="ru.home.swap.providers.PersonProvider" />
     </data>
 
     <FrameLayout
@@ -27,8 +36,8 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="@dimen/base_margin_extra"
                 android:layout_marginBottom="@dimen/component_margin"
-                android:gravity="center_vertical"
-                android:text="Dmitry Test Markovich"
+                android:gravity="center"
+                android:text="@{name}"
                 android:textColor="@color/white"
                 android:textSize="@dimen/title_text_size"
                 tools:text="Jane Ostin" />
@@ -45,14 +54,39 @@
                 />
 
             <TextView
-                android:id="@+id/contact"
+                android:id="@+id/contact_phone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:autoLink="phone"
                 android:textColor="@color/white"
-                android:text="88002000500"
+                android:autoLink="phone"
+                android:text="@{contact}"
+                android:visibility="@{profileProvider.contactIsPhone(contact) ? View.VISIBLE : View.GONE}"
                 tools:text="88002000500"
+                />
+
+            <TextView
+                android:id="@+id/contact_email"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:autoLink="email"
+                android:text="@{contact}"
+                android:visibility="@{profileProvider.contactIsEmail(contact) ? View.VISIBLE : View.GONE}"
+                tools:text="dm@gmail.com"
+                />
+
+            <TextView
+                android:id="@+id/contact_general"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:autoLink="email"
+                android:text="@{contact}"
+                android:visibility="@{(profileProvider.contactIsEmail(contact) || profileProvider.contactIsPhone(contact)) ? View.GONE : View.VISIBLE}"
+                tools:text="dm@gmail.com"
                 />
 
         </LinearLayout>

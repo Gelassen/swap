@@ -67,7 +67,7 @@
                 android:paddingBottom="@dimen/component_margin">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/contact"
+                    android:id="@+id/contact_phone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Enter your cell or email"

@@ -94,7 +94,7 @@ describe('Cover /api/v1/contacts with tests', () => {
             .get(`/api/v1/contacts?serviceId=${johnProfile.offers[0].id}`)
             .set('Authorization', 'Basic Qm9iQGdtYWlsLmNvbTpidXBh')
             .set('Content-Type', 'application/json; charset=utf-8')
-            .expect(200, { "payload" :  { "id" : johnProfile.id, "title" : `${johnProfile.name}`, "contact" : `${johnProfile.contact}`}});
+            .expect(200, { "payload" :  { "id" : johnProfile.id, "name" : `${johnProfile.name}`, "contact" : `${johnProfile.contact}`}});
 
         // clean database 
         const bobProfileResponse = await request(app)

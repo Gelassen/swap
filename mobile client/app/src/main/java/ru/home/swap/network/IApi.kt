@@ -58,4 +58,10 @@ interface IApi {
         @Header("Authorization") credentials: String,
         @Query("page") page: Int,
         @Query("size") size: Int): Response<ProfileResponse<Collection<Service>>>
+
+    @Headers("Content-Type: application/json; charset=utf-8")
+    @GET("/api/v1/contacts")
+    suspend fun getContacts(
+        @Header("Authorization") credentials: String,
+        @Query("serviceId") serviceId: Long): Response<ProfileResponse<PersonProfile>>
 }

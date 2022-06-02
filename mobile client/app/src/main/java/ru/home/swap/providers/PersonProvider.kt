@@ -1,5 +1,7 @@
 package ru.home.swap.providers
 
+import android.content.Context
+import android.telephony.PhoneNumberUtils
 import android.text.TextUtils
 import android.util.Patterns
 import java.text.SimpleDateFormat
@@ -31,6 +33,18 @@ class PersonProvider {
 
         return "till ${SimpleDateFormat("MMM dd yyyy", Locale.getDefault())
             .format(Date(date))}"
+    }
+
+    fun getNameIfAvailable(name: String) : String {
+        return if (TextUtils.isEmpty(name)) "Not available" else name
+    }
+
+    fun contactIsPhone(contact: String) : Boolean {
+        return android.util.Patterns.PHONE.matcher(contact).matches()
+    }
+
+    fun contactIsEmail(contact: String) : Boolean {
+        return android.util.Patterns.EMAIL_ADDRESS.matcher(contact).matches()
     }
 
 }
