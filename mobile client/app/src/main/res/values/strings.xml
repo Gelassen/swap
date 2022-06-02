@@ -15,4 +15,8 @@
     <string name="title_offers">Offers</string>
     <string name="title_demands">Demands</string>
     <string name="title_chains">Chains</string>
+
+    <!-- Offers screen -->
+    <string name="no_offers_in_user_profile">Did you add any offers in your profile? If you didn\'t define your offers, platform could not figure out which demands from others users you are able to full fill.</string>
+    <string name="no_demands_in_user_profile">Did you add any demands in your profile? If you didn\'t define your demands, platform could not figure out in which offers you are interested in.</string>
 </resources>
