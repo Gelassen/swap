@@ -42,7 +42,6 @@ class ContactsFragment : BaseFragment() {
         binding = ContactsFragmentBinding.inflate(inflater, container, false)
         binding.name = viewModel.uiState.value.counterpartyProfile?.name
         binding.contact = viewModel.uiState.value.counterpartyProfile?.contact
-        Log.d(App.TAG, "Service id ${requireArguments().get(EXTRA_SERVICE_ID)}")
         hideBottomNavigationView()
         return binding.root
     }
@@ -53,7 +52,6 @@ class ContactsFragment : BaseFragment() {
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 viewModel.uiState.collect { it ->
-                    Log.d(App.TAG, "[contacts] collect call ${it.counterpartyProfile}")
                     if (it.errors.isNotEmpty()) {
                         showErrorDialog(it.errors.first())
                     }
@@ -63,9 +61,7 @@ class ContactsFragment : BaseFragment() {
             }
         }
         lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                viewModel.fetchContacts(requireArguments().getLong(EXTRA_SERVICE_ID))
-            }
+            viewModel.fetchContacts(requireArguments().getLong(EXTRA_SERVICE_ID))
         }
     }
 
