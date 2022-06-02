@@ -50,14 +50,12 @@ class ContactsFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                viewModel.uiState.collect { it ->
-                    if (it.errors.isNotEmpty()) {
-                        showErrorDialog(it.errors.first())
-                    }
-                    binding.name = it.counterpartyProfile?.name
-                    binding.contact = it.counterpartyProfile?.contact
+            viewModel.uiState.collect { it ->
+                if (it.errors.isNotEmpty()) {
+                    showErrorDialog(it.errors.first())
                 }
+                binding.name = it.counterpartyProfile?.name
+                binding.contact = it.counterpartyProfile?.contact
             }
         }
         lifecycleScope.launch {
