@@ -12,32 +12,12 @@ exports.getMsg = function(code, payload) {
     return { code, payload }
 }
 
+exports.getMsg = function(code, payload, msg) {
+    return { code, payload, msg }
+}
+
 exports.getErrorMsg = function(code, payload) {
     return { code: code, payload }
-}
-
-exports.getMessage = function(code, message) {
-    return {code: code, message: message, payload: {}};
-}
-
-exports.getPayloadMessage = function(payload) {
-    return {payload: payload}
-}
-
-exports.getErrorMessage = function() {
-    return {code: 500, message: "unsuccess", payload: {}}
-}
-
-exports.getErrorMessage = function(payload) {
-    return {code: 500, message: "unsuccess", payload: payload}
-}
-
-exports.getErrorMessage = function(code, message) {
-    return {code: code, message: message, payload: {}}
-}
-
-exports.getErrorMessage = function(code, message, payload) {
-    return {code: code, message: message, payload: payload}
 }
 
 exports.statusSuccess = 1
@@ -76,7 +56,7 @@ exports.send = async function send (req, res, result) {
         res.send(JSON.stringify(result));
     } else {
         logger.log(`[reply] status code ${JSON.stringify(result.code)}, payload ${JSON.stringify(result)}`);
-        res.status(result.code).send({ payload: result.payload });
+        res.status(result.code).send({ payload: result.payload, msg: result.msg });
     }
     res.end();
 }

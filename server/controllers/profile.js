@@ -27,19 +27,19 @@ exports.create = async function(req, res) {
             result = network.getErrorMsg(401, authResult.result);
         } else {
             logger.log(`[account::create] [6] try to get profile by cell`);
-            let credentials = getAuthNameSecretPair(
-                getAuthHeaderAsTokens(req)
+            let credentials = network.getAuthNameSecretPair(
+                network.getAuthHeaderAsTokens(req)
             );
-            logger.log(`[auth header issue] ${JSON.stringify(getAuthHeaderAsTokens(req))}`);
+            logger.log(`[auth header issue] ${JSON.stringify(network.getAuthHeaderAsTokens(req))}`);
             let profiles = await profile.getProfileByCell(req, res, credentials);
             logger.log(`[account::create] [7] profiles result: ${JSON.stringify(profiles)}`);
             if (isAttemptToSignIn(profiles, credentials[1])) {
                 // we have to return back to the client a full profile
                 let model = await profile.getFullProfile(credentials)
-                    .catch(e => network.getErrorMessage(e));
+                    .catch(e => network.getErrorMsg(500, JSON.stringify(e)));
                 logger.log("Full profile response: " + JSON.stringify(model));
                 logger.log(`Json response keys size ${Object.keys(model).length}`);
-                if (noSuchData(model)) {
+                if (network.noSuchData(model)) {
                     // should be never invoked due to the first check await profile.getProfileByCell(req, res)
                     result = network.getMsg(204, model);
                 } else {
@@ -56,7 +56,7 @@ exports.create = async function(req, res) {
         }
     }
     logger.log("[profile] create-response " + JSON.stringify(result));
-    send(req, res, result)
+    network.send(req, res, result)
     logger.log(`[account::create] [9] end`)
 }
 
@@ -64,23 +64,23 @@ exports.get = async function(req, res) {
     let result;
     if (req.get(global.authHeader) === undefined) {
         result = network.getErrorMsg(401, global.noAuthHeaderMsg)
-    } else if (getAuthHeaderAsTokens(req).error) {
-        result = network.getErrorMsg(400, getAuthHeaderAsTokens(req).result);
+    } else if (network.getAuthHeaderAsTokens(req).error) {
+        result = network.getErrorMsg(400, network.getAuthHeaderAsTokens(req).result);
     } else {
-        let credentials = getAuthNameSecretPair(
-            getAuthHeaderAsTokens(req)
+        let credentials = network.getAuthNameSecretPair(
+            network.getAuthHeaderAsTokens(req)
         );
         let model = await profile.getFullProfile(credentials)
-            .catch(e => network.getErrorMessage(e));
+            .catch(e => network.getErrorMsg(500, JSON.stringify(e)));
         logger.log("Full profile response: " + JSON.stringify(model));
         logger.log(`Json response keys size ${Object.keys(model).length}`);
-        if (noSuchData(model)) {
+        if (network.noSuchData(model)) {
             result = network.getMsg(204, model);
         } else {
             result = network.getMsg(200, model);
         }
     }
-    send(req, res, result)
+    network.send(req, res, result)
 }
 
 /* intended to be used for CI tests only */
@@ -88,14 +88,14 @@ exports.delete = async function(req, res) {
     let result; 
     if (req.get(global.authHeader) === undefined) {
         result = network.getErrorMsg(401, global.noAuthHeaderMsg);
-    } else if (getAuthHeaderAsTokens(req).error) {
-        result = network.getErrorMsg(400, getAuthHeaderAsTokens(req).result);
+    } else if (network.getAuthHeaderAsTokens(req).error) {
+        result = network.getErrorMsg(400, network.getAuthHeaderAsTokens(req).result);
     } else {
-        let credentials = getAuthNameSecretPair(
-            getAuthHeaderAsTokens(req)
+        let credentials = network.getAuthNameSecretPair(
+            network.getAuthHeaderAsTokens(req)
         );
         let model = await profile.getProfileByCell(req, res, credentials);
-        if (noSuchData(model)) {
+        if (network.noSuchData(model)) {
             result = network.getErrorMsg(404, model);
         } else {
             let isSuccess = await profile.deleteProfile(req, res, credentials);
@@ -106,7 +106,7 @@ exports.delete = async function(req, res) {
             }
         }
     }
-    send(req, res, result)
+    network.send(req, res, result)
 }
 
 exports.addOffer = async function(req, res) {
@@ -116,19 +116,19 @@ exports.addOffer = async function(req, res) {
     offerFromRequest.index = prepareIndex(offerFromRequest.title);
     if (req.get(global.authHeader) === undefined) {
         result = network.getErrorMsg(401, "Did you forget to add authorization header?");
-    } else if (getAuthHeaderAsTokens(req).error) {
+    } else if (network.getAuthHeaderAsTokens(req).error) {
         result = network.getErrorMsg(400, "Did you add correct authorization header?");
     } else if (!validator.validateService(offerFromRequest)) {
         logger.log(`[add offer] offer payload ${offerFromRequest} check - failed`);
         result = network.getErrorMsg(400, "Did you forget to add a valid profile as a payload?");
     } else {
-        let credentials = getAuthNameSecretPair(
-            getAuthHeaderAsTokens(req)
+        let credentials = network.getAuthNameSecretPair(
+            network.getAuthHeaderAsTokens(req)
         );
         let profileResult = await profile.getFullProfile(credentials);
         logger.log(`[add offer] offer ${JSON.stringify(offerFromRequest)}`);
         logger.log(`[add offer] full profile ${JSON.stringify(profileResult)}`);
-        if (noSuchData(profileResult)) {
+        if (network.noSuchData(profileResult)) {
             result = network.getErrorMsg(401, "There is no account for this credentials. Are you authorized?")
         } else if (isThereSuchService(profileResult.offers, offerFromRequest)) {
             result = network.getErrorMsg(409, `The same offer for this profile already exist ${JSON.stringify(offerFromRequest)}`);
@@ -137,7 +137,7 @@ exports.addOffer = async function(req, res) {
             result = await profile.addOffer(offerFromRequest, profileResult.id); 
         }
     }
-    send(req, res, result);
+    network.send(req, res, result);
     logger.log("[add offer] ends");
 }
 
@@ -148,19 +148,19 @@ exports.addDemand = async function(req, res) {
     demandFromRequest.index = prepareIndex(demandFromRequest.title);
     if (req.get(global.authHeader) === undefined) {
         result = network.getErrorMsg(401, "Did you forget to add authorization header?");
-    } else if (getAuthHeaderAsTokens(req).error) {
+    } else if (network.getAuthHeaderAsTokens(req).error) {
         result = network.getErrorMsg(400, "Did you add correct authorization header?");
     } else if (!validator.validateService(demandFromRequest)) {
         logger.log(`[add demand] demand payload ${demandFromRequest} check - failed`);
         result = network.getErrorMsg(400, "Did you forget to add a valid profile as a payload?");
     } else {
-        let credentials = getAuthNameSecretPair(
-            getAuthHeaderAsTokens(req)
+        let credentials = network.getAuthNameSecretPair(
+            network.getAuthHeaderAsTokens(req)
         );
         let profileResult = await profile.getFullProfile(credentials);
         logger.log(`[add demand] offer ${JSON.stringify(demandFromRequest)}`);
         logger.log(`[add demand] full profile ${JSON.stringify(profileResult)}`);
-        if (noSuchData(profileResult)) {
+        if (network.noSuchData(profileResult)) {
             result = network.getErrorMsg(401, "There is no account for this credentials. Are you authorized?")
         } else if (isThereSuchService(profileResult.demands, demandFromRequest)) {
             result = network.getErrorMsg(409, `The same demand for this profile already exist ${JSON.stringify(demandFromRequest)}`);
@@ -169,7 +169,7 @@ exports.addDemand = async function(req, res) {
             result = await profile.addDemand(demandFromRequest, profileResult.id); 
         }
     }
-    send(req, res, result); 
+    network.send(req, res, result); 
     logger.log("[add demand] ends");
 }
 
@@ -178,14 +178,14 @@ exports.deleteOffer = async function(req, res) {
     let result = network.getMsg(200, "Not defined");
     if (req.get(global.authHeader) === undefined) {
         result = network.getErrorMsg(401, "Did you forget to add authorization header?");
-    } else if (getAuthHeaderAsTokens(req).error) {
+    } else if (network.getAuthHeaderAsTokens(req).error) {
         result = network.getErrorMsg(400, "Did you add correct authorization header?");
     } else {
-        let credentials = getAuthNameSecretPair(
-            getAuthHeaderAsTokens(req)
+        let credentials = network.getAuthNameSecretPair(
+            network.getAuthHeaderAsTokens(req)
         );
         let profileResult = await profile.getFullProfile(credentials);
-        if (noSuchData(profileResult)) {
+        if (network.noSuchData(profileResult)) {
             result = network.getErrorMsg(401, "There is no account for this credentials. Are you authorized?");
         } else if(thereIsNoThisService(profileResult.offers, req.param.id)) {
             result = network.getErrorMsg(404, `There is an account for this credentials, but there is no offer in for this id ${req.params.id}`);
@@ -198,7 +198,7 @@ exports.deleteOffer = async function(req, res) {
             }
         }
     }
-    send(req, res, result);
+    network.send(req, res, result);
     logger.log('[delete offer] end');
 }
 
@@ -207,14 +207,14 @@ exports.deleteDemand = async function(req, res) {
     let result = network.getMsg(200, "Not defined");
     if (req.get(global.authHeader) === undefined) {
         result = network.getErrorMsg(401, "Did you forget to add authorization header?");
-    } else if (getAuthHeaderAsTokens(req).error) {
+    } else if (network.getAuthHeaderAsTokens(req).error) {
         result = network.getErrorMsg(400, "Did you add correct authorization header?");
     } else {
-        let credentials = getAuthNameSecretPair(
-            getAuthHeaderAsTokens(req)
+        let credentials = network.getAuthNameSecretPair(
+            network.getAuthHeaderAsTokens(req)
         );
         let profileResult = await profile.getFullProfile(credentials);
-        if (noSuchData(profileResult)) {
+        if (network.noSuchData(profileResult)) {
             result = network.getErrorMsg(401, "There is no account for this credentials. Are you authorized?");
         } else if(thereIsNoThisService(profileResult.demands, req.param.id)) {
             result = network.getErrorMsg(404, `There is an account for this credentials, but there is no demand in for this id ${req.params.id}`);
@@ -227,7 +227,7 @@ exports.deleteDemand = async function(req, res) {
             }
         }
     }
-    send(req, res, result);
+    network.send(req, res, result);
     logger.log('[delete demand] end');
 }
 
@@ -273,38 +273,13 @@ function thereIsSuchData(obj) {
     return Object.keys(obj).length
 }
 
+/**
+ * @deprecated
+ */
 function noSuchData(obj) {
     return !Object.keys(obj).length
 }
 
 function isAttemptToSignIn(profile, reqSecret) {
     return Object.keys(profile).length && profile.secret === reqSecret;
-}
-
-/**
- * @deprecated it was moved to the 'network' module. Use 'network' module
- * @input the result of getAuthHeaderAsTokens(req); both methods require refactoring
- */
-function getAuthNameSecretPair(authResult) {
-    return authResult.result.split(":");
-}
-
-/**
- * @deprecated it was moved to the 'network' module. Use 'network' module
- */
-function getAuthHeaderAsTokens(req) {
-    return auth.parse(req.get(global.authHeader));
-}
-
-/**
- * @deprecated it was moved to the 'network' module. Use 'network' module
- */
-async function send (req, res, result) {
-    if (result.code === undefined) {
-        res.send(JSON.stringify(result));
-    } else {
-        logger.log(`[reply] status code ${JSON.stringify(result.code)}, payload ${JSON.stringify(result)}`);
-        res.status(result.code).send({ payload: result.payload });
-    }
-    res.end();
 }

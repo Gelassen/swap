@@ -105,7 +105,7 @@ describe('Cover /api/v1/offers with tests', () => {
             .get('/api/v1/offers?page=1&size=20')
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .set('Content-Type', 'application/json; charset=utf-8')
-            .expect(200, { "payload" : "Profile doesn't have any demands. In this case there is no need to select offers." });
+            .expect(200, { "payload" : "", "msg" : "Profile doesn't have any demands. In this case there is no need to select offers." });
 
         // clean database from test data
         const response = await request(app)
