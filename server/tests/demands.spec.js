@@ -105,7 +105,7 @@ describe('Cover /api/v1/demands with tests', () => {
             .get('/api/v1/demands?page=1&size=10')
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .set('Content-Type', 'application/json; charset=utf-8')
-            .expect(200, { "payload" : "Profile doesn't have any offers. In this case there is no filter to match demands." });
+            .expect(200, { "payload" : [], "msg" : "Profile doesn't have any offers. In this case there is no filter to match demands." });
 
         // clean database from test data
         const response = await request(app)

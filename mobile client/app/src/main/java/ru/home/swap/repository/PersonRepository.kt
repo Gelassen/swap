@@ -29,7 +29,7 @@ class PersonRepository(val api: IApi, val cache: Cache, val context: Context) {
             if (response.isSuccessful) {
                 Log.d(App.TAG, "[c] response is ok")
                 var payload = response.body()!!
-                payload = if (payload.payload == null) ProfileResponse(EmptyPayload()) else payload
+                payload = if (payload.payload == null) ProfileResponse(EmptyPayload(), "") else payload
                 emit(Response.Data(payload.payload))
             } else {
                 Log.d(App.TAG, "[d] response is not ok")

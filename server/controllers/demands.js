@@ -38,7 +38,7 @@ exports.get = async function(req, res) {
             result = profileResult;
         } else if (profileResult.offers.length == 0) {
             logger.log("[3]");
-            result = network.getMsg(200, "Profile doesn't have any offers. In this case there is no filter to match demands.");
+            result = network.getMsg(200, [], "Profile doesn't have any offers. In this case there is no filter to match demands.");
         } else {
             logger.log("[4]");
             let demandsResult = await demands.getDemands(profileResult, req.query.page, req.query.size);
