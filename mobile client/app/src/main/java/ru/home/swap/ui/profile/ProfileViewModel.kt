@@ -149,6 +149,14 @@ class ProfileViewModel
         val newService = Service(title = proposal.get()!!, date = 0L, index = listOf())
         viewModelScope.launch {
             repository.addOffer(uiState.value.contact, uiState.value.secret, newService)
+                .flatMapConcat { it ->
+                    if (it is Response.Data) {
+                        repository.cacheAccount(it.data)
+                    }
+                    flow {
+                        emit(it)
+                    }
+                }
                 .collect { it ->
                     Log.d(App.TAG, "[add offer] start collect data in viewmodel")
                     processAddOfferResponse(it)
@@ -159,6 +167,14 @@ class ProfileViewModel
     fun removeOffer(item: Service) {
         viewModelScope.launch {
             repository.removeOffer(uiState.value.contact, uiState.value.secret, item.id)
+                .flatMapConcat { it ->
+                    if (it is Response.Data) {
+                        repository.cacheAccount(it.data)
+                    }
+                    flow {
+                        emit(it)
+                    }
+                }
                 .collect { it ->
                     processRemoveOfferResponse(it)
                 }
@@ -169,6 +185,14 @@ class ProfileViewModel
         val newService = Service(title = proposal.get()!!, date = 0L, index = listOf())
         viewModelScope.launch {
             repository.addDemand(uiState.value.contact, uiState.value.secret, newService)
+                .flatMapConcat { it ->
+                    if (it is Response.Data) {
+                        repository.cacheAccount(it.data)
+                    }
+                    flow {
+                        emit(it)
+                    }
+                }
                 .collect { it ->
                     processAddDemandResponse(it)
                 }
@@ -178,6 +202,14 @@ class ProfileViewModel
     fun removeDemand(item: Service) {
         viewModelScope.launch {
             repository.removeDemand(uiState.value.contact, uiState.value.secret, item.id)
+                .flatMapConcat { it ->
+                    if (it is Response.Data) {
+                        repository.cacheAccount(it.data)
+                    }
+                    flow {
+                        emit(it)
+                    }
+                }
                 .collect { it ->
                     processRemoveDemandsResponse(it)
                 }
