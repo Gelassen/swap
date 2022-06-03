@@ -41,13 +41,12 @@ class OffersViewModel
                 .onStart { state.update { state -> state.copy(isLoading = true) } }
                 .flatMapConcat { it ->
                     state.update { state ->
-/*                        if (it.offers.isEmpty()) {
+                        if (it.offers.isEmpty()) {
                             val errorMsg = application.getString(R.string.no_demands_in_user_profile)
                             state.copy(profile = it, errors = state.errors.plus(errorMsg))
                         } else {
                             state.copy(profile = it)
-                        }*/
-                        state.copy(profile = it)
+                        }
                     }
                     getPagingData(state.value.profile!!)
                 }

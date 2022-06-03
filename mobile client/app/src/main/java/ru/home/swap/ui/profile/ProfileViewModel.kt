@@ -17,6 +17,7 @@ import ru.home.swap.repository.PersonRepository
 import ru.home.swap.repository.PersonRepository.*
 import javax.inject.Inject
 
+// TODO refactor model to with profile object and remove redundant extra classes
 sealed interface IModel {
     val isLoading: Boolean
     val errors: List<String>
@@ -152,6 +153,10 @@ class ProfileViewModel
                 .flatMapConcat { it ->
                     if (it is Response.Data) {
                         repository.cacheAccount(it.data)
+                            .collect { it ->
+                                // no op, just execute the command
+                                Log.d(App.TAG, "account has been cached")
+                            }
                     }
                     flow {
                         emit(it)
@@ -170,6 +175,10 @@ class ProfileViewModel
                 .flatMapConcat { it ->
                     if (it is Response.Data) {
                         repository.cacheAccount(it.data)
+                            .collect { it ->
+                                // no op, just execute the command
+                                Log.d(App.TAG, "account has been cached")
+                            }
                     }
                     flow {
                         emit(it)
@@ -188,6 +197,10 @@ class ProfileViewModel
                 .flatMapConcat { it ->
                     if (it is Response.Data) {
                         repository.cacheAccount(it.data)
+                            .collect { it ->
+                                // no op, just execute the command
+                                Log.d(App.TAG, "account has been cached")
+                            }
                     }
                     flow {
                         emit(it)
@@ -205,6 +218,10 @@ class ProfileViewModel
                 .flatMapConcat { it ->
                     if (it is Response.Data) {
                         repository.cacheAccount(it.data)
+                            .collect { it ->
+                                // no op, just execute the command
+                                Log.d(App.TAG, "account has been cached")
+                            }
                     }
                     flow {
                         emit(it)
@@ -275,6 +292,19 @@ class ProfileViewModel
                         Log.d(App.TAG, "[b2] Get cached account call and request server for an actual one")
                         repository.getAccount(it)
                     }
+                }
+                .flatMapConcat { it ->
+                    if (it is Response.Data) {
+                        repository.cacheAccount(it.data)
+                            .collect { it ->
+                                // no op, just execute the command
+                                Log.d(App.TAG, "account has been cached")
+                            }
+                    }
+                    flow {
+                        emit(it)
+                    }
+
                 }
                 .onStart {
                     state.update { state ->

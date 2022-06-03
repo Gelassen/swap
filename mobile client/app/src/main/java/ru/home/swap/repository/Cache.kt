@@ -39,7 +39,7 @@ class Cache(val context: Context) {
             .map { preferences ->
                 Log.d(App.TAG, "[cache] get profile from cache")
                 PersonProfile(
-                    id = if (preferences[PROFILE_ID_KEY].isNullOrEmpty()) -1L else  preferences[PROFILE_ID_KEY] as Long?,
+                    id = if (preferences[PROFILE_ID_KEY].isNullOrEmpty()) -1L else  preferences[PROFILE_ID_KEY]?.toLong(),
                     name = preferences[PROFILE_NAME_KEY] ?: "",
                     contact = preferences[PROFILE_CONTACT_KEY] ?: "",
                     secret = preferences[PROFILE_SECRET_KEY] ?: "",
