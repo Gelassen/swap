@@ -6,7 +6,7 @@
 
     </data>
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
@@ -23,6 +23,7 @@
             android:id="@+id/demands_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_below="@+id/progress_indicator"
             />
 
         <FrameLayout
@@ -44,5 +45,5 @@
         </FrameLayout>
 
 
-    </LinearLayout>
+    </RelativeLayout>
 </layout>

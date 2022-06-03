@@ -103,6 +103,7 @@ class OffersFragment: BaseFragment(), OffersAdapter.IListener {
                     if (it.pagingData != null) {
                         (binding.offersList.adapter as OffersAdapter).submitData(it.pagingData)
                     }
+                    binding.noContent.visibility = if (binding.offersList.adapter!!.itemCount == 0) View.VISIBLE else View.GONE
                 }
             }
         }
