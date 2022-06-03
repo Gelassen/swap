@@ -12,6 +12,7 @@ import ru.home.swap.R
 import ru.home.swap.model.PersonProfile
 import ru.home.swap.model.Service
 import ru.home.swap.repository.Cache
+import ru.home.swap.repository.PersonRepository
 import ru.home.swap.repository.pagination.DemandsPagingSource
 import ru.home.swap.repository.pagination.OffersPagingSource
 import ru.home.swap.ui.offers.Model
@@ -27,7 +28,7 @@ data class Model(
 class DemandsViewModel
 @Inject constructor(
     private val offersPagingSource: DemandsPagingSource,
-    private val cache: Cache,
+    private val repository: PersonRepository,
     private val application: Context
 ) : ViewModel() {
 
@@ -38,16 +39,17 @@ class DemandsViewModel
 
     suspend fun fetchDemands() {
         if (uiState.value.profile == null) {
-            cache.getProfile()
+            repository.getCachedAccount()
                 .onStart {state.update { state -> state.copy(isLoading = true) } }
                 .flatMapConcat { it ->
                     state.update { state ->
-                        if (it.offers.isEmpty()) {
+/*                        if (it.offers.isEmpty()) {
                             val errorMsg = application.getString(R.string.no_offers_in_user_profile)
                             state.copy(profile = it, errors = state.errors.plus(errorMsg))
                         } else {
                             state.copy(profile = it)
-                        }
+                        }*/
+                        state.copy(profile = it)
                     }
                     getPagingData(state.value.profile!!)
                 }
