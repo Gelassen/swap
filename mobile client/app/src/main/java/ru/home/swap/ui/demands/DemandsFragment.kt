@@ -93,18 +93,16 @@ class DemandsFragment: BaseFragment(), OffersAdapter.IListener {
 
     private fun listenUpdates() {
         lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                viewModel.uiState.collect { it ->
-                    Log.d(App.PAGING, "[offers] get update from viewmodel ${it.pagingData}")
-                    binding.progressIndicator.visibility = if (it.isLoading) View.VISIBLE else View.GONE
-                    if (it.errors.isNotEmpty()) {
-                        showErrorDialog(it.errors.get(0))
-                    }
-                    if (it.pagingData != null) {
-                        (binding.demandsList.adapter as OffersAdapter).submitData(it.pagingData)
-                    }
-                    binding.noContent.visibility = if (binding.demandsList.adapter?.itemCount == 0) View.VISIBLE else View.GONE
+            viewModel.uiState.collect { it ->
+                Log.d(App.PAGING, "[offers] get update from viewmodel ${it.pagingData}")
+                binding.progressIndicator.visibility = if (it.isLoading) View.VISIBLE else View.GONE
+                if (it.errors.isNotEmpty()) {
+                    showErrorDialog(it.errors.get(0))
                 }
+                if (it.pagingData != null) {
+                    (binding.demandsList.adapter as OffersAdapter).submitData(it.pagingData)
+                }
+                binding.noContent.visibility = if (binding.demandsList.adapter?.itemCount == 0) View.VISIBLE else View.GONE
             }
         }
         lifecycleScope.launch {

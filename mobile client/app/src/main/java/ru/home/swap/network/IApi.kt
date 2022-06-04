@@ -9,6 +9,8 @@ import ru.home.swap.network.model.ProfileResponse
 
 interface IApi {
 
+    // TODO rename ProfileResponse generic class to more general name, e.g. ApiResponse
+
     @Headers("Content-Type: application/json; charset=utf-8")
     @POST("/api/v1/account")
     suspend fun createProfile(
