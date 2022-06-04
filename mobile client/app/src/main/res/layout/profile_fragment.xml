@@ -40,7 +40,7 @@
                     android:layout_marginEnd="@dimen/base_margin_extra"
                     android:layout_marginBottom="@dimen/component_margin"
                     android:gravity="center_vertical"
-                    android:text="@={viewmodel.state.name}"
+                    android:text="@={viewmodel.state.profile.name}"
                     android:textColor="@color/white"
                     android:textSize="@dimen/title_text_size"
                     tools:text="Jane Ostin" />
@@ -54,22 +54,7 @@
                     android:layout_marginEnd="@dimen/base_margin_extra"
                     android:layout_marginBottom="@dimen/component_margin"
                     android:background="@color/white"
-
                     />
-
-                <!--                <TextView-->
-                <!--                    android:id="@+id/name"-->
-                <!--                    android:layout_width="match_parent"-->
-                <!--                    android:layout_height="wrap_content"-->
-                <!--                    android:layout_marginStart="@dimen/base_margin_extra"-->
-                <!--                    android:layout_marginEnd="@dimen/base_margin_extra"-->
-                <!--                    android:layout_marginBottom="@dimen/component_margin"-->
-                <!--                    android:layout_below="@+id/profile_title"-->
-                <!--                    android:textColor="@color/white"-->
-                <!--                    android:textAllCaps="false"-->
-                <!--                    android:textSize="18sp"-->
-                <!--                    android:text="@={viewmodel.state.name}"-->
-                <!--                    tools:text="Jane Ostin"/>-->
 
                 <TextView
                     android:id="@+id/offers_title"

@@ -17,102 +17,12 @@ import ru.home.swap.repository.PersonRepository
 import ru.home.swap.repository.PersonRepository.*
 import javax.inject.Inject
 
-// TODO refactor model to with profile object and remove redundant extra classes
-sealed interface IModel {
-    val isLoading: Boolean
-    val errors: List<String>
-    val status: StateFlag
-
-    data class ProfileState(
-        var name: String = "",
-        val offers: MutableList<Service> = mutableListOf<Service>(),
-        val demands: MutableList<Service> = mutableListOf<Service>(),
-        override val isLoading: Boolean = false,
-        override val errors: List<String> = emptyList(),
-        override val status: StateFlag = StateFlag.PROFILE
-    ) : IModel {
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (javaClass != other?.javaClass) return false
-
-            other as ProfileState
-
-            if (name != other.name) return false
-            if (offers != other.offers) return false
-            if (demands != other.demands) return false
-            if (isLoading != other.isLoading) return false
-            if (errors != other.errors) return false
-            if (status != other.status) return false
-
-            return true
-        }
-
-        override fun hashCode(): Int {
-            var result = name.hashCode()
-            result = 31 * result + offers.hashCode()
-            result = 31 * result + demands.hashCode()
-            result = 31 * result + isLoading.hashCode()
-            result = 31 * result + errors.hashCode()
-            result = 31 * result + status.hashCode()
-            return result
-        }
-    }
-
-    data class CredentialsState(
-        var contact: String,
-        var secret: String,
-        override val isLoading: Boolean = false,
-        override val errors: List<String> = emptyList(),
-        override val status: StateFlag = StateFlag.CREDENTIALS
-    ) : IModel
-
-    data class NoState(
-        override val isLoading: Boolean,
-        override val errors: List<String>,
-        override val status: StateFlag = StateFlag.NONE
-
-    ) : IModel
-}
 data class Model(
-    var id: Long? = null,
-    var contact: String = "",
-    var secret: String = "",
-    var name: String = "",
-    val offers: MutableList<Service> = mutableListOf<Service>(),
-    val demands: MutableList<Service> = mutableListOf<Service>(),
+    var profile: PersonProfile = PersonProfile(),
     val isLoading: Boolean = false,
     val errors: List<String> = emptyList(),
     val status: StateFlag = StateFlag.NONE
-) {
-    fun toUiState(): IModel {
-        when(status) {
-            StateFlag.CREDENTIALS -> {
-                return IModel.CredentialsState(
-                    contact = contact,
-                    secret = secret,
-                    isLoading = isLoading,
-                    errors = errors
-                )
-            }
-            StateFlag.PROFILE -> {
-                return IModel.ProfileState(
-                    name = name,
-                    offers = offers,
-                    demands = demands,
-                    isLoading = isLoading,
-                    errors = errors
-                )
-            }
-            StateFlag.NONE -> {
-                return IModel.NoState(
-                    isLoading = isLoading,
-                    errors = errors
-                )
-            }
-        }
-
-    }
-}
+)
 
 enum class StateFlag {
     CREDENTIALS,
@@ -149,7 +59,10 @@ class ProfileViewModel
     fun addOffer() {
         val newService = Service(title = proposal.get()!!, date = 0L, index = listOf())
         viewModelScope.launch {
-            repository.addOffer(uiState.value.contact, uiState.value.secret, newService)
+            repository.addOffer(
+                contact = uiState.value.profile.contact,
+                secret = uiState.value.profile.secret,
+                newService = newService)
                 .flatMapConcat { it ->
                     if (it is Response.Data) {
                         repository.cacheAccount(it.data)
@@ -171,7 +84,10 @@ class ProfileViewModel
 
     fun removeOffer(item: Service) {
         viewModelScope.launch {
-            repository.removeOffer(uiState.value.contact, uiState.value.secret, item.id)
+            repository.removeOffer(
+                contact = uiState.value.profile.contact,
+                secret = uiState.value.profile.secret,
+                id = item.id)
                 .flatMapConcat { it ->
                     if (it is Response.Data) {
                         repository.cacheAccount(it.data)
@@ -193,7 +109,10 @@ class ProfileViewModel
     fun addDemand() {
         val newService = Service(title = proposal.get()!!, date = 0L, index = listOf())
         viewModelScope.launch {
-            repository.addDemand(uiState.value.contact, uiState.value.secret, newService)
+            repository.addDemand(
+                contact = uiState.value.profile.contact,
+                secret = uiState.value.profile.secret,
+                newService = newService)
                 .flatMapConcat { it ->
                     if (it is Response.Data) {
                         repository.cacheAccount(it.data)
@@ -214,7 +133,10 @@ class ProfileViewModel
 
     fun removeDemand(item: Service) {
         viewModelScope.launch {
-            repository.removeDemand(uiState.value.contact, uiState.value.secret, item.id)
+            repository.removeDemand(
+                contact = uiState.value.profile.contact,
+                secret = uiState.value.profile.secret,
+                id = item.id)
                 .flatMapConcat { it ->
                     if (it is Response.Data) {
                         repository.cacheAccount(it.data)
@@ -234,24 +156,15 @@ class ProfileViewModel
     }
 
     fun createAnAccount() {
-        Log.d(App.TAG, "[check] contact value (${state.value.contact}) and secret value(${state.value.secret})")
-        if (PersonProvider().isAnyOfCredentialsEmpty(state.value.contact, state.value.secret)) {
+        Log.d(App.TAG, "[check] contact value (${uiState.value.profile.contact}) and secret value(${uiState.value.profile.secret})")
+        if (PersonProvider().isAnyOfCredentialsEmpty(uiState.value.profile.contact, uiState.value.profile.secret)) {
             state.update { state ->
                 state.copy(
                     errors = state.errors + application.getString(R.string.empty_credentials_error)
                 )
             }
         } else {
-            createAnAccount(
-                PersonProfile(
-                    id = state.value.id,
-                    contact = state.value.contact,
-                    secret = state.value.secret,
-                    name = state.value.name,
-                    offers = state.value.offers,
-                    demands = state.value.demands
-                )
-            )
+            createAnAccount(state.value.profile)
         }
     }
 
@@ -344,12 +257,7 @@ class ProfileViewModel
                 Log.d(App.TAG, "[5a] collect the data")
                 state.update { state ->
                     state.copy(
-                        id = it.data.id,
-                        contact = it.data.contact,
-                        name = it.data.name,
-                        secret = it.data.secret,
-                        offers = it.data.offers.toMutableList(),
-                        demands = it.data.demands.toMutableList(),
+                        profile = it.data,
                         status = StateFlag.PROFILE,
                         isLoading = false
                     )
@@ -386,11 +294,7 @@ class ProfileViewModel
                 Log.d(App.TAG, "[offers] ${offers.toString()}")
                 state.update { state ->
                     state.copy(
-                        contact = it.data.contact,
-                        secret = it.data.secret,
-                        name = it.data.name,
-                        offers = offers,
-                        demands = demands,
+                        profile = it.data,
                         status = if (it.data.contact.isEmpty() && it.data.secret.isEmpty()) StateFlag.CREDENTIALS else StateFlag.PROFILE,
                         isLoading = false
                     )
@@ -431,9 +335,11 @@ class ProfileViewModel
         when(response) {
             is Response.Data<PersonProfile> -> {
                 Log.d(App.TAG, "[add offer] positive case")
+                state.value.profile.offers = response.data.offers
                 state.update { state ->
                     state.copy(
-                        offers = response.data.offers.toMutableList()
+                        isLoading = false,
+                        profile = state.profile
                     )
                 }
             }
@@ -441,6 +347,7 @@ class ProfileViewModel
                 Log.d(App.TAG, "[add offer] error case")
                 state.update { state ->
                     state.copy(
+                        isLoading = false,
                         errors = state.errors + getErrorMessage(response)
                     )
                 }
@@ -451,10 +358,11 @@ class ProfileViewModel
     private fun processAddDemandResponse(response: Response<PersonProfile>) {
         when(response) {
             is Response.Data -> {
+                state.value.profile.demands = response.data.demands.toMutableList()
                 state.update { state ->
                     state.copy(
                         isLoading = false,
-                        demands = response.data.demands.toMutableList()
+                        profile = state.profile
                     )
                 }
             }
@@ -472,10 +380,12 @@ class ProfileViewModel
     private fun processRemoveOfferResponse(response: Response<PersonProfile>) {
         when(response) {
             is Response.Data -> {
+                state.value.profile.offers = response.data.offers.toMutableList()
                 state.update { state ->
                     state.copy(
-                        isLoading = false,
-                        offers = response.data.offers.toMutableList()
+                        profile = state.profile,
+                        isLoading = false
+
                     )
                 }
             }
@@ -493,10 +403,11 @@ class ProfileViewModel
     private fun processRemoveDemandsResponse(response: Response<PersonProfile>) {
         when(response) {
             is Response.Data -> {
+                state.value.profile.demands = response.data.demands.toMutableList()
                 state.update { state ->
                     state.copy(
                         isLoading = false,
-                        demands = response.data.demands.toMutableList()
+                        profile = state.profile
                     )
                 }
             }

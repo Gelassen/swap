@@ -56,8 +56,8 @@ class ProfileFragment : BaseFragment(), ItemAdapter.Listener {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 Log.d(App.TAG, "[collect] UI state collect is called")
                 viewModel.uiState.collect { it ->
-                    Log.d(App.TAG, "[collect] collected #${it.offers.count()} offers items")
-                    (binding.offersList.adapter as ItemAdapter).submitList(it.offers)
+                    Log.d(App.TAG, "[collect] collected #${it.profile.offers.count()} offers items")
+                    (binding.offersList.adapter as ItemAdapter).submitList(it.profile.offers)
                 }
             }
         }
@@ -65,8 +65,8 @@ class ProfileFragment : BaseFragment(), ItemAdapter.Listener {
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 viewModel.uiState.collect { it ->
-                    Log.d(App.TAG, "[collect] collected #${it.demands.count()} demands items")
-                    (binding.demandsList.adapter as ItemAdapter).submitList(it.demands)
+                    Log.d(App.TAG, "[collect] collected #${it.profile.demands.count()} demands items")
+                    (binding.demandsList.adapter as ItemAdapter).submitList(it.profile.demands)
                 }
             }
         }
@@ -82,7 +82,7 @@ class ProfileFragment : BaseFragment(), ItemAdapter.Listener {
         binding.fab.apply {
             setOnClickListener {
                 childFragmentManager.let {
-                    Log.d(App.TAG, "[fab click] Offers count: ${viewModel.uiState.value.offers.count()}")
+                    Log.d(App.TAG, "[fab click] Offers count: ${viewModel.uiState.value.profile.offers.count()}")
                     AddItemBottomSheetDialogFragment.newInstance(Bundle.EMPTY)
                         .show(it, AddItemBottomSheetDialogFragment.TAG)
                 }
