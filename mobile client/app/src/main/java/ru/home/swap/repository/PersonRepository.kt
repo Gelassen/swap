@@ -11,8 +11,6 @@ import ru.home.swap.converters.ApiResponseConverter
 import ru.home.swap.model.PersonProfile
 import ru.home.swap.model.Service
 import ru.home.swap.network.IApi
-import ru.home.swap.network.model.EmptyPayload
-import ru.home.swap.network.model.ProfileResponse
 import ru.home.swap.utils.AppCredentials
 import java.net.HttpURLConnection
 

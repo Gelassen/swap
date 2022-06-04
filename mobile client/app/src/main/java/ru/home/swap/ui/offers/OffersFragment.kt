@@ -23,6 +23,7 @@ import ru.home.swap.R
 import ru.home.swap.databinding.OffersFragmentBinding
 import ru.home.swap.di.ViewModelFactory
 import ru.home.swap.model.Service
+import ru.home.swap.network.model.ApiResponse
 import ru.home.swap.ui.common.BaseFragment
 import ru.home.swap.ui.contacts.ContactsFragment
 import javax.inject.Inject
@@ -90,7 +91,6 @@ class OffersFragment: BaseFragment(), OffersAdapter.IListener {
         )
     }
 
-    // TODO consider corner cases - do you really need to fetch items on onResume()?
     private fun listenUpdates() {
         lifecycleScope.launch {
             viewModel.uiState.collect { it ->
