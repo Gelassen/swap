@@ -52,6 +52,7 @@ exports.create = async function(req, res) {
                 logger.log(`[account::create] [7] there is no such account - attempt to create`);
                 req.body.secret = credentials[1];
                 result = await profile.create(req);
+                result = network.noSuchData(result) ? network.getMsg(200, req.body) : result;
             }
         }
     }

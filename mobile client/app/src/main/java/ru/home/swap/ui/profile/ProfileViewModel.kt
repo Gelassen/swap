@@ -263,6 +263,18 @@ class ProfileViewModel
                     Log.d(App.TAG, "[2] create account call (server)")
                     repository.createAccount(person)
                 }
+                .flatMapConcat { it ->
+                    if (it is Response.Data) {
+                        repository.cacheAccount(it.data)
+                            .collect { it ->
+                                // no op, just execute the command
+                                Log.d(App.TAG, "account has been cached")
+                            }
+                    }
+                    flow {
+                        emit(it)
+                    }
+                }
                 .catch { e ->
                     Log.d(App.TAG, "[3] get an exception in catch block")
                     Log.e(App.TAG, "Got an exception during network call", e)
@@ -304,7 +316,6 @@ class ProfileViewModel
                     flow {
                         emit(it)
                     }
-
                 }
                 .onStart {
                     state.update { state ->
@@ -327,12 +338,18 @@ class ProfileViewModel
         }
     }
 
-    private fun updateStateProfile(it: Response<EmptyPayload>) {
+    private fun updateStateProfile(it: Response<PersonProfile>) {
         when (it) {
             is Response.Data -> {
                 Log.d(App.TAG, "[5a] collect the data")
                 state.update { state ->
                     state.copy(
+                        id = it.data.id,
+                        contact = it.data.contact,
+                        name = it.data.name,
+                        secret = it.data.secret,
+                        offers = it.data.offers.toMutableList(),
+                        demands = it.data.demands.toMutableList(),
                         status = StateFlag.PROFILE,
                         isLoading = false
                     )

@@ -13,7 +13,7 @@ interface IApi {
     @POST("/api/v1/account")
     suspend fun createProfile(
         @Header("Authorization") credentials: String,
-        @Body person: PersonProfile): Response<ProfileResponse<EmptyPayload>>
+        @Body person: PersonProfile): Response<ProfileResponse<PersonProfile>>
 
     @Headers("Content-Type: application/json; charset=utf-8")
     @GET("/api/v1/account")

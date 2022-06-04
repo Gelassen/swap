@@ -18,7 +18,7 @@ import java.net.HttpURLConnection
 
 class PersonRepository(val api: IApi, val cache: Cache, val context: Context) {
 
-    fun createAccount(person: PersonProfile): Flow<Response<EmptyPayload>> {
+    fun createAccount(person: PersonProfile): Flow<Response<PersonProfile>> {
         return flow {
             Log.d(App.TAG, "[a] createProfile() call")
             val response = api.createProfile(
@@ -29,7 +29,6 @@ class PersonRepository(val api: IApi, val cache: Cache, val context: Context) {
             if (response.isSuccessful) {
                 Log.d(App.TAG, "[c] response is ok")
                 var payload = response.body()!!
-                payload = if (payload.payload == null) ProfileResponse(EmptyPayload(), "") else payload
                 emit(Response.Data(payload.payload))
             } else {
                 Log.d(App.TAG, "[d] response is not ok")
