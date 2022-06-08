@@ -44,7 +44,6 @@ public abstract class ViewModelModule {
     @Binds
     @IntoMap
     @ViewModelKey(ContactsViewModel.class)
-    @Singleton
     abstract ViewModel contactsViewModel(ContactsViewModel vm);
 
 }

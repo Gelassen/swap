@@ -71,10 +71,6 @@ class OffersFragment: BaseFragment(), OffersAdapter.IListener {
 
     override fun onItemClick(item: Service) {
         Log.e(App.TAG, "On item click ${item.title}")
-        Toast.makeText(
-            requireContext(),
-            "Show contacts is not implemented yet for service '${item.title}'",
-            Toast.LENGTH_SHORT).show()
         val bundle = bundleOf(ContactsFragment.Params.EXTRA_SERVICE_ID to item.id)
         findNavController().navigate(R.id.action_offersFragment_to_contactsFragment, bundle)
     }

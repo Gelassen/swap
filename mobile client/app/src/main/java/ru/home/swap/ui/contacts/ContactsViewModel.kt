@@ -9,8 +9,8 @@ import ru.home.swap.repository.PersonRepository
 import javax.inject.Inject
 
 data class Model(
-    val ownerProfile: PersonProfile? = null,
-    val counterpartyProfile: PersonProfile? = null,
+    var ownerProfile: PersonProfile? = null,
+    var counterpartyProfile: PersonProfile? = null,
     val isLoading: Boolean = false,
     val errors: List<String> = emptyList()
 )
@@ -27,13 +27,11 @@ class ContactsViewModel
         .stateIn(viewModelScope, SharingStarted.Eagerly, state.value)
 
     suspend fun fetchContacts(serviceId: Long) {
-        if (uiState.value.ownerProfile == null) {
+        if (state.value.ownerProfile == null) {
             cache.getProfile()
                 .onStart {state.update { state -> state.copy(isLoading = true) } }
                 .flatMapConcat { it ->
-                    state.update { state ->
-                        state.copy(ownerProfile = it)
-                    }
+                    state.update { state -> state.copy(ownerProfile = it) }
                     repository.getContacts(
                         contact = state.value.ownerProfile!!.contact,
                         secret = state.value.ownerProfile!!.secret,
@@ -89,4 +87,5 @@ class ContactsViewModel
             )
         }
     }
+
 }
