@@ -12,3 +12,8 @@ As an application I can chain people (more than two) who are interested in servi
 
 # Inspired by
 The idea to use barter with assist of the modern tech was heard by me from russian ex-oligarch Herman Sterligov during finance crisis in 2008. The idea of matching and chaining people together by their needs and offers has borrowed few things from dead Google project Schemer (https://gcemetery.co/google-schemer/) 
+
+# Contacts
+For reporting issue use 'Issues' tab, for offers -- pull requests.
+
+Email: swap.dev.abc@gmail.com
