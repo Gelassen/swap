@@ -17,6 +17,17 @@
   },
   "jest": {
     "testEnvironment": "node",
+    "coverageDirectory": "<rootDir>/dist/jest/coverage",
+    "reporters" : [
+      "default",
+      ["./node_modules/jest-html-reporter", {
+        "pageTitle": "Test Report"
+      }]
+    ],
+    "coverageReporters": [
+      "text-summary",
+      "html"
+    ],
     "coveragePathIgnorePatterns": [
       "/node_modules/"
     ],
