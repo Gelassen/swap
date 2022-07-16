@@ -1,9 +1,12 @@
 {
     "config" : {
-        "webPort" : "0"
+        "webHost" : "0.0.0.0",
+        "webPort" : "3100"
     },
     "dbConfig" : {
-        "user"     : "root",
+        "host"     : "127.0.0.1",
+        "port"     : "3306",
+        "user"     : "CI_client",
         "password" : "password",
         "database" : "test_db_swap",
         "maxSize"  : 10
