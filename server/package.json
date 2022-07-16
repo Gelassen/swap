@@ -9,7 +9,7 @@
     "start:test": "NODE_ENV=test node app.js",
     "test": "NODE_ENV=test jest --forceExit --detectOpenHandles",
     "test:debug": "NODE_ENV=test jest --forceExit --detectOpenHandles account.spec.js",
-    "install": "npm install --save-dev eslint && npm install --save-dev mysql && npm install --save-dev express && npm install --save-dev jest supertest && npm install --save-dev jest supertest && npm install --save-dev config && npm install --save-dev weak-napi && npm install --save-dev jest-watch-typeahead"
+    "install": "npm install --save-dev jest-html-reporter && npm install --save-dev eslint && npm install --save-dev mysql && npm install --save-dev express && npm install --save-dev jest supertest && npm install --save-dev jest supertest && npm install --save-dev config && npm install --save-dev weak-napi && npm install --save-dev jest-watch-typeahead"
   },
   "repository": {
     "type": "git",
