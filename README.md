@@ -1,6 +1,9 @@
 # Swap
 The idea behind this project is to give people an option to exchange products and services without money (barter).  
 
+# Github Actions CI
+Similar to the case of <a href="https://github.com/Gelassen/government-rus">government-rus</a> tests passes locally, but on the server one test has been failing which marks CI run as unsuccessful. The root cause of this is unclear. Build reports created at the end of the build work as 2nd source of confidence as a workaround of this issue.  
+
 # Tech doc in user stories
 As a user I open an app and write services I can offer. 
 
