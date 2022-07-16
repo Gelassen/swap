@@ -13,6 +13,8 @@ exports.create = function(req) {
     return new Promise((resolve) => {
         pool.getConnection(function(err, connection) {
             logger.log(`[create] ${JSON.stringify(req.body)}`)
+            if (err) throw err;
+            
             var body = req.body;
             connection.query(
                 {sql : 'INSERT INTO Profile SET name = ?, contact = ?, secret = ?', timeout: TIMEOUT},
@@ -42,6 +44,8 @@ exports.getProfileByCell = function(req, res, credentials) {
     logger.log(`[model] getProfileByCell ${JSON.stringify(credentials)}`);
     return new Promise((resolve) => {
         pool.getConnection(function(err, connection) {
+            if (err) throw err;
+            
             connection.query(
                 {sql: 'SELECT * FROM Profile WHERE contact = ?', TIMEOUT},
                 [credentials[0]],
@@ -75,6 +79,8 @@ exports.getProfileByCellAndSecret = function(req, res, credentials) {
     logger.log(`[model] getProfileByCell ${JSON.stringify(credentials)}`);
     return new Promise((resolve) => {
         pool.getConnection(function(err, connection) {
+            if (err) throw err;
+            
             connection.query(
                 {sql: 'SELECT * FROM Profile WHERE contact = ? AND secret = ?', TIMEOUT},
                 [credentials[0], credentials[1]],
@@ -108,6 +114,8 @@ exports.getFullProfile = function(credentials) {
     logger.log(JSON.stringify(credentials));
     return new Promise((resolve) => {
         pool.getConnection(function(err, connection) {
+            if (err) throw err;
+            
             connection.query(
                 {sql: 'select profile.id as profileId, profile.name as profileName, profile.contact as profileContact, profile.secret as profileSecret, service.id as serviceId, service.title as serviceTitle, service.date as serviceDate, service.offer as serviceOffer, service.index as serviceIndex, service.profileId as serviceProfileId FROM Profile as profile  LEFT OUTER JOIN Service as service  ON profile.id = service.profileId  WHERE profile.contact = ? AND profile.secret = ?', timeout: TIMEOUT},
                 [credentials[0], credentials[1]],
@@ -132,6 +140,8 @@ exports.deleteProfile = function(req, res, credentials) {
     logger.log(`[delete] ${req.params.id} + ${credentials[0]} + ${credentials[1]}`);
     return new Promise((resolve) => {
         pool.getConnection(function(err, connection) {
+            if (err) throw err;
+            
             connection.query(
                 {sql: 'DELETE FROM Profile WHERE id = ? AND contact = ? AND secret = ?;'},
                 [req.params.id, credentials[0], credentials[1]],
@@ -155,6 +165,8 @@ exports.addOffer = function(offerAsObj, profileId) {
     return new Promise((resolve) => {
         pool.getConnection(function(err, connection) {
             logger.log(`[add offer] profile id ${profileId}`);
+            if (err) throw err;
+            
             connection.query(
                 {sql: 'INSERT INTO Service SET title = ?, date = ?, offer = ?, Service.index = ?, profileId = ?;'},
                 [offerAsObj.title, offerAsObj.date, OFFER, offerAsObj.index, profileId],
@@ -180,6 +192,8 @@ exports.addDemand = function(demandAsObj, profileId) {
     return new Promise((resolve) => {
         pool.getConnection(function(err, connection) {
             logger.log(`[add demand] profile id ${profileId}`);
+            if (err) throw err;
+            
             connection.query(
                 {sql: 'INSERT INTO Service SET title = ?, date = ?, offer = ?, Service.index = ?, profileId = ?;'}, 
                 [demandAsObj.title, demandAsObj.date, DEMAND, demandAsObj.index, profileId],
@@ -204,6 +218,8 @@ exports.addDemand = function(demandAsObj, profileId) {
 exports.deleteOffer = function(req) {
     return new Promise((resolve) => {
         pool.getConnection(function(err, connection) {
+            if (err) throw err;
+            
             connection.query(
                 {sql: 'DELETE FROM Service WHERE id = ?;'},
                 [req.params.id],
@@ -226,6 +242,8 @@ exports.deleteOffer = function(req) {
 exports.deleteDemand = function(req) {
     return new Promise((resolve) => {
         pool.getConnection(function(err, connection) {
+            if (err) throw err;
+            
             connection.query(
                 {sql: 'DELETE FROM Service WHERE id = ?;'},
                 [req.params.id],

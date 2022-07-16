@@ -13,6 +13,8 @@ exports.getOffers = function(fullProfile, page, size) {
     logger.log(`[get service from model] ${page}`);
     return new Promise((resolve) => {
         pool.getConnection(function(err, connection) {
+            if (err) throw err;
+            
             const sql = `SELECT * FROM Service 
                 WHERE profileId != ${fullProfile.id} 
                 AND offer = ${OFFER} 

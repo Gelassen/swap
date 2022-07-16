@@ -12,6 +12,8 @@ const DEMAND = 0;
 exports.getDemands = function(fullProfile, page, size) {
     return new Promise((resolve) => {
         pool.getConnection(function(err, connection) {
+            if (err) throw err;
+            
             const sql = `SELECT * FROM Service 
                 WHERE profileId != ${fullProfile.id} 
                 AND offer = ${DEMAND} 

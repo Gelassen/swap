@@ -10,6 +10,8 @@ const TIMEOUT = config.dbConfig.timeout;
 exports.getContactsByServiceId = function(serviceId) {
     return new Promise((resolve) => {
         pool.getConnection(function(err, connection) {
+            if (err) throw err;
+            
             const sql = `SELECT p.id, p.name, p.contact
                 FROM Profile as p
                 INNER JOIN Service 
