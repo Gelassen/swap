@@ -12,7 +12,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .expect('Content-Type', 'application/json; charset=utf-8')
             .expect(200, {msg: "Hello to open exchange platform!"})
     })
-    it('on GET /api/v1 receive a welcome message', async() => {
+    it.only('on GET /api/v1 receive a welcome message', async() => {
         await request(app)
             .get('/api/v1/')
             .expect('Content-Type', 'application/json; charset=utf-8')
