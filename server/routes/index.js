@@ -6,8 +6,21 @@ const offers = require('../controllers/offers');
 const demands = require('../controllers/demands');
 const contacts = require('../controllers/contacts');
 
+router.get('/', function(req, res) {
+    res.redirect('/api/v1');
+});
 router.get('/api/v1', function(req, res) {
-    res.send({msg: "Hello to open exchange platform!" })
+    var responseMsg = "Hello to open exchange platform! \n"
+        + "POST GET /account \n"
+        + "DELETE /account/:id \n"
+        + "POST GET /account/offers \n"
+        + "POST /account/demands \n"
+        + "DELETE /account/offers/:id \n"
+        + "DELETE /account/demands/:id \n"
+        + "GET /offers \n"
+        + "GET /demands \n"
+        + "GET /contacts \n"
+    res.send({msg: responseMsg })
 });
 router.post('/api/v1/account', profile.create);
 router.get('/api/v1/account', profile.get);

@@ -13,12 +13,22 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .expect(200, {msg: "Hello to open exchange platform!"})
     })
     it('on GET /api/v1 receive a welcome message', async() => {
+        var responseMsg = "Hello to open exchange platform! \n"
+            + "POST GET /account \n"
+            + "DELETE /account/:id \n"
+            + "POST GET /account/offers \n"
+            + "POST /account/demands \n"
+            + "DELETE /account/offers/:id \n"
+            + "DELETE /account/demands/:id \n"
+            + "GET /offers \n"
+            + "GET /demands \n"
+            + "GET /contacts \n"
         await request(app)
             .get('/api/v1/')
             .expect('Content-Type', 'application/json; charset=utf-8')
             .expect('access-control-allow-origin', '*')
             .expect('access-control-allow-headers', 'Origin, X-Requested-With, Content-Type, Accept')
-            .expect(200, { msg: 'Hello to open exchange platform!' });
+            .expect(200, { msg: responseMsg });
     });
     it('on GET /api/v1/account receive a non existing profile', async() => {
         await request(app)
