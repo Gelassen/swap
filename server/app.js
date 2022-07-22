@@ -1,3 +1,4 @@
+const createError = require('http-errors');
 const express = require('express');
 const app = express();
 const config = require('config');
@@ -13,6 +14,16 @@ app.use(function(req, res, next) {
     next()
 });
 app.use('/', indexRouter);
+
+// catch 404 and forward to error handler
+app.use(function (req, res, next) {
+    next(createError(404));
+});
+
+// error handler
+app.use(function (err, req, res, next) {
+    res.send(err.status || 500, { code: err.status, msg: err.message });
+});
 
 app.listen(config.get('config').webPort);
 
