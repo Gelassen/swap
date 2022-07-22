@@ -221,3 +221,6 @@ server/.pnp.*
 
 # configs
 server/config.js
+
+# other
+server/test-report.html
