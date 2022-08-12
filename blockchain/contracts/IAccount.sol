@@ -27,12 +27,9 @@ pragma solidity ^0.8.4;
  */
 interface IAccount {
 
-    /// fallback function
-    function () external { /* no op */}
-
     function issueOffer() external returns (uint256);
 
-    function issueDemand(string name) external returns (uint256);
+    function issueDemand(string memory name) external returns (uint256);
 
     /* function getAllHistoryOfExchanges() external view returns(Value[] history); */
 
