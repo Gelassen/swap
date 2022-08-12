@@ -130,6 +130,7 @@ server/build/Release
 # Dependency directories
 server/node_modules/
 server/jspm_packages/
+node_modules/
 
 # Snowpack dependency directory (https://snowpack.dev/)
 server/web_modules/

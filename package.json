@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "install": "npm install --save-dev hardhat"
+  },
+  "devDependencies": {
+    "hardhat": "^2.10.1"
+  }
+}
