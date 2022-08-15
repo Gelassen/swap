@@ -62,17 +62,12 @@ contract DynamicArray {
         console.log("_getFirstEmptySlotIndex() has been called");
         if (index == NO_VALUE) { return data; }
         address[] memory result = data;
-        // if (index == 0) { for (uint idx = 0; idx < DEFAULT_SIZE; idx++) { delete result[idx]; }}
-        // if (index == NO_VALUE) { /* no op */ }
         for (uint idx = uint(index); idx < data.length; idx++) { 
-            console.log("result[idx] = data[next]; is going to be called.");
-            // removeByIndex(idx);
             uint next = idx + 1;
-            result[idx] = data[next];
-            console.log("result[idx] = data[next]; has been called.");
+            if (next < data.length) {
+                result[idx] = data[next];
+            }
         }
-        // console.log("dropEmptySlots::result", result);
-        // console.log(result);
         console.log("[end] dropEmptySlots");
         return result;
     }
@@ -107,16 +102,46 @@ contract DynamicArray {
     }
 
     function _dropEmptySlots() private view returns(address[] memory) {
+        console.log("[start] _dropEmptySlots");
         int index = _getFirstEmptySlotIndex();
-        address[] memory result = data;
-        if (index == 0) { for (uint idx = 0; idx < DEFAULT_SIZE; idx++) { delete result[idx]; }}
-        if (index == NO_VALUE) { /* no op */ }
+        console.log('_getFirstEmptySlotIndex() has been called with returned index $s', uint(index));
+        if (index == NO_VALUE) { return data; }
+        
+        // TODO create a new array with size of index
+        uint emptySlotsCounter = 0;
+        for (uint idx = 0; idx < data.length; idx++) {
+            if (data[idx] == EMPTY_ADDRESS) { emptySlotsCounter++; }
+        }
+        address[] memory result = new address[](data.length - emptySlotsCounter);
+        uint resultIdx = 0;
+        for (uint idx = 0; idx < data.length; idx++) {
+            if (data[idx] != EMPTY_ADDRESS) {
+                result[resultIdx] = data[idx];
+                resultIdx++;
+            }
+        }
+
+        // for (uint idx = 0; idx < uint(index); idx++) { 
+        //     uint next = idx + 1;
+        //     if (next < data.length) {
+        //         result[idx] = data[next];
+        //     }
+        // }
+        console.log("Result with all droped empty slots has size $s", result.length);
+        console.log("[end] _dropEmptySlots");
         return result;
     }
 
     function _getFirstEmptySlotIndex() private view returns(int) {
         int result = NO_VALUE;
-        for (uint idx = 0; idx < DEFAULT_SIZE; idx++) { if (data[idx] == EMPTY_ADDRESS) result = int(idx); }
+        for (uint idx = 0; idx < DEFAULT_SIZE; idx++) { 
+            console.log('data[idx] == EMPTY_ADDRESS $s', data[idx] == EMPTY_ADDRESS);
+            console.log('data[idx] %s', data[idx]);
+            if (data[idx] == EMPTY_ADDRESS) { 
+                result = int(idx); 
+                break;
+            }
+        }
         return result;
     }
 
