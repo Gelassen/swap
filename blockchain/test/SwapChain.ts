@@ -10,11 +10,12 @@ import { time, loadFixture } from "@nomicfoundation/hardhat-network-helpers";
  */
 describe.only("SwapChain test", async function() {
     async function deploy() {
-        const factory = await ethers.getContractFactory("SwapChain");
-        const contract = await factory.deploy();
-        
         const factoryUtils = await ethers.getContractFactory("Utils");
         const contractUtils = await factoryUtils.deploy();
+
+        const factory = await ethers.getContractFactory("SwapChain");
+        const contract = await factory.deploy(contractUtils.address);
+        
         return { contract, contractUtils };
     }
 
@@ -60,10 +61,33 @@ describe.only("SwapChain test", async function() {
         const oldDemands = await contract.getDemandsByUser(someUser);
         await contract.registerUser(someUser);
 
-        await contract.registerDemand(someUser, "Framer products");
+        await contract.registerDemand(someUser, "Farmer products");
         const newDemands = await contract.getDemandsByUser(someUser);
 
-        // await expect(().length).to.be.equal(oldDemands.length);
+        await expect(newDemands.length).to.be.equal(oldDemands.length + 1);
+    });
+
+    it("On registerDemand() twice with the same input tx is reverted", async function() {
+        const { contract, contractUtils } = await loadFixture(deploy);
+        const someUser = "0x0000000000000000000000000000000000000042";
+        const oldDemands = await contract.getDemandsByUser(someUser);
+        
+        await contract.registerDemand(someUser, "Farmer products");
+        
+        await expect(contract.registerDemand(someUser, "Farmer products")).to.be.revertedWith("This pair <user, demand> already exist.");
+    });
+
+    it("On reigsterDemand() with several users and several items changes state correctly", async function() {
+        const { contract, contractUtils } = await loadFixture(deploy);
+        const someUser = "0x0000000000000000000000000000000000000042";
+        const anotherUser = "0x0000000000000000000000000000000000000043";
+
+        await contract.registerDemand(someUser, "Farmer products");
+        await contract.registerDemand(anotherUser, "Software Development");
+        await contract.registerDemand(anotherUser, "Gasoline");
+
+        await expect((await contract.getDemandsByUser(someUser)).length).to.be.equal(1);
+        await expect((await contract.getDemandsByUser(anotherUser)).length).to.be.equal(2);
     });
 
 });

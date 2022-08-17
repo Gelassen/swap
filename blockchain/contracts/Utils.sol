@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-library Utils {
+contract Utils {
 
     function stringsEquals(string memory s1, string memory s2) public pure returns (bool) {
         bytes memory b1 = bytes(s1);
@@ -16,6 +16,10 @@ library Utils {
 
     function stringsEqualsHardWay(string memory a, string memory b) public pure returns (bool) {
         return (keccak256(abi.encodePacked((a))) == keccak256(abi.encodePacked((b))));
+    }
+
+    function concatenate(string memory _In1, string memory _In2) public view returns(string memory){
+        return string(abi.encodePacked(_In1, _In2));
     }
 
 }

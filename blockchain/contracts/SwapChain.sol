@@ -2,10 +2,11 @@
 
 pragma solidity ^0.8.4;
 
-// import "./Model.sol"
 import { User } from "./Model.sol";
 import "../contracts/ISwapChain.sol";
 import "../contracts/SwapValue.sol";
+import { Utils } from "../contracts/Utils.sol";
+import "hardhat/console.sol";
 
 /**
  * ERC721 and ERC20 standarts already has links on tokens owned by address. 
@@ -22,13 +23,16 @@ contract SwapChain is ISwapChain {
 
     // uint256 _usersCounter = 0;
     // mapping(address => SwapValue[]) _users;
+    Utils _utils;
     address[] _users;
     address[] _nfts;
     mapping(string => address[]) _indexNfts;
     mapping(address => string[]) _demandsByUsers;
 
     
-    constructor() {}
+    constructor(address utilsAddr) {
+        _utils = Utils(utilsAddr);
+    }
 
     function registerUser(address user) public override {
         // require(_users[user] == [], "User should not be registered yet or have any tokens.");
@@ -50,16 +54,23 @@ contract SwapChain is ISwapChain {
     }
 
     function registerDemand(address user, string memory demand) external {
-        // string[] memory demands = _demandsByUsers[user];
-        // bool isExist = false;
-        // for (uint idx = 0; idx < demands.length; idx++) {
-        //     if (demands[idx] == demand) {
-        //         isExist = true;
-        //         break;
-        //     }
-        //     _demandsByUsers[user].push(demand);
-        // }
-        
+        console.log("[start] registerDemand()");
+        // TODO check do we need to check is the user registered in system
+        string[] memory demands = _demandsByUsers[user];
+        bool isExist = false;
+        for (uint idx = 0; idx < demands.length; idx++) {
+            console.log(demands[idx], demand);
+            if (_utils.stringsEquals(demands[idx], demand)) {
+                isExist = true;
+                break;
+            }            
+        }
+        if (isExist) {
+            revert("This pair <user, demand> already exist.");
+        } else {
+            _demandsByUsers[user].push(demand);
+        }
+        console.log("[end] registerDemand()");
     }
 
     function usersInTotal() external view override returns (uint256) {
