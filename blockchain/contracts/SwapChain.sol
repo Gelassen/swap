@@ -30,13 +30,12 @@ contract SwapChain is ISwapChain {
     
     constructor() {}
 
-    function registerUser(address user) public override returns (bool) {
+    function registerUser(address user) public override {
         // require(_users[user] == [], "User should not be registered yet or have any tokens.");
         // _users[user] = [];
         // _usersCounter++;
-        require(_isUserExist(user) != true, "User should not be registered yet ${user}");
+        require(_isUserExist(user) != true, "User should not be registered yet.");
         _users.push(user);
-        return true;
     }
 
     function registerOffer(address user, address nft) external override returns (bool) { 
@@ -50,8 +49,25 @@ contract SwapChain is ISwapChain {
         return false;
     }
 
+    function registerDemand(address user, string memory demand) external {
+        // string[] memory demands = _demandsByUsers[user];
+        // bool isExist = false;
+        // for (uint idx = 0; idx < demands.length; idx++) {
+        //     if (demands[idx] == demand) {
+        //         isExist = true;
+        //         break;
+        //     }
+        //     _demandsByUsers[user].push(demand);
+        // }
+        
+    }
+
     function usersInTotal() external view override returns (uint256) {
         return _users.length;
+    }
+
+    function getDemandsByUser(address user) external view override returns (string[] memory) {
+        return _demandsByUsers[user];
     }
 
     function showMatches(address user) external override pure returns(address[] memory) {
