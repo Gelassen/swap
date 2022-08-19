@@ -22,4 +22,10 @@ contract Utils {
         return string(abi.encodePacked(_In1, _In2));
     }
 
+    function getMaxUint() public pure returns(uint256){
+        unchecked{
+            return uint256(0) - 1;
+        }
+    }
+
 }

@@ -15,8 +15,11 @@ describe("SwapChain test", async function() {
 
         const factory = await ethers.getContractFactory("SwapChain");
         const contract = await factory.deploy(contractUtils.address);
+
+        const factoryValue = await ethers.getContractFactory("SwapValue");
+        const contractValue = await factoryValue.deploy();
         
-        return { contract, contractUtils };
+        return { contract, contractUtils, contractValue };
     }
 
     it("On registerUser() the next call of usersInTotal() will return increased number", async function() {
@@ -91,7 +94,26 @@ describe("SwapChain test", async function() {
     });
 
     it.skip("On mint new token receive address of just created token", async function() {
-        // SwapValue__factory.
+        /**
+         * There is an adress of the ERC721 contract, there is no address of just minted token. 
+         * We can get array of token id per address if it is necessary.  
+         */
+    });
+
+    it("On mint new token balance of user increases by one", async function() {
+        const accounts = await ethers.getSigners();
+        const owner = accounts[0].address;
+        const { contractValue } = await loadFixture(deploy);
+        await expect(await contractValue.balanceOf(owner)).to.be.equal(0);
+
+        // {value: ethers.utils.parseEther("0.123") }
+        await contractValue.safeMint(owner, "https://gelassen.github.io/blog/");
+
+        await expect(await contractValue.balanceOf(owner)).to.be.equal(1);
+    });
+
+    it("On mint new token with custom content token with new content is created and stored", async function() {
+        
     });
 
     it.skip("On showMatches() for existing user and value, return result", async function() {

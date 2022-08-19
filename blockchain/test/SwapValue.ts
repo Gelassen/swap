@@ -20,7 +20,7 @@ describe.only("Swap value suite", async function() {
         expect(accounts[2]).to.be.equal(2);
     });
 
-    it.only("On emit new tokens", async function() {
+    it("On emit new tokens balance of user changes", async function() {
         const accounts = await ethers.getSigners();
         const owner = accounts[0].address;
         const user1 = accounts[1].address;
@@ -32,5 +32,13 @@ describe.only("Swap value suite", async function() {
 
         await expect(await contract.balanceOf(owner)).to.be.equal(1);
     });
+
+    it("On mint new token with custom content token with new content is created and stored", async function() {
+        const accounts = await ethers.getSigners();
+        const owner = accounts[0].address;
+        const user1 = accounts[1].address;
+        const { contract } = await loadFixture(deploy);
+        await expect(await contract.balanceOf(owner)).to.be.equal(0);
+    })
 
 })
