@@ -107,13 +107,14 @@ describe("SwapChain test", async function() {
         await expect(await contractValue.balanceOf(owner)).to.be.equal(0);
 
         // {value: ethers.utils.parseEther("0.123") }
-        await contractValue.safeMint(owner, "https://gelassen.github.io/blog/");
+        const customMetadata = { offer : "Software development for Android."};
+        await contractValue.safeMint(owner, customMetadata, "https://gelassen.github.io/blog/");
 
         await expect(await contractValue.balanceOf(owner)).to.be.equal(1);
     });
 
     it("On mint new token with custom content token with new content is created and stored", async function() {
-        
+
     });
 
     it.skip("On showMatches() for existing user and value, return result", async function() {
