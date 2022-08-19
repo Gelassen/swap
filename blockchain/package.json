@@ -1,7 +1,8 @@
 {
   "name": "hardhat-project",
   "scripts": {
-    "install": "npm install --save-dev @openzeppelin/test-helpers && npm install --save-dev hardhat && npm install --save-dev @openzeppelin/contracts"
+    "install": "npm install --save-dev @openzeppelin/test-helpers && npm install --save-dev hardhat && npm install --save-dev @openzeppelin/contracts",
+    "test": "REPORT_GAS=true npx hardhat test"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^1.0.2",

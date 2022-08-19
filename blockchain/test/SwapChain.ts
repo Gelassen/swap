@@ -8,7 +8,7 @@ import { time, loadFixture } from "@nomicfoundation/hardhat-network-helpers";
  * For the rest you will receive tx. 
  * 
  */
-describe.only("SwapChain test", async function() {
+describe("SwapChain test", async function() {
     async function deploy() {
         const factoryUtils = await ethers.getContractFactory("Utils");
         const contractUtils = await factoryUtils.deploy();
@@ -90,4 +90,16 @@ describe.only("SwapChain test", async function() {
         await expect((await contract.getDemandsByUser(anotherUser)).length).to.be.equal(2);
     });
 
+    it.skip("On mint new token receive address of just created token", async function() {
+        // SwapValue__factory.
+    });
+
+    it.skip("On showMatches() for existing user and value, return result", async function() {
+        const { contract, contractUtils } = await loadFixture(deploy);
+        const firstUser = "0x0000000000000000000000000000000000000042";
+        // const firstValue = // TODO address of minted token
+        const secondUser = "0x0000000000000000000000000000000000000043";
+
+        const matches = await contract.showMatches(firstUser);
+    });
 });

@@ -81,7 +81,7 @@ contract SwapChain is ISwapChain {
         return _demandsByUsers[user];
     }
 
-    function showMatches(address user) external override pure returns(address[] memory) {
+    function showMatches(address user) external override pure returns(Match[] memory) {
         // require(_isUserExist(user) == true, "User should be registered first to view matches.");
         // require(_demandsByUsers[user].length != 0, "User should have at least one registered demand.");
 
@@ -92,7 +92,7 @@ contract SwapChain is ISwapChain {
         // }
         // // address[] memory result = matches;
         // // return address[] memory addresss;
-        return new address[](0);
+        return new Match[](0);
     }
 
     function swap(address actorOne, address actorTwo, bytes32 actorOneOffer, bytes32 actorTwoOffer) external override returns (bool) {
