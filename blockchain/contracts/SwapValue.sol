@@ -53,4 +53,6 @@ contract SwapValue is ERC721, ERC721URIStorage, Ownable {
     function offer(uint256 tokenId) public view returns(Value memory){
         return _offerPerToken[tokenId];
     }
+
+    
 }

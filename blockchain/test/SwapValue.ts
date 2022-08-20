@@ -48,6 +48,25 @@ describe.only("Swap value suite", async function() {
         console.log(JSON.stringify(await contract.offer(0)));
         console.log(JSON.stringify(customMetadata));
         await expect((await contract.offer(0)).at(0)).to.be.equal(customMetadata.offer);
-    })
+    });
+
+    it("On queryFilter() when two tokens have been minted receives token ids", async function() {
+        const accounts = await ethers.getSigners();
+        const owner = accounts[0].address;
+        const user1 = accounts[1].address;
+        const { contract } = await loadFixture(deploy);
+        const customMetadata = { "offer" : "Software development for Android."};
+        await contract.safeMint(owner, customMetadata, "https://gelassen.github.io/blog/");
+        await contract.safeMint(owner, customMetadata, "https://gelassen.github.io/blog/");
+
+        let eventFilter = contract.filters.Transfer();
+        let events = await contract.queryFilter(eventFilter)
+
+        console.log("Events: ", JSON.stringify(events));
+        expect(events[0].args[2]._hex).to.be.equal('0x00');
+        expect(events[1].args[2]._hex).to.be.equal('0x01');
+        expect(ethers.BigNumber.from(events[0].args[2]._hex)).eq(0);
+        expect(ethers.BigNumber.from(events[1].args[2]._hex)).eq(1);
+    });
 
 })

@@ -13,6 +13,11 @@ import "hardhat/console.sol";
  * Take a look on balanceOf(owner) and tokenOfOwnerByIndex(address owner, uint256 index)
  * https://docs.openzeppelin.com/contracts/3.x/api/token/erc721#IERC721Enumerable-tokenOfOwnerByIndex-address-uint256-
  * https://docs.openzeppelin.com/contracts/3.x/api/token/erc721#IERC721-balanceOf-address-
+ * Please note: balanceOf(owner) for IERC721Enumerable is very gas costly and vector of 
+ * attacks.
+ * 
+ * Alternative to IERC721Enumerable api is contract.getPastEvents():
+ * https://stackoverflow.com/questions/69302924/erc-721-how-to-get-all-token-ids 
  * 
  * For things like instanceOf() and typeOf() use check by interface implementation
  * like described in this blog post https://kushgoyal.com/solidity-how-to-check-type-of-the-contract-erc-165/
