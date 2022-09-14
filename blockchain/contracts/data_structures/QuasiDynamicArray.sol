@@ -29,24 +29,11 @@ contract DynamicArray {
     }
 
     function asPlainArray(bool dropEmptySlots) external view returns(address[] memory) {
-        // address[] memory result;
-        // if (dropEmptySlots) { 
-        //     result = _dropEmptySlots(); 
-        // } else { 
-        //     result = data;
-        // }
-        // return result;
         return _data;
     } 
 
     function push(address addr) external {
         require(addr != EMPTY_ADDRESS, "0x0000000000000000000000000000000000000000 is reserved as empty address. Did you pass correct address?");
-        // int idx = _getFirstEmptySlotIndex();
-        // if (idx == NO_VALUE) {
-        //     data.push(addr);
-        // } else {
-        //     data[uint256(idx)] = addr;
-        // }
         _data.push(addr);
     }
 
@@ -126,12 +113,6 @@ contract DynamicArray {
             }
         }
 
-        // for (uint idx = 0; idx < uint(index); idx++) { 
-        //     uint next = idx + 1;
-        //     if (next < data.length) {
-        //         result[idx] = data[next];
-        //     }
-        // }
         console.log("Result with all droped empty slots has size $s", result.length);
         console.log("[end] _dropEmptySlots");
         return result;

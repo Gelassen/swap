@@ -1,6 +1,10 @@
 pragma solidity ^0.8.4;
 
 /**
+ * Redundant legacy code
+ */
+
+/**
     Why do we need blockchain for this task? 
 
     a. To make exchange of goods & services safe for all parties (both 

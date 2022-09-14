@@ -3,6 +3,9 @@ pragma solidity ^0.8.4;
 import "../contracts/IAccount.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
+/**
+ * Redundant legacy code
+ */
 contract Account is IAccount {
 
     /// fallback function
