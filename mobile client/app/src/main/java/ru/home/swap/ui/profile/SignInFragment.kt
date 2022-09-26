@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 import ru.home.swap.App
 import ru.home.swap.AppApplication
 import ru.home.swap.R
+import ru.home.swap.core.model.DebugProfiles
 import ru.home.swap.databinding.SigninFragmentBinding
 import ru.home.swap.di.ViewModelFactory
 import ru.home.swap.providers.PersonProvider
@@ -62,6 +63,13 @@ class SignInFragment: BaseFragment() {
         binding.lifecycleOwner = this
         binding.confirm.setOnClickListener {
             viewModel.createAnAccount()
+        }
+        binding.debugBadge.setOnClickListener {
+            val profiles = DebugProfiles()
+            val profile = profiles.next(0)
+            binding.name.setText(profile.name)
+            binding.contactPhone.setText(profile.contact)
+            binding.secret.setText(profile.secret)
         }
 
         lifecycleScope.launch {
