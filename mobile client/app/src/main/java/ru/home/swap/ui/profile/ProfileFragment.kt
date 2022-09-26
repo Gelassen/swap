@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
-import ru.home.swap.model.Service
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -16,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.launch
 import ru.home.swap.App
 import ru.home.swap.AppApplication
+import ru.home.swap.core.model.Service
 import ru.home.swap.databinding.ProfileFragmentBinding
 import ru.home.swap.di.ViewModelFactory
 import ru.home.swap.ui.common.BaseFragment

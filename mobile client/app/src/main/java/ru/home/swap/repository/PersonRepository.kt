@@ -8,9 +8,9 @@ import kotlinx.coroutines.flow.flow
 import ru.home.swap.App
 import ru.home.swap.R
 import ru.home.swap.converters.ApiResponseConverter
-import ru.home.swap.model.PersonProfile
-import ru.home.swap.model.Service
-import ru.home.swap.network.IApi
+import ru.home.swap.core.model.PersonProfile
+import ru.home.swap.core.model.Service
+import ru.home.swap.core.network.IApi
 import ru.home.swap.utils.AppCredentials
 import java.net.HttpURLConnection
 

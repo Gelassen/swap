@@ -1,10 +1,10 @@
 package ru.home.swap
 
 import android.app.Application
+import ru.home.swap.core.di.NetworkModule
 import ru.home.swap.di.AppComponent
 import ru.home.swap.di.AppModule
 import ru.home.swap.di.DaggerAppComponent
-import ru.home.swap.di.NetworkModule
 
 class AppApplication: Application() {
 

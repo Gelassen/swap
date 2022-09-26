@@ -1,6 +1,7 @@
 package ru.home.swap.di
 
 import dagger.Component
+import ru.home.swap.core.di.NetworkModule
 import ru.home.swap.ui.contacts.ContactsFragment
 import ru.home.swap.ui.demands.DemandsFragment
 import ru.home.swap.ui.offers.OffersFragment

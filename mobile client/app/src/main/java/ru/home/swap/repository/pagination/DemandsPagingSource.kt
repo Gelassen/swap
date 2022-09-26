@@ -5,9 +5,8 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import retrofit2.HttpException
 import ru.home.swap.App
-import ru.home.swap.model.Service
-import ru.home.swap.network.IApi
-import ru.home.swap.repository.Cache
+import ru.home.swap.core.model.Service
+import ru.home.swap.core.network.IApi
 import ru.home.swap.utils.AppCredentials
 import java.io.IOException
 import java.util.*

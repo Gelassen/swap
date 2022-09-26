@@ -1,7 +1,7 @@
 package ru.home.swap.converters
 
 import com.google.gson.GsonBuilder
-import ru.home.swap.network.model.ApiResponse
+import ru.home.swap.core.network.model.ApiResponse
 
 class ApiResponseConverter {
 

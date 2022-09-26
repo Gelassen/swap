@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Gradle: org.web3j:rlp:4.8.7-android">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.web3j/rlp/4.8.7-android/5b0e6f06b65fad15a2e5f9296b79577699976054/rlp-4.8.7-android.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.web3j/rlp/4.8.7-android/1cd9da040e55b7c729e2c3cd56f4add3bddf4dd2/rlp-4.8.7-android-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.web3j/rlp/4.8.7-android/d10be2929cc22e241605b4d790ec39e66b43db2b/rlp-4.8.7-android-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

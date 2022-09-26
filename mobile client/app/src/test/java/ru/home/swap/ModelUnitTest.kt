@@ -2,7 +2,6 @@ package ru.home.swap
 
 import org.junit.Assert
 import org.junit.Test
-import ru.home.swap.model.Service
 import ru.home.swap.ui.profile.Model
 import ru.home.swap.ui.profile.StateFlag
 

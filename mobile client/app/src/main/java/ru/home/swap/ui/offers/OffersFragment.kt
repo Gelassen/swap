@@ -5,12 +5,9 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.os.bundleOf
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -20,10 +17,9 @@ import kotlinx.coroutines.launch
 import ru.home.swap.App
 import ru.home.swap.AppApplication
 import ru.home.swap.R
+import ru.home.swap.core.model.Service
 import ru.home.swap.databinding.OffersFragmentBinding
 import ru.home.swap.di.ViewModelFactory
-import ru.home.swap.model.Service
-import ru.home.swap.network.model.ApiResponse
 import ru.home.swap.ui.common.BaseFragment
 import ru.home.swap.ui.contacts.ContactsFragment
 import javax.inject.Inject

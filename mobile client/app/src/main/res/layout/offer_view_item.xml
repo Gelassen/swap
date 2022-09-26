@@ -6,7 +6,7 @@
     <data>
         <variable
             name="person"
-            type="ru.home.swap.model.PersonView" />
+            type="ru.home.swap.core.model.PersonView" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

@@ -9,12 +9,10 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import kotlinx.coroutines.flow.*
 import ru.home.swap.R
-import ru.home.swap.model.PersonProfile
-import ru.home.swap.model.Service
-import ru.home.swap.repository.Cache
+import ru.home.swap.core.model.PersonProfile
+import ru.home.swap.core.model.Service
 import ru.home.swap.repository.PersonRepository
 import ru.home.swap.repository.pagination.DemandsPagingSource
-import ru.home.swap.repository.pagination.OffersPagingSource
 import ru.home.swap.ui.offers.Model
 import javax.inject.Inject
 

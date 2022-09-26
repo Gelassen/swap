@@ -5,7 +5,7 @@
     <data>
         <variable
             name="service"
-            type="ru.home.swap.model.Service" />
+            type="ru.home.swap.core.model.Service" />
         <variable
             name="provider"
             type="ru.home.swap.providers.PersonProvider" />

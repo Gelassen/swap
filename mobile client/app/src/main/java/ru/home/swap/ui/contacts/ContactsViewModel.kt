@@ -3,7 +3,7 @@ package ru.home.swap.ui.contacts
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.*
-import ru.home.swap.model.PersonProfile
+import ru.home.swap.core.model.PersonProfile
 import ru.home.swap.repository.Cache
 import ru.home.swap.repository.PersonRepository
 import javax.inject.Inject

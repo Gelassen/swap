@@ -13,10 +13,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import ru.home.swap.App
-import ru.home.swap.model.PersonProfile
-import ru.home.swap.model.Service
-import ru.home.swap.model.toJson
-import java.util.*
+import ru.home.swap.core.model.PersonProfile
+import ru.home.swap.core.model.Service
+import ru.home.swap.core.model.toJson
 
 // At the top level of your kotlin file:
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")

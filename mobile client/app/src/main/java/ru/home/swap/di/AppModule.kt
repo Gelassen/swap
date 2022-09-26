@@ -4,7 +4,8 @@ import android.content.Context
 import dagger.Module
 import dagger.Provides
 import ru.home.swap.R
-import ru.home.swap.network.IApi
+import ru.home.swap.core.di.NetworkModule
+import ru.home.swap.core.network.IApi
 import ru.home.swap.repository.Cache
 import ru.home.swap.repository.PersonRepository
 import ru.home.swap.repository.pagination.DemandsPagingSource

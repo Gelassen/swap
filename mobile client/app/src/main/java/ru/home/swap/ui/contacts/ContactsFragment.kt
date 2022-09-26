@@ -5,28 +5,16 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.flow.FlowCollector
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import ru.home.swap.App
 import ru.home.swap.AppApplication
-import ru.home.swap.R
 import ru.home.swap.databinding.ContactsFragmentBinding
-import ru.home.swap.di.AppModule
-import ru.home.swap.di.NetworkModule
 import ru.home.swap.di.ViewModelFactory
-import ru.home.swap.repository.Cache
-import ru.home.swap.repository.PersonRepository
 import ru.home.swap.ui.common.BaseFragment
-import ru.home.swap.ui.common.IDialogListener
 import ru.home.swap.ui.contacts.ContactsFragment.Params.EXTRA_SERVICE_ID
-import java.lang.RuntimeException
 import javax.inject.Inject
 
 class ContactsFragment : BaseFragment() {

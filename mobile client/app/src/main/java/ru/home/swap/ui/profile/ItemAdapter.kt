@@ -5,8 +5,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import ru.home.swap.core.model.Service
 import ru.home.swap.databinding.ServiceViewItemBinding
-import ru.home.swap.model.Service
 
 class ItemAdapter(val isOffers: Boolean, val listener: Listener)
     : ListAdapter<Service, ItemAdapter.ViewHolder>(DiffCallback) {

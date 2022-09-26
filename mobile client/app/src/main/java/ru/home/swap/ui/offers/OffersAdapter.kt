@@ -5,8 +5,8 @@ import android.view.ViewGroup
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import ru.home.swap.core.model.Service
 import ru.home.swap.databinding.OffersViewItemBinding
-import ru.home.swap.model.Service
 import ru.home.swap.providers.PersonProvider
 
 class OffersAdapter(val listener: IListener, diffCallback: DiffUtil.ItemCallback<Service> = OffersComparator())

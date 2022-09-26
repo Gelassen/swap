@@ -4,7 +4,6 @@ import org.junit.Test
 
 import org.junit.Assert.*
 import ru.home.swap.model.PersonProfile
-import ru.home.swap.model.Service
 import ru.home.swap.stub.Stubs
 
 /**
