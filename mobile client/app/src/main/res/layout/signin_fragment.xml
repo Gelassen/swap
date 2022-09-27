@@ -126,6 +126,8 @@
             android:layout_gravity="bottom|end"
             android:textColor="@color/white"
             android:text="Debug"
+            android:visibility="gone"
+            tools:visibility="visible"
             />
     </FrameLayout>
 </layout>
