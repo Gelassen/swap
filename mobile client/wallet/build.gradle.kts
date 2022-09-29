@@ -4,41 +4,41 @@ plugins {
 }
 
 android {
-    compileSdk 33
+    compileSdk = 33
 
     defaultConfig {
-        minSdk 21
-        targetSdk 32
+        minSdk = 21
+        targetSdk = 32
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles "consumer-rules.pro"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles("consumer-rules.pro")
     }
 
     buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+        getByName("release") {
+            isMinifyEnabled = false
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
     kotlinOptions {
         jvmTarget = "1.8"
     }
     packagingOptions {
-        pickFirst "org/bouncycastle/x509/CertPathReviewerMessages.properties"
-        pickFirst "org/bouncycastle/x509/CertPathReviewerMessages_de.properties"
-        pickFirst "org.bouncycastle.LICENSE"
+        resources.pickFirsts.add("org/bouncycastle/x509/CertPathReviewerMessages.properties")
+        resources.pickFirsts.add("org/bouncycastle/x509/CertPathReviewerMessages_de.properties")
+        resources.pickFirsts.add("org.bouncycastle.LICENSE")
     }
 }
 
 dependencies {
 
-    implementation "androidx.core:core-ktx:1.9.0"
-    implementation "androidx.appcompat:appcompat:1.5.1"
-    implementation "com.google.android.material:material:1.6.1"
+    implementation("androidx.core:core-ktx:1.9.0")
+    implementation("androidx.appcompat:appcompat:1.5.1")
+    implementation("com.google.android.material:material:1.6.1")
 
     implementation("org.web3j:core:4.8.7-android") {
 //        exclude(group : "org.bouncycastle")
@@ -57,10 +57,10 @@ dependencies {
 //        exclude module: 'bcprov-jdk15on'
 //    }
 
-    testImplementation "junit:junit:4.13.2"
+    testImplementation("junit:junit:4.13.2")
 
-    androidTestImplementation "androidx.test.ext:junit:1.1.3"
-    androidTestImplementation "androidx.test.espresso:espresso-core:3.4.0"
+    androidTestImplementation("androidx.test.ext:junit:1.1.30")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
 
-    implementation project(":Core")
+    implementation(project(":Core"))
 }
