@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import ru.home.swap.App
 import ru.home.swap.R
-import ru.home.swap.converters.ApiResponseConverter
+import ru.home.swap.core.converters.ApiResponseConverter
 import ru.home.swap.core.model.PersonProfile
 import ru.home.swap.core.model.Service
 import ru.home.swap.core.network.IApi

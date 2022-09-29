@@ -1,4 +1,4 @@
-package ru.home.swap.converters
+package ru.home.swap.core.converters
 
 import com.google.gson.GsonBuilder
 import ru.home.swap.core.network.model.ApiResponse
