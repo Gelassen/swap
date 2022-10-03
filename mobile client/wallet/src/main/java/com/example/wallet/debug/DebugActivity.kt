@@ -59,6 +59,9 @@ class DebugActivity: AppCompatActivity() {
             }
     }
 
+    fun temporaryBlockOfCodeForExperiment() {
+    }
+
     fun test() {
         val testAPI = "https://rinkeby.infura.io/v3/ce67e157fc964d3bbf7ff1db09aa316a"
         web3 = Web3j.build(HttpService(testAPI))
