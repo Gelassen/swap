@@ -1,5 +1,6 @@
 package com.example.wallet.debug
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.*
@@ -11,12 +12,16 @@ data class Model(
 )
 class WalletViewModel(): ViewModel() {
 
-    private val repository: WalletRepository = WalletRepository()
+    private lateinit var repository: WalletRepository
 
     val state: MutableStateFlow<Model> = MutableStateFlow(Model())
     val uiState: StateFlow<Model> = state
         .asStateFlow()
         .stateIn(viewModelScope, SharingStarted.Eagerly, state.value)
+
+    fun setRepository(context: Context) {
+        repository = WalletRepository(context)
+    }
 
     fun mintToken() {
         viewModelScope.launch {
