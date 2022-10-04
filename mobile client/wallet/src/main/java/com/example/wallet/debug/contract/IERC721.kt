@@ -1,6 +1,14 @@
 package com.example.wallet.debug.contract
 
+import org.web3j.protocol.core.RemoteFunctionCall
+import org.web3j.protocol.core.methods.response.TransactionReceipt
+import java.math.BigInteger
+
 interface IERC721 {
+
+    object Functions {
+        val SAFE_MINT: String = "safeMint"
+    }
 
     fun balanceOf(owner: String): Int
 
@@ -21,8 +29,12 @@ interface IERC721 {
 
     fun isApprovedForAll(owner: String, operator: String): Boolean
 
-    fun safeMint(to: String, tokenId: String)
-
     fun burn(tokenId: String)
 
+    fun safeMint(
+        to: String,
+        value: Value,
+        uri: String,
+        wei: BigInteger
+    ): RemoteFunctionCall<TransactionReceipt>
 }
