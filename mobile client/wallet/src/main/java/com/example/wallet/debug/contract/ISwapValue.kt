@@ -4,7 +4,12 @@ import org.web3j.protocol.core.RemoteFunctionCall
 import org.web3j.protocol.core.methods.response.TransactionReceipt
 import java.math.BigInteger
 
-interface IERC721 {
+/**
+ * All java classes which reflects solidity contracts are just a wrappers which under API
+ * provides calls to the chain contract's functions. Therefore they don't need a whole
+ * logic implementation neither inheritance hierarchy -- just a wrap on chain function call.
+ * */
+interface ISwapValue {
 
     object Functions {
         val SAFE_MINT: String = "safeMint"
@@ -37,4 +42,8 @@ interface IERC721 {
         uri: String,
         wei: BigInteger
     ): RemoteFunctionCall<TransactionReceipt>
+
+    fun tokenUri(tokenId: BigInteger): String
+
+    fun testReturnCall(): RemoteFunctionCall<TransactionReceipt>
 }
