@@ -40,8 +40,9 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.5.1")
     implementation("com.google.android.material:material:1.6.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1")
+    implementation("androidx.activity:activity-ktx:1.6.0")
 
-    implementation("org.web3j:core:4.8.7-android") {
+    implementation("org.web3j:core:4.9.4") {
 //        exclude(group : "org.bouncycastle")
     }
 //    implementation 'com.madgag.spongycastle:core:1.58.0.0'

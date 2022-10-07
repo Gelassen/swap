@@ -17,6 +17,7 @@ import org.web3j.protocol.core.methods.response.EthGetBalance
 import org.web3j.protocol.http.HttpService
 import org.web3j.tx.Transfer
 import org.web3j.utils.Convert
+
 import ru.home.swap.core.App
 import java.io.File
 import java.math.BigDecimal
@@ -169,4 +170,5 @@ class DebugActivity: AppCompatActivity() {
         Log.d(App.WALLET, "Wallet's balance ${result.balance}")
         return result
     }
+
 }

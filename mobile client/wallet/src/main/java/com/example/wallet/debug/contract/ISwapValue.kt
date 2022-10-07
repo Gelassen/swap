@@ -12,10 +12,11 @@ import java.math.BigInteger
 interface ISwapValue {
 
     object Functions {
-        val SAFE_MINT: String = "safeMint"
+        val FUNC_SAFE_MINT: String = "safeMint"
+        val FUNC_BALANCEOF = "balanceOf"
     }
 
-    fun balanceOf(owner: String): Int
+    fun balanceOf(owner: String): RemoteFunctionCall<BigInteger>
 
     fun ownerOf(tokenId: String): String
 

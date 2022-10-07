@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="wallet_password"></string>
-    <string name="test_infura_api">https://rinkeby.infura.io/v3/ce67e157fc964d3bbf7ff1db09aa316a</string>
+    <string name="wallet_password">3ba9b75a087df0e7082e1d3d58308755e35e17ac1117a4caf42ef209d203cb4a</string>
+    <string name="my_account">0xB54e15454E0711b1917f88E656C2fc3E9dF4117d</string>
+    <string name="swap_value_contract_address">0x3106248fbb449ed92b03d6f93f43f464cd95b74d</string>
+
+    <!-- by legacy reason originally it was rinkeby -->
+    <string name="test_infura_api">https://goerli.infura.io/v3/ce67e157fc964d3bbf7ff1db09aa316a</string>
 </resources>
