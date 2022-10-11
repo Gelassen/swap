@@ -8,18 +8,15 @@ import com.example.wallet.debug.contract.Value
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.web3j.abi.datatypes.Function
 import org.web3j.crypto.Credentials
 import org.web3j.protocol.Web3j
-import org.web3j.protocol.core.methods.request.Transaction
 import org.web3j.protocol.core.methods.response.TransactionReceipt
 import org.web3j.protocol.http.HttpService
 import org.web3j.tx.gas.DefaultGasProvider
-import org.web3j.utils.Numeric
 import ru.home.swap.core.logger.Logger
 import java.math.BigInteger
 
@@ -50,12 +47,13 @@ class WalletRepository(val context: Context) {
     fun mintToken(to: String, value: Value, uri: String): Flow<TransactionReceipt> {
         // TODO web3.ethEstimateGas() would require Transaction.createFunctionCallTransaction()
         // TODO figure out why passed wei is not added in total gas used by tx; error message is `has failed with status: 0x0. Gas used: 24397.`
-        return mintToken(to, value, uri, BigInteger.valueOf(40000))
+        return mintToken(to, value, uri, BigInteger.valueOf(423220))
     }
 
     fun mintToken(to: String, value: Value, uri: String, wei: BigInteger): Flow<TransactionReceipt> {
         return flow {
             val txReceipt = swapValueContract.safeMint(to, value, uri, wei).send()
+            logger.d("safeMint() txReceipt ${txReceipt}")
             emit(txReceipt)
         }
     }
@@ -67,6 +65,17 @@ class WalletRepository(val context: Context) {
 
     private suspend fun loadContract() = withContext(Dispatchers.IO) {
         val swapValueContractAddress: String = context.getString(R.string.swap_value_contract_address)
+/*      // for infura testnet custom tx manager would require sign tx before sending it to the node,
+        // otherwise it will throw an error 'The method eth_sendTransaction does not exist/is not available'
+        // (it was a test of workaround regarding timeout exception issue)
+        val sleepDuration: Int = 15 * 1000
+        val attempts: Int = 8
+        val txManager: TransactionManager = ClientTransactionManager(
+            web3,
+            context.getString(R.string.my_account),
+            attempts,
+            sleepDuration
+        )*/
         swapValueContract = SwapValue.load(swapValueContractAddress, web3, getCredentials(), DefaultGasProvider())
     }
 

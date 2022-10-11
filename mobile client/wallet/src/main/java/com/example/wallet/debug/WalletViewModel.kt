@@ -58,10 +58,11 @@ class WalletViewModel(): ViewModel() {
         viewModelScope.launch {
             repository.mintToken(to, value, uri)
                 .flowOn(Dispatchers.IO)
-//                .catch {
-//                    logger.e(it.stackTrace.toString(), RuntimeException())
-//                    logger.e("Failed to mint token", RuntimeException())
-//                }
+/*                .catch {
+                    // catch block has been commented out because it throttled an exception
+                    logger.e(it.stackTrace.toString(), RuntimeException())
+                    logger.e("Failed to mint token", RuntimeException())
+                }*/
                 .collect {
                     // TODO complete me
                     logger.d(it.toString())

@@ -11,19 +11,15 @@ import org.web3j.crypto.Credentials
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.RemoteFunctionCall
 import org.web3j.protocol.core.methods.response.TransactionReceipt
+import org.web3j.tx.ClientTransactionManager
 import org.web3j.tx.Contract
+import org.web3j.tx.TransactionManager
 import org.web3j.tx.gas.ContractGasProvider
 import java.math.BigInteger
 import java.util.*
 
 
-class SwapValue(
-    contractBinary: String?,
-    contractAddress: String?,
-    web3j: Web3j?,
-    credentials: Credentials?,
-    gasProvider: ContractGasProvider?
-) : ISwapValue, Contract(contractBinary, contractAddress, web3j, credentials, gasProvider) {
+class SwapValue : ISwapValue, Contract {
 
     /**
      * There is a difference between contract binary creation and binary runtime. This is a creation binary
@@ -42,6 +38,36 @@ class SwapValue(
         ): ISwapValue {
             return SwapValue(Const.CONTRACT_BINARY, contractAddress, web3j, credentials, contractGasProvider)
         }
+
+        @JvmStatic
+        fun load(
+            contractAddress: String?,
+            web3j: Web3j?,
+            transactionManager: TransactionManager,
+            contractGasProvider: ContractGasProvider?
+        ): ISwapValue {
+            return SwapValue(Const.CONTRACT_BINARY, contractAddress, web3j, transactionManager, contractGasProvider)
+        }
+    }
+
+    protected constructor(
+        contractBinary: String?,
+        contractAddress: String?,
+        web3j: Web3j?,
+        credentials: Credentials?,
+        gasProvider: ContractGasProvider?
+    ): super(contractBinary, contractAddress, web3j, credentials, gasProvider) {
+        // no op
+    }
+
+    protected constructor(
+        contractBinary: String?,
+        contractAddress: String?,
+        web3j: Web3j?,
+        transactionManager: TransactionManager,
+        contractGasProvider: ContractGasProvider?
+    ): super(contractBinary, contractAddress, web3j, transactionManager, contractGasProvider) {
+        // no op
     }
 
     override fun balanceOf(owner: String): RemoteFunctionCall<BigInteger> {
