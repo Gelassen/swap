@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
+import "../contracts/openzeppelin/token/ERC721/ERC721.sol";
+import "../contracts/openzeppelin/token/ERC721/extensions/ERC721URIStorage.sol";
+import "../contracts/openzeppelin/access/Ownable.sol";
+import "../contracts/openzeppelin/utils/Counters.sol";
 import { Value } from "../contracts/structs/StructDeclaration.sol";
 import "../contracts/ISwapValue.sol";
-import "hardhat/console.sol";
+// import "../contracts/hardhat/hardhat-core/console.sol";
+
 /**
  * SwapValue extend ERC721 spec implementation by adding:
  *  - support extra metadata per tokenId
@@ -30,10 +31,10 @@ contract SwapValue is ERC721, ERC721URIStorage, Ownable, ISwapValue {
      * @param tokenId Token id which belongs to owner or addresses within its approval list 
      */
     modifier onlyAuthorised(uint256 tokenId) {
-        console.log("msg.sender ", msg.sender);
-        console.log("ownerOf(tokenId) ", ownerOf(tokenId));
-        console.log("getApproved(tokenId) ", getApproved(tokenId));
-        console.log(ownerOf(tokenId) == msg.sender || getApproved(tokenId) == msg.sender);
+        // console.log("msg.sender ", msg.sender);
+        // console.log("ownerOf(tokenId) ", ownerOf(tokenId));
+        // console.log("getApproved(tokenId) ", getApproved(tokenId));
+        // console.log(ownerOf(tokenId) == msg.sender || getApproved(tokenId) == msg.sender);
         require(ownerOf(tokenId) == msg.sender 
             || getApproved(tokenId) == msg.sender
             || isApprovedForAll(ownerOf(tokenId), msg.sender), 
@@ -57,7 +58,7 @@ contract SwapValue is ERC721, ERC721URIStorage, Ownable, ISwapValue {
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
         _setOffer(value, tokenId);
-        console.log("Minted token id", tokenId);
+        // console.log("Minted token id", tokenId);
     }
 
     function transferFrom(
@@ -117,7 +118,7 @@ contract SwapValue is ERC721, ERC721URIStorage, Ownable, ISwapValue {
 
     function _setOffer(Value calldata value, uint256 tokenId) internal {
         _offerPerToken[tokenId] = value;
-        console.log("_offerPerToken[tokenId]", tokenId);
+        // console.log("_offerPerToken[tokenId]", tokenId);
     }
 
     function _safeMint(address to, uint256 tokenId) internal virtual override {
