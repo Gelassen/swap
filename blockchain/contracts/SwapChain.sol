@@ -117,7 +117,7 @@ contract SwapChain is ISwapChain {
         string[] memory demands = _demandsByUsers[user];
         bool isExist = false;
         for (uint idx = 0; idx < demands.length; idx++) {
-            console.log(demands[idx], demand);
+            // console.log(demands[idx], demand);
             if (_utils.stringsEquals(demands[idx], demand)) {
                 isExist = true;
                 break;
@@ -256,7 +256,7 @@ contract SwapChain is ISwapChain {
         uint256 aliceOffer, 
         string[] memory aliceDemands) private view returns(Match memory) {
         require(_utils.stringsEquals(jackDemand, _swapValueContract.offer(aliceOffer)._offer), "Caller demand should matches offer which is obtained over _indexNft.");
-        console.log("[start] isMatch()");
+        // console.log("[start] isMatch()");
 
         bool isThereMutualMatch = false;
         uint256 matchedJackOffer;
@@ -284,7 +284,7 @@ contract SwapChain is ISwapChain {
             result._userSecond = _swapValueContract.ownerOf(aliceOffer);
             result._valueOfSecondUser = aliceOffer;
         }
-        console.log("[end] isMatch()"); 
+        // console.log("[end] isMatch()"); 
         return result;
     }
 
@@ -392,13 +392,13 @@ contract SwapChain is ISwapChain {
     }
 
     function _updateNftsIndex(address user) private {
-        console.log("Update index for user", user);
+        // console.log("Update index for user", user);
         uint256[] memory tokensIds = _swapValueContract.getTokensIdsForUser(user);
         for (uint idx = 0; idx < tokensIds.length; idx++) {
             uint256 tokenId = tokensIds[idx];
             string memory offer = _swapValueContract.offer(tokenId)._offer;
             _indexNfts[offer].push(tokenId);
-            console.log("Register new index", offer);
+            // console.log("Register new index", offer);
         }
     }
 
@@ -406,8 +406,8 @@ contract SwapChain is ISwapChain {
         Match memory tmp;
         for (uint256 idx = 0; idx < _pendingMatches.length; idx++) {
             Match memory pendingMatch = _pendingMatches[idx];
-            console.log(pendingMatch._userFirst);
-            console.log(obj._userFirst);
+            // console.log(pendingMatch._userFirst);
+            // console.log(obj._userFirst);
             if (pendingMatch._userFirst == obj._userFirst
                 && pendingMatch._userSecond == obj._userSecond
                 && pendingMatch._valueOfFirstUser == obj._valueOfFirstUser
