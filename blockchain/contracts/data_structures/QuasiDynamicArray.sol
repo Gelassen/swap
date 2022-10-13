@@ -2,8 +2,6 @@
 
 pragma solidity ^0.8.4;
 
-import "hardhat/console.sol";
-
 /**
     Pushing into non-initialized array or pass it as a parameter into the function
     do not pass remix linter check. We have to work with initialized arrays and 
@@ -22,10 +20,8 @@ contract DynamicArray {
     address[] _data;
 
     constructor() {
-        console.log("[start] DynamicArray constructor");
         _data = new address[](DEFAULT_SIZE);
         _removeEmptySlots();
-        console.log("[end] DynamicArray constructor");
     }
 
     function asPlainArray(bool dropEmptySlots) external view returns(address[] memory) {
@@ -47,9 +43,7 @@ contract DynamicArray {
     }
 
     function dropEmptySlots() public returns(address[] memory) {
-        console.log("[start] dropEmptySlots");
         int index = _getFirstEmptySlotIndex();
-        console.log("_getFirstEmptySlotIndex() has been called");
         if (index == NO_VALUE) { return _data; }
         address[] memory result = _data;
         for (uint idx = uint(index); idx < _data.length; idx++) { 
@@ -58,7 +52,6 @@ contract DynamicArray {
                 result[idx] = _data[next];
             }
         }
-        console.log("[end] dropEmptySlots");
         return result;
     }
 
@@ -72,31 +65,22 @@ contract DynamicArray {
         by index requires its own implementation
     */
     function removeByIndex(uint index) public {
-        console.log("[start] removeByIndex()");
         require(_data.length != 0, "You can not remove any value from the empty array.");
         require(_data.length > index, "You can not remove item with index out of this array range.");
-        console.logUint(index);
-        console.logUint(_data.length);
         // require(index >= data.length, "Passed index is out of array range."); // TODO investigate why does it cause transaction to be reverted 
         if (_data.length == 1) { 
-            console.log("data = new address[](0) is going to call");
             _data = new address[](0);
-            console.log("data = new address[](0) has been called."); 
         } else {
-      console.log("removeByIndex()::loop start");
         for (uint idx = index; idx < _data.length; idx++) {
             uint next = idx + 1;
             if (next < _data.length) { _data[idx] = _data[next]; }
         }
         _data.pop(); // we shift the array and have to pop up a redundant item 
         }
-        console.log("[end] removeByIndex()");
     }
 
     function _dropEmptySlots() private view returns(address[] memory) {
-        console.log("[start] _dropEmptySlots");
         int index = _getFirstEmptySlotIndex();
-        console.log('_getFirstEmptySlotIndex() has been called with returned index $s', uint(index));
         if (index == NO_VALUE) { return _data; }
         
         // TODO create a new array with size of index
@@ -113,16 +97,12 @@ contract DynamicArray {
             }
         }
 
-        console.log("Result with all droped empty slots has size $s", result.length);
-        console.log("[end] _dropEmptySlots");
         return result;
     }
 
     function _getFirstEmptySlotIndex() private view returns(int) {
         int result = NO_VALUE;
         for (uint idx = 0; idx < DEFAULT_SIZE; idx++) { 
-            console.log('data[idx] == EMPTY_ADDRESS $s', _data[idx] == EMPTY_ADDRESS);
-            console.log('data[idx] %s', _data[idx]);
             if (_data[idx] == EMPTY_ADDRESS) { 
                 result = int(idx); 
                 break;

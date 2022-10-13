@@ -7,7 +7,7 @@ import "../contracts/data_structures/MatchDynamicArray.sol";
 import "../contracts/ISwapChain.sol";
 import "../contracts/SwapValue.sol";
 import { Utils } from "../contracts/utils/Utils.sol";
-import "hardhat/console.sol";
+// import "hardhat/console.sol";
 
 /**
  * ERC721 and ERC20 standarts already has links on tokens owned by address. 
@@ -56,13 +56,13 @@ contract SwapChain is ISwapChain {
 
     modifier existingMatch(Match memory obj) {
         bool hasMatch = false;
-        console.log("[start] modifier");
+        // console.log("[start] modifier");
         for (uint256 idx = 0; idx < _pendingMatches.length; idx++) {
             Match memory pendingMatch = _pendingMatches[0];
-            console.log("[check match object]");
-            console.log(pendingMatch._userFirst);
-            console.log(pendingMatch._userSecond);
-            console.log(obj._userFirst);
+            // console.log("[check match object]");
+            // console.log(pendingMatch._userFirst);
+            // console.log(pendingMatch._userSecond);
+            // console.log(obj._userFirst);
             if (pendingMatch._userFirst == obj._userFirst
                 && pendingMatch._userSecond == obj._userSecond
                 && pendingMatch._valueOfFirstUser == obj._valueOfFirstUser
@@ -78,25 +78,25 @@ contract SwapChain is ISwapChain {
                 hasMatch = true;
             }
         }
-        console.log("[end] modifier, before require");
+        // console.log("[end] modifier, before require");
         require(hasMatch, "There is no Match object which is equal to the passed input parameter.");
         _;
     }
 
     modifier hasBeenAproved(Match memory subj) {
-        console.log("[start] hasBeenAproved()");
+        // console.log("[start] hasBeenAproved()");
         address approveFirst = _swapValueContract.getApproved(subj._valueOfFirstUser);
         address approveSecond = _swapValueContract.getApproved(subj._valueOfSecondUser);
         bool approvedForAllFirst = _swapValueContract.isApprovedForAll(subj._userFirst, address(this));
         bool approvedForAllSecond = _swapValueContract.isApprovedForAll(subj._userSecond, address(this));
-        console.log(approveFirst);
-        console.log(approveSecond);
-        console.log(address(this));
+        // console.log(approveFirst);
+        // console.log(approveSecond);
+        // console.log(address(this));
         require(
             (address(this) == approveFirst && address(this) == approveSecond)
                 || (approvedForAllFirst && approvedForAllSecond), 
                     "SwapChain should be allowed to transfer tokens by BOTH users. Please confirm both users in match has call SwapValue.approve(swapChainContractAddress).");
-        console.log("[end] hasBeenAproved()");
+        // console.log("[end] hasBeenAproved()");
         _;
     }
 
@@ -111,7 +111,7 @@ contract SwapChain is ISwapChain {
     }
 
     function registerDemand(address user, string memory demand) external {
-        console.log("[start] registerDemand()");
+        // console.log("[start] registerDemand()");
         require(msg.sender == user && _isUserExist(user), "This user hasn't been registered yet or does not meet with caller.");
 
         string[] memory demands = _demandsByUsers[user];
@@ -128,7 +128,7 @@ contract SwapChain is ISwapChain {
         } else {
             _demandsByUsers[user].push(demand);
         }
-        console.log("[end] registerDemand()");
+        // console.log("[end] registerDemand()");
     }
 
     function getDemandsByUser(address user) external view override returns (string[] memory) {
@@ -136,21 +136,21 @@ contract SwapChain is ISwapChain {
     }
 
     function showMatches(address user) external override returns(Match[] memory) {
-        console.log("[start] showMatchDEV");
+        // console.log("[start] showMatchDEV");
         require(_isUserExist(user) == true, "User should be registered first to view matches.");
         require(_demandsByUsers[user].length != 0, "User should have at least one registered demand.");
 
         // FIXME
         // TODO customize dynamic array to use with Match struct and make it fully dynamically resizeable
         // Match[] memory result = new Match[](20);
-        console.log("_demandsByUsers[user].length", _demandsByUsers[user].length);
+        // console.log("_demandsByUsers[user].length", _demandsByUsers[user].length);
         for (uint idx = 0; idx < _demandsByUsers[user].length; idx++) {
-            console.log("Within 1st loop");
+            // console.log("Within 1st loop");
             string memory jackDemand = _demandsByUsers[user][idx];
             uint256[] memory jackOffers = _swapValueContract.getTokensIdsForUser(user);
             uint256[] memory allAvailableOffers = _indexNfts[jackDemand];
-            console.log("jack demand", jackDemand);
-            console.log("allAvailableOffers.length", allAvailableOffers.length);
+            // console.log("jack demand", jackDemand);
+            // console.log("allAvailableOffers.length", allAvailableOffers.length);
             if (allAvailableOffers.length == 0) {
                 continue;
             } 
@@ -162,39 +162,39 @@ contract SwapChain is ISwapChain {
                 if (_isStructureNonEmpty(potentialMatch) 
                         && _notLocked(potentialMatch)
                             && _notConsumed(potentialMatch)) {
-                    console.log("[end] showMatchDEV - before push");
+                    // console.log("[end] showMatchDEV - before push");
                     _matches.push(potentialMatch);
                 }
             }
         }
         emit Matches(_matches.getArray());        
-        console.log("[end] showMatchDEV");
+        // console.log("[end] showMatchDEV");
         return _matches.getArray();
     }
 
     function swap(Match memory subj) external override {
         uint256 lockUntil = block.timestamp + LOCK_TIME;
-        console.log("[start] swap call");
-        console.log(msg.sender);
-        console.log(_swapValueContract.getApproved(subj._valueOfFirstUser));
-        console.log(subj._valueOfFirstUser);
-        console.log("[in progress] call in progress");
+        // console.log("[start] swap call");
+        // console.log(msg.sender);
+        // console.log(_swapValueContract.getApproved(subj._valueOfFirstUser));
+        // console.log(subj._valueOfFirstUser);
+        // console.log("[in progress] call in progress");
         _swapValueContract.lockToken(subj._valueOfFirstUser, lockUntil);
         _swapValueContract.lockToken(subj._valueOfSecondUser, lockUntil);
         _pendingMatches.push(subj);
 
         require(_swapValueContract.offer(subj._valueOfFirstUser)._lockedUntil == lockUntil, "One or both values are not locked after swap() call.");
         require(_swapValueContract.offer(subj._valueOfSecondUser)._lockedUntil == lockUntil, "One or both values are not locked after swap() call.");
-        console.log("[end] swap call");
+        // console.log("[end] swap call");
     }
 
     function swapNoParams(address userWhoLooksForMatch) external override {
         Match[] memory matches = this.showMatches(userWhoLooksForMatch);
         if (matches.length > 0) {
             this.swap(matches[0]);
-            console.log("[before swap] There is a match");
+            // console.log("[before swap] There is a match");
         } else {
-            console.log("[before swap] There is NO match");
+            // console.log("[before swap] There is NO match");
         }
     }
 

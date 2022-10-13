@@ -3,7 +3,6 @@
 pragma solidity ^0.8.4;
 
 import { Match } from "../../contracts/structs/StructDeclaration.sol";
-import "hardhat/console.sol";
 
 contract MatchDynamicArray {
 
