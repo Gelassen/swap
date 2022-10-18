@@ -9,6 +9,7 @@ import com.example.wallet.debug.model.Wallet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import org.web3j.protocol.core.methods.response.Log
 import ru.home.swap.core.logger.Logger
 
 data class Model(
@@ -69,5 +70,15 @@ class WalletViewModel(): ViewModel() {
                 }
         }
         logger.d("[end] mintToken()")
+    }
+
+    fun getTokens() {
+        viewModelScope.launch {
+            repository.getTokensNotConsumedAndBelongingToMe()
+                .flowOn(Dispatchers.IO)
+                .collect { it ->
+                    logger.d(it.toString())
+                }
+        }
     }
 }

@@ -5,15 +5,24 @@ import com.example.wallet.R
 import com.example.wallet.debug.contract.ISwapValue
 import com.example.wallet.debug.contract.SwapValue
 import com.example.wallet.debug.contract.Value
+import io.reactivex.Flowable
+import io.reactivex.Observable
+import io.reactivex.schedulers.Schedulers
+import io.reactivex.subjects.PublishSubject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.web3j.abi.datatypes.Function
 import org.web3j.crypto.Credentials
 import org.web3j.protocol.Web3j
+import org.web3j.protocol.core.DefaultBlockParameter
+import org.web3j.protocol.core.DefaultBlockParameterName
+import org.web3j.protocol.core.methods.request.EthFilter
+import org.web3j.protocol.core.methods.response.Log
 import org.web3j.protocol.core.methods.response.TransactionReceipt
 import org.web3j.protocol.http.HttpService
 import org.web3j.tx.gas.DefaultGasProvider
@@ -57,6 +66,30 @@ class WalletRepository(val context: Context) {
             emit(txReceipt)
         }
     }
+
+    suspend fun test() = withContext(Dispatchers.IO) {
+        val swapValueContractAddress: String = context.getString(R.string.swap_value_contract_address)
+        val ethFilter = EthFilter(
+            DefaultBlockParameterName.EARLIEST,
+            DefaultBlockParameterName.LATEST,
+            swapValueContractAddress
+        )
+        web3.ethLogFlowable(ethFilter)
+    }
+
+    fun getTokensNotConsumedAndBelongingToMe(): Flow<Log> {
+        val swapValueContractAddress: String = context.getString(R.string.swap_value_contract_address)
+        val ethFilter = EthFilter(
+            DefaultBlockParameterName.EARLIEST,
+            DefaultBlockParameterName.LATEST,
+            swapValueContractAddress
+        )
+        return web3.ethLogFlowable(ethFilter)
+            .subscribeOn(Schedulers.io())
+            .asFlow()
+    }
+
+    fun getTransferEvents() {}
 
     private fun estimateGas(function: Function) : BigInteger {
 //        Transaction.createFunctionCallTransaction()

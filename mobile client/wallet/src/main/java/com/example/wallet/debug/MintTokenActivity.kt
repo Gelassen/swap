@@ -61,5 +61,10 @@ class MintTokenActivity: AppCompatActivity() {
                 val uri = "https://gelassen.github.io/blog/"
                 viewModel.mintToken(to, value, uri)
             }
+
+        findViewById<Button>(R.id.getMyTokens)
+            .setOnClickListener {
+                viewModel.getTokens()
+            }
     }
 }

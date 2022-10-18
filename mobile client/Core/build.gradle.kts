@@ -2,6 +2,7 @@ plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
     id("kotlin-kapt")
+//    id("jvm") version "1.6.21"
 }
 
 android {
@@ -41,6 +42,9 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:3.11.0")
     implementation("com.google.dagger:dagger:2.38.1")
     implementation("com.google.dagger:dagger-android-support:2.38.1")
+//    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0")
 
     kapt("com.google.dagger:dagger-compiler:2.15")
 
