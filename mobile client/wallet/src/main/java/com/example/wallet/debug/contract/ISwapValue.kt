@@ -40,8 +40,7 @@ interface ISwapValue {
     fun safeMint(
         to: String,
         value: Value,
-        uri: String,
-        wei: BigInteger
+        uri: String
     ): RemoteFunctionCall<TransactionReceipt>
 
     fun tokenUri(tokenId: BigInteger): String

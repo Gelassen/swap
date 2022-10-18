@@ -111,7 +111,7 @@ class SwapValue : ISwapValue, Contract {
         TODO("Not yet implemented")
     }
 
-    override fun safeMint(to: String, value: Value, uri: String, wei: BigInteger): RemoteFunctionCall<TransactionReceipt> {
+    override fun safeMint(to: String, value: Value, uri: String): RemoteFunctionCall<TransactionReceipt> {
 /*        // TODO complete me
         *//*
         * TODO it all goes as a single tx
@@ -125,11 +125,16 @@ class SwapValue : ISwapValue, Contract {
         val tokenId = idCounter.getAndIncrement()
         return super.safeMint(to, value, uri, wei)*/
 
-        val function: Function = Function(ISwapValue.Functions.FUNC_SAFE_MINT,
-            listOf(Utf8String(to), value, Utf8String(uri)),
+        val function: Function = Function(
+            ISwapValue.Functions.FUNC_SAFE_MINT,
+            listOf(
+                Address(to),
+                value,
+                Utf8String(uri)),
             Collections.emptyList()
         )
-        return executeRemoteCallTransaction(function, wei)
+        // omit wei here as it is not a payable function
+        return executeRemoteCallTransaction(function)
     }
 
     override fun tokenUri(tokenId: BigInteger): String {
