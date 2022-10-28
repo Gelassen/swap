@@ -76,11 +76,11 @@ class MintTokenActivity: AppCompatActivity() {
                 val repo = WalletRepository(this)
                 lifecycleScope.launch {
                     logger.d("start test")
-                    repo.test()
+                    repo.getTransferEvents()
                         .collect { it ->
-                            logger.d("collect call")
-                            logger.d(it.topics.toString())
-                            logger.d("hash ${it.transactionHash}")
+                            logger.d("collect call $it")
+//                            logger.d(it.topics.toString())
+//                            logger.d("hash ${it.transactionHash}")
                         }
                     logger.d("end test")
                 }

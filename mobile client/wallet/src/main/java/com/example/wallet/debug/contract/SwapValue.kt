@@ -157,7 +157,7 @@ class SwapValue
         return executeRemoteCallTransaction(function, wei)
     }
 
-    override fun offer(tokenId: String): RemoteFunctionCall<TransactionReceipt> {
+    override fun getOffer(tokenId: String): RemoteFunctionCall<TransactionReceipt> {
         TODO("Not yet implemented")
     }
 

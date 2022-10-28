@@ -28,7 +28,7 @@ interface ISwapValue {
         wei: BigInteger
     ): RemoteFunctionCall<TransactionReceipt>
 
-    fun offer(tokenId: String): RemoteFunctionCall<TransactionReceipt>
+    fun getOffer(tokenId: String): RemoteFunctionCall<TransactionReceipt>
 
     @Deprecated(message = "Redundant")
     fun testReturnCall(): RemoteFunctionCall<TransactionReceipt>

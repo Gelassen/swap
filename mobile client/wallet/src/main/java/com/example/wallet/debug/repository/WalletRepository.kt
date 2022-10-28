@@ -58,42 +58,30 @@ class WalletRepository(val context: Context) {
     }
 
     fun mintToken(to: String, value: Value, uri: String): Flow<TransactionReceipt> {
-        // TODO web3.ethEstimateGas() would require Transaction.createFunctionCallTransaction()
-        // TODO figure out why passed wei is not added in total gas used by tx; error message is `has failed with status: 0x0. Gas used: 24397.`
-        return mintToken(to, value, uri, BigInteger.valueOf(4232200))
+        /*
+        * web3.ethEstimateGas() would require Transaction.createFunctionCallTransaction()
+        * wei is omitted in web3j-cli generate wrapper,
+        * */
+        return flow {
+            val txReceipt = swapValueContract.safeMint(to, value, uri).send()
+            logger.d("safeMint() txReceipt ${txReceipt}")
+            emit(txReceipt)
+        }
     }
 
     fun mintToken(to: String, value: Value, uri: String, wei: BigInteger): Flow<TransactionReceipt> {
-        return flow { // TODO wei is omitted in web3j-cli generate wrapper
+        return flow {
             val txReceipt = swapValueContract.safeMint(to, value, uri, wei).send()
             logger.d("safeMint() txReceipt ${txReceipt}")
             emit(txReceipt)
         }
     }
 
-    fun test(): Flow<Log> {
-        val swapValueContractAddress: String = context.getString(R.string.swap_value_contract_address)
-        val filter: EthFilter = EthFilter(
-                DefaultBlockParameterName.EARLIEST,
-                DefaultBlockParameterName.LATEST,
-                swapValueContractAddress
-            )
-            .addSingleTopic(EventEncoder.encode(SwapValue.Const.TRANSFER_EVENT))
-        logger.d("Encoded transfer event function signature ${EventEncoder.encode(SwapValue.Const.TRANSFER_EVENT)}")
-        return web3.ethLogFlowable(filter)
-            .subscribeOn(Schedulers.io())
-            .asFlow()
-    }
-
     fun getTokensNotConsumedAndBelongingToMe(account: String): Flow<SwapValue.TransferEventResponse> {
-//        val account = context.getString(R.string.my_account)
-        // TODO there is an issue with comparing address like 0x000000000000000000000000b54e15454e0711b1917f88e656c2fc3e9df7127d from response
-        // and origin wallet address 0xb54e15454e0711b1917f88e656c2fc3e9df7127d
         return getTransferEvents()
-//            .filter { it ->
-//                logger.d(("Filter transfer events"))
-//                it.to == account
-//            }
+            .filter { it ->
+                it.to?.lowercase().equals(account.lowercase())
+            }
     }
 
     fun getTransferEvents(): Flow<SwapValue.TransferEventResponse> {
@@ -104,8 +92,9 @@ class WalletRepository(val context: Context) {
             DefaultBlockParameterName.LATEST,
             swapValueContractAddress
         ).addSingleTopic(EventEncoder.encode(SwapValue.Const.TRANSFER_EVENT))
-        // TODO there is an issue with using Kotlin version of TRANSFER_EVENT and java wrapper's one
         /*
+        * There is an issue with using Kotlin version of TRANSFER_EVENT and java wrapper's one
+        *
         * See more information on topic structure and how to decipher EVENT type (topic.get(0))
         * https://ethereum.stackexchange.com/questions/64856/web3j-how-to-get-event-args-when-parsing-logs
         * */

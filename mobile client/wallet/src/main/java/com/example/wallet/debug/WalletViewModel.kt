@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import ru.home.swap.core.logger.Logger
+import java.util.concurrent.Flow
 
 data class Model(
     var privateKey: String = "", // TODO refactor this dev mode solution
@@ -75,12 +76,11 @@ class WalletViewModel(): ViewModel() {
         logger.d("start getTokens()")
         viewModelScope.launch {
             repository.getTokensNotConsumedAndBelongingToMe(account)
-//                .flowOn(Dispatchers.IO)
+//                .flatMapConcat { it ->
+//                    repository.getOffer(it.tokenId)
+//                }
                 .collect { it ->
-                    logger.d("Collect my tokens")
-                    logger.d(it.toString())
-//                    logger.d(it.topics.toString())
-//                    logger.d("hash ${it.transactionHash}")
+
                 }
         }
         logger.d("end getTokens()")
