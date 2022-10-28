@@ -13,29 +13,7 @@ interface ISwapValue {
 
     object Functions {
         val FUNC_SAFE_MINT: String = "safeMint"
-        val FUNC_BALANCEOF = "balanceOf"
     }
-
-    fun balanceOf(owner: String): RemoteFunctionCall<BigInteger>
-
-    fun ownerOf(tokenId: String): String
-
-    // void safeTransferFrom(ERC721Context ctx, String from, String to, String tokenId, String data);
-
-    // void safeTransferFrom(ERC721Context ctx, String from, String to, String tokenId, String data);
-    fun safeTransferFrom(from: String, to: String, tokenId: String)
-
-    fun transferFrom(from: String, to: String, tokenId: String)
-
-    fun approve(to: String, tokenId: String)
-
-    fun setApprovalForAll(operator: String, approved: Boolean)
-
-    fun getApproved(tokenId: String): String
-
-    fun isApprovedForAll(owner: String, operator: String): Boolean
-
-    fun burn(tokenId: String)
 
     fun safeMint(
         to: String,
@@ -43,7 +21,15 @@ interface ISwapValue {
         uri: String
     ): RemoteFunctionCall<TransactionReceipt>
 
-    fun tokenUri(tokenId: BigInteger): String
+    fun safeMint(
+        to: String,
+        value: Value,
+        uri: String,
+        wei: BigInteger
+    ): RemoteFunctionCall<TransactionReceipt>
 
+    fun offer(tokenId: String): RemoteFunctionCall<TransactionReceipt>
+
+    @Deprecated(message = "Redundant")
     fun testReturnCall(): RemoteFunctionCall<TransactionReceipt>
 }

@@ -1,18 +1,22 @@
 package com.example.wallet.debug.contract
 
+import org.json.JSONObject
 import org.web3j.abi.datatypes.Bool
 import org.web3j.abi.datatypes.DynamicStruct
 import org.web3j.abi.datatypes.Utf8String
 import org.web3j.abi.datatypes.generated.Uint256
+import java.io.Serializable
 import java.math.BigInteger
 
 class Value: DynamicStruct {
 
-    private lateinit var offer: String
-    private lateinit var availableSince: BigInteger
-    private lateinit var availabilityEnd: BigInteger
-    private var isConsumed: Boolean = false
-    private lateinit var lockedUntil: BigInteger
+    lateinit var offer: String
+    lateinit var availableSince: BigInteger
+    lateinit var availabilityEnd: BigInteger
+    var isConsumed: Boolean = false
+    lateinit var lockedUntil: BigInteger
+
+    constructor()
 
     constructor(
         offer: String,
@@ -46,4 +50,33 @@ class Value: DynamicStruct {
         this.lockedUntil = lockedUntil.value
     }
 
+}
+
+private object ValueConst {
+    const val OFFER_FIELD = "offer"
+    const val AVAILABLE_SINCE = "availableSince"
+    const val AVAILABLE_END = "availableEnd"
+    const val IS_CONSUMED = "isConsumed"
+    const val LOCKED_UNTIL = "lockedUntil"
+}
+
+fun Value.convertToJson(): String {
+    val result = JSONObject()
+    result.put(ValueConst.OFFER_FIELD, offer)
+    result.put(ValueConst.AVAILABLE_SINCE, availableSince.toLong())
+    result.put(ValueConst.AVAILABLE_END, availabilityEnd.toLong())
+    result.put(ValueConst.IS_CONSUMED, isConsumed)
+    result.put(ValueConst.LOCKED_UNTIL, lockedUntil)
+    return result.toString()
+}
+
+fun Value.fromJson(json: String): Value {
+    val subj = JSONObject(json)
+    return Value(
+        subj.optString(ValueConst.OFFER_FIELD),
+        BigInteger.valueOf(subj.optLong(ValueConst.AVAILABLE_SINCE)),
+        BigInteger.valueOf(subj.optLong(ValueConst.AVAILABLE_END)),
+        subj.optBoolean(ValueConst.IS_CONSUMED),
+        BigInteger.valueOf(subj.optLong(ValueConst.LOCKED_UNTIL))
+    )
 }
