@@ -6,11 +6,12 @@ import androidx.lifecycle.viewModelScope
 import com.example.wallet.debug.contract.Value
 import com.example.wallet.debug.model.Wallet
 import com.example.wallet.debug.repository.WalletRepository
+import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import ru.home.swap.core.logger.Logger
-import java.util.concurrent.Flow
 
 data class Model(
     var privateKey: String = "", // TODO refactor this dev mode solution
@@ -72,15 +73,22 @@ class WalletViewModel(): ViewModel() {
         logger.d("[end] mintToken()")
     }
 
+    @OptIn(FlowPreview::class)
     fun getTokens(account: String) {
         logger.d("start getTokens()")
         viewModelScope.launch {
             repository.getTokensNotConsumedAndBelongingToMe(account)
-//                .flatMapConcat { it ->
-//                    repository.getOffer(it.tokenId)
-//                }
+                .flowOn(Dispatchers.IO) // explicitly choose network thread
+                .map { it ->
+                    repository.getOffer(it.tokenId.toString())
+                }
+                .flowOn(Dispatchers.IO)
+/*                .flatMapConcat { it ->
+                    repository.getOffer(it.tokenId.toString())
+                }*/
                 .collect { it ->
-
+                    logger.d("Collect result value for tokens owned by wallet address")
+                    logger.d("$it")
                 }
         }
         logger.d("end getTokens()")

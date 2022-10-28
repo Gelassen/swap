@@ -16,8 +16,6 @@ class Value: DynamicStruct {
     var isConsumed: Boolean = false
     lateinit var lockedUntil: BigInteger
 
-    constructor()
-
     constructor(
         offer: String,
         availableSince: BigInteger,

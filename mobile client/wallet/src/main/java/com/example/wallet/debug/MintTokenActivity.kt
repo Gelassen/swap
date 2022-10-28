@@ -1,5 +1,6 @@
 package com.example.wallet.debug
 
+import android.app.Application
 import android.os.Bundle
 import android.widget.Button
 import androidx.activity.viewModels
@@ -13,7 +14,12 @@ import com.example.wallet.debug.repository.StorageRepository
 import com.example.wallet.debug.repository.WalletRepository
 import com.example.wallet.debug.storage.AppDatabase
 import com.example.wallet.debug.storage.ChainTransactionDao
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
+import org.web3j.protocol.core.methods.response.TransactionReceipt
 import ru.home.swap.core.logger.Logger
 import java.math.BigInteger
 
@@ -73,36 +79,23 @@ class MintTokenActivity: AppCompatActivity() {
 
         findViewById<Button>(R.id.testNewFunctionality)
             .setOnClickListener {
-                val repo = WalletRepository(this)
                 lifecycleScope.launch {
                     logger.d("start test")
-                    repo.getTransferEvents()
+                    testFunc()
                         .collect { it ->
-                            logger.d("collect call $it")
-//                            logger.d(it.topics.toString())
-//                            logger.d("hash ${it.transactionHash}")
-                        }
-                    logger.d("end test")
+                            logger.d("Result of offer for token id: ${it}")
+                    }
+
                 }
-/*                val to = getString(R.string.my_account)
-                val value = Value(
-                    "Consulting2",
-                    BigInteger.valueOf(1665158348220),
-                    BigInteger.valueOf(1667758348220),
-                    false,
-                    BigInteger.valueOf(0)
-                )
-                val uri = "https://gelassen.github.io/blog/"
-                val chainTxDao = AppDatabase.getInstance(applicationContext).chainTransactionDao()
-                lifecycleScope.launch {
-*//*                    StorageRepository(chainTxDao)
-                        .createChainTx(to, value, uri)*//*
-                    StorageRepository(chainTxDao)
-                        .getAllChainTransactions()
-                        .collect { it ->
-                            logger.d("Collect for chain tx is called ${it.toString()}")
-                        }
-                }*/
             }
+    }
+
+    fun testFunc(): Flow<Value> {
+        return flow {
+            val repo = WalletRepository(applicationContext)
+            val result = repo.getOffer("12")
+            emit(result)
+        }
+            .flowOn(Dispatchers.IO)
     }
 }

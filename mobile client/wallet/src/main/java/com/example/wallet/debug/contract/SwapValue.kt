@@ -157,8 +157,17 @@ class SwapValue
         return executeRemoteCallTransaction(function, wei)
     }
 
-    override fun getOffer(tokenId: String): RemoteFunctionCall<TransactionReceipt> {
-        TODO("Not yet implemented")
+    override fun getOffer(tokenId: String): RemoteFunctionCall<Value> {
+        val function: Function = Function(
+            ISwapValue.Functions.FUNC_GET_OFFER,
+            listOf(
+                Uint256(BigInteger(tokenId))
+            ),
+            listOf(
+                object : TypeReference<Value>() {}
+            )
+        )
+        return executeRemoteCallSingleValueReturn(function, Value::class.java)
     }
 
     override fun name(): String {

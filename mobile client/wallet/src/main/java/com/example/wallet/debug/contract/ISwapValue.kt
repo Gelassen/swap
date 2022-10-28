@@ -13,6 +13,7 @@ interface ISwapValue {
 
     object Functions {
         val FUNC_SAFE_MINT: String = "safeMint"
+        val FUNC_GET_OFFER: String = "offer"
     }
 
     fun safeMint(
@@ -28,7 +29,7 @@ interface ISwapValue {
         wei: BigInteger
     ): RemoteFunctionCall<TransactionReceipt>
 
-    fun getOffer(tokenId: String): RemoteFunctionCall<TransactionReceipt>
+    fun getOffer(tokenId: String): RemoteFunctionCall<Value>
 
     @Deprecated(message = "Redundant")
     fun testReturnCall(): RemoteFunctionCall<TransactionReceipt>

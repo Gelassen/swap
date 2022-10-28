@@ -117,4 +117,15 @@ class WalletRepository(val context: Context) {
         return Credentials.create(context.getString(R.string.wallet_password))
     }
 
+/*    fun getOffer(tokenId: String): Flow<TransactionReceipt> {
+        return flow {
+            val txReceipt = swapValueContract.getOffer(tokenId).send()
+            emit(txReceipt)
+        }
+    }*/
+
+    fun getOffer(tokenId: String): Value {
+        return swapValueContract.getOffer(tokenId).send()
+    }
+
 }
