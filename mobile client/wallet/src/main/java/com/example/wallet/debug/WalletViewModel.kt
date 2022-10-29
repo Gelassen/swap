@@ -73,19 +73,22 @@ class WalletViewModel(): ViewModel() {
         logger.d("[end] mintToken()")
     }
 
-    @OptIn(FlowPreview::class)
-    fun getTokens(account: String) {
+    fun getTokensThatBelongsToMeNotConsumedNotExpired(account: String) {
         logger.d("start getTokens()")
         viewModelScope.launch {
-            repository.getTokensNotConsumedAndBelongingToMe(account)
+            repository.getTransferEvents()
                 .flowOn(Dispatchers.IO) // explicitly choose network thread
+                .filter { it ->
+                    it.to?.lowercase().equals(account.lowercase())
+                }
                 .map { it ->
                     repository.getOffer(it.tokenId.toString())
                 }
+                .filter { it ->
+                    !it.isConsumed
+                            && it.availabilityEnd.toLong() > System.currentTimeMillis()
+                }
                 .flowOn(Dispatchers.IO)
-/*                .flatMapConcat { it ->
-                    repository.getOffer(it.tokenId.toString())
-                }*/
                 .collect { it ->
                     logger.d("Collect result value for tokens owned by wallet address")
                     logger.d("$it")

@@ -1,6 +1,5 @@
 package com.example.wallet.debug
 
-import android.app.Application
 import android.os.Bundle
 import android.widget.Button
 import androidx.activity.viewModels
@@ -10,16 +9,12 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.wallet.R
 import com.example.wallet.debug.contract.Value
-import com.example.wallet.debug.repository.StorageRepository
 import com.example.wallet.debug.repository.WalletRepository
-import com.example.wallet.debug.storage.AppDatabase
-import com.example.wallet.debug.storage.ChainTransactionDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
-import org.web3j.protocol.core.methods.response.TransactionReceipt
 import ru.home.swap.core.logger.Logger
 import java.math.BigInteger
 
@@ -74,7 +69,7 @@ class MintTokenActivity: AppCompatActivity() {
         findViewById<Button>(R.id.getMyTokens)
             .setOnClickListener {
                 val account = applicationContext.getString(R.string.my_account)
-                viewModel.getTokens(account)
+                viewModel.getTokensThatBelongsToMeNotConsumedNotExpired(account)
             }
 
         findViewById<Button>(R.id.testNewFunctionality)
