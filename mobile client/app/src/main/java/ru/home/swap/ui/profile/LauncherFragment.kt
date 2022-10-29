@@ -16,7 +16,7 @@ import ru.home.swap.App
 import ru.home.swap.AppApplication
 import ru.home.swap.R
 import ru.home.swap.databinding.LauncherFragmentBinding
-import ru.home.swap.di.ViewModelFactory
+import ru.home.swap.core.di.ViewModelFactory
 import ru.home.swap.ui.common.BaseFragment
 import ru.home.swap.ui.common.ErrorDialogFragment
 import javax.inject.Inject

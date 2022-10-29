@@ -9,6 +9,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.wallet.R
 import com.example.wallet.debug.contract.Value
+import com.example.wallet.debug.di.WalletModule
 import com.example.wallet.debug.repository.WalletRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -27,7 +28,7 @@ class MintTokenActivity: AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.mint_token_activity)
 
-        val viewModel: WalletViewModel by viewModels()
+/*        val viewModel: WalletViewModel by viewModels()
         viewModel.setRepository(applicationContext)
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
@@ -82,15 +83,19 @@ class MintTokenActivity: AppCompatActivity() {
                     }
 
                 }
-            }
+            }*/
     }
 
-    fun testFunc(): Flow<Value> {
-        return flow {
-            val repo = WalletRepository(applicationContext)
-            val result = repo.getOffer("12")
-            emit(result)
-        }
-            .flowOn(Dispatchers.IO)
-    }
+//    fun testFunc(): Flow<Value> {
+//        return flow {
+//            val repo = WalletRepository(
+//                applicationContext,
+//                WalletModule(applicationContext)
+//                    .providesWeb3jHttpService(WalletModule(applicationContext).providesInterceptor())
+//            )
+//            val result = repo.getOffer("12")
+//            emit(result)
+//        }
+//            .flowOn(Dispatchers.IO)
+//    }
 }

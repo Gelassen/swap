@@ -12,6 +12,7 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import ru.home.swap.core.logger.Logger
+import javax.inject.Inject
 
 data class Model(
     var privateKey: String = "", // TODO refactor this dev mode solution
@@ -22,18 +23,21 @@ data class Model(
 enum class Status {
     NONE, BALANCE, MINT_TOKEN
 }
-class WalletViewModel(): ViewModel() {
+class WalletViewModel
+    @Inject constructor(
+        val repository: WalletRepository
+    ): ViewModel() {
 
     private val logger: Logger = Logger.getInstance()
-    private lateinit var repository: WalletRepository
 
     val state: MutableStateFlow<Model> = MutableStateFlow(Model())
     val uiState: StateFlow<Model> = state
         .asStateFlow()
         .stateIn(viewModelScope, SharingStarted.Eagerly, state.value)
 
+    @Deprecated("Repository is passed now via dagger DI")
     fun setRepository(context: Context) {
-        repository = WalletRepository(context)
+//        repository = WalletRepository(context)
     }
 
     fun balanceOf(owner: String) {

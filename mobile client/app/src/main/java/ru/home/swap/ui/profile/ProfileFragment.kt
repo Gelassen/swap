@@ -17,7 +17,7 @@ import ru.home.swap.App
 import ru.home.swap.AppApplication
 import ru.home.swap.core.model.Service
 import ru.home.swap.databinding.ProfileFragmentBinding
-import ru.home.swap.di.ViewModelFactory
+import ru.home.swap.core.di.ViewModelFactory
 import ru.home.swap.ui.common.BaseFragment
 import javax.inject.Inject
 

@@ -6,8 +6,9 @@ import "../contracts/openzeppelin/token/ERC721/extensions/ERC721URIStorage.sol";
 import "../contracts/openzeppelin/access/Ownable.sol";
 import "../contracts/openzeppelin/utils/Counters.sol";
 import { Value } from "../contracts/structs/StructDeclaration.sol";
-import "../contracts/ISwapValue.sol";
+import { ISwapValue } from "../contracts/ISwapValue.sol";
 // import "../contracts/hardhat/hardhat-core/console.sol";
+
 
 /**
  * SwapValue extend ERC721 spec implementation by adding:

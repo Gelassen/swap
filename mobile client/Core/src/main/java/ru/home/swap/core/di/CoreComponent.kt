@@ -4,7 +4,7 @@ import dagger.Component
 
 @Component(
     dependencies = [],
-    modules = [CoreModule::class]
+    modules = [CoreModule::class, CoreViewModelModule::class]
 )
 interface CoreComponent {
 

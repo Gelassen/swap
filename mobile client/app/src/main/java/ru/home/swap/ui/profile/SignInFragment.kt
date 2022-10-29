@@ -18,7 +18,7 @@ import ru.home.swap.BuildConfig
 import ru.home.swap.R
 import ru.home.swap.core.model.DebugProfiles
 import ru.home.swap.databinding.SigninFragmentBinding
-import ru.home.swap.di.ViewModelFactory
+import ru.home.swap.core.di.ViewModelFactory
 import ru.home.swap.providers.PersonProvider
 import ru.home.swap.ui.common.BaseFragment
 import javax.inject.Inject

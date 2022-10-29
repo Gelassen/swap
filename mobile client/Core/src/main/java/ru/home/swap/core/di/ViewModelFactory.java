@@ -1,4 +1,4 @@
-package ru.home.swap.di;
+package ru.home.swap.core.di;
 
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;

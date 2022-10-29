@@ -1,4 +1,4 @@
-package ru.home.swap.di;
+package ru.home.swap.core.di;
 
 import androidx.lifecycle.ViewModel;
 
@@ -13,6 +13,6 @@ import dagger.MapKey;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @MapKey
-@interface ViewModelKey {
+public @interface ViewModelKey {
     Class<? extends ViewModel> value();
 }

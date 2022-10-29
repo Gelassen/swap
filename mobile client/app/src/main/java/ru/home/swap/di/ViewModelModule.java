@@ -9,12 +9,14 @@ import javax.inject.Singleton;
 import dagger.Binds;
 import dagger.Module;
 import dagger.multibindings.IntoMap;
+import ru.home.swap.core.di.ViewModelFactory;
+import ru.home.swap.core.di.ViewModelKey;
 import ru.home.swap.ui.contacts.ContactsViewModel;
 import ru.home.swap.ui.demands.DemandsViewModel;
 import ru.home.swap.ui.offers.OffersViewModel;
 import ru.home.swap.ui.profile.ProfileViewModel;
 
-@Module
+@Module/*(includes = [CoreViewModelModule::class.java])*/
 public abstract class ViewModelModule {
 
     @Binds

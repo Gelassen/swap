@@ -51,6 +51,9 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+    kapt {
+        correctErrorTypes = false
+    }
     testOptions {
         animationsDisabled = true
         unitTests {

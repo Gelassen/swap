@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
 import org.web3j.abi.EventEncoder
 import org.web3j.abi.TypeReference
 import org.web3j.abi.datatypes.Address
@@ -33,15 +34,18 @@ import java.math.BigInteger
 import java.util.*
 
 
-class WalletRepository(val context: Context) {
+class WalletRepository(
+    val context: Context,
+    httpService: HttpService
+) {
 
     private val logger: Logger = Logger.getInstance()
 
-    private lateinit var web3: Web3j
+    private var web3: Web3j
     private lateinit var swapValueContract: SwapValue
 
     init {
-        web3 = Web3j.build(HttpService(context.getString(R.string.test_infura_api)))
+        web3 = Web3j.build(httpService)
         runBlocking {
             launch(Dispatchers.IO) {
                 loadContract()

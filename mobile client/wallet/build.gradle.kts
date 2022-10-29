@@ -41,37 +41,25 @@ dependencies {
 
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.appcompat:appcompat:1.5.1")
-    implementation("com.google.android.material:material:1.6.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1")
     implementation("androidx.activity:activity-ktx:1.6.0")
+    implementation("androidx.room:room-runtime:2.4.3")
+    implementation("androidx.room:room-ktx:2.4.3")
+
+    implementation("com.google.android.material:material:1.6.1")
+    implementation ("com.google.dagger:dagger:2.38.1")
+    implementation ("com.google.dagger:dagger-android-support:2.38.1")
+
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactive:1.6.0")
 
-    implementation("org.web3j:core:4.9.4") {
-//        exclude(group : "org.bouncycastle")
-    }
-//    implementation 'com.madgag.spongycastle:core:1.58.0.0'
-//    implementation 'com.madgag.spongycastle:prov:1.58.0.0'
-//    implementation 'com.madgag.spongycastle:bcpkix-jdk15on:1.58.0.0'
-//    implementation 'com.madgag.spongycastle:pkix:1.54.0.0' // sic!
-//    implementation 'com.madgag.spongycastle:pg:1.54.0.0'
-//    runtimeOnly 'com.madgag.spongycastle:bcpg-jdk15on:1.58.0.0'
-//    implementation 'com.madgag.spongycastle:bctls-jdk15on:1.58.0.0'
-//    implementation("com.walletconnect:kotlin-walletconnect-lib:0.9.9") {
-//        exclude('org/bouncycastle/x509/CertPathReviewerMessages_de.properties')
-//        exclude('org.bouncycastle.LICENSE')
-//        exclude(group = 'org.bouncycastle')
-//        exclude module: 'bcprov-jdk15on'
-//    }
+    implementation("org.web3j:core:4.9.4")
 
-    val room_version = "2.4.3"
-    implementation("androidx.room:room-runtime:$room_version")
-    implementation("androidx.room:room-ktx:$room_version")
-
-    annotationProcessor("androidx.room:room-compiler:$room_version")
+    annotationProcessor("androidx.room:room-compiler:2.4.3")
 
     kapt("androidx.room:room-compiler:2.4.3")
+    kapt("com.google.dagger:dagger-compiler:2.15")
     // To use Kotlin Symbol Processing (KSP)
 //    ksp("androidx.room:room-compiler:$room_version")
 
