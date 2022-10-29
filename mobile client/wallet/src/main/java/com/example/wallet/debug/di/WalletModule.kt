@@ -2,6 +2,7 @@ package com.example.wallet.debug.di
 
 import android.content.Context
 import com.example.wallet.R
+import com.example.wallet.debug.repository.WalletRepository
 import dagger.Module
 import dagger.Provides
 import okhttp3.Interceptor
@@ -34,5 +35,11 @@ class WalletModule(val context: Context) {
             .addInterceptor(logging)
             .build()
         return HttpService(url, client)
+    }
+
+    @Singleton
+    @Provides
+    fun providesWalletRepository(httpService: HttpService): WalletRepository {
+        return WalletRepository(context, httpService)
     }
 }

@@ -1,5 +1,6 @@
 package ru.home.swap.di
 
+import com.example.wallet.debug.WalletViewModel
 import dagger.Component
 import ru.home.swap.core.di.NetworkModule
 import ru.home.swap.ui.contacts.ContactsFragment
@@ -12,7 +13,11 @@ import ru.home.swap.ui.profile.SignInFragment
 import javax.inject.Singleton
 
 @Singleton
-@Component(modules = [ViewModelModule::class, NetworkModule::class, AppModule::class])
+@Component(modules = [
+    ViewModelModule::class,
+    NetworkModule::class,
+    AppModule::class
+])
 interface AppComponent {
     fun inject(subject: SignInFragment)
     fun inject(subject: LauncherFragment)

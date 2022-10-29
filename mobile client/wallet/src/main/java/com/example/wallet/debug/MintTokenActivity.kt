@@ -5,10 +5,12 @@ import android.widget.Button
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.wallet.R
 import com.example.wallet.debug.contract.Value
+import com.example.wallet.debug.di.WalletDi
 import com.example.wallet.debug.di.WalletModule
 import com.example.wallet.debug.repository.WalletRepository
 import kotlinx.coroutines.Dispatchers
@@ -16,23 +18,31 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
+import ru.home.swap.core.di.ViewModelFactory
 import ru.home.swap.core.logger.Logger
 import java.math.BigInteger
+import javax.inject.Inject
 
 class MintTokenActivity: AppCompatActivity() {
 
     private val logger: Logger = Logger.getInstance()
     // TODO figure out di management for multi-modules project
 
+    @Inject
+    lateinit var viewModelFactory: ViewModelFactory
+    lateinit var walletViewModel: WalletViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.mint_token_activity)
 
-/*        val viewModel: WalletViewModel by viewModels()
-        viewModel.setRepository(applicationContext)
+        WalletDi(application).getWalletComponent().inject(this)
+        walletViewModel = ViewModelProvider(this, viewModelFactory).get(WalletViewModel::class.java)
+//        val viewModel: WalletViewModel by viewModels()
+//        viewModel.setRepository(applicationContext)
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                viewModel.uiState.collect { it ->
+                walletViewModel.uiState.collect { it ->
                     when(it.status) {
                         Status.NONE -> {
                             logger.d("Origin state")
@@ -50,7 +60,7 @@ class MintTokenActivity: AppCompatActivity() {
 
         findViewById<Button>(R.id.checkBalance)
             .setOnClickListener {
-                viewModel.balanceOf(getString(R.string.my_account))
+                walletViewModel.balanceOf(getString(R.string.my_account))
             }
 
         findViewById<Button>(R.id.mintToken)
@@ -64,13 +74,13 @@ class MintTokenActivity: AppCompatActivity() {
                     BigInteger.valueOf(0)
                 )
                 val uri = "https://gelassen.github.io/blog/"
-                viewModel.mintToken(to, value, uri)
+                walletViewModel.mintToken(to, value, uri)
             }
 
         findViewById<Button>(R.id.getMyTokens)
             .setOnClickListener {
                 val account = applicationContext.getString(R.string.my_account)
-                viewModel.getTokensThatBelongsToMeNotConsumedNotExpired(account)
+                walletViewModel.getTokensThatBelongsToMeNotConsumedNotExpired(account)
             }
 
         findViewById<Button>(R.id.testNewFunctionality)
@@ -83,19 +93,19 @@ class MintTokenActivity: AppCompatActivity() {
                     }
 
                 }
-            }*/
+            }
     }
 
-//    fun testFunc(): Flow<Value> {
-//        return flow {
-//            val repo = WalletRepository(
-//                applicationContext,
-//                WalletModule(applicationContext)
-//                    .providesWeb3jHttpService(WalletModule(applicationContext).providesInterceptor())
-//            )
-//            val result = repo.getOffer("12")
-//            emit(result)
-//        }
-//            .flowOn(Dispatchers.IO)
-//    }
+    fun testFunc(): Flow<Value> {
+        return flow {
+            val repo = WalletRepository(
+                applicationContext,
+                WalletModule(applicationContext)
+                    .providesWeb3jHttpService(WalletModule(applicationContext).providesInterceptor())
+            )
+            val result = repo.getOffer("12")
+            emit(result)
+        }
+            .flowOn(Dispatchers.IO)
+    }
 }
