@@ -14,7 +14,7 @@ import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
-import ru.home.swap.network.IApi
+import ru.home.swap.core.network.IApi
 import ru.home.swap.repository.Cache
 import ru.home.swap.repository.PersonRepository
 import ru.home.swap.ui.profile.ProfileViewModel
@@ -96,7 +96,7 @@ class ViewModelUnitTest {
             subject.proposal.set("Another item")
             subject.addOffer()
 
-            Assert.assertEquals(2, subject.state.value.offers.count())
+            Assert.assertEquals(2, subject.state.value.profile.offers.count())
         }
     }
 
@@ -109,10 +109,10 @@ class ViewModelUnitTest {
             subject.addOffer()
             subject.proposal.set("Third item")
             subject.addOffer()
-            subject.removeOffer(subject.state.value.offers.get(0))
+            subject.removeOffer(subject.state.value.profile.offers.get(0))
 
-            Assert.assertEquals(2, subject.state.value.offers.count())
-            Assert.assertEquals("Another item", subject.state.value.offers.first().title)
+            Assert.assertEquals(2, subject.state.value.profile.offers.count())
+            Assert.assertEquals("Another item", subject.state.value.profile.offers.first().title)
         }
     }
 
@@ -128,8 +128,8 @@ class ViewModelUnitTest {
             subject.proposal.set("Fourth item")
             subject.addOffer()
 
-            Assert.assertEquals(4, subject.state.value.offers.count())
-            Assert.assertEquals(4, subject.uiState.value.offers.count())
+            Assert.assertEquals(4, subject.state.value.profile.offers.count())
+            Assert.assertEquals(4, subject.uiState.value.profile.offers.count())
         }
     }
 
