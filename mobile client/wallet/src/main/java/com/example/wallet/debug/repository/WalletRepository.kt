@@ -27,9 +27,11 @@ import org.web3j.protocol.core.DefaultBlockParameterName
 import org.web3j.protocol.core.methods.request.EthFilter
 import org.web3j.protocol.core.methods.response.Log
 import org.web3j.protocol.core.methods.response.TransactionReceipt
+import org.web3j.protocol.exceptions.TransactionException
 import org.web3j.protocol.http.HttpService
 import org.web3j.tx.gas.DefaultGasProvider
 import ru.home.swap.core.logger.Logger
+import ru.home.swap.core.network.Response
 import java.math.BigInteger
 import java.util.*
 
@@ -37,7 +39,7 @@ import java.util.*
 class WalletRepository(
     val context: Context,
     httpService: HttpService
-) {
+) : IWalletRepository {
 
     private val logger: Logger = Logger.getInstance()
 
@@ -53,7 +55,7 @@ class WalletRepository(
         }
     }
 
-    fun balanceOf(owner: String): Flow<BigInteger> {
+    override fun balanceOf(owner: String): Flow<BigInteger> {
         return flow {
             val balance = swapValueContract.balanceOf(owner).send()
             logger.d("balanceOf() call result ${balance}")
@@ -61,7 +63,8 @@ class WalletRepository(
         }
     }
 
-    fun mintToken(to: String, value: Value, uri: String): Flow<TransactionReceipt> {
+    @Throws(TransactionException::class)
+    override fun mintToken(to: String, value: Value, uri: String): Flow<Response<TransactionReceipt>> {
         /*
         * web3.ethEstimateGas() would require Transaction.createFunctionCallTransaction()
         * wei is omitted in web3j-cli generate wrapper,
@@ -69,11 +72,11 @@ class WalletRepository(
         return flow {
             val txReceipt = swapValueContract.safeMint(to, value, uri).send()
             logger.d("safeMint() txReceipt ${txReceipt}")
-            emit(txReceipt)
+            emit(Response.Data<TransactionReceipt>(txReceipt))
         }
     }
 
-    fun mintToken(to: String, value: Value, uri: String, wei: BigInteger): Flow<TransactionReceipt> {
+    override fun mintToken(to: String, value: Value, uri: String, wei: BigInteger): Flow<TransactionReceipt> {
         return flow {
             val txReceipt = swapValueContract.safeMint(to, value, uri, wei).send()
             logger.d("safeMint() txReceipt ${txReceipt}")
@@ -81,14 +84,14 @@ class WalletRepository(
         }
     }
 
-    fun getTokensNotConsumedAndBelongingToMe(account: String): Flow<SwapValue.TransferEventResponse> {
+    override fun getTokensNotConsumedAndBelongingToMe(account: String): Flow<SwapValue.TransferEventResponse> {
         return getTransferEvents()
             .filter { it ->
                 it.to?.lowercase().equals(account.lowercase())
             }
     }
 
-    fun getTransferEvents(): Flow<SwapValue.TransferEventResponse> {
+    override fun getTransferEvents(): Flow<SwapValue.TransferEventResponse> {
         logger.d("start getTransferEvents()")
         val swapValueContractAddress: String = context.getString(R.string.swap_value_contract_address)
         val ethFilter = EthFilter(
@@ -121,7 +124,7 @@ class WalletRepository(
         return Credentials.create(context.getString(R.string.wallet_password))
     }
 
-    fun getOffer(tokenId: String): Value {
+    override fun getOffer(tokenId: String): Value {
         return swapValueContract.getOffer(tokenId).send()
     }
 

@@ -200,6 +200,7 @@ class PersonRepository(val api: IApi, val cache: Cache, val context: Context) {
         return cache.cleanProfile()
     }
 
+    @Deprecated(message = "Please use Response class defined in :core module")
     sealed class Response<out T: Any> {
         data class Data<out T: Any>(val data: T): Response<T>()
         sealed class Error: Response<Nothing>() {

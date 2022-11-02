@@ -2,16 +2,17 @@ package com.example.wallet.debug.di
 
 import android.content.Context
 import com.example.wallet.R
+import com.example.wallet.debug.repository.IWalletRepository
+import com.example.wallet.debug.repository.StorageRepository
 import com.example.wallet.debug.repository.WalletRepository
+import com.example.wallet.debug.storage.AppDatabase
 import dagger.Module
 import dagger.Provides
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.web3j.protocol.http.HttpService
-import ru.home.swap.core.network.DefaultInterceptor
-import ru.home.swap.core.network.MockInterceptor
-import javax.inject.Named
+import ru.home.swap.core.network.interceptors.DefaultInterceptor
 import javax.inject.Singleton
 
 @Module
@@ -39,7 +40,19 @@ class WalletModule(val context: Context) {
 
     @Singleton
     @Provides
-    fun providesWalletRepository(httpService: HttpService): WalletRepository {
+    fun providesWalletRepository(httpService: HttpService): IWalletRepository {
         return WalletRepository(context, httpService)
+    }
+
+    @Singleton
+    @Provides
+    fun providesDatabase(): AppDatabase {
+        return AppDatabase.getInstance(context)
+    }
+
+    @Singleton
+    @Provides
+    fun providesStorageRepository(database: AppDatabase): StorageRepository {
+        return StorageRepository(database.chainTransactionDao())
     }
 }

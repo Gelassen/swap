@@ -1,4 +1,4 @@
-package ru.home.swap.core.network
+package ru.home.swap.core.network.interceptors
 
 import android.content.Context
 import android.net.Uri

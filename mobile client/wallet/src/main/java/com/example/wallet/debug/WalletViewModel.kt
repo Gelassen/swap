@@ -4,28 +4,37 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.wallet.debug.contract.Value
+import com.example.wallet.debug.model.Transaction
 import com.example.wallet.debug.model.Wallet
+import com.example.wallet.debug.repository.IWalletRepository
+import com.example.wallet.debug.repository.StorageRepository
 import com.example.wallet.debug.repository.WalletRepository
 import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import org.web3j.protocol.core.methods.response.TransactionReceipt
+import org.web3j.protocol.exceptions.TransactionException
 import ru.home.swap.core.logger.Logger
+import ru.home.swap.core.network.Response
+import java.util.*
 import javax.inject.Inject
 
 data class Model(
     var privateKey: String = "", // TODO refactor this dev mode solution
     val wallet: Wallet = Wallet(),
+    val pendingTx: List<Transaction> = mutableListOf(),
     val status: Status = Status.NONE,
-    val errors: List<String> = emptyList()
+    val errors: List<String> = mutableListOf()
 )
 enum class Status {
     NONE, BALANCE, MINT_TOKEN
 }
 class WalletViewModel
     @Inject constructor(
-        val repository: WalletRepository
+        val repository: IWalletRepository,
+        val cacheRepository: StorageRepository
     ): ViewModel() {
 
     private val logger: Logger = Logger.getInstance()
@@ -60,17 +69,46 @@ class WalletViewModel
         logger.d("[start] mintToken()")
         viewModelScope.launch {
             repository.mintToken(to, value, uri)
+                .catch { it ->
+                    if (it is TransactionException
+                        && it.message!!.contains("Transaction receipt was not generated after 600 seconds for transaction")) {
+                        cacheRepository.createChainTx(to, value, uri) // TODO consider always put in pending cache and remove after it confirms as succeeded
+                        val txReceipt = TransactionReceipt()
+                        txReceipt.transactionHash = ""
+                        emit(Response.Data(txReceipt))
+                    } else {
+                        emit(Response.Error.Exception(it))
+                    }
+                }
                 .flowOn(Dispatchers.IO)
-/*                .catch {
-                    // catch block has been commented out because it throttled an exception
-                    logger.e(it.stackTrace.toString(), RuntimeException())
-                    logger.e("Failed to mint token", RuntimeException())
-                }*/
                 .collect {
-                    // TODO complete me
                     logger.d(it.toString())
-                    state.update {
-                        it.copy(status = Status.MINT_TOKEN)
+                    when (it) {
+                        is Response.Data -> {
+                            if (it.data.transactionHash.isEmpty()) {
+                                state.update {
+                                    it.copy(
+                                        status = Status.MINT_TOKEN,
+                                        pendingTx = it.pendingTx + Transaction(to, value, uri)
+                                    )
+                                }
+                            }
+                        }
+                        is Response.Error.Message -> {
+                            val errorMsg = "Something went wrong on mint a token with error ${it.msg}"
+                            logger.d(errorMsg)
+                            state.update {
+                                val newErrors = it.errors + "Something went wrong on mint a token with error ${errorMsg}"
+                                it.copy(status = Status.MINT_TOKEN, errors = newErrors)
+                            }
+                        }
+                        is Response.Error.Exception -> {
+                            logger.e("Something went wrong on mint a token ${to}, ${value}, ${uri}", it.error)
+                            state.update {
+                                val newErrors = it.errors + "Something went wrong on mint a token ${to}, ${value}, ${uri}"
+                                it.copy(status = Status.MINT_TOKEN, errors = newErrors)
+                            }
+                        }
                     }
                 }
         }
