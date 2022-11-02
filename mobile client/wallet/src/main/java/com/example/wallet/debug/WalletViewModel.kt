@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.wallet.debug.contract.Value
+import com.example.wallet.debug.model.Token
 import com.example.wallet.debug.model.Transaction
 import com.example.wallet.debug.model.Wallet
 import com.example.wallet.debug.repository.IWalletRepository
@@ -29,7 +30,7 @@ data class Model(
     val errors: List<String> = mutableListOf()
 )
 enum class Status {
-    NONE, BALANCE, MINT_TOKEN
+    NONE, BALANCE, MINT_TOKEN, MY_TOKENS
 }
 class WalletViewModel
     @Inject constructor(
@@ -124,16 +125,24 @@ class WalletViewModel
                     it.to?.lowercase().equals(account.lowercase())
                 }
                 .map { it ->
-                    repository.getOffer(it.tokenId.toString())
+                    // TODO consider to add async {} here to request offers asynchronously
+                    val value = repository.getOffer(it.tokenId.toString())
+                    Token(it.tokenId!!.toLong(), value)
                 }
                 .filter { it ->
-                    !it.isConsumed
-                            && it.availabilityEnd.toLong() > System.currentTimeMillis()
+                    !it.value.isConsumed
+                            && it.value.availabilityEnd.toLong() > System.currentTimeMillis()
                 }
                 .flowOn(Dispatchers.IO)
-                .collect { it ->
-                    logger.d("Collect result value for tokens owned by wallet address")
-                    logger.d("$it")
+                .collect { token ->
+                    logger.d("Collect result value for tokens owned by wallet address $it")
+                    state.update {
+                        it.wallet.addToken(token)
+                        it.copy(
+                            status = Status.MY_TOKENS,
+                            wallet = it.wallet
+                        )
+                    }
                 }
         }
         logger.d("end getTokens()")

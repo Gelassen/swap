@@ -1,0 +1,26 @@
+title Swap V2
+
+# mint tokens as offers
+User Jack -> Chain: 1a. register an offer (= mint a token)
+User Alice -> Chain: 1b. register an offer (= mint a token)
+# register in system
+User Alice -> Chain: 2b. register a user in system (= record on chain)
+User Alice -> Server: 2b. register a user in system (= record in database)
+User Alice -> Chain: 3b. approve contract as a token manager (= record on chain)
+User Jack -> Chain: 2a. register a user in system (= record on chain)
+User Jack -> Server: 2a. register a user in system (= record in database)
+User Jack -> Chain: 3a. approve contract as a token manager (= record on chain)
+# register demands
+User Jack -> Server: 4a. register a demand (= record in database)
+User Alice -> Server: 4b. register a demand (= record in database)
+Server -> Chain: 901. always polls chain by schedule or on each register demand for potential match to execute swapNoParams (= chain record, datbase record)
+# look through and operate with matches
+User Jack -> Server: 5a. request a matches (= synthetic query from database and chain)
+User Jack -> Server: 6a. [positive scenario] confirm match (= record in database and on chain) 
+User Jack -> Chain: 6a. [positive scenario] confirm match (= record in database and on chain)
+User Alice -> Server: 5b. request matches (= synthetic query from database and chain)
+User Alice -> Server: 6b. [positive scenario] confirm match (= record in database and on chain)
+User Alice -> Chain: 6b. [positive scenario] confirm match (= record in database and on chain)
+note right of User Alice: In addition to 4b polls server by schedule for notification about confirmed matches
+# Chain -> Chain: 7. [positive scenario] when both users confirm match make a swap (= record on chain)
+Server -> Chain: 902. always pools chain by schedule for Swap event and update datbase records (= record in database)

@@ -5,6 +5,7 @@ import java.math.BigInteger
 class Wallet {
 
     private var balance: BigInteger = BigInteger.valueOf(0)
+    private var tokens: MutableList<Token> = mutableListOf()
 
     fun getBalance(): BigInteger {
         return this.balance
@@ -16,6 +17,10 @@ class Wallet {
 
     fun setBalance(value: BigInteger) {
         this.balance = value
+    }
+
+    fun addToken(token: Token) {
+        tokens.plus(token)
     }
 
 }
