@@ -135,7 +135,7 @@ class WalletViewModel
                 }
                 .flowOn(Dispatchers.IO)
                 .collect { token ->
-                    logger.d("Collect result value for tokens owned by wallet address $it")
+                    logger.d("Collect result value for tokens owned by wallet address $token")
                     state.update {
                         it.wallet.addToken(token)
                         it.copy(
