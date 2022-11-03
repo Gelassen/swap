@@ -1,24 +1,18 @@
 package com.example.wallet
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.example.wallet.debug.Status
-import com.example.wallet.debug.WalletViewModel
-import com.example.wallet.debug.contract.Value
-import com.example.wallet.debug.repository.StorageRepository
-import com.example.wallet.debug.repository.WalletRepository
+import com.example.wallet.contract.Value
+import com.example.wallet.repository.StorageRepository
+import com.example.wallet.repository.WalletRepository
 import com.example.wallet.rules.MainCoroutineRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.*
-import org.junit.Assert.assertEquals
 import org.mockito.Mock
 import org.mockito.Mockito.*
 import org.mockito.MockitoAnnotations
-import org.web3j.protocol.core.methods.response.TransactionReceipt
-import org.web3j.protocol.exceptions.TransactionException
-import ru.home.swap.core.network.Response
 import java.math.BigInteger
 
 @OptIn(ExperimentalCoroutinesApi::class)

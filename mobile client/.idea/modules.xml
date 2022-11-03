@@ -15,6 +15,7 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/wallet/Swap.wallet.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/wallet/Swap.wallet.androidTest.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/wallet/Swap.wallet.main.iml" filepath="$PROJECT_DIR$/.idea/modules/wallet/Swap.wallet.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/wallet/Swap.wallet.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/wallet/Swap.wallet.unitTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/web3j-deployer/Swap.web3j-deployer.iml" filepath="$PROJECT_DIR$/.idea/modules/web3j-deployer/Swap.web3j-deployer.iml" />
     </modules>
   </component>
 </project>

@@ -1,6 +1,5 @@
 package ru.home.swap.di
 
-import com.example.wallet.debug.WalletViewModel
 import dagger.Component
 import ru.home.swap.core.di.NetworkModule
 import ru.home.swap.ui.contacts.ContactsFragment

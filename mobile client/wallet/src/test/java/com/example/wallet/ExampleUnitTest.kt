@@ -1,10 +1,8 @@
 package com.example.wallet
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.example.wallet.debug.Status
-import com.example.wallet.debug.WalletViewModel
-import com.example.wallet.debug.repository.StorageRepository
-import com.example.wallet.debug.repository.WalletRepository
+import com.example.wallet.repository.StorageRepository
+import com.example.wallet.repository.WalletRepository
 import com.example.wallet.rules.MainCoroutineRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flow
@@ -12,7 +10,6 @@ import kotlinx.coroutines.test.runBlockingTest
 import org.hamcrest.MatcherAssert
 import org.junit.Test
 
-import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
 import org.mockito.Mock

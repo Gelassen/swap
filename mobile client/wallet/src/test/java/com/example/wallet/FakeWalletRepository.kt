@@ -1,8 +1,8 @@
 package com.example.wallet
 
-import com.example.wallet.debug.contract.SwapValue
-import com.example.wallet.debug.contract.Value
-import com.example.wallet.debug.repository.IWalletRepository
+import com.example.wallet.contract.SwapValue
+import com.example.wallet.contract.Value
+import com.example.wallet.repository.IWalletRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.web3j.protocol.core.methods.response.TransactionReceipt
