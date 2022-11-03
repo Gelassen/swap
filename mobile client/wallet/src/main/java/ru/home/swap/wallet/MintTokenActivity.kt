@@ -37,6 +37,7 @@ class MintTokenActivity: AppCompatActivity() {
 
         WalletDi(application).getWalletComponent().inject(this)
         walletViewModel = ViewModelProvider(this, viewModelFactory).get(WalletViewModel::class.java)
+
 //        val viewModel: WalletViewModel by viewModels()
 //        viewModel.setRepository(applicationContext)
         lifecycleScope.launch {
