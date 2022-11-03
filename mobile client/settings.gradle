@@ -17,4 +17,4 @@ dependencyResolutionManagement {
 rootProject.name = "Swap"
 include ":app"
 include ":wallet"
-include ":Core"
+include ':core'

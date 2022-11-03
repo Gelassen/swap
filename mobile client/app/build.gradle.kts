@@ -90,9 +90,6 @@ dependencies {
     implementation ("com.google.dagger:dagger:2.38.1")
     implementation ("com.google.dagger:dagger-android-support:2.38.1")
 
-    implementation(project(":Core"))
-    implementation(project(":wallet"))
-
     kapt("com.google.dagger:dagger-compiler:2.15")
 
     testImplementation("org.mockito:mockito-core:3.12.4")
@@ -104,4 +101,7 @@ dependencies {
 
     androidTestImplementation ("androidx.test.ext:junit:1.1.3")
     androidTestImplementation ("androidx.test.espresso:espresso-core:3.4.0")
+
+    implementation(project(":core"))
+    implementation(project(":wallet"))
 }
