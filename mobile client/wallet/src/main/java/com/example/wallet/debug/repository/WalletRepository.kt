@@ -2,6 +2,7 @@ package com.example.wallet.debug.repository
 
 import android.content.Context
 import com.example.wallet.R
+import com.example.wallet.debug.contract.SwapChain
 import com.example.wallet.debug.contract.SwapValue
 import com.example.wallet.debug.contract.Value
 import io.reactivex.Flowable
@@ -45,6 +46,7 @@ class WalletRepository(
 
     private var web3: Web3j
     private lateinit var swapValueContract: SwapValue
+    private lateinit var swapChainContract: SwapChain
 
     init {
         web3 = Web3j.build(httpService)
@@ -118,6 +120,13 @@ class WalletRepository(
             getCredentials(),
             DefaultGasProvider()
         )
+        val swapChainContractAddress: String = context.getString(R.string.swap_chain_contract_address)
+        swapChainContract = SwapChain.load(
+            swapChainContractAddress,
+            web3,
+            getCredentials(),
+            DefaultGasProvider()
+        )
     }
 
     private fun getCredentials() : Credentials {
@@ -126,6 +135,10 @@ class WalletRepository(
 
     override fun getOffer(tokenId: String): Value {
         return swapValueContract.getOffer(tokenId).send()
+    }
+
+    override fun registerUserOnSwapMarket(userWalletAddress: String) {
+        swapValueContract
     }
 
 }

@@ -22,4 +22,6 @@ interface IWalletRepository {
     fun getTransferEvents(): Flow<SwapValue.TransferEventResponse>
 
     fun getOffer(tokenId: String): Value
+
+    fun registerUserOnSwapMarket(userWalletAddress: String)
 }

@@ -147,4 +147,10 @@ class WalletViewModel
         }
         logger.d("end getTokens()")
     }
+
+    fun registerUserOnSwapMarket(userWalletAddress: String) {
+        viewModelScope.launch {
+//            repository.registerUser(userWalletAddress)
+        }
+    }
 }
