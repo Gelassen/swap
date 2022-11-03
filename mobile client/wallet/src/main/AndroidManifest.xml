@@ -4,7 +4,7 @@
 
     <application>
         <activity
-            android:name="com.example.wallet.MintTokenActivity"
+            android:name="com.example.ru.home.wallet.MintTokenActivity"
             android:screenOrientation="portrait"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:exported="true">
