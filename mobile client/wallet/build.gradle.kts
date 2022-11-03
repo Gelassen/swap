@@ -61,6 +61,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactive:1.6.0")
 
     implementation("org.web3j:core:4.9.4")
+    implementation("io.github.classgraph:classgraph:4.8.129")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.3.72")
 
     annotationProcessor("androidx.room:room-compiler:2.4.3")
 
