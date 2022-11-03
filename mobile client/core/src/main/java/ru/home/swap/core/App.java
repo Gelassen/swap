@@ -6,7 +6,7 @@ public class App {
 
     public static final String TAG = "TAG";
 
-    public static final String DATABASE_NAME = "swap-wallet-db";
+    public static final String DATABASE_NAME = "swap-swap-db";
 
     public static final String WALLET = "WALLET";
 
