@@ -22,6 +22,65 @@ This is a client-server application with use of ethereum chain. The cost of depl
 4. Ethereum chain contracts, ```SwapValue.sol``` and ```SwapChain.sol``` would require deployment. Their addresses available after depoloyment should be passed to mobile client and server configs.
 5. Mobile client operates with chain over java\kotlin wrappers which require binary code of the compiled contracts. Binary code is available after execution ```$npx hardhat compile```
 
+# Deploy own self-hosted chain
+1. Create folders for nodes
+2. Create accounts in nodes: 
+$geth --datadir ./node1/data account new
+
+pwd: node1
+
+Public address of the key:   0x06Ba36FeA25dAAc20d7d00f95a491566E80a610a
+Path of the secret key file: node1/data/keystore/UTC--2022-11-07T07-00-25.976610112Z--06ba36fea25daac20d7d00f95a491566e80a610a
+
+$geth --datadir ./node2/data account new
+
+pwd: node2
+
+Public address of the key:   0xaB781fEF949CB48a554C15Be2c36b9E1d2663dee
+Path of the secret key file: node2/data/keystore/UTC--2022-11-07T07-02-51.751446401Z--ab781fef949cb48a554c15be2c36b9e1d2663dee
+
+$geth --datadir ./node3/data account new
+
+pwd: node3
+
+Public address of the key:   0xDb4E3996071D1B0d37336b6D082ee0176395749b
+Path of the secret key file: node3/data/keystore/UTC--2022-11-07T07-03-44.502277991Z--db4e3996071d1b0d37336b6d082ee0176395749b
+
+3. Generate genesis block:
+$puppeth
+
+4. Export chain configuration: 
+$puppeth (reselect option 2. Manage existing genesis)
+
+5. Initialize all nodes with chain config: 
+
+$geth --datadir ./node1/data init <chain config>.json
+$geth --datadir ./node2/data init <chain config>.json
+$geth --datadir ./node3/data init <chain config>.json
+
+6. Start nodes: 
+
+$geth --datadir ./node1/data --port 2001 (default authrpc.port 8551)
+$geth --datadir ./node2/data --port 2002 --authrpc.port 8552
+$geth --datadir ./node3/data --port 2003 --authrpc.port 8553
+
+7. Link all nodes with a main one: 
+
+$geth attach ipc:node1/data/geth.ipc
+$admin.nodeInfo.enode
+(reply would be something similar to "enode://64dccd02d5d1166cfb4913f0d0c164dff2b9c61fd55182461010569e15319c7ff5cb4dc8b502e441c38c80ae1b42c2cc95c7e170ed973bb0353d766669c5447c@195.178.22.21:2001?discport=39805")
+$geth attach ipc:node2/data/geth.ipc
+$admin.addPeer(enode://64dccd02d5d1166cfb4913f0d0c164dff2b9c61fd55182461010569e15319c7ff5cb4dc8b502e441c38c80ae1b42c2cc95c7e170ed973bb0353d766669c5447c@127.0.0.1:2001")
+
+Repeat for all nodes: each node should have reference in peers on all OTHERS nodes. Known issue: https://github.com/ethereum/go-ethereum/issues
+
+8. To make node miner:
+
+$geth attach ipc:node3/data/geth.ipc
+$miner.start()
+$miner.stop()
+$eth.getBalance(eth.accounts[0])
+
 # Inspired by
 The idea to use barter with assist of the modern tech was heard by me from russian ex-oligarch Herman Sterligov during finance crisis in 2008. The idea of matching and chaining people together by their needs and offers has borrowed few things from dead Google project Schemer (https://gcemetery.co/google-schemer/) 
 
