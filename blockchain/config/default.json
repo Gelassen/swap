@@ -1,0 +1,8 @@
+{
+    "goerly_testnet" : {
+        "goerlyApi" : "https://goerli.infura.io/v3/ce67e157fc964d3bbf7ff1db09aa316a"
+    },
+    "wallet" : {
+        "privateKey" : "3ba9b75a087df0e7082e1d3d58308755e35e17ac1117a4caf42ef209d203cb4a"
+    }
+}
