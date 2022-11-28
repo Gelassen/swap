@@ -10,6 +10,7 @@
     "@openzeppelin/contracts": "^4.7.3",
     "@openzeppelin/test-helpers": "^0.5.16",
     "config": "^3.3.8",
-    "hardhat": "^2.11.2"
+    "hardhat": "^2.11.2",
+    "keythereum": "^2.0.0"
   }
 }
