@@ -41,7 +41,7 @@ async function main() {
 
   } else {
     const nodeConfig = configChain.get("private_testnet");
-    const pwd = Utils.recoverPasswordForNode(
+    const pwd = new Utils().recoverPasswordForNode(
       nodeConfig.password, 
       nodeConfig.address, 
       nodeConfig.dataDir
