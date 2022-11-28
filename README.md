@@ -97,6 +97,13 @@ $miner.start()
 $miner.stop()
 $eth.getBalance(eth.accounts[0])
 ```
+
+10. Deploy nodes: 
+
+```
+npx hardhat run --network localhost scripts/deploy.ts
+```
+
 # Inspired by
 The idea to use barter with assist of the modern tech was heard by me from russian ex-oligarch Herman Sterligov during finance crisis in 2008. The idea of matching and chaining people together by their needs and offers has borrowed few things from dead Google project Schemer (https://gcemetery.co/google-schemer/) 
 
