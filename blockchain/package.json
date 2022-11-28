@@ -1,7 +1,7 @@
 {
   "name": "hardhat-project",
   "scripts": {
-    "install": "npm install --save-dev @openzeppelin/test-helpers && npm install --save-dev hardhat && npm install --save-dev @openzeppelin/contracts && npm install --save-dev config",
+    "install": "npm install --save-dev keythereum && npm install --save-dev @openzeppelin/test-helpers && npm install --save-dev hardhat && npm install --save-dev @openzeppelin/contracts && npm install --save-dev config",
     "test": "REPORT_GAS=true npx hardhat test",
     "deploy": "NODE_ENV=production npx hardhat deploy"
   },
