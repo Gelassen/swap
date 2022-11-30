@@ -65,14 +65,27 @@ $geth --datadir ./node3/data init <chain config>.json
 
 6. Start nodes: 
 
+A.
 ```
 $geth --datadir ./node1/data --port 2001 (default authrpc.port 8551)
 $geth --datadir ./node2/data --port 2002 --authrpc.port 8552
 $geth --datadir ./node3/data --port 2003 --authrpc.port 8553
 ```
+B. (preferable)
+```
+$./swap/blockchain/start_nodes.sh
+$<enter your root pwd>
+```
+The script is tested on Ubuntu 22.04, but still should be POSIX-compatible. 
+
+The script is partly finished. There is a not complete issue with passing ```enode`` url to each node. More details regarding this issue are here:
+https://unix.stackexchange.com/questions/724525/custom-scenario-for-linux-shell-script/726158#726158
+
+This script will start nodes available over http and print ```enode``` url for each node. You still have to add them manually as peers which is described in the next step.
 
 7. Link all nodes with a main one: 
 
+A.
 ```
 $geth attach ipc:node1/data/geth.ipc
 $admin.nodeInfo.enode
@@ -80,14 +93,28 @@ $admin.nodeInfo.enode
 $geth attach ipc:node2/data/geth.ipc
 $admin.addPeer("enode://64dccd02d5d1166cfb4913f0d0c164dff2b9c61fd55182461010569e15319c7ff5cb4dc8b502e441c38c80ae1b42c2cc95c7e170ed973bb0353d766669c5447c@127.0.0.1:2001")
 ```
-
 Repeat for all nodes: each node should have reference in peers on all OTHERS nodes. Known issue: https://github.com/ethereum/go-ethereum/issues
+
+B.
+<complete me>
 
 8. Set reward collector:
 
 ```
 $miner.setEtherbase(<account for collecting rewards from mining>)
 ```
+
+9. To solve invalid address error which appears on contract's method invocation:
+```
+web3.eth.defaultAccount = web3.eth.coinbase
+```
+
+10. Unlock account to make it available to either collect the reward from mining or withdraw ether on transaction execution:
+```
+personal.unlockAccount("0x62f8dc8a5c80db6e8fcc042f0cc54a298f8f2ffd")
+```
+
+Please note, unlock account is not avaiable by default for nodes run with http access due security breach reasons. For development purpouses nodes are run over http with flag ``` --allow-insecure-unlock```, for deployment in the production alternative way should be found. 
 
 9. To make node miner:
 
