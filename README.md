@@ -85,7 +85,6 @@ This script will start nodes available over http and print ```enode``` url for e
 
 7. Link all nodes with a main one: 
 
-A.
 ```
 $geth attach ipc:node1/data/geth.ipc
 $admin.nodeInfo.enode
@@ -94,9 +93,6 @@ $geth attach ipc:node2/data/geth.ipc
 $admin.addPeer("enode://64dccd02d5d1166cfb4913f0d0c164dff2b9c61fd55182461010569e15319c7ff5cb4dc8b502e441c38c80ae1b42c2cc95c7e170ed973bb0353d766669c5447c@127.0.0.1:2001")
 ```
 Repeat for all nodes: each node should have reference in peers on all OTHERS nodes. Known issue: https://github.com/ethereum/go-ethereum/issues
-
-B.
-<complete me>
 
 8. Set reward collector:
 
@@ -116,7 +112,7 @@ personal.unlockAccount("0x62f8dc8a5c80db6e8fcc042f0cc54a298f8f2ffd")
 
 Please note, unlock account is not avaiable by default for nodes run with http access due security breach reasons. For development purpouses nodes are run over http with flag ``` --allow-insecure-unlock```, for deployment in the production alternative way should be found. 
 
-9. To make node miner:
+11. To make node miner:
 
 ```
 $geth attach ipc:node3/data/geth.ipc
@@ -125,10 +121,18 @@ $miner.stop()
 $eth.getBalance(eth.accounts[0])
 ```
 
-10. Deploy nodes: 
+12. Deploy nodes: 
 
 ```
 npx hardhat run --network localhost scripts/deploy.ts
+```
+
+Some extra commands:
+```
+$admin.peers
+$txpool.status
+$var contract = eth.contract(abi)
+$contract.at('<contract address>').methodCall()
 ```
 
 # Inspired by
