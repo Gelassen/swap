@@ -1,7 +1,7 @@
 import { ethers } from "hardhat";
 import { Utils } from "../utils/utils"
 const configChain = require('config');
-const isNodeAccountPwdRecovered = false
+const isNodeAccountPwdRecovered = true;
 
 async function main() {
   if (isNodeAccountPwdRecovered) {
