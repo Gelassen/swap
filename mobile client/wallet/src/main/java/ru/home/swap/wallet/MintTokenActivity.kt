@@ -17,6 +17,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
+import org.slf4j.LoggerFactory
+import org.web3j.protocol.http.HttpService
 import ru.home.swap.core.di.ViewModelFactory
 import ru.home.swap.core.logger.Logger
 import java.math.BigInteger
@@ -58,14 +60,18 @@ class MintTokenActivity: AppCompatActivity() {
             }
         }
 
+        val privateSwapChainNode1Account = "0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd"
+
+        LoggerFactory.getLogger(HttpService::class.java).isDebugEnabled
+
         findViewById<Button>(R.id.checkBalance)
             .setOnClickListener {
-                walletViewModel.balanceOf(getString(R.string.my_account))
+                walletViewModel.balanceOf(privateSwapChainNode1Account/*getString(R.string.my_account)*/)
             }
 
         findViewById<Button>(R.id.mintToken)
             .setOnClickListener {
-                val to = getString(R.string.my_account)
+                val to = privateSwapChainNode1Account/*getString(R.string.my_account)*/
                 val value = Value(
                     "Consulting",
                     BigInteger.valueOf(1665158348220),

@@ -37,7 +37,6 @@ class NetworkModule(val context: Context) {
 
         val httpClient = OkHttpClient
             .Builder()
-//            .addInterceptor(MockInterceptor(context))
             .addInterceptor(logging)
             .build()
 

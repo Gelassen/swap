@@ -22,6 +22,7 @@ import org.web3j.protocol.core.methods.request.EthFilter
 import org.web3j.protocol.core.methods.response.TransactionReceipt
 import org.web3j.protocol.exceptions.TransactionException
 import org.web3j.protocol.http.HttpService
+import org.web3j.tx.RawTransactionManager
 import org.web3j.tx.gas.DefaultGasProvider
 import ru.home.swap.core.logger.Logger
 import ru.home.swap.core.network.Response
@@ -50,9 +51,15 @@ class WalletRepository(
 
     override fun balanceOf(owner: String): Flow<BigInteger> {
         return flow {
-            val balance = swapValueContract.balanceOf(owner).send()
-            logger.d("balanceOf() call result ${balance}")
-            emit(balance)
+            try {
+                val balance = swapValueContract.balanceOf(owner).send()
+                logger.d("balanceOf() call result ${balance}")
+                emit(balance)
+            } catch (e: Exception) {
+                logger.e("Failed to call balanceOf()", e)
+                val errorFlag: Long = -1
+                emit(BigInteger.valueOf(errorFlag))
+            }
         }
     }
 
@@ -104,11 +111,15 @@ class WalletRepository(
     }
 
     private suspend fun loadContract() = withContext(Dispatchers.IO) {
+        // TODO chainId required to mint tokens based on new ethereum standard (see https://blog.ethereum.org/2021/03/03/geth-v1-10-0)
+        // it is only available over custom RawTransactionManager which is used for both balanceOf() and mint() methods
         val swapValueContractAddress: String = context.getString(R.string.swap_value_contract_address)
+//        val privateKey: String = context.getString(R.string.private_key)
+        val chainId: Long = context.getString(R.string.chain_id).toLong()
         swapValueContract = SwapValue.load(
             swapValueContractAddress,
             web3,
-            getCredentials(),
+            RawTransactionManager(web3, getCredentials()/*Credentials.create(privateKey)*/, chainId),
             DefaultGasProvider()
         )
         val swapChainContractAddress: String = context.getString(R.string.swap_chain_contract_address)
@@ -121,7 +132,7 @@ class WalletRepository(
     }
 
     private fun getCredentials() : Credentials {
-        return Credentials.create(context.getString(R.string.wallet_password))
+        return Credentials.create(context.getString(R.string.test_account_private_key/*R.string.wallet_password*/))
     }
 
     override fun getOffer(tokenId: String): Value {
