@@ -42,6 +42,17 @@ class SwapChain : Contract, ISwapChain {
         )
     }
     companion object {
+        @Deprecated(message =
+        "Only replay-protected (EIP-155) transactions allowed over RPC "
+                + "which requires chainId maintained by RawTransactionManager",
+            replaceWith = ReplaceWith("SwapChain().load(\n" +
+                    "            contractAddress: String?,\n" +
+                    "            web3j: Web3j?,\n" +
+                    "            transactionManager: TransactionManager,\n" +
+                    "            contractGasProvider: ContractGasProvider?\n" +
+                    "        )"
+            )
+        )
         @JvmStatic
         fun load(
             contractAddress: String?,

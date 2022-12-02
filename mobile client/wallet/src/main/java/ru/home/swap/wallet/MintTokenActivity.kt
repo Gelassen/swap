@@ -60,6 +60,12 @@ class MintTokenActivity: AppCompatActivity() {
             }
         }
 
+        findViewById<Button>(R.id.registerUser)
+            .setOnClickListener {
+                val testUser = "0x62F8DC8a5c00006e000000000cC54a298F8F2FFd"
+                walletViewModel.registerUserOnSwapMarket(testUser)
+            }
+
         val privateSwapChainNode1Account = "0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd"
 
         LoggerFactory.getLogger(HttpService::class.java).isDebugEnabled

@@ -16,6 +16,8 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.web3j.abi.EventEncoder
 import org.web3j.crypto.Credentials
+import org.web3j.crypto.Keys
+import org.web3j.crypto.WalletUtils
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.DefaultBlockParameterName
 import org.web3j.protocol.core.methods.request.EthFilter
@@ -49,16 +51,15 @@ class WalletRepository(
         }
     }
 
-    override fun balanceOf(owner: String): Flow<BigInteger> {
+    override fun balanceOf(owner: String): Flow<Response<BigInteger>> {
         return flow {
             try {
                 val balance = swapValueContract.balanceOf(owner).send()
                 logger.d("balanceOf() call result ${balance}")
-                emit(balance)
+                emit(Response.Data(balance))
             } catch (e: Exception) {
                 logger.e("Failed to call balanceOf()", e)
-                val errorFlag: Long = -1
-                emit(BigInteger.valueOf(errorFlag))
+                emit(Response.Error.Exception(e))
             }
         }
     }
@@ -126,7 +127,7 @@ class WalletRepository(
         swapChainContract = SwapChain.load(
             swapChainContractAddress,
             web3,
-            getCredentials(),
+            RawTransactionManager(web3, getCredentials(), chainId),
             DefaultGasProvider()
         )
     }
@@ -139,8 +140,23 @@ class WalletRepository(
         return swapValueContract.getOffer(tokenId).send()
     }
 
-    override fun registerUserOnSwapMarket(userWalletAddress: String) {
-        swapValueContract
+    override fun registerUserOnSwapMarket(userWalletAddress: String): Flow<Response<TransactionReceipt>> {
+        return flow {
+            logger.d("[start] registerUserOnSwapMarket")
+            val isValidEthAddress = WalletUtils.isValidAddress(userWalletAddress)
+                    && userWalletAddress.uppercase().contentEquals(
+                        Keys.toChecksumAddress(userWalletAddress).uppercase())
+            if (isValidEthAddress) {
+                val response: TransactionReceipt = swapChainContract.registerUser(userWalletAddress).send()
+                logger.d("Response from registerUser() + ${response}")
+                emit(Response.Data(response))
+            } else {
+                val response = Response.Error.Message("${userWalletAddress} is not valid ethereum address.Please check you pass a corect ethereum address.")
+                emit(response)
+            }
+            logger.d("[end] registerUserOnSwapMarket")
+        }
+
     }
 
 }

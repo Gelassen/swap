@@ -16,6 +16,7 @@ import org.web3j.protocol.core.methods.response.TransactionReceipt
 import org.web3j.protocol.exceptions.TransactionException
 import ru.home.swap.core.logger.Logger
 import ru.home.swap.core.network.Response
+import java.math.BigInteger
 import javax.inject.Inject
 
 data class Model(
@@ -53,13 +54,33 @@ class WalletViewModel
                 .flowOn(Dispatchers.IO)
                 .collect { value ->
                     logger.d("collect get balance result")
-                    state.update {
-                        it.wallet.setBalance(value)
-                        it.copy(wallet = it.wallet, status = Status.BALANCE)
-                    }
+                    processBalanceOfResponse(value)
                 }
         }
         logger.d("[end] balanceOf()")
+    }
+
+    private fun processBalanceOfResponse(value: Response<BigInteger>) {
+        when (value) {
+            is Response.Data -> {
+                state.update {
+                    it.wallet.setBalance(value.data)
+                    it.copy(wallet = it.wallet, status = Status.BALANCE)
+                }
+            }
+            is Response.Error.Message -> {
+                state.update {
+                    it.copy(errors = it.errors + value.msg, status = Status.NONE)
+                }
+            }
+            is Response.Error.Exception -> {
+                logger.e("Get an exception due balanceOf() call", value.error)
+                val error = "Something went wrong with exception: ${value.error}"
+                state.update {
+                    it.copy(errors = it.errors + error, status = Status.NONE)
+                }
+            }
+        }
     }
 
     fun mintToken(to: String, value: Value, uri: String) {
@@ -146,7 +167,32 @@ class WalletViewModel
 
     fun registerUserOnSwapMarket(userWalletAddress: String) {
         viewModelScope.launch {
-//            repository.registerUser(userWalletAddress)
+            repository.registerUserOnSwapMarket(userWalletAddress)
+                .catch { ex ->
+                    logger.e("Get an exception due registerUser() call", ex)
+                    state.update { it ->
+                        val error = "Can not register a new user: ${ex.message} ${ex.cause}"
+                        it.copy(errors = it.errors + error, status = Status.NONE )
+                    }
+                }
+                .flowOn(Dispatchers.IO)
+                .collect { it ->
+                    processRegisterUserResponse(it)
+                }
+        }
+    }
+
+    private fun processRegisterUserResponse(it: Response<TransactionReceipt>) {
+        when (it) {
+            is Response.Data -> {
+                logger.d("Collect response from registerUser() request ${it}")
+            }
+            is Response.Error.Message -> {
+                logger.d("Collect response from registerUser(). Get an error ${it.msg}")
+            }
+            is Response.Error.Exception -> {
+                logger.e("Collect response from registerUser(). Get an exception ", it.error)
+            }
         }
     }
 }

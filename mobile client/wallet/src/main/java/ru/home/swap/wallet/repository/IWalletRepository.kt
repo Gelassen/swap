@@ -10,7 +10,12 @@ import java.math.BigInteger
 
 interface IWalletRepository {
 
-    fun balanceOf(owner: String): Flow<BigInteger>
+    companion object {
+        const val TX_STATUS_FAIL = "0x0"
+        const val TX_STATUS_OK = "0x1"
+    }
+
+    fun balanceOf(owner: String): Flow<Response<BigInteger>>
 
     @Throws(TransactionException::class)
     fun mintToken(to: String, value: Value, uri: String): Flow<Response<TransactionReceipt>>
@@ -23,5 +28,5 @@ interface IWalletRepository {
 
     fun getOffer(tokenId: String): Value
 
-    fun registerUserOnSwapMarket(userWalletAddress: String)
+    fun registerUserOnSwapMarket(userWalletAddress: String): Flow<Response<TransactionReceipt>>
 }
