@@ -29,4 +29,6 @@ interface IWalletRepository {
     fun getOffer(tokenId: String): Value
 
     fun registerUserOnSwapMarket(userWalletAddress: String): Flow<Response<TransactionReceipt>>
+
+    fun approveTokenManager(operator: String, approved: Boolean)
 }

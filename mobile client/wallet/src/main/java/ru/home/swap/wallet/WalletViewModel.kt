@@ -1,6 +1,5 @@
 package ru.home.swap.wallet
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ru.home.swap.wallet.contract.Value
@@ -41,11 +40,6 @@ class WalletViewModel
     val uiState: StateFlow<Model> = state
         .asStateFlow()
         .stateIn(viewModelScope, SharingStarted.Eagerly, state.value)
-
-    @Deprecated("Repository is passed now via dagger DI")
-    fun setRepository(context: Context) {
-//        repository = WalletRepository(context)
-    }
 
     fun balanceOf(owner: String) {
         logger.d("[start] balanceOf()")
@@ -176,6 +170,9 @@ class WalletViewModel
                     }
                 }
                 .flowOn(Dispatchers.IO)
+/*                .map {
+                    // TODO implement caching the result
+                }*/
                 .collect { it ->
                     processRegisterUserResponse(it)
                 }

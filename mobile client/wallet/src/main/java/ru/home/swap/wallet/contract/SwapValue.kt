@@ -1,13 +1,9 @@
 package ru.home.swap.wallet.contract
 
-import ru.home.swap.wallet.contract.IERC721.Functions.FUNC_BALANCEOF
-import ru.home.swap.wallet.contract.SwapValue.Const.TRANSFER_EVENT
 import io.reactivex.Flowable
 import org.web3j.abi.TypeReference
-import org.web3j.abi.datatypes.Address
-import org.web3j.abi.datatypes.Event
+import org.web3j.abi.datatypes.*
 import org.web3j.abi.datatypes.Function
-import org.web3j.abi.datatypes.Utf8String
 import org.web3j.abi.datatypes.generated.Uint256
 import org.web3j.crypto.Credentials
 import org.web3j.protocol.Web3j
@@ -19,6 +15,11 @@ import org.web3j.protocol.core.methods.response.TransactionReceipt
 import org.web3j.tx.Contract
 import org.web3j.tx.TransactionManager
 import org.web3j.tx.gas.ContractGasProvider
+import ru.home.swap.wallet.contract.IERC721.Functions.FUNC_BALANCEOF
+import ru.home.swap.wallet.contract.IERC721.Functions.FUNC_GETAPPROVED
+import ru.home.swap.wallet.contract.IERC721.Functions.FUNC_ISAPPROVEDFORALL
+import ru.home.swap.wallet.contract.IERC721.Functions.FUNC_SETAPPROVALFORALL
+import ru.home.swap.wallet.contract.SwapValue.Const.TRANSFER_EVENT
 import java.math.BigInteger
 import java.util.*
 
@@ -115,16 +116,36 @@ class SwapValue
         TODO("Not yet implemented")
     }
 
-    override fun setApprovalForAll(operator: String, approved: Boolean) {
-        TODO("Not yet implemented")
+    override fun setApprovalForAll(operator: String, approved: Boolean): RemoteFunctionCall<TransactionReceipt> {
+        val function = Function(
+            FUNC_SETAPPROVALFORALL,
+            listOf(
+                Address(operator),
+                Bool(approved)
+            ),
+            Collections.emptyList()
+        )
+        return executeRemoteCallTransaction(function)
     }
 
-    override fun getApproved(tokenId: String): String {
-        TODO("Not yet implemented")
+    override fun getApproved(tokenId: Long): RemoteFunctionCall<String> {
+        val function = Function(
+            FUNC_GETAPPROVED,
+            listOf(Uint256(tokenId)),
+            listOf(object : TypeReference<Address>() {})
+        )
+        return executeRemoteCallSingleValueReturn(function, String::class.java)
     }
 
-    override fun isApprovedForAll(owner: String, operator: String): Boolean {
-        TODO("Not yet implemented")
+    override fun isApprovedForAll(owner: String, operator: String): RemoteFunctionCall<Boolean> {
+        val function = Function(FUNC_ISAPPROVEDFORALL,
+            listOf(
+                Address(owner),
+                Address(operator)
+            ),
+            listOf(object: TypeReference<Bool>() {})
+        )
+        return executeRemoteCallSingleValueReturn(function, Boolean::class.java)
     }
 
     override fun safeMint(to: String, value: Value, uri: String): RemoteFunctionCall<TransactionReceipt> {
