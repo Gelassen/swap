@@ -12,5 +12,5 @@
 
     <!-- by legacy reason originally it was rinkeby -->
 <!--    https://goerli.infura.io/v3/ce67e157fc964d3bbf7ff1db09aa316a-->
-    <string name="test_infura_api">http://192.168.0.185:2001</string>
+    <string name="ethereum_api_endpoint">http://192.168.1.243:2001</string>
 </resources>

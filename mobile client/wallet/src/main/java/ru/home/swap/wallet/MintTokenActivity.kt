@@ -2,6 +2,7 @@ package ru.home.swap.wallet
 
 import android.os.Bundle
 import android.widget.Button
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
@@ -60,10 +61,19 @@ class MintTokenActivity: AppCompatActivity() {
             }
         }
 
+
+        findViewById<TextView>(R.id.infoView).text = getString(R.string.ethereum_api_endpoint)
+
         findViewById<Button>(R.id.registerUser)
             .setOnClickListener {
                 val testUser = "0x62F8DC8a5c00006e000000000cC54a298F8F2FFd"
                 walletViewModel.registerUserOnSwapMarket(testUser)
+            }
+
+        findViewById<Button>(R.id.approveTokenManager)
+            .setOnClickListener {
+                val swapChainAddress = getString(R.string.swap_chain_contract_address)
+                walletViewModel.approveTokenManager(swapChainAddress)
             }
 
         val privateSwapChainNode1Account = "0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd"

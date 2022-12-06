@@ -4,60 +4,80 @@
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical"
         android:gravity="center"
         >
 
-        <TextView
-            android:id="@+id/infoView"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            tools:text="Here is place for debug information"
-            />
+            android:orientation="vertical"
+            android:gravity="center"
+            >
 
-        <Button
-            android:id="@+id/registerUser"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="Register test user"
-            />
+            <TextView
+                android:id="@+id/infoView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:padding="24dp"
+                tools:text="Here is place for debug information"
+                />
 
-        <Button
-            android:id="@+id/checkBalance"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="Check balance"
-            />
+            <Button
+                android:id="@+id/registerUser"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Register test user"
+                />
 
-        <Button
-            android:id="@+id/mintToken"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="Mint a token"
-            />
 
-        <Button
-            android:id="@+id/getMyTokens"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="Get my tokens"
-            />
+            <Button
+                android:id="@+id/approveTokenManager"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Approve token manager"
+                />
 
-        <Button
-            android:id="@+id/testNewFunctionality"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="Test new functionality"
-            />
-    </LinearLayout>
+            <Button
+                android:id="@+id/checkBalance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Check balance"
+                />
+
+            <Button
+                android:id="@+id/mintToken"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Mint a token"
+                />
+
+            <Button
+                android:id="@+id/getMyTokens"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Get my tokens"
+                />
+
+            <Button
+                android:id="@+id/testNewFunctionality"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Test new functionality"
+                />
+        </LinearLayout>
+
+    </ScrollView>
+
 
 </FrameLayout>

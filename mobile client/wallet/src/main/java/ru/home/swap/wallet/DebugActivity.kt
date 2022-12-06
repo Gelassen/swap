@@ -6,6 +6,7 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.wallet.R
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.web3j.crypto.Credentials
 import org.web3j.crypto.WalletUtils
@@ -24,6 +25,7 @@ import java.security.Provider
 import java.security.Security
 
 
+@Deprecated(message = "MintTokenActivity is used for debug purpose")
 class DebugActivity: AppCompatActivity() {
 
     private lateinit var credentials: Credentials
@@ -38,7 +40,7 @@ class DebugActivity: AppCompatActivity() {
         test()
 
         val debugView = findViewById<TextView>(com.example.wallet.R.id.debugInfo)
-        debugView.text = "Hello world from debug activity!"
+        debugView.text = getString(R.string.ethereum_api_endpoint)
 
         findViewById<Button>(com.example.wallet.R.id.setupWallet)
             .setOnClickListener { setExistingWallet() }

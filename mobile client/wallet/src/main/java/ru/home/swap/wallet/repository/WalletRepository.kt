@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import org.bouncycastle.asn1.ocsp.ResponseData
 import org.web3j.abi.EventEncoder
 import org.web3j.crypto.Credentials
 import org.web3j.crypto.Keys
@@ -26,6 +27,7 @@ import org.web3j.protocol.exceptions.TransactionException
 import org.web3j.protocol.http.HttpService
 import org.web3j.tx.RawTransactionManager
 import org.web3j.tx.gas.DefaultGasProvider
+import ru.home.swap.core.App
 import ru.home.swap.core.logger.Logger
 import ru.home.swap.core.network.Response
 import java.math.BigInteger
@@ -159,10 +161,17 @@ class WalletRepository(
 
     }
 
-    override fun approveTokenManager(operator: String, approved: Boolean) {
-//        return flow {
-//
-//        }
+    override fun approveTokenManager(operator: String, approved: Boolean): Flow<Response<TransactionReceipt>> {
+        return flow {
+            try {
+                val response: TransactionReceipt = swapValueContract.setApprovalForAll(operator, approved).send()
+                emit(Response.Data(response))
+            } catch (ex: Exception) {
+                logger.e("Failed to approve address as an operator over the tokens for this user", ex)
+                val response = Response.Error.Exception(ex)
+                emit(response)
+            }
+        }
     }
 
 }

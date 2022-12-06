@@ -27,7 +27,7 @@ class WalletModule(val context: Context) {
     @Singleton
     @Provides
     fun providesWeb3jHttpService(interceptor: Interceptor): HttpService {
-        val url: String = context.getString(R.string.test_infura_api)
+        val url: String = context.getString(R.string.ethereum_api_endpoint)
         val logging = HttpLoggingInterceptor()
         logging.setLevel(HttpLoggingInterceptor.Level.BODY)
         val client = OkHttpClient

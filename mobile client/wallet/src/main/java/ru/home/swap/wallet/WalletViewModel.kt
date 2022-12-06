@@ -192,4 +192,29 @@ class WalletViewModel
             }
         }
     }
+
+    fun approveTokenManager(swapChainAddress: String) {
+        viewModelScope.launch {
+            repository.approveTokenManager(swapChainAddress, true)
+                .flowOn(Dispatchers.IO)
+                .collect {
+                    processApproveTokenManagerResponse(it)
+                }
+        }
+    }
+
+    private fun processApproveTokenManagerResponse(response: Response<TransactionReceipt>) {
+        when(response) {
+            is Response.Data -> {
+                logger.d("Collect response from the approveTokenManager() call with the status "
+                        + "${response.data.status} and tx receipt ${response}")
+            }
+            is Response.Error.Message -> {
+                logger.d("Get an error on approveTokenManager() call ${response.msg}")
+            }
+            is Response.Error.Exception -> {
+                logger.d("Get an error on approveTokenManager() call ${response.error}")
+            }
+        }
+    }
 }

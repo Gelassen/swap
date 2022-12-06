@@ -3,6 +3,7 @@ package ru.home.swap.wallet.repository
 import ru.home.swap.wallet.contract.SwapValue
 import ru.home.swap.wallet.contract.Value
 import kotlinx.coroutines.flow.Flow
+import org.bouncycastle.asn1.ocsp.ResponseData
 import org.web3j.protocol.core.methods.response.TransactionReceipt
 import org.web3j.protocol.exceptions.TransactionException
 import ru.home.swap.core.network.Response
@@ -30,5 +31,5 @@ interface IWalletRepository {
 
     fun registerUserOnSwapMarket(userWalletAddress: String): Flow<Response<TransactionReceipt>>
 
-    fun approveTokenManager(operator: String, approved: Boolean)
+    fun approveTokenManager(operator: String, approved: Boolean): Flow<Response<TransactionReceipt>>
 }
