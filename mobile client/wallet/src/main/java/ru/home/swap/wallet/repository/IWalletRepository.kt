@@ -7,6 +7,7 @@ import org.bouncycastle.asn1.ocsp.ResponseData
 import org.web3j.protocol.core.methods.response.TransactionReceipt
 import org.web3j.protocol.exceptions.TransactionException
 import ru.home.swap.core.network.Response
+import ru.home.swap.wallet.contract.Match
 import java.math.BigInteger
 
 interface IWalletRepository {
@@ -32,4 +33,8 @@ interface IWalletRepository {
     fun registerUserOnSwapMarket(userWalletAddress: String): Flow<Response<TransactionReceipt>>
 
     fun approveTokenManager(operator: String, approved: Boolean): Flow<Response<TransactionReceipt>>
+
+    fun approveSwap(matchSubj: Match): Flow<Response<TransactionReceipt>>
+
+    fun registerDemand(userAddress: String, demand: String): Flow<Response<TransactionReceipt>>
 }

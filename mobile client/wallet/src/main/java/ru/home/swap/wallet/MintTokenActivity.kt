@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory
 import org.web3j.protocol.http.HttpService
 import ru.home.swap.core.di.ViewModelFactory
 import ru.home.swap.core.logger.Logger
+import ru.home.swap.wallet.contract.Match
 import java.math.BigInteger
 import javax.inject.Inject
 
@@ -105,29 +106,26 @@ class MintTokenActivity: AppCompatActivity() {
                 walletViewModel.getTokensThatBelongsToMeNotConsumedNotExpired(account)
             }
 
-        findViewById<Button>(R.id.testNewFunctionality)
+        findViewById<Button>(R.id.approveSwap)
             .setOnClickListener {
-                lifecycleScope.launch {
-                    logger.d("start test")
-                    testFunc()
-                        .collect { it ->
-                            logger.d("Result of offer for token id: ${it}")
-                    }
+                val userFirstTokenId = BigInteger.valueOf(0) // TODO define me
+                val userSecondTokenId = BigInteger.valueOf(0) // TODO define me
+                val matchSubj = Match(
+                    userFirst = "0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd",
+                    valueOfFirstUser = userFirstTokenId,
+                    userSecond = "0x52E7400Ba1B956B11394a5045F8BC3682792E1AC",
+                    valueOfSecondUser = userSecondTokenId,
+                    approvedByFirstUser = true,
+                    approvedBySecondUser = true
+                )
+                walletViewModel.approveSwap(matchSubj)
+            }
 
-                }
+        findViewById<Button>(R.id.registerDemand)
+            .setOnClickListener {
+                val demandOfFirstUser = "Farmer products"
+                walletViewModel.registerDemand(demandOfFirstUser)
             }
     }
 
-    fun testFunc(): Flow<Value> {
-        return flow {
-            val repo = WalletRepository(
-                applicationContext,
-                WalletModule(applicationContext)
-                    .providesWeb3jHttpService(WalletModule(applicationContext).providesInterceptor())
-            )
-            val result = repo.getOffer("12")
-            emit(result)
-        }
-            .flowOn(Dispatchers.IO)
-    }
 }

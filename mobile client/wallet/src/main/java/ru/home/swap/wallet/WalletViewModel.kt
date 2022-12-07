@@ -15,6 +15,7 @@ import org.web3j.protocol.core.methods.response.TransactionReceipt
 import org.web3j.protocol.exceptions.TransactionException
 import ru.home.swap.core.logger.Logger
 import ru.home.swap.core.network.Response
+import ru.home.swap.wallet.contract.Match
 import java.math.BigInteger
 import javax.inject.Inject
 
@@ -213,7 +214,55 @@ class WalletViewModel
                 logger.d("Get an error on approveTokenManager() call ${response.msg}")
             }
             is Response.Error.Exception -> {
-                logger.d("Get an error on approveTokenManager() call ${response.error}")
+                logger.e("Get an error on approveTokenManager() call", response.error)
+            }
+        }
+    }
+
+    fun approveSwap(matchSubj: Match) {
+        viewModelScope.launch {
+            repository.approveSwap(matchSubj)
+                .flowOn(Dispatchers.IO)
+                .collect {
+                    processApproveSwapResponse(it)
+                }
+        }
+    }
+
+    private fun processApproveSwapResponse(response: Response<TransactionReceipt>) {
+        when (response) {
+            is Response.Data -> {
+                logger.d("Collect approve swap response ")
+            }
+            is Response.Error.Message -> {
+                logger.d("Get an error on approve swap call ${response.msg}")
+            }
+            is Response.Error.Exception -> {
+                logger.e("Get an error on approve swap call", response.error)
+            }
+        }
+    }
+
+    fun registerDemand(userAddress: String, demand: String) {
+        viewModelScope.launch {
+            repository.registerDemand(demand, userAddress)
+                .flowOn(Dispatchers.IO)
+                .collect {
+                    processRegisterDemandResponse(it)
+                }
+        }
+    }
+
+    private fun processRegisterDemandResponse(response: Response<TransactionReceipt>) {
+        when (response) {
+            is Response.Data -> {
+                logger.d("Register demand response with status ${response.data.status} and tx receipt ${response.data}")
+            }
+            is Response.Error.Message -> {
+                logger.d("Get an error on register demand call ${response.msg}")
+            }
+            is Response.Error.Exception -> {
+                logger.e("Get an error on register demand call", response.error)
             }
         }
     }

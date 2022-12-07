@@ -30,6 +30,7 @@ import org.web3j.tx.gas.DefaultGasProvider
 import ru.home.swap.core.App
 import ru.home.swap.core.logger.Logger
 import ru.home.swap.core.network.Response
+import ru.home.swap.wallet.contract.Match
 import java.math.BigInteger
 
 
@@ -168,6 +169,40 @@ class WalletRepository(
                 emit(Response.Data(response))
             } catch (ex: Exception) {
                 logger.e("Failed to approve address as an operator over the tokens for this user", ex)
+                val response = Response.Error.Exception(ex)
+                emit(response)
+            }
+        }
+    }
+
+    override fun approveSwap(matchSubj: Match): Flow<Response<TransactionReceipt>> {
+        return flow {
+            try {
+                val response: TransactionReceipt = swapChainContract.approveSwap(matchSubj).send()
+                emit(Response.Data(response))
+            } catch (ex: Exception) {
+                logger.e("Failed to approve match", ex)
+                val response = Response.Error.Exception(ex)
+                emit(response)
+            }
+        }
+    }
+
+    override fun registerDemand(userWalletAddress: String, demand: String): Flow<Response<TransactionReceipt>> {
+        return flow {
+            try {
+                val isValidEthAddress = WalletUtils.isValidAddress(userWalletAddress)
+                        && userWalletAddress.uppercase().contentEquals(
+                    Keys.toChecksumAddress(userWalletAddress).uppercase())
+                if (isValidEthAddress) {
+                    val response: TransactionReceipt = swapChainContract.registerDemand(userWalletAddress, demand).send()
+                    emit(Response.Data(response))
+                } else {
+                    val errMessage = "${userWalletAddress} is not valid ethereum address."
+                    emit(Response.Error.Message(errMessage))
+                }
+            } catch (ex: Exception) {
+                logger.e("Failed to approve match", ex)
                 val response = Response.Error.Exception(ex)
                 emit(response)
             }
