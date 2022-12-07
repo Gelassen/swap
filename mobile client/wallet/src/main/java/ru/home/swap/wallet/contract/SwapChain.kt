@@ -3,6 +3,7 @@ package ru.home.swap.wallet.contract
 import org.web3j.abi.FunctionEncoder
 import org.web3j.abi.datatypes.Address
 import org.web3j.abi.datatypes.Function
+import org.web3j.abi.datatypes.Utf8String
 import org.web3j.crypto.Credentials
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.RemoteCall
@@ -98,6 +99,29 @@ class SwapChain : Contract, ISwapChain {
         val function = Function(
             ISwapChain.Functions.FUNC_REGISTER_USER,
             listOf(Address(userWalletAddress)),
+            emptyList()
+        )
+
+        return executeRemoteCallTransaction(function)
+    }
+
+    override fun approveSwap(matchObj: Match): RemoteFunctionCall<TransactionReceipt> {
+        val function = Function(
+            ISwapChain.Functions.FUNC_APPROVE_SWAP,
+            listOf(matchObj),
+            emptyList()
+        )
+
+        return executeRemoteCallTransaction(function)
+    }
+
+    override fun registerDemand(
+        userAddress: String,
+        demand: String
+    ): RemoteFunctionCall<TransactionReceipt> {
+        val function = Function(
+            ISwapChain.Functions.FUNC_REGISTER_DEMAND,
+            listOf(Address(userAddress), Utf8String(demand)),
             emptyList()
         )
 
