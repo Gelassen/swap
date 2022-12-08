@@ -4,10 +4,12 @@ import ru.home.swap.wallet.contract.SwapValue
 import ru.home.swap.wallet.contract.Value
 import kotlinx.coroutines.flow.Flow
 import org.bouncycastle.asn1.ocsp.ResponseData
+import org.web3j.protocol.core.RemoteFunctionCall
 import org.web3j.protocol.core.methods.response.TransactionReceipt
 import org.web3j.protocol.exceptions.TransactionException
 import ru.home.swap.core.network.Response
 import ru.home.swap.wallet.contract.Match
+import ru.home.swap.wallet.model.Token
 import java.math.BigInteger
 
 interface IWalletRepository {
@@ -37,4 +39,8 @@ interface IWalletRepository {
     fun approveSwap(matchSubj: Match): Flow<Response<TransactionReceipt>>
 
     fun registerDemand(userAddress: String, demand: String): Flow<Response<TransactionReceipt>>
+
+    fun getTokenIdsForUser(userWalletAddress: String): Flow<Response<List<*>>>
+
+    fun getTokenIdsWithValues(userWalletAddress: String, withConsumed: Boolean): Flow<Response<List<Token>>>
 }

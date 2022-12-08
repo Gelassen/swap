@@ -14,6 +14,7 @@ interface ISwapValue {
     object Functions {
         val FUNC_SAFE_MINT: String = "safeMint"
         val FUNC_GET_OFFER: String = "offer"
+        val FUNC_GETTOKENSIDSFORUSER = "getTokensIdsForUser";
     }
 
     fun safeMint(
@@ -30,6 +31,8 @@ interface ISwapValue {
     ): RemoteFunctionCall<TransactionReceipt>
 
     fun getOffer(tokenId: String): RemoteFunctionCall<Value>
+
+    fun getTokensIdsForUser(userAddress: String): RemoteFunctionCall<List<*>>
 
     @Deprecated(message = "Redundant")
     fun testReturnCall(): RemoteFunctionCall<TransactionReceipt>

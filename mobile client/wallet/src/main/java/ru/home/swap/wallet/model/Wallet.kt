@@ -23,4 +23,8 @@ class Wallet {
         tokens.plus(token)
     }
 
+    fun getTokens(): MutableList<Token> {
+        return tokens
+    }
+
 }

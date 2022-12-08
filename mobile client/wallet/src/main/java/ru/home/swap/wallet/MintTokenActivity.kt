@@ -11,12 +11,6 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.example.wallet.R
 import ru.home.swap.wallet.contract.Value
 import ru.home.swap.wallet.di.WalletDi
-import ru.home.swap.wallet.di.WalletModule
-import ru.home.swap.wallet.repository.WalletRepository
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 import org.web3j.protocol.http.HttpService
@@ -67,8 +61,8 @@ class MintTokenActivity: AppCompatActivity() {
 
         findViewById<Button>(R.id.registerUser)
             .setOnClickListener {
-                val testUser = "0x62F8DC8a5c00006e000000000cC54a298F8F2FFd"
-                walletViewModel.registerUserOnSwapMarket(testUser)
+                walletViewModel.registerUserOnSwapMarket(FIRST_USER)
+                walletViewModel.registerUserOnSwapMarket(SECOND_USER)
             }
 
         findViewById<Button>(R.id.approveTokenManager)
@@ -77,20 +71,34 @@ class MintTokenActivity: AppCompatActivity() {
                 walletViewModel.approveTokenManager(swapChainAddress)
             }
 
-        val privateSwapChainNode1Account = "0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd"
+//        val privateSwapChainNode1Account = "0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd"
 
         LoggerFactory.getLogger(HttpService::class.java).isDebugEnabled
 
         findViewById<Button>(R.id.checkBalance)
             .setOnClickListener {
-                walletViewModel.balanceOf(privateSwapChainNode1Account/*getString(R.string.my_account)*/)
+                walletViewModel.balanceOf(FIRST_USER/*getString(R.string.my_account)*/)
             }
 
         findViewById<Button>(R.id.mintToken)
             .setOnClickListener {
-                val to = privateSwapChainNode1Account/*getString(R.string.my_account)*/
+                val to = FIRST_USER/*getString(R.string.my_account)*/
                 val value = Value(
-                    "Consulting",
+                    FIRST_USER_OFFER,
+                    BigInteger.valueOf(1665158348220),
+                    BigInteger.valueOf(1669758348220),
+                    false,
+                    BigInteger.valueOf(0)
+                )
+                val uri = "https://gelassen.github.io/blog/"
+                walletViewModel.mintToken(to, value, uri)
+            }
+
+        findViewById<Button>(R.id.mintTokenSecondUser)
+            .setOnClickListener {
+                val to = SECOND_USER/*getString(R.string.my_account)*/
+                val value = Value(
+                    SECOND_USER_OFFER,
                     BigInteger.valueOf(1665158348220),
                     BigInteger.valueOf(1669758348220),
                     false,
@@ -102,18 +110,19 @@ class MintTokenActivity: AppCompatActivity() {
 
         findViewById<Button>(R.id.getMyTokens)
             .setOnClickListener {
-                val account = applicationContext.getString(R.string.my_account)
-                walletViewModel.getTokensThatBelongsToMeNotConsumedNotExpired(account)
+                val account = FIRST_USER//applicationContext.getString(R.string.my_account)
+//                walletViewModel.getTokensThatBelongsToMeNotConsumedNotExpired(account)
+                walletViewModel.getTokenIdsForUser(account)
             }
 
         findViewById<Button>(R.id.approveSwap)
             .setOnClickListener {
-                val userFirstTokenId = BigInteger.valueOf(0) // TODO define me
-                val userSecondTokenId = BigInteger.valueOf(0) // TODO define me
+                val userFirstTokenId = BigInteger.valueOf(4) // TODO define me
+                val userSecondTokenId = BigInteger.valueOf(1) // TODO define me
                 val matchSubj = Match(
-                    userFirst = "0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd",
+                    userFirst = FIRST_USER,
                     valueOfFirstUser = userFirstTokenId,
-                    userSecond = "0x52E7400Ba1B956B11394a5045F8BC3682792E1AC",
+                    userSecond = SECOND_USER,
                     valueOfSecondUser = userSecondTokenId,
                     approvedByFirstUser = true,
                     approvedBySecondUser = true
@@ -121,11 +130,26 @@ class MintTokenActivity: AppCompatActivity() {
                 walletViewModel.approveSwap(matchSubj)
             }
 
-        findViewById<Button>(R.id.registerDemand)
+        findViewById<Button>(R.id.registerDemandFirstUser)
             .setOnClickListener {
-                val demandOfFirstUser = "Farmer products"
-                walletViewModel.registerDemand(demandOfFirstUser)
+                val demandOfFirstUser = SECOND_USER_OFFER
+                walletViewModel.registerDemand(FIRST_USER, demandOfFirstUser)
             }
+
+        findViewById<Button>(R.id.registerDemandSecondUser)
+            .setOnClickListener {
+                val demandOfSecondUser = FIRST_USER_OFFER
+                walletViewModel.registerDemand(SECOND_USER, demandOfSecondUser)
+            }
+
+        // TODO test registerDemand() and approveSwap(), also check a whole flow (don't forget insert token ids!)
+    }
+
+    companion object {
+        const val FIRST_USER = "0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd"
+        const val FIRST_USER_OFFER = "Consulting"
+        const val SECOND_USER = "0x52E7400Ba1B956B11394a5045F8BC3682792E1AC"
+        const val SECOND_USER_OFFER = "Farmer products"
     }
 
 }

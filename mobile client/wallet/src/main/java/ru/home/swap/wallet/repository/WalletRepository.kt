@@ -21,6 +21,7 @@ import org.web3j.crypto.Keys
 import org.web3j.crypto.WalletUtils
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.DefaultBlockParameterName
+import org.web3j.protocol.core.RemoteFunctionCall
 import org.web3j.protocol.core.methods.request.EthFilter
 import org.web3j.protocol.core.methods.response.TransactionReceipt
 import org.web3j.protocol.exceptions.TransactionException
@@ -31,6 +32,7 @@ import ru.home.swap.core.App
 import ru.home.swap.core.logger.Logger
 import ru.home.swap.core.network.Response
 import ru.home.swap.wallet.contract.Match
+import ru.home.swap.wallet.model.Token
 import java.math.BigInteger
 
 
@@ -114,6 +116,70 @@ class WalletRepository(
             .asFlow()
     }
 
+    override fun getTokenIdsForUser(userWalletAddress: String): Flow<Response<List<*>>> {
+        return flow {
+            logger.d("[start] getTokenIdsForUser() for user ${userWalletAddress}")
+            try {
+                val isValidEthAddress = WalletUtils.isValidAddress(userWalletAddress)
+                        && userWalletAddress.uppercase().contentEquals(
+                    Keys.toChecksumAddress(userWalletAddress).uppercase())
+                if (isValidEthAddress) {
+                    val response = swapValueContract.getTokensIdsForUser(userWalletAddress).send()
+                    emit(Response.Data(response))
+                } else {
+                    val response = Response.Error.Message("${userWalletAddress} is not valid ethereum address.Please check you pass a correct ethereum address.")
+                    emit(response)
+                }
+            } catch (ex: Exception) {
+                logger.e("Failed to obtain tokens ids for user", ex)
+                emit(Response.Error.Exception(ex))
+            } finally {
+                logger.d("[end] getTokenIdsForUser() for user ${userWalletAddress}")
+            }
+        }
+    }
+
+    override fun getTokenIdsWithValues(
+        userWalletAddress: String,
+        withConsumed: Boolean
+    ): Flow<Response<List<Token>>> {
+        return flow {
+            logger.d("[start] getTokenIdsWithValues() for user ${userWalletAddress}")
+            try {
+                val isValidEthAddress = WalletUtils.isValidAddress(userWalletAddress)
+                        && userWalletAddress.uppercase().contentEquals(
+                    Keys.toChecksumAddress(userWalletAddress).uppercase())
+                if (isValidEthAddress) {
+                    val response = swapValueContract.getTokensIdsForUser(userWalletAddress).send()
+                    val finalResult = getFullTokenForTokenIds(response, withConsumed)
+                    emit(Response.Data(finalResult))
+                } else {
+                    val response = Response.Error.Message("${userWalletAddress} is not valid ethereum address.Please check you pass a correct ethereum address.")
+                    emit(response)
+                }
+            } catch (ex: Exception) {
+                logger.e("Failed to obtain tokens ids for user", ex)
+                emit(Response.Error.Exception(ex))
+            } finally {
+                logger.d("[end] getTokenIdsWithValues() for user ${userWalletAddress}")
+            }
+        }
+    }
+
+    private fun getFullTokenForTokenIds(tokenIds: List<*>, withConsumed: Boolean): MutableList<Token> {
+        val finalResult = mutableListOf<Token>()
+        for (item in tokenIds) {
+            val tokenId = (item as BigInteger).toString()
+            val value = swapValueContract.getOffer(tokenId).send()
+            if (!withConsumed && !value.isConsumed) {
+                finalResult.add(Token(tokenId = tokenId.toLong(), value = value))
+            } else {
+                finalResult.add(Token(tokenId = tokenId.toLong(), value = value))
+            }
+        }
+        return finalResult
+    }
+
     private suspend fun loadContract() = withContext(Dispatchers.IO) {
         // TODO chainId required to mint tokens based on new ethereum standard (see https://blog.ethereum.org/2021/03/03/geth-v1-10-0)
         // it is only available over custom RawTransactionManager which is used for both balanceOf() and mint() methods
@@ -154,7 +220,7 @@ class WalletRepository(
                 logger.d("Response from registerUser() + ${response}")
                 emit(Response.Data(response))
             } else {
-                val response = Response.Error.Message("${userWalletAddress} is not valid ethereum address.Please check you pass a corect ethereum address.")
+                val response = Response.Error.Message("${userWalletAddress} is not valid ethereum address.Please check you pass a correct ethereum address.")
                 emit(response)
             }
             logger.d("[end] registerUserOnSwapMarket")
@@ -165,12 +231,15 @@ class WalletRepository(
     override fun approveTokenManager(operator: String, approved: Boolean): Flow<Response<TransactionReceipt>> {
         return flow {
             try {
+                logger.d("[start] approve token manager")
                 val response: TransactionReceipt = swapValueContract.setApprovalForAll(operator, approved).send()
                 emit(Response.Data(response))
             } catch (ex: Exception) {
                 logger.e("Failed to approve address as an operator over the tokens for this user", ex)
                 val response = Response.Error.Exception(ex)
                 emit(response)
+            } finally {
+                logger.d("[end] approve token manager")
             }
         }
     }
@@ -178,12 +247,15 @@ class WalletRepository(
     override fun approveSwap(matchSubj: Match): Flow<Response<TransactionReceipt>> {
         return flow {
             try {
+                logger.d("[start] approve swap")
                 val response: TransactionReceipt = swapChainContract.approveSwap(matchSubj).send()
                 emit(Response.Data(response))
             } catch (ex: Exception) {
                 logger.e("Failed to approve match", ex)
                 val response = Response.Error.Exception(ex)
                 emit(response)
+            } finally {
+                logger.d("[end] approve swap")
             }
         }
     }
@@ -191,6 +263,7 @@ class WalletRepository(
     override fun registerDemand(userWalletAddress: String, demand: String): Flow<Response<TransactionReceipt>> {
         return flow {
             try {
+                logger.d("[start] register demand")
                 val isValidEthAddress = WalletUtils.isValidAddress(userWalletAddress)
                         && userWalletAddress.uppercase().contentEquals(
                     Keys.toChecksumAddress(userWalletAddress).uppercase())
@@ -205,6 +278,8 @@ class WalletRepository(
                 logger.e("Failed to approve match", ex)
                 val response = Response.Error.Exception(ex)
                 emit(response)
+            } finally {
+                logger.d("[end] register demand")
             }
         }
     }

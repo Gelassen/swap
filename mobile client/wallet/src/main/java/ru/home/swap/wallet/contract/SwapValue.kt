@@ -19,6 +19,7 @@ import ru.home.swap.wallet.contract.IERC721.Functions.FUNC_BALANCEOF
 import ru.home.swap.wallet.contract.IERC721.Functions.FUNC_GETAPPROVED
 import ru.home.swap.wallet.contract.IERC721.Functions.FUNC_ISAPPROVEDFORALL
 import ru.home.swap.wallet.contract.IERC721.Functions.FUNC_SETAPPROVALFORALL
+import ru.home.swap.wallet.contract.ISwapValue.Functions.FUNC_GETTOKENSIDSFORUSER
 import ru.home.swap.wallet.contract.SwapValue.Const.TRANSFER_EVENT
 import java.math.BigInteger
 import java.util.*
@@ -189,6 +190,26 @@ class SwapValue
             )
         )
         return executeRemoteCallSingleValueReturn(function, Value::class.java)
+    }
+
+    override fun getTokensIdsForUser(user: String): RemoteFunctionCall<List<*>> {
+        val function =
+            Function(
+                FUNC_GETTOKENSIDSFORUSER,
+                Arrays.asList<Type<*>>(Address(user)),
+                Arrays.asList<TypeReference<*>>(object :
+                    TypeReference<DynamicArray<Uint256>>() {})
+            )
+        return RemoteFunctionCall(
+            function
+        ) {
+            val result =
+                executeCallSingleValueReturn<Type<Uint256>, List<*>>(
+                    function,
+                    List::class.java
+                ) as List<Type<Uint256>>
+            convertToNative<Type<Uint256>, BigInteger>(result)
+        }
     }
 
     override fun name(): String {

@@ -2,6 +2,7 @@ package ru.home.swap.wallet
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import io.reactivex.schedulers.Schedulers
 import ru.home.swap.wallet.contract.Value
 import ru.home.swap.wallet.model.Token
 import ru.home.swap.wallet.model.Transaction
@@ -128,8 +129,9 @@ class WalletViewModel
         logger.d("[end] mintToken()")
     }
 
+    @Deprecated(message = "Get token ids over call, not by filter events as it is very time consuming")
     fun getTokensThatBelongsToMeNotConsumedNotExpired(account: String) {
-        logger.d("start getTokens()")
+        logger.d("[start] getTokens()")
         viewModelScope.launch {
             repository.getTransferEvents()
                 .flowOn(Dispatchers.IO) // explicitly choose network thread
@@ -150,14 +152,16 @@ class WalletViewModel
                     logger.d("Collect result value for tokens owned by swap address $token")
                     state.update {
                         it.wallet.addToken(token)
+                        logger.d("${account} tokens ${it.wallet.getTokens()}")
                         it.copy(
                             status = Status.MY_TOKENS,
                             wallet = it.wallet
                         )
+
                     }
                 }
         }
-        logger.d("end getTokens()")
+        logger.d("[end] getTokens()")
     }
 
     fun registerUserOnSwapMarket(userWalletAddress: String) {
@@ -245,7 +249,7 @@ class WalletViewModel
 
     fun registerDemand(userAddress: String, demand: String) {
         viewModelScope.launch {
-            repository.registerDemand(demand, userAddress)
+            repository.registerDemand(userAddress, demand)
                 .flowOn(Dispatchers.IO)
                 .collect {
                     processRegisterDemandResponse(it)
@@ -263,6 +267,30 @@ class WalletViewModel
             }
             is Response.Error.Exception -> {
                 logger.e("Get an error on register demand call", response.error)
+            }
+        }
+    }
+
+    fun getTokenIdsForUser(userAddress: String) {
+        viewModelScope.launch {
+            repository.getTokenIdsWithValues(userAddress, false)
+                .flowOn(Dispatchers.IO)
+                .collect {
+                    processTokenIdsResponse(userAddress, it)
+                }
+        }
+    }
+
+    private fun processTokenIdsResponse(userAddress: String, response: Response<List<*>>) {
+        when (response) {
+            is Response.Data -> {
+                logger.d("Get token ids for ${userAddress}: ${response.data}")
+            }
+            is Response.Error.Message -> {
+                logger.d("Failed to request token ids: ${response.msg}")
+            }
+            is Response.Error.Exception -> {
+                logger.e("Failed to obtain token ids", response.error)
             }
         }
     }
