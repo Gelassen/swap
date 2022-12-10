@@ -16,7 +16,7 @@ As an application I can chain people (more than two) who are interested in servi
 # Installation
 This is a client-server application with use of ethereum chain. The cost of deployment and operation of project work on Mainnet force us to use private own network. At time of writing development goes with help of Goerly testnet. 
 
-1. sudo apt install mysql-server [for more details: https://www.digitalocean.com/community/tutorials/how-to-install-mysql-on-ubuntu-20-04]
+1. ```sudo apt install mysql-server``` [for more details: https://www.digitalocean.com/community/tutorials/how-to-install-mysql-on-ubuntu-20-04]
 2. Server would require database which creation and configuration file lays in the repository:
 ```
 $ mysql -u <username> -p
