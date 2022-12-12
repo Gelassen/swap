@@ -61,7 +61,7 @@ class MintTokenActivity: AppCompatActivity() {
 
         findViewById<Button>(R.id.registerUser)
             .setOnClickListener {
-                walletViewModel.registerUserOnSwapMarket(FIRST_USER)
+//                walletViewModel.registerUserOnSwapMarket(FIRST_USER)
                 walletViewModel.registerUserOnSwapMarket(SECOND_USER)
             }
 
@@ -110,7 +110,7 @@ class MintTokenActivity: AppCompatActivity() {
 
         findViewById<Button>(R.id.getMyTokens)
             .setOnClickListener {
-                val account = FIRST_USER//applicationContext.getString(R.string.my_account)
+                val account = SECOND_USER//applicationContext.getString(R.string.my_account)
 //                walletViewModel.getTokensThatBelongsToMeNotConsumedNotExpired(account)
                 walletViewModel.getTokenIdsForUser(account)
             }
@@ -118,7 +118,7 @@ class MintTokenActivity: AppCompatActivity() {
         findViewById<Button>(R.id.approveSwap)
             .setOnClickListener {
                 val userFirstTokenId = BigInteger.valueOf(4) // TODO define me
-                val userSecondTokenId = BigInteger.valueOf(1) // TODO define me
+                val userSecondTokenId = BigInteger.valueOf(5) // TODO define me
                 val matchSubj = Match(
                     userFirst = FIRST_USER,
                     valueOfFirstUser = userFirstTokenId,

@@ -3,9 +3,11 @@
     <!-- SECURITY BREACH: allowed for quick prototyping only -->
     <string name="wallet_password">3ba9b75a087df0e7082e1d3d58308755e35e17ac1117a4caf42ef209d203cb4a</string>
     <string name="test_account_private_key">6cc625d1f47602232006d6d7b9c586cd838ffcad7a7c988cc27c8ce6934ca090</string>
+    <string name="test_account_2_private_key">7300c460af63c70ba89189c4d39a0b8a3a75eee1ea7d7dcef1f96c5736031bf5</string>
 
     <string name="chain_id">3347</string>
     <string name="my_account">0xB54e15454E0711b1917f88E656C2fc3E9dF4117d</string>
+    <string name="my_account_2">0x52E7400Ba1B956B11394a5045F8BC3682792E1AC</string>
     <!-- 0x3106248fbb449ed92b03d6f93f43f464cd95b74d -->
     <string name="swap_value_contract_address">0x1ECFF12ac352EB1200Ce85135D062030EfcbB71B</string>
     <string name="swap_chain_contract_address">0xAB098Df3443A424604DA70726Cc9Cf15Ae15f6FF</string>
