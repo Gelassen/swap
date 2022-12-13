@@ -326,6 +326,7 @@ contract SwapChain is ISwapChain {
                 continue;
             }
             _pendingMatches[idx] = _pendingMatches[resultIdx];
+            // FIXME: there should be an error - resultIdx is incremented at most once when it should be incremented on each iteration
         }
         _pendingMatches.pop();
     }

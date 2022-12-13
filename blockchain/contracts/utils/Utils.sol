@@ -31,4 +31,10 @@ contract Utils {
         }
     }
 
+    function hash(address first, address second) public pure returns(uint256) {
+        bytes32 hashed = keccak256(abi.encode(first, second));
+        uint256 hashedAsAddress = uint256(hashed);
+        return hashedAsAddress;
+    }
+
 }
