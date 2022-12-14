@@ -1,10 +1,11 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
 import { User, Match } from "../contracts/structs/StructDeclaration.sol";
-import "../contracts/data_structures/MatchDynamicArray.sol";
 import "../contracts/ISwapChainV2.sol";
 import "../contracts/SwapValue.sol";
 import { Utils } from "../contracts/utils/Utils.sol";
+import "hardhat/console.sol";
 
 contract SwapChainV2 is ISwapChainV2 {
 
@@ -29,18 +30,19 @@ contract SwapChainV2 is ISwapChainV2 {
     }
 
     modifier userExists(address userFirst, address userSecond) {
-        require(_isUserExist(userFirst) == true, "The first user should be registered first.");
-        require(_isUserExist(userSecond) == true, "The second user should be registered first.");
+        require(_isUserExist(userFirst) == true, "The first user should be registered.");
+        require(_isUserExist(userSecond) == true, "The second user should be registered.");
         _;
     }
 
     modifier bothHaveValidTokens(Match memory subj) {
+        // console.log(block.timestamp);
         require(_swapValueContract.offer(subj._valueOfFirstUser)._isConsumed != true 
                     && _swapValueContract.offer(subj._valueOfSecondUser)._isConsumed != true,
                     "Tokens should not be already consumed.");
-        require(block.timestamp < _swapValueContract.offer(subj._valueOfFirstUser)._lockedUntil 
-                    && block.timestamp < _swapValueContract.offer(subj._valueOfSecondUser)._lockedUntil,
-                    "Current time should not exceed time of value's has been locked.");  
+        require(block.timestamp < _swapValueContract.offer(subj._valueOfFirstUser)._availabilityEnd 
+                    && block.timestamp < _swapValueContract.offer(subj._valueOfSecondUser)._availabilityEnd,
+                    "One or both tokens has been expired.");  
         _;
     }
 
@@ -48,6 +50,10 @@ contract SwapChainV2 is ISwapChainV2 {
         require(_isUserExist(user) != true, "User should not be registered yet.");
         _users.push(user);
         // _updateNftsIndex(user);
+    }
+
+    function getUsers() public view override returns (address[] memory) {
+        return _users;
     }
     
     function swap(Match memory subj) external override

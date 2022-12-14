@@ -5,6 +5,7 @@ import { Match } from "../contracts/structs/StructDeclaration.sol";
 
 interface ISwapChainV2 {
     function registerUser(address user) external;
+    function getUsers() external returns (address[] memory);
     function swap(Match memory subj) external;
     function approveSwap(Match memory subj) external;
 }
