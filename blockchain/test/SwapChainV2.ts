@@ -180,7 +180,7 @@ describe.only("SwapChain V2 test", async function () {
             _approvedByFirstUser : false,
             _approvedBySecondUser : false
         }
-        expect(contractSwapChain.connect(firstUser).approveSwap(matchObj)).not.to.be.reverted;
+        await expect(contractSwapChain.connect(firstUser).approveSwap(matchObj)).not.to.be.reverted;
     })
 
 })

@@ -12,6 +12,8 @@ contract SwapChainV2 is ISwapChainV2 {
     // TODO: in case of match by address relationship for two addresses we have two the same match objects
     // which should be changed simultaneously => find out a way two addreses to become an one single key
     
+    int8 constant private NOT_VALID = -1; 
+
     SwapValue _swapValueContract;
     Utils _utils;
     address[] _users;
@@ -62,10 +64,12 @@ contract SwapChainV2 is ISwapChainV2 {
         bothHaveValidTokens(subj) {
 
         int256 matchItemIndex = _getMatchItemIndex(subj);
-        require(matchItemIndex != -1, "Match item is not found. Did you pass correct match object?");
+        require(matchItemIndex != NOT_VALID, "Match item is not found. Did you pass correct match object?");
 
-        uint256 hashedKey = _getValidHash(subj._userFirst, subj._userSecond);
-        Match memory item = _matchesByUser[hashedKey][uint256(matchItemIndex)];
+        int256 hashedKey = _getValidHash(subj._userFirst, subj._userSecond);
+        require(hashedKey != NOT_VALID, "Could not find a match. Do you have it in storage?");            
+
+        Match memory item = _matchesByUser[uint256(hashedKey)][uint256(matchItemIndex)];
         require(item._approvedByFirstUser && item._approvedBySecondUser, "One or both users hasn't confirmed yet swap.");
 
         _swapValueContract.makeTokenConsumed(item._valueOfFirstUser);
@@ -82,7 +86,7 @@ contract SwapChainV2 is ISwapChainV2 {
             item._valueOfSecondUser
         );
             
-        _cleanUp(hashedKey, uint256(matchItemIndex));
+        _cleanUp(uint256(hashedKey), uint256(matchItemIndex));
     }
 
     function approveSwap(Match memory subj) external override
@@ -107,18 +111,24 @@ contract SwapChainV2 is ISwapChainV2 {
         // TODO 1st user's associated value match with 2nd user's associated value (how to implement it here without extra gas usage?)
         // TODO 2nd user's associated value match with 1st user's associated value (how to implement it here without extra gas usage?)
         int256 matchItemIndex = _getMatchItemIndex(subj);
-        require(matchItemIndex != -1, "Match item is not found. Did you pass correct match object?");
+        if (matchItemIndex == NOT_VALID) {
+            _addNewMatch(subj);
+            matchItemIndex = _getMatchItemIndex(subj);
+            require(matchItemIndex != NOT_VALID, "Can not add this new match object into storage. Check _getMatchItemIndex() function.");
+        }
 
-        uint256 hashedKey = _getValidHash(subj._userFirst, subj._userSecond);
-        Match memory item = _matchesByUser[hashedKey][uint256(matchItemIndex)]; // we have to use this version instead of subj because users and its values might have changed order
+        int256 hashedKey = _getValidHash(subj._userFirst, subj._userSecond);
+        require(hashedKey != NOT_VALID, "Can not add match object. Do yours keys can be hashed? ");
+
+        Match memory item = _matchesByUser[uint256(hashedKey)][uint256(matchItemIndex)]; // we have to use this version instead of subj because users and its values might have changed order
         require(item._approvedByFirstUser == false || item._approvedBySecondUser == false, "This match object already approved by both users.");
 
         if (msg.sender == item._userFirst) {
             require(item._approvedByFirstUser == false, "Match is already approved by this, first, user.");
-            _matchesByUser[hashedKey][uint256(matchItemIndex)]._approvedByFirstUser = true;
+            _matchesByUser[uint256(hashedKey)][uint256(matchItemIndex)]._approvedByFirstUser = true;
         } else if (msg.sender == item._userSecond) {
             require(item._approvedBySecondUser == true, "Match is already approved by this, second, user.");
-            _matchesByUser[hashedKey][uint256(matchItemIndex)]._approvedBySecondUser = true;
+            _matchesByUser[uint256(hashedKey)][uint256(matchItemIndex)]._approvedBySecondUser = true;
         }
     }
 
@@ -132,9 +142,13 @@ contract SwapChainV2 is ISwapChainV2 {
     }    
 
     function _getMatchItemIndex(Match memory subj) private view returns (int256) {
-        int256 result = -1;
-        uint256 hashedKey = _getValidHash(subj._userFirst, subj._userSecond);
-        Match[] memory matches = _matchesByUser[hashedKey];
+        int256 result = NOT_VALID;
+        int256 hashedKey = _getValidHash(subj._userFirst, subj._userSecond);
+        if (hashedKey == NOT_VALID) {
+            return result;
+        }
+
+        Match[] memory matches = _matchesByUser[uint256(hashedKey)];
         for (uint256 idx = 0; idx < matches.length; idx++) {
             Match memory item = matches[idx];
             bool isTheSameUsers = (subj._userFirst == item._userFirst && subj._userSecond == item._userSecond) 
@@ -167,16 +181,24 @@ contract SwapChainV2 is ISwapChainV2 {
         _matchesByUser[hashedKey].pop();
     }
 
-    function _getValidHash(address userFirst, address userSecond) private view returns (uint256) {
+    function _getValidHash(address userFirst, address userSecond) private view returns (int256) {
         uint256 hashedFirst = _utils.hash(userFirst, userSecond);
         uint256 hashedSecond = _utils.hash(userSecond, userFirst);
         if (_matchesByUser[hashedFirst].length != 0) {
-            return hashedFirst;
+            return int256(hashedFirst);
         } else if (_matchesByUser[hashedSecond].length != 0) {
-            return hashedSecond;
+            return int256(hashedSecond);
         } else {
-            revert("Can not find any match object for this users. Did you pass correct Match objects?");
+            // revert("Can not find any match object for this users. Did you pass correct Match objects?");
+            return NOT_VALID;
         }
+    }
+
+    function _addNewMatch(Match memory subj) private {
+        uint256 hashedKey = _utils.hash(subj._userFirst, subj._userSecond);
+        subj._approvedByFirstUser = false;
+        subj._approvedBySecondUser = false;
+        _matchesByUser[hashedKey].push(subj);
     }
 
     /*
