@@ -7,7 +7,7 @@ import "../contracts/openzeppelin/access/Ownable.sol";
 import "../contracts/openzeppelin/utils/Counters.sol";
 import { Value } from "../contracts/structs/StructDeclaration.sol";
 import { ISwapValue } from "../contracts/ISwapValue.sol";
-// import "../contracts/hardhat/hardhat-core/console.sol";
+import "../contracts/hardhat/hardhat-core/console.sol";
 
 
 /**
@@ -32,10 +32,10 @@ contract SwapValue is ERC721, ERC721URIStorage, Ownable, ISwapValue {
      * @param tokenId Token id which belongs to owner or addresses within its approval list 
      */
     modifier onlyAuthorised(uint256 tokenId) {
-        // console.log("msg.sender ", msg.sender);
-        // console.log("ownerOf(tokenId) ", ownerOf(tokenId));
-        // console.log("getApproved(tokenId) ", getApproved(tokenId));
-        // console.log(ownerOf(tokenId) == msg.sender || getApproved(tokenId) == msg.sender);
+        console.log("msg.sender ", msg.sender);
+        console.log("ownerOf(tokenId) ", ownerOf(tokenId));
+        console.log("getApproved(tokenId) ", getApproved(tokenId));
+        console.log(ownerOf(tokenId) == msg.sender || getApproved(tokenId) == msg.sender || isApprovedForAll(ownerOf(tokenId), msg.sender));
         require(ownerOf(tokenId) == msg.sender 
             || getApproved(tokenId) == msg.sender
             || isApprovedForAll(ownerOf(tokenId), msg.sender), 
@@ -53,13 +53,14 @@ contract SwapValue is ERC721, ERC721URIStorage, Ownable, ISwapValue {
         address to, 
         Value calldata value, 
         string memory uri
-    ) public onlyOwner {
+    ) public {
+        require(msg.sender == to, "Minting a token is allowed only by person itself.");
+
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
         _setOffer(value, tokenId);
-        // console.log("Minted token id", tokenId);
     }
 
     function transferFrom(
@@ -69,6 +70,15 @@ contract SwapValue is ERC721, ERC721URIStorage, Ownable, ISwapValue {
     ) public virtual override {
         super.transferFrom(from, to, tokenId);
         _transferMetadata(from, to, tokenId); 
+    }
+
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) public virtual override {
+        super.safeTransferFrom(from, to, tokenId);
+        _transferMetadata(from, to, tokenId);
     }
 
     function burn(address owner, uint256 tokenId) public {
@@ -119,7 +129,6 @@ contract SwapValue is ERC721, ERC721URIStorage, Ownable, ISwapValue {
 
     function _setOffer(Value calldata value, uint256 tokenId) internal {
         _offerPerToken[tokenId] = value;
-        // console.log("_offerPerToken[tokenId]", tokenId);
     }
 
     function _safeMint(address to, uint256 tokenId) internal virtual override {

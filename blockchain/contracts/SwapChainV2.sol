@@ -5,19 +5,22 @@ import { User, Match } from "../contracts/structs/StructDeclaration.sol";
 import "../contracts/ISwapChainV2.sol";
 import "../contracts/SwapValue.sol";
 import { Utils } from "../contracts/utils/Utils.sol";
-import "hardhat/console.sol";
+// import "../contracts/hardhat/hardhat-core/console.sol";
 
 contract SwapChainV2 is ISwapChainV2 {
 
-    // TODO: in case of match by address relationship for two addresses we have two the same match objects
-    // which should be changed simultaneously => find out a way two addreses to become an one single key
+    /* 
+        In case of match by address relationship for two addresses we have 
+        two the same match objects which should be changed simultaneously => 
+        use hash from two addresses as a key
+    */
     
     int8 constant private NOT_VALID = -1; 
 
     SwapValue _swapValueContract;
     Utils _utils;
     address[] _users;
-    mapping(uint256 => Match[]) _matchesByUser; // TODO replace by hash function see https://ethereum.stackexchange.com/questions/76492/combine-two-addresses-into-one
+    mapping(uint256 => Match[]) _matchesByUser; 
 
     constructor(
         address utilsAddr, 
@@ -38,7 +41,6 @@ contract SwapChainV2 is ISwapChainV2 {
     }
 
     modifier bothHaveValidTokens(Match memory subj) {
-        // console.log(block.timestamp);
         require(_swapValueContract.offer(subj._valueOfFirstUser)._isConsumed != true 
                     && _swapValueContract.offer(subj._valueOfSecondUser)._isConsumed != true,
                     "Tokens should not be already consumed.");
@@ -51,7 +53,6 @@ contract SwapChainV2 is ISwapChainV2 {
     function registerUser(address user) public override {
         require(_isUserExist(user) != true, "User should not be registered yet.");
         _users.push(user);
-        // _updateNftsIndex(user);
     }
 
     function getUsers() public view override returns (address[] memory) {
@@ -76,8 +77,8 @@ contract SwapChainV2 is ISwapChainV2 {
         _swapValueContract.makeTokenConsumed(item._valueOfSecondUser);
             
         _swapValueContract.safeTransferFrom(
-            item._userFirst, 
-            item._userSecond, 
+            item._userFirst,
+            item._userSecond,
             item._valueOfFirstUser
         );
         _swapValueContract.safeTransferFrom(
@@ -127,7 +128,7 @@ contract SwapChainV2 is ISwapChainV2 {
             require(item._approvedByFirstUser == false, "Match is already approved by this, first, user.");
             _matchesByUser[uint256(hashedKey)][uint256(matchItemIndex)]._approvedByFirstUser = true;
         } else if (msg.sender == item._userSecond) {
-            require(item._approvedBySecondUser == true, "Match is already approved by this, second, user.");
+            require(item._approvedBySecondUser == false, "Match is already approved by this, second, user.");
             _matchesByUser[uint256(hashedKey)][uint256(matchItemIndex)]._approvedBySecondUser = true;
         }
     }
@@ -189,7 +190,6 @@ contract SwapChainV2 is ISwapChainV2 {
         } else if (_matchesByUser[hashedSecond].length != 0) {
             return int256(hashedSecond);
         } else {
-            // revert("Can not find any match object for this users. Did you pass correct Match objects?");
             return NOT_VALID;
         }
     }
@@ -200,17 +200,5 @@ contract SwapChainV2 is ISwapChainV2 {
         subj._approvedBySecondUser = false;
         _matchesByUser[hashedKey].push(subj);
     }
-
-    /*
-    function _updateNftsIndex(address user) private {
-        // console.log("Update index for user", user);
-        uint256[] memory tokensIds = _swapValueContract.getTokensIdsForUser(user);
-        for (uint idx = 0; idx < tokensIds.length; idx++) {
-            uint256 tokenId = tokensIds[idx];
-            string memory offer = _swapValueContract.offer(tokenId)._offer;
-            _indexNfts[offer].push(tokenId);
-            // console.log("Register new index", offer);
-        }
-    }
-    */    
+ 
 }
