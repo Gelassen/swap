@@ -3,6 +3,7 @@ import { ethers } from "hardhat";
 import { utils, BigNumber } from "ethers";
 import { time, loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { token } from "../typechain-types/@openzeppelin/contracts";
+import "./SwapValue";
 
 describe.only("SwapChain V2 test", async function () {
 
@@ -326,4 +327,197 @@ describe.only("SwapChain V2 test", async function () {
         await expect((await contractValue.connect(anotherUser).getTokensIdsForUser(anotherUser.address)).at(0)).to.be.equal(firstUserToken);
     });
 
+    it("On swap call when tokens are approved, but match object contains different tokens would lead to reverted tx", async function() {
+        const accounts = await ethers.getSigners();
+        const firstUser = accounts[0];
+        const anotherUser = accounts[1];
+        const { contractSwapChain, contractValue } = await loadFixture(deploy);
+        // approve swap chain as tokens operator
+        await contractValue.connect(firstUser).setApprovalForAll(contractSwapChain.address, true);
+        await contractValue.connect(anotherUser).setApprovalForAll(contractSwapChain.address, true);
+        // register users
+        await contractSwapChain.registerUser(firstUser.address);
+        await contractSwapChain.registerUser(anotherUser.address);
+        // check the initial state is valid 
+        await expect((await contractValue.getTokensIdsForUser(firstUser.address)).length).to.be.equal(0);
+        await expect((await contractValue.getTokensIdsForUser(anotherUser.address)).length).to.be.equal(0);
+        // mint token
+        const firstUserCustomMetadata = { 
+            _offer : "Software development for Android.", 
+            _availableSince: DATE_2022_12_14,
+            _availabilityEnd: DATE_2023_12_14,
+            _isConsumed: false,
+            _lockedUntil: 1000 
+        };
+        await contractValue.connect(firstUser).safeMint(firstUser.address, firstUserCustomMetadata, "https://gelassen.github.io/blog/");
+        const anotherUserCustomMetadata = {
+            _offer : "Farmer's products.", 
+            _availableSince: DATE_2022_12_14,
+            _availabilityEnd: DATE_2023_12_14,
+            _isConsumed: false,
+            _lockedUntil: 1000
+        }
+        await contractValue.connect(anotherUser).safeMint(anotherUser.address, anotherUserCustomMetadata, "https://gelassen.github.io/blog/2021/08/20/case-study-pharmacy-and-farmer-growing-sales.html");
+        // prepare initial conditions
+        const firstUserToken = (await contractValue.getTokensIdsForUser(firstUser.address))[0];
+        const anotherUserToken = (await contractValue.getTokensIdsForUser(anotherUser.address))[0];
+        // check the initial state is valid
+        await expect((await contractValue.offer(firstUserToken))._isConsumed).to.be.false
+        await expect((await contractValue.offer(anotherUserToken))._isConsumed).to.be.false
+        // approve swap
+        const matchObj = {
+            _userFirst : firstUser.address,
+            _valueOfFirstUser : firstUserToken,
+            _userSecond : anotherUser.address,
+            _valueOfSecondUser : anotherUserToken,
+            _approvedByFirstUser : false,
+            _approvedBySecondUser : false
+        }
+        await expect(contractSwapChain.connect(firstUser).approveSwap(matchObj)).not.to.be.reverted
+        const anotherMatchObj = {
+            _userFirst : anotherUser.address,
+            _valueOfFirstUser : anotherUserToken,
+            _userSecond : firstUser.address,
+            _valueOfSecondUser : firstUserToken,
+            _approvedByFirstUser : false,
+            _approvedBySecondUser : false
+        }
+        await expect(contractSwapChain.connect(anotherUser).approveSwap(anotherMatchObj)).not.to.be.reverted    
+        // prepare extra tokens 
+        const firstUserExtraCustomMetadata = { 
+            _offer : "Product management", 
+            _availableSince: DATE_2022_12_14,
+            _availabilityEnd: DATE_2023_12_14,
+            _isConsumed: false,
+            _lockedUntil: 1000 
+        };
+        await contractValue.connect(firstUser).safeMint(firstUser.address, firstUserExtraCustomMetadata, "https://gelassen.github.io/blog/");
+        const anotherUserExtraCustomMetadata = {
+            _offer : "Natural fetrilizers", 
+            _availableSince: DATE_2022_12_14,
+            _availabilityEnd: DATE_2023_12_14,
+            _isConsumed: false,
+            _lockedUntil: 1000
+        }
+        await contractValue.connect(anotherUser).safeMint(anotherUser.address, anotherUserExtraCustomMetadata, "https://gelassen.github.io/blog/2021/08/20/case-study-pharmacy-and-farmer-growing-sales.html");
+        const firstUserExtraToken = (await contractValue.getTokensIdsForUser(firstUser.address))[1];
+        const anotherUserExtraToken = (await contractValue.getTokensIdsForUser(anotherUser.address))[1];
+
+        const notValidMatchObj = {
+            _userFirst : firstUser.address,
+            _valueOfFirstUser : firstUserExtraToken,
+            _userSecond : anotherUser.address,
+            _valueOfSecondUser : anotherUserExtraToken,
+            _approvedByFirstUser : false,
+            _approvedBySecondUser : false
+        }
+        await expect(contractSwapChain.connect(firstUser).swap(notValidMatchObj)).to.be.reverted;
+    });
+
+    it("On swap call when everything is ok and there is one more pending match only a single and correct tokens have been exchanged", async function() {
+        const accounts = await ethers.getSigners();
+        const firstUser = accounts[0];
+        const anotherUser = accounts[1];
+        const { contractSwapChain, contractValue } = await loadFixture(deploy);
+        // approve swap chain as tokens operator
+        await contractValue.connect(firstUser).setApprovalForAll(contractSwapChain.address, true);
+        await contractValue.connect(anotherUser).setApprovalForAll(contractSwapChain.address, true);
+        // register users
+        await contractSwapChain.registerUser(firstUser.address);
+        await contractSwapChain.registerUser(anotherUser.address);
+        // check the initial state is valid 
+        await expect((await contractValue.getTokensIdsForUser(firstUser.address)).length).to.be.equal(0);
+        await expect((await contractValue.getTokensIdsForUser(anotherUser.address)).length).to.be.equal(0);
+        // mint token
+        const firstUserCustomMetadata = { 
+            _offer : "Software development for Android.", 
+            _availableSince: DATE_2022_12_14,
+            _availabilityEnd: DATE_2023_12_14,
+            _isConsumed: false,
+            _lockedUntil: 1000 
+        };
+        await contractValue.connect(firstUser).safeMint(firstUser.address, firstUserCustomMetadata, "https://gelassen.github.io/blog/");
+        const anotherUserCustomMetadata = {
+            _offer : "Farmer's products.", 
+            _availableSince: DATE_2022_12_14,
+            _availabilityEnd: DATE_2023_12_14,
+            _isConsumed: false,
+            _lockedUntil: 1000
+        }
+        await contractValue.connect(anotherUser).safeMint(anotherUser.address, anotherUserCustomMetadata, "https://gelassen.github.io/blog/2021/08/20/case-study-pharmacy-and-farmer-growing-sales.html");
+        // prepare initial conditions
+        const firstUserToken = (await contractValue.getTokensIdsForUser(firstUser.address))[0];
+        const anotherUserToken = (await contractValue.getTokensIdsForUser(anotherUser.address))[0];
+        // check the initial state is valid
+        await expect((await contractValue.offer(firstUserToken))._isConsumed).to.be.false
+        await expect((await contractValue.offer(anotherUserToken))._isConsumed).to.be.false
+        // approve swap
+        const matchObj = {
+            _userFirst : firstUser.address,
+            _valueOfFirstUser : firstUserToken,
+            _userSecond : anotherUser.address,
+            _valueOfSecondUser : anotherUserToken,
+            _approvedByFirstUser : false,
+            _approvedBySecondUser : false
+        }
+        await expect(contractSwapChain.connect(firstUser).approveSwap(matchObj)).not.to.be.reverted
+        const anotherMatchObj = {
+            _userFirst : anotherUser.address,
+            _valueOfFirstUser : anotherUserToken,
+            _userSecond : firstUser.address,
+            _valueOfSecondUser : firstUserToken,
+            _approvedByFirstUser : false,
+            _approvedBySecondUser : false
+        }
+        await expect(contractSwapChain.connect(anotherUser).approveSwap(anotherMatchObj)).not.to.be.reverted    
+        // prepare extra tokens 
+        const firstUserExtraCustomMetadata = { 
+            _offer : "Product management", 
+            _availableSince: DATE_2022_12_14,
+            _availabilityEnd: DATE_2023_12_14,
+            _isConsumed: false,
+            _lockedUntil: 1000 
+        };
+        await contractValue.connect(firstUser).safeMint(firstUser.address, firstUserExtraCustomMetadata, "https://gelassen.github.io/blog/");
+        const anotherUserExtraCustomMetadata = {
+            _offer : "Natural fetrilizers", 
+            _availableSince: DATE_2022_12_14,
+            _availabilityEnd: DATE_2023_12_14,
+            _isConsumed: false,
+            _lockedUntil: 1000
+        }
+        await contractValue.connect(anotherUser).safeMint(anotherUser.address, anotherUserExtraCustomMetadata, "https://gelassen.github.io/blog/2021/08/20/case-study-pharmacy-and-farmer-growing-sales.html");
+        const firstUserExtraToken = (await contractValue.getTokensIdsForUser(firstUser.address))[1];
+        const anotherUserExtraToken = (await contractValue.getTokensIdsForUser(anotherUser.address))[1];
+        // approve extra match object
+        const extraMatchObj = {
+            _userFirst : firstUser.address,
+            _valueOfFirstUser : firstUserExtraToken,
+            _userSecond : anotherUser.address,
+            _valueOfSecondUser : anotherUserExtraToken,
+            _approvedByFirstUser : false,
+            _approvedBySecondUser : false
+        }
+        await expect(contractSwapChain.connect(firstUser).approveSwap(extraMatchObj)).not.to.be.reverted
+        const anotherExtraMatchObj = {
+            _userFirst : anotherUser.address,
+            _valueOfFirstUser : anotherUserExtraToken,
+            _userSecond : firstUser.address,
+            _valueOfSecondUser : firstUserExtraToken,
+            _approvedByFirstUser : false,
+            _approvedBySecondUser : false
+        }
+        await expect(contractSwapChain.connect(anotherUser).approveSwap(anotherExtraMatchObj)).not.to.be.reverted  
+
+        await expect(contractSwapChain.connect(firstUser).swap(matchObj)).not.to.be.reverted;
+    
+        await expect((await contractValue.offer(firstUserToken))._isConsumed).to.be.true;
+        await expect((await contractValue.offer(anotherUserToken))._isConsumed).to.be.true;
+        await expect((await contractValue.offer(firstUserExtraToken))._isConsumed).to.be.false;
+        await expect((await contractValue.offer(anotherUserExtraToken))._isConsumed).to.be.false;
+        await expect((await contractValue.connect(firstUser).getTokensIdsForUser(firstUser.address)).length).to.be.equal(2);
+        await expect((await contractValue.connect(anotherUser).getTokensIdsForUser(anotherUser.address)).length).to.be.equal(2);
+        await expect((await contractValue.connect(firstUser).getTokensIdsForUser(firstUser.address)).at(1)).to.be.equal(anotherUserToken);
+        await expect((await contractValue.connect(anotherUser).getTokensIdsForUser(anotherUser.address)).at(1)).to.be.equal(firstUserToken);
+    });
 })

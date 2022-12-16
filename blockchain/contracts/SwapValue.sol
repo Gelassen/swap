@@ -7,7 +7,7 @@ import "../contracts/openzeppelin/access/Ownable.sol";
 import "../contracts/openzeppelin/utils/Counters.sol";
 import { Value } from "../contracts/structs/StructDeclaration.sol";
 import { ISwapValue } from "../contracts/ISwapValue.sol";
-import "../contracts/hardhat/hardhat-core/console.sol";
+// import "../contracts/hardhat/hardhat-core/console.sol";
 
 
 /**
@@ -32,10 +32,10 @@ contract SwapValue is ERC721, ERC721URIStorage, Ownable, ISwapValue {
      * @param tokenId Token id which belongs to owner or addresses within its approval list 
      */
     modifier onlyAuthorised(uint256 tokenId) {
-        console.log("msg.sender ", msg.sender);
-        console.log("ownerOf(tokenId) ", ownerOf(tokenId));
-        console.log("getApproved(tokenId) ", getApproved(tokenId));
-        console.log(ownerOf(tokenId) == msg.sender || getApproved(tokenId) == msg.sender || isApprovedForAll(ownerOf(tokenId), msg.sender));
+        // console.log("msg.sender ", msg.sender);
+        // console.log("ownerOf(tokenId) ", ownerOf(tokenId));
+        // console.log("getApproved(tokenId) ", getApproved(tokenId));
+        // console.log(ownerOf(tokenId) == msg.sender || getApproved(tokenId) == msg.sender || isApprovedForAll(ownerOf(tokenId), msg.sender));
         require(ownerOf(tokenId) == msg.sender 
             || getApproved(tokenId) == msg.sender
             || isApprovedForAll(ownerOf(tokenId), msg.sender), 
