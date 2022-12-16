@@ -1,6 +1,6 @@
 # !/bin/bash
 
-export pwd="<>your password"
+export pwd="<your password>"
 
 export NODE1_PORT=2001
 export NODE1_PORT_UDP_TCP=30304

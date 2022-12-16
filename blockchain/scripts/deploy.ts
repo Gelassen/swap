@@ -5,10 +5,6 @@ const isNodeAccountPwdRecovered = true;
 
 async function main() {
   if (isNodeAccountPwdRecovered) {
-    const factoryMatchDynamicArray = await ethers.getContractFactory("MatchDynamicArray");
-    const contractMatchDynamicArray = await factoryMatchDynamicArray.deploy();
-    console.log("contractMatchDynamicArray address: ", contractMatchDynamicArray.address);
-  
     const factoryUtils = await ethers.getContractFactory("Utils");
     const contractUtils = await factoryUtils.deploy();
     console.log("contractUtils address: ", contractUtils.address);
@@ -18,13 +14,12 @@ async function main() {
     console.log("contractValue adddress: ", contractValue.address);
 
     // estimate gas cost for deployment
-    const factorySwapChain = await ethers.getContractFactory("SwapChain");
+    const factorySwapChain = await ethers.getContractFactory("SwapChainV2");
     const gasPrice = await factorySwapChain.signer.getGasPrice();
     const estimatedGas = await factorySwapChain.signer.estimateGas(
       factorySwapChain.getDeployTransaction(
         contractUtils.address, 
-        contractValue.address,
-        contractMatchDynamicArray.address
+        contractValue.address
       )
     )
     const deployerBalance = await factorySwapChain.signer.getBalance();
@@ -34,10 +29,9 @@ async function main() {
 
     const contract = await factorySwapChain.deploy(
         contractUtils.address, 
-        contractValue.address,
-        contractMatchDynamicArray.address
+        contractValue.address
     );
-    console.log("SwapChainContract address: ", contract.address)
+    console.log("SwapChainV2Contract address: ", contract.address)
 
   } else {
     const nodeConfig = configChain.get("private_testnet");
