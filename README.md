@@ -144,7 +144,7 @@ $contract.at('<contract address>').methodCall()
 # Important points 
 Each change on solidity contract changes its bytecode. Client side uses Java\Kotlin wrapper of the contract with its bytecode under the hood. It means changes in solidity code should lead to change in Java\Kotlin code simultaneously. 
 
-```Web3j``` offers automation of this process over <a href="https://docs.web3j.io/4.8.7/smart_contracts/construction_and_deployment/#solidity-smart-contract-wrappers">its console tool</a>. However it is not work stable. I had issues to run it, eventually I succesfully managed to get ```SwapValue``` ERC721 token, but not a ```SwapChain```. Therefore manual change of the binary code in Java\Kotlin contracts wrappers is the most reliable way to get this done. 
+```Web3j``` offers automation of this process over <a href="https://docs.web3j.io/4.8.7/smart_contracts/construction_and_deployment/#solidity-smart-contract-wrappers">its console tool</a>. However its work is not stable. I had issues to run it, eventually I successfully managed to get ```SwapValue``` ERC721 token, but not a ```SwapChain```. Therefore manual change of the binary code in Java\Kotlin contracts wrappers is the most reliable way to get this done. 
 
 # Inspired by
 The idea to use barter with assist of the modern tech was heard by me from russian ex-oligarch Herman Sterligov during finance crisis in 2008. The idea of matching and chaining people together by their needs and offers has borrowed few things from dead Google project Schemer (https://gcemetery.co/google-schemer/) 
