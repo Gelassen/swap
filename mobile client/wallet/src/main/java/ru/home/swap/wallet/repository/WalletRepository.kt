@@ -45,7 +45,7 @@ class WalletRepository(
         web3 = Web3j.build(httpService)
         runBlocking {
             launch(Dispatchers.IO) {
-                loadContract(R.string.test_account_2_private_key)
+                loadContract(R.string.test_account_private_key)
             }
         }
     }
@@ -156,6 +156,20 @@ class WalletRepository(
                 emit(Response.Error.Exception(ex))
             } finally {
                 logger.d("[end] getTokenIdsWithValues() for user ${userWalletAddress}")
+            }
+        }
+    }
+
+    override fun swap(subj: Match): Flow<Response<TransactionReceipt>> {
+        return flow {
+            logger.d("[start] swap call")
+            try {
+                val response = swapChainContract.swap(subj).send()
+                emit(Response.Data(response))
+            } catch (ex: Exception) {
+                emit(Response.Error.Exception(ex))
+            } finally {
+                logger.d("[end] swap call")
             }
         }
     }

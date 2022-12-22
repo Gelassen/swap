@@ -9,6 +9,7 @@ interface ISwapChain {
         const val FUNC_REGISTER_USER = "registerUser"
         const val FUNC_APPROVE_SWAP = "approveSwap"
         const val FUNC_REGISTER_DEMAND = "registerDemand"
+        const val FUNC_SWAP = "swap"
     }
 
     fun registerUser(userWalletAddress: String): RemoteFunctionCall<TransactionReceipt>
@@ -16,4 +17,6 @@ interface ISwapChain {
     fun approveSwap(userFirstAddress: String, userSecondAddress: String, matchObj: Match): RemoteFunctionCall<TransactionReceipt>
 
     fun registerDemand(userAddress: String, demand: String): RemoteFunctionCall<TransactionReceipt>
+
+    fun swap(subj: Match): RemoteFunctionCall<TransactionReceipt>
 }

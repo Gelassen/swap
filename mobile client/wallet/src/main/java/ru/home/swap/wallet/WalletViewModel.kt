@@ -294,4 +294,28 @@ class WalletViewModel
         }
     }
 
+    fun swap(subj: Match) {
+        viewModelScope.launch {
+            repository.swap(subj)
+                .flowOn(Dispatchers.IO)
+                .collect {
+                    processSwapResponse(it)
+                }
+        }
+    }
+
+    private fun processSwapResponse(response: Response<TransactionReceipt>) {
+        when (response) {
+            is Response.Data -> {
+                logger.d("Get response for swap call: ${response.data}")
+            }
+            is Response.Error.Message -> {
+                logger.d("Failed to execute swap call: ${response.msg}")
+            }
+            is Response.Error.Exception -> {
+                logger.e("Failed to execute swap call:", response.error)
+            }
+        }
+    }
+
 }

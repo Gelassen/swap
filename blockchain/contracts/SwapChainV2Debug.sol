@@ -96,6 +96,17 @@ contract SwapChainV2Debug is ISwapChainV2 {
         _approveSwap(msg.sender, matchParam);
     }
 
+    function swap(address firstUser, address secondUser, MatchDebug calldata subj) public {
+        Match memory matchParam;
+        matchParam._userFirst = firstUser;
+        matchParam._userSecond = secondUser;
+        matchParam._valueOfFirstUser = subj._valueOfFirstUser;
+        matchParam._valueOfSecondUser = subj._valueOfSecondUser;
+        matchParam._approvedByFirstUser = false;
+        matchParam._approvedBySecondUser = false;
+        _swap(msg.sender, matchParam);
+    }
+
     function _approveSwap(address msgSender, Match memory subj) private 
         callerIsRegisteredUser(msgSender, subj._userFirst, subj._userSecond)
         userExists(subj._userFirst, subj._userSecond)
@@ -141,7 +152,7 @@ contract SwapChainV2Debug is ISwapChainV2 {
         }
     }
 
-    function _swap(address msgSender, Match calldata subj) private 
+    function _swap(address msgSender, Match memory subj) private 
         callerIsRegisteredUser(msgSender, subj._userFirst, subj._userSecond)
         userExists(subj._userFirst, subj._userSecond)
         bothHaveValidTokens(subj) 

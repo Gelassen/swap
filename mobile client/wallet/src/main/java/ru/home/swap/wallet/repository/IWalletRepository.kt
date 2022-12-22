@@ -42,4 +42,6 @@ interface IWalletRepository {
 
     fun getTokenIdsWithValues(userWalletAddress: String, withConsumed: Boolean): Flow<Response<List<Token>>>
 
+    fun swap(subj: Match): Flow<Response<TransactionReceipt>>
+
 }

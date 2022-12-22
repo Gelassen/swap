@@ -124,16 +124,7 @@ class MintTokenActivity: AppCompatActivity() {
 
         findViewById<Button>(R.id.approveSwap)
             .setOnClickListener {
-                val userFirstTokenId = BigInteger.valueOf(0) // TODO define me
-                val userSecondTokenId = BigInteger.valueOf(1) // TODO define me
-                val matchSubj = Match(
-                    userFirst = FIRST_USER.lowercase(),
-                    valueOfFirstUser = userFirstTokenId,
-                    userSecond = SECOND_USER.lowercase(),
-                    valueOfSecondUser = userSecondTokenId,
-                    approvedByFirstUser = false,
-                    approvedBySecondUser = false
-                )
+                val matchSubj = getMatchObj()
                 logger.d("Match object passed on approve call: $matchSubj")
                 walletViewModel.approveSwap(matchSubj)
             }
@@ -150,7 +141,26 @@ class MintTokenActivity: AppCompatActivity() {
                 walletViewModel.registerDemand(SECOND_USER, demandOfSecondUser)
             }
 
+        findViewById<Button>(R.id.swap)
+            .setOnClickListener {
+                val subj = getMatchObj()
+                walletViewModel.swap(subj)
+            }
+
         // TODO test registerDemand() and approveSwap(), also check a whole flow (don't forget insert token ids!)
+    }
+
+    private fun getMatchObj() : Match {
+        val userFirstTokenId = BigInteger.valueOf(0) // TODO define me
+        val userSecondTokenId = BigInteger.valueOf(1) // TODO define me
+        return Match(
+            userFirst = FIRST_USER.lowercase(),
+            valueOfFirstUser = userFirstTokenId,
+            userSecond = SECOND_USER.lowercase(),
+            valueOfSecondUser = userSecondTokenId,
+            approvedByFirstUser = false,
+            approvedBySecondUser = false
+        )
     }
 
     companion object {

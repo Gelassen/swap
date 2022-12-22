@@ -7,7 +7,7 @@ import "../contracts/SwapValue.sol";
 import { Utils } from "../contracts/utils/Utils.sol";
 // import "../contracts/hardhat/hardhat-core/console.sol";
 
-contract SwapChainV2 is ISwapChainV2 {
+abstract contract SwapChainV2 is ISwapChainV2 {
 
     /* 
         In case of match by address relationship for two addresses we have 

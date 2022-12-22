@@ -1,6 +1,5 @@
 package ru.home.swap.wallet.contract
 
-import android.util.Log
 import org.web3j.abi.FunctionEncoder
 import org.web3j.abi.datatypes.Address
 import org.web3j.abi.datatypes.Function
@@ -13,8 +12,6 @@ import org.web3j.protocol.core.methods.response.TransactionReceipt
 import org.web3j.tx.Contract
 import org.web3j.tx.TransactionManager
 import org.web3j.tx.gas.ContractGasProvider
-import ru.home.swap.core.App
-import java.util.*
 
 class SwapChain : Contract, ISwapChain {
 
@@ -128,6 +125,20 @@ class SwapChain : Contract, ISwapChain {
         val function = Function(
             ISwapChain.Functions.FUNC_REGISTER_DEMAND,
             listOf(Address(userAddress), Utf8String(demand)),
+            emptyList()
+        )
+
+        return executeRemoteCallTransaction(function)
+    }
+
+    override fun swap(subj: Match): RemoteFunctionCall<TransactionReceipt> {
+        val function = Function(
+            ISwapChain.Functions.FUNC_SWAP,
+            listOf(
+                Address(subj.userFirst),
+                Address(subj.userSecond),
+                subj
+            ),
             emptyList()
         )
 
