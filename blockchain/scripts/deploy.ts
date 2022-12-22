@@ -14,7 +14,7 @@ async function main() {
     console.log("contractValue adddress: ", contractValue.address);
 
     // estimate gas cost for deployment
-    const factorySwapChain = await ethers.getContractFactory("SwapChainV2Debug");
+    const factorySwapChain = await ethers.getContractFactory("SwapChainV2");
     const gasPrice = await factorySwapChain.signer.getGasPrice();
     const estimatedGas = await factorySwapChain.signer.estimateGas(
       factorySwapChain.getDeployTransaction(

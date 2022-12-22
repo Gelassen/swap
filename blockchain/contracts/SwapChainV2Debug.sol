@@ -29,18 +29,6 @@ contract SwapChainV2Debug is ISwapChainV2 {
         _swapValueContract = SwapValue(valueToken);
     }
 
-    // modifier debugMatchParam(MatchDebug calldata subj) {
-    //     require(subj._valueOfFirstUser == 2, "Token Value of the first user is not correct"); 
-    //     require(subj._valueOfSecondUser == 3, "Token Value of the second user is not correct");
-    //     require(_utils.stringsEquals(subj._userFirst, _asString(address(0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd))), subj._userFirst); // ,"0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd does not match with subj"
-    //     require(_utils.stringsEquals(subj._userSecond, _asString(address(0x52E7400Ba1B956B11394a5045F8BC3682792E1AC))), subj._userSecond); // "0x52E7400Ba1B956B11394a5045F8BC3682792E1AC does not match with subj"
-    //     _;
-    // }
-
-    function _asString(address subj) public returns (string memory) {
-        return Strings.toHexString(uint256(uint160(subj)), 20);
-    }
-
     /**
      * We have to pass msg.sender of origin function caller as a parameter as there is a 
      * known case when this function is called by the contract which acts as a proxy. An 
@@ -81,6 +69,17 @@ contract SwapChainV2Debug is ISwapChainV2 {
         _swap(msg.sender, subj);
     }
 
+    function swap(address firstUser, address secondUser, MatchDebug calldata subj) public {
+        Match memory matchParam;
+        matchParam._userFirst = firstUser;
+        matchParam._userSecond = secondUser;
+        matchParam._valueOfFirstUser = subj._valueOfFirstUser;
+        matchParam._valueOfSecondUser = subj._valueOfSecondUser;
+        matchParam._approvedByFirstUser = false;
+        matchParam._approvedBySecondUser = false;
+        _swap(msg.sender, matchParam);
+    }
+
     function approveSwap(Match calldata subj) public override {
         _approveSwap(msg.sender, subj);
     }
@@ -96,28 +95,11 @@ contract SwapChainV2Debug is ISwapChainV2 {
         _approveSwap(msg.sender, matchParam);
     }
 
-    function swap(address firstUser, address secondUser, MatchDebug calldata subj) public {
-        Match memory matchParam;
-        matchParam._userFirst = firstUser;
-        matchParam._userSecond = secondUser;
-        matchParam._valueOfFirstUser = subj._valueOfFirstUser;
-        matchParam._valueOfSecondUser = subj._valueOfSecondUser;
-        matchParam._approvedByFirstUser = false;
-        matchParam._approvedBySecondUser = false;
-        _swap(msg.sender, matchParam);
-    }
-
     function _approveSwap(address msgSender, Match memory subj) private 
         callerIsRegisteredUser(msgSender, subj._userFirst, subj._userSecond)
         userExists(subj._userFirst, subj._userSecond)
         bothHaveValidTokens(subj) 
         {
-        // bool debugFlag = true;
-        // require(debugFlag != true, "Artificially made break point: successfully passed _swapValueContract modifiers checks, reach begining of the contract method.");
-        /* require(msg.sender == subj._userFirst || msg.sender == subj._userSecond, "Caller should be an one of the users defined in the passed match object."); */
-        // both users are registered
-        /* require(_isUserExist(subj._userFirst) == true, "The first user should be registered first.");
-        require(_isUserExist(subj._userSecond) == true, "The second user should be registered first."); */
         // TODO 1st user has associated value 
         // TODO 2nd user has associated value
         // 1st user's associated value is not consumed and not expired  
@@ -183,7 +165,7 @@ contract SwapChainV2Debug is ISwapChainV2 {
         _cleanUp(uint256(hashedKey), uint256(matchItemIndex));
     }
 
-    function _isUserExist(address userAddr) private returns (bool) {
+    function _isUserExist(address userAddr) private view returns (bool) {
         for (uint idx = 0; idx < _users.length; idx++) {
             if (_users[idx] == userAddr) {
                 return true;

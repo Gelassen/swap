@@ -51,6 +51,15 @@
                 android:text="Approve token manager"
                 />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:maxEms="16"
+                android:maxLines="2"
+                android:text="Call approve token manager twice, from each user wallet" />
+
             <Button
                 android:id="@+id/checkBalance"
                 android:layout_width="wrap_content"
@@ -114,6 +123,15 @@
                 android:layout_gravity="center"
                 android:text="Approve swap"
                 />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:maxEms="16"
+                android:maxLines="2"
+                android:text="Call approve swap twice, from each user wallet" />
 
             <Button
                 android:id="@+id/swap"

@@ -7,7 +7,7 @@ import "../contracts/SwapValue.sol";
 import { Utils } from "../contracts/utils/Utils.sol";
 // import "../contracts/hardhat/hardhat-core/console.sol";
 
-abstract contract SwapChainV2 is ISwapChainV2 {
+contract SwapChainV2 is ISwapChainV2 {
 
     /* 
         In case of match by address relationship for two addresses we have 
@@ -29,8 +29,14 @@ abstract contract SwapChainV2 is ISwapChainV2 {
         _swapValueContract = SwapValue(valueToken);
     }
 
-    modifier callerIsRegisteredUser(address userFirst, address userSecond) {
-        require(msg.sender == userFirst || msg.sender == userSecond, "Caller should be an one of the users defined in the passed match object.");
+    /**
+     * We have to pass msg.sender of origin function caller as a parameter as there is a 
+     * known case when this function is called by the contract which acts as a proxy. An 
+     * origin caller is not visible which opens a security issue for anyone can call 
+     * 'authorised only' and 'match object owner' functions.    
+     */
+    modifier callerIsRegisteredUser(address originMsgSender, address userFirst, address userSecond) {
+        require(originMsgSender == userFirst || originMsgSender == userSecond, "Caller should be an one of the users defined in the passed match object.");
         _;
     }
 
@@ -59,11 +65,80 @@ abstract contract SwapChainV2 is ISwapChainV2 {
         return _users;
     }
     
-    function swap(Match calldata subj) external override
-        callerIsRegisteredUser(subj._userFirst, subj._userSecond)
-        userExists(subj._userFirst, subj._userSecond)
-        bothHaveValidTokens(subj) {
+    function swap(Match calldata subj) public override {
+        _swap(msg.sender, subj);
+    }
 
+    function swap(address firstUser, address secondUser, MatchDebug calldata subj) public {
+        Match memory matchParam;
+        matchParam._userFirst = firstUser;
+        matchParam._userSecond = secondUser;
+        matchParam._valueOfFirstUser = subj._valueOfFirstUser;
+        matchParam._valueOfSecondUser = subj._valueOfSecondUser;
+        matchParam._approvedByFirstUser = false;
+        matchParam._approvedBySecondUser = false;
+        _swap(msg.sender, matchParam);
+    }
+
+    function approveSwap(Match calldata subj) public override {
+        _approveSwap(msg.sender, subj);
+    }
+
+    function approveSwap(address firstUser, address secondUser, MatchDebug calldata subj) public {
+        Match memory matchParam;
+        matchParam._userFirst = firstUser;
+        matchParam._userSecond = secondUser;
+        matchParam._valueOfFirstUser = subj._valueOfFirstUser;
+        matchParam._valueOfSecondUser = subj._valueOfSecondUser;
+        matchParam._approvedByFirstUser = false;
+        matchParam._approvedBySecondUser = false;
+        _approveSwap(msg.sender, matchParam);
+    }
+
+    function _approveSwap(address msgSender, Match memory subj) private 
+        callerIsRegisteredUser(msgSender, subj._userFirst, subj._userSecond)
+        userExists(subj._userFirst, subj._userSecond)
+        bothHaveValidTokens(subj) 
+        {
+        // TODO 1st user has associated value 
+        // TODO 2nd user has associated value
+        // 1st user's associated value is not consumed and not expired  
+        // 2nd user's associated value is not consumed and not expired
+        /* require(_swapValueContract.offer(subj._valueOfFirstUser)._isConsumed != true 
+                    && _swapValueContract.offer(subj._valueOfSecondUser)._isConsumed != true,
+                    "Tokens should not be already consumed.");
+        require(block.timestamp < _swapValueContract.offer(subj._valueOfFirstUser)._lockedUntil 
+                    && block.timestamp < _swapValueContract.offer(subj._valueOfSecondUser)._lockedUntil,
+                    "Current time should not exceed time of value's has been locked."); */       
+        // TODO 1st user's associated value match with 2nd user's associated value (how to implement it here without extra gas usage?)
+        // TODO 2nd user's associated value match with 1st user's associated value (how to implement it here without extra gas usage?)
+        int256 matchItemIndex = _getMatchItemIndex(subj);
+        if (matchItemIndex == NOT_VALID) {
+            _addNewMatch(subj);
+            matchItemIndex = _getMatchItemIndex(subj);
+            require(matchItemIndex != NOT_VALID, "Can not add this new match object into storage. Check _getMatchItemIndex() function.");
+        }
+
+        int256 hashedKey = _getValidHash(subj._userFirst, subj._userSecond);
+        require(hashedKey != NOT_VALID, "Can not add match object. Do yours keys can be hashed? ");
+
+        Match memory item = _matchesByUser[uint256(hashedKey)][uint256(matchItemIndex)]; // we have to use this version instead of subj because users and its values might have changed order
+        require(item._approvedByFirstUser == false || item._approvedBySecondUser == false, "This match object already approved by both users.");
+
+        if (msg.sender == item._userFirst) {
+            require(item._approvedByFirstUser == false, "Match is already approved by this, first, user.");
+            _matchesByUser[uint256(hashedKey)][uint256(matchItemIndex)]._approvedByFirstUser = true;
+        } else if (msg.sender == item._userSecond) {
+            require(item._approvedBySecondUser == false, "Match is already approved by this, second, user.");
+            _matchesByUser[uint256(hashedKey)][uint256(matchItemIndex)]._approvedBySecondUser = true;
+        }
+    }
+
+    function _swap(address msgSender, Match memory subj) private 
+        callerIsRegisteredUser(msgSender, subj._userFirst, subj._userSecond)
+        userExists(subj._userFirst, subj._userSecond)
+        bothHaveValidTokens(subj) 
+        {
         int256 matchItemIndex = _getMatchItemIndex(subj);
         require(matchItemIndex != NOT_VALID, "Match item is not found. Did you pass correct match object?");
 
@@ -88,58 +163,6 @@ abstract contract SwapChainV2 is ISwapChainV2 {
         );
             
         _cleanUp(uint256(hashedKey), uint256(matchItemIndex));
-    }
-
-    function approveSwap(Match calldata subj) external override {
-
-        /* require(msg.sender == subj._userFirst || msg.sender == subj._userSecond, "Caller should be an one of the users defined in the passed match object."); */
-        // both users are registered
-        /* require(_isUserExist(subj._userFirst) == true, "The first user should be registered first.");
-        require(_isUserExist(subj._userSecond) == true, "The second user should be registered first."); */
-        // TODO 1st user has associated value 
-        // TODO 2nd user has associated value
-        // 1st user's associated value is not consumed and not expired  
-        // 2nd user's associated value is not consumed and not expired
-        /* require(_swapValueContract.offer(subj._valueOfFirstUser)._isConsumed != true 
-                    && _swapValueContract.offer(subj._valueOfSecondUser)._isConsumed != true,
-                    "Tokens should not be already consumed.");
-        require(block.timestamp < _swapValueContract.offer(subj._valueOfFirstUser)._lockedUntil 
-                    && block.timestamp < _swapValueContract.offer(subj._valueOfSecondUser)._lockedUntil,
-                    "Current time should not exceed time of value's has been locked."); */       
-        // TODO 1st user's associated value match with 2nd user's associated value (how to implement it here without extra gas usage?)
-        // TODO 2nd user's associated value match with 1st user's associated value (how to implement it here without extra gas usage?)
-
-        int256 matchItemIndex = _getMatchItemIndex(subj);
-        if (matchItemIndex == NOT_VALID) {
-            _addNewMatch(subj);
-            matchItemIndex = _getMatchItemIndex(subj);
-            require(matchItemIndex != NOT_VALID, "Can not add this new match object into storage. Check _getMatchItemIndex() function.");
-        }
-
-        int256 hashedKey = _getValidHash(subj._userFirst, subj._userSecond);
-        require(hashedKey != NOT_VALID, "Can not add match object. Do yours keys can be hashed? ");
-
-        Match memory item = _matchesByUser[uint256(hashedKey)][uint256(matchItemIndex)]; // we have to use this version instead of subj because users and its values might have changed order
-        require(item._approvedByFirstUser == false || item._approvedBySecondUser == false, "This match object already approved by both users.");
-
-        if (msg.sender == item._userFirst) {
-            require(item._approvedByFirstUser == false, "Match is already approved by this, first, user.");
-            _matchesByUser[uint256(hashedKey)][uint256(matchItemIndex)]._approvedByFirstUser = true;
-        } else if (msg.sender == item._userSecond) {
-            require(item._approvedBySecondUser == false, "Match is already approved by this, second, user.");
-            _matchesByUser[uint256(hashedKey)][uint256(matchItemIndex)]._approvedBySecondUser = true;
-        }
-    }
-
-    function approveSwap(address firstUser, address secondUser, MatchDebug calldata subj) public {
-        Match memory matchParam;
-        matchParam._userFirst = firstUser;
-        matchParam._userSecond = secondUser;
-        matchParam._valueOfFirstUser = subj._valueOfFirstUser;
-        matchParam._valueOfSecondUser = subj._valueOfSecondUser;
-        matchParam._approvedByFirstUser = false;
-        matchParam._approvedBySecondUser = false;
-        this.approveSwap(matchParam);
     }
 
     function _isUserExist(address userAddr) private view returns (bool) {
