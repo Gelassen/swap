@@ -21,9 +21,13 @@ class Match: DynamicStruct {
         valueOfSecondUser: BigInteger,
         approvedByFirstUser: Boolean,
         approvedBySecondUser: Boolean
-    ) : super(Utf8String(userFirst), Uint256(valueOfFirstUser),
-        Utf8String(userSecond), Uint256(valueOfSecondUser),
-        Bool(approvedByFirstUser), Bool(approvedBySecondUser)
+    ) : super(
+        Utf8String(userFirst),
+        Uint256(valueOfFirstUser),
+        Utf8String(userSecond),
+        Uint256(valueOfSecondUser),
+        Bool(approvedByFirstUser),
+        Bool(approvedBySecondUser)
     ) {
         this.userFirst = userFirst
         this.valueOfFirstUser = valueOfFirstUser
@@ -32,4 +36,34 @@ class Match: DynamicStruct {
         this.approvedByFirstUser = approvedByFirstUser
         this.approvedBySecondUser = approvedBySecondUser
     }
+
+    constructor(
+        userFirst: Utf8String,
+        valueOfFirstUser: Uint256,
+        userSecond: Utf8String,
+        valueOfSecondUser: Uint256,
+        approvedByFirstUser: Bool,
+        approvedBySecondUser: Bool
+    ) : super(userFirst, valueOfFirstUser, userSecond, valueOfSecondUser, approvedByFirstUser, approvedBySecondUser) {
+        this.userFirst = userFirst.value
+        this.valueOfFirstUser = valueOfFirstUser.value
+        this.userSecond = userSecond.value
+        this.valueOfSecondUser = valueOfSecondUser.value
+        this.approvedByFirstUser = approvedByFirstUser.value
+        this.approvedBySecondUser = approvedBySecondUser.value
+    }
+
+    override fun toString(): String {
+        return "{ " +
+                "\"userFirst\": \"${userFirst}\", " +
+                "\"valueOfFirstUser\": \"${valueOfFirstUser}\", " +
+                "\"userSecond\": \"${userSecond}\", " +
+                "\"valueOfSecondUser\" : \"${valueOfSecondUser}\", " +
+                "\"approvedByFirstUser\" : \"${approvedByFirstUser}\", " +
+                "\"approvedBySecondUser\" : \"${approvedBySecondUser}\" " +
+                "}"
+
+    }
+
+
 }

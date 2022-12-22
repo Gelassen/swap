@@ -2,9 +2,6 @@ package ru.home.swap.wallet.repository
 
 import android.content.Context
 import com.example.wallet.R
-import ru.home.swap.wallet.contract.SwapChain
-import ru.home.swap.wallet.contract.SwapValue
-import ru.home.swap.wallet.contract.Value
 import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -14,24 +11,21 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import org.bouncycastle.asn1.ocsp.ResponseData
 import org.web3j.abi.EventEncoder
 import org.web3j.crypto.Credentials
 import org.web3j.crypto.Keys
 import org.web3j.crypto.WalletUtils
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.DefaultBlockParameterName
-import org.web3j.protocol.core.RemoteFunctionCall
 import org.web3j.protocol.core.methods.request.EthFilter
 import org.web3j.protocol.core.methods.response.TransactionReceipt
 import org.web3j.protocol.exceptions.TransactionException
 import org.web3j.protocol.http.HttpService
 import org.web3j.tx.RawTransactionManager
 import org.web3j.tx.gas.DefaultGasProvider
-import ru.home.swap.core.App
 import ru.home.swap.core.logger.Logger
 import ru.home.swap.core.network.Response
-import ru.home.swap.wallet.contract.Match
+import ru.home.swap.wallet.contract.*
 import ru.home.swap.wallet.model.Token
 import java.math.BigInteger
 
@@ -51,7 +45,7 @@ class WalletRepository(
         web3 = Web3j.build(httpService)
         runBlocking {
             launch(Dispatchers.IO) {
-                loadContract()
+                loadContract(R.string.test_account_2_private_key)
             }
         }
     }
@@ -180,7 +174,16 @@ class WalletRepository(
         return finalResult
     }
 
+    @Deprecated(message = "User loadContract(key) method with explicitly passed user account key")
     private suspend fun loadContract() = withContext(Dispatchers.IO) {
+        loadContract(R.string.test_account_private_key)
+    }
+
+    /*
+    * We do not need to have an option to change the user. Each user will have its own mobile device,
+    * own wallet, own contract instance. Just leave it for debug purpose.
+    * */
+    private suspend fun loadContract(userAccountPrivateKeyReference: Int) = withContext(Dispatchers.IO) {
         // TODO chainId required to mint tokens based on new ethereum standard (see https://blog.ethereum.org/2021/03/03/geth-v1-10-0)
         // it is only available over custom RawTransactionManager which is used for both balanceOf() and mint() methods
         val swapValueContractAddress: String = context.getString(R.string.swap_value_contract_address)
@@ -189,20 +192,26 @@ class WalletRepository(
         swapValueContract = SwapValue.load(
             swapValueContractAddress,
             web3,
-            RawTransactionManager(web3, getCredentials()/*Credentials.create(privateKey)*/, chainId),
+            RawTransactionManager(web3, getCredentials(userAccountPrivateKeyReference)/*Credentials.create(privateKey)*/, chainId),
             DefaultGasProvider()
         )
         val swapChainContractAddress: String = context.getString(R.string.swap_chain_contract_address)
         swapChainContract = SwapChain.load(
             swapChainContractAddress,
             web3,
-            RawTransactionManager(web3, getCredentials(), chainId),
+            RawTransactionManager(web3, getCredentials(userAccountPrivateKeyReference), chainId),
             DefaultGasProvider()
         )
     }
 
+    @Deprecated(message = "Use getCredentials(key) with explicitly passed user account key")
     private fun getCredentials() : Credentials {
-        return Credentials.create(context.getString(R.string.test_account_private_key/*R.string.wallet_password*/))
+//        return Credentials.create(context.getString(R.string.test_account_private_key/*R.string.wallet_password*/))
+        return getCredentials(R.string.test_account_private_key)
+    }
+
+    private fun getCredentials(userAccountPrivateKeyReference: Int): Credentials {
+        return Credentials.create(context.getString(userAccountPrivateKeyReference/*R.string.wallet_password*/))
     }
 
     override fun getOffer(tokenId: String): Value {
@@ -248,7 +257,12 @@ class WalletRepository(
         return flow {
             try {
                 logger.d("[start] approve swap")
-                val response: TransactionReceipt = swapChainContract.approveSwap(matchSubj).send()
+                val response: TransactionReceipt = swapChainContract.approveSwap(
+                    matchSubj.userFirst,
+                    matchSubj.userSecond,
+                    matchSubj
+                )
+                    .send()
                 emit(Response.Data(response))
             } catch (ex: Exception) {
                 logger.e("Failed to approve match", ex)

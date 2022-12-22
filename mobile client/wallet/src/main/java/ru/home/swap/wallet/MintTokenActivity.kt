@@ -61,7 +61,11 @@ class MintTokenActivity: AppCompatActivity() {
 
         findViewById<Button>(R.id.registerUser)
             .setOnClickListener {
-//                walletViewModel.registerUserOnSwapMarket(FIRST_USER)
+                walletViewModel.registerUserOnSwapMarket(FIRST_USER)
+            }
+
+        findViewById<Button>(R.id.registerSecondUser)
+            .setOnClickListener {
                 walletViewModel.registerUserOnSwapMarket(SECOND_USER)
             }
 
@@ -70,8 +74,6 @@ class MintTokenActivity: AppCompatActivity() {
                 val swapChainAddress = getString(R.string.swap_chain_contract_address)
                 walletViewModel.approveTokenManager(swapChainAddress)
             }
-
-//        val privateSwapChainNode1Account = "0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd"
 
         LoggerFactory.getLogger(HttpService::class.java).isDebugEnabled
 
@@ -110,23 +112,29 @@ class MintTokenActivity: AppCompatActivity() {
 
         findViewById<Button>(R.id.getMyTokens)
             .setOnClickListener {
+                val account = FIRST_USER//applicationContext.getString(R.string.my_account)
+                walletViewModel.getTokenIdsForUser(account)
+            }
+
+        findViewById<Button>(R.id.getMyTokensSecondUser)
+            .setOnClickListener {
                 val account = SECOND_USER//applicationContext.getString(R.string.my_account)
-//                walletViewModel.getTokensThatBelongsToMeNotConsumedNotExpired(account)
                 walletViewModel.getTokenIdsForUser(account)
             }
 
         findViewById<Button>(R.id.approveSwap)
             .setOnClickListener {
-                val userFirstTokenId = BigInteger.valueOf(4) // TODO define me
-                val userSecondTokenId = BigInteger.valueOf(5) // TODO define me
+                val userFirstTokenId = BigInteger.valueOf(0) // TODO define me
+                val userSecondTokenId = BigInteger.valueOf(1) // TODO define me
                 val matchSubj = Match(
-                    userFirst = FIRST_USER,
+                    userFirst = FIRST_USER.lowercase(),
                     valueOfFirstUser = userFirstTokenId,
-                    userSecond = SECOND_USER,
+                    userSecond = SECOND_USER.lowercase(),
                     valueOfSecondUser = userSecondTokenId,
-                    approvedByFirstUser = true,
-                    approvedBySecondUser = true
+                    approvedByFirstUser = false,
+                    approvedBySecondUser = false
                 )
+                logger.d("Match object passed on approve call: $matchSubj")
                 walletViewModel.approveSwap(matchSubj)
             }
 

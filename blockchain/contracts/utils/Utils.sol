@@ -37,4 +37,24 @@ contract Utils {
         return hashedAsAddress;
     }
 
+    /* // Strings lib is avaialble from the contract
+        function _asString(address subj) public returns (string memory) {
+            return Strings.toHexString(uint256(uint160(subj)), 20);
+        }
+    */
+    
+    // https://ethereum.stackexchange.com/questions/8346/convert-address-to-string
+
+    /*function bytesToAddress(bytes32 _address) public returns (address) {
+        uint160 m = 0;
+        uint160 b = 0;
+
+        for (uint8 i = 0; i < 20; i++) {
+        m *= 256;
+        b = uint160(_address[i]);
+        m += (b);
+        }
+
+        return address(m);
+    }*/
 }

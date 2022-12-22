@@ -2,7 +2,6 @@ package ru.home.swap.wallet
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.reactivex.schedulers.Schedulers
 import ru.home.swap.wallet.contract.Value
 import ru.home.swap.wallet.model.Token
 import ru.home.swap.wallet.model.Transaction
@@ -294,4 +293,5 @@ class WalletViewModel
             }
         }
     }
+
 }

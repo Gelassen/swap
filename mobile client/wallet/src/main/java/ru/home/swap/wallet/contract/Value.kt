@@ -9,11 +9,11 @@ import java.math.BigInteger
 
 class Value: DynamicStruct {
 
-    lateinit var offer: String
-    lateinit var availableSince: BigInteger
-    lateinit var availabilityEnd: BigInteger
+    var offer: String
+    var availableSince: BigInteger
+    var availabilityEnd: BigInteger
     var isConsumed: Boolean = false
-    lateinit var lockedUntil: BigInteger
+    var lockedUntil: BigInteger
 
     constructor(
         offer: String,
@@ -22,8 +22,10 @@ class Value: DynamicStruct {
         isConsumed: Boolean,
         lockedUntil: BigInteger
     ) : super(
-        Utf8String(offer), Uint256(availableSince),
-        Uint256(availabilityEnd), Bool(isConsumed),
+        Utf8String(offer),
+        Uint256(availableSince),
+        Uint256(availabilityEnd),
+        Bool(isConsumed),
         Uint256(lockedUntil)
     ) {
         this.offer = offer

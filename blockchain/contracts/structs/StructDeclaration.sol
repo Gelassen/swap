@@ -17,6 +17,15 @@ struct Match {
     bool _approvedBySecondUser;
 }
 
+struct MatchDebug {
+    string _userFirst;
+    uint256 _valueOfFirstUser; // tokenId of SwapValue.sol owned by _userFirst
+    string _userSecond;
+    uint256 _valueOfSecondUser; // tokenId of SwapValue.sol owned by _userSecond
+    bool _approvedByFirstUser;
+    bool _approvedBySecondUser;
+}
+
 struct Value {
     string _offer;
     uint256 _availableSince;

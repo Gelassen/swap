@@ -6,11 +6,14 @@
     <string name="test_account_2_private_key">7300c460af63c70ba89189c4d39a0b8a3a75eee1ea7d7dcef1f96c5736031bf5</string>
 
     <string name="chain_id">3347</string>
-    <string name="my_account">0xB54e15454E0711b1917f88E656C2fc3E9dF4117d</string>
+    <!--  0xB54e15454E0711b1917f88E656C2fc3E9dF4117d  -->
+    <string name="my_account">0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd</string>
     <string name="my_account_2">0x52E7400Ba1B956B11394a5045F8BC3682792E1AC</string>
     <!-- 0x3106248fbb449ed92b03d6f93f43f464cd95b74d -->
-    <string name="swap_value_contract_address">0x1ECFF12ac352EB1200Ce85135D062030EfcbB71B</string>
-    <string name="swap_chain_contract_address">0xAB098Df3443A424604DA70726Cc9Cf15Ae15f6FF</string>
+    <string name="swap_value_contract_address">0x96359fC5001F481b368E4493676e70d7072Db3fF</string>
+    <!-- Origin swap chain address: 0xbEC5032A1A14f94169Fcfd69B9DB637e1902AD65 -->
+    <!-- Debug swap chain address: 0x8bC0B5C62dD269256587E46d465c9091808C3BaA -->
+    <string name="swap_chain_contract_address">0xB69d42018db9fCEacE2d7da70C389976F9704d84</string>
 
     <!-- by legacy reason originally it was rinkeby -->
 <!--    https://goerli.infura.io/v3/ce67e157fc964d3bbf7ff1db09aa316a-->

@@ -13,8 +13,7 @@ interface ISwapChain {
 
     fun registerUser(userWalletAddress: String): RemoteFunctionCall<TransactionReceipt>
 
-    fun approveSwap(matchObj: Match): RemoteFunctionCall<TransactionReceipt>
+    fun approveSwap(userFirstAddress: String, userSecondAddress: String, matchObj: Match): RemoteFunctionCall<TransactionReceipt>
 
     fun registerDemand(userAddress: String, demand: String): RemoteFunctionCall<TransactionReceipt>
-
 }
