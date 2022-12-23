@@ -22,13 +22,11 @@ interface IWalletRepository {
     @Throws(TransactionException::class)
     fun mintToken(to: String, value: Value, uri: String): Flow<Response<TransactionReceipt>>
 
-    fun mintToken(to: String, value: Value, uri: String, wei: BigInteger): Flow<TransactionReceipt>
-
     fun getTokensNotConsumedAndBelongingToMe(account: String): Flow<SwapValue.TransferEventResponse>
 
     fun getTransferEvents(): Flow<SwapValue.TransferEventResponse>
 
-    fun getOffer(tokenId: String): Value
+    fun getOffer(tokenId: String): Flow<Response<Value>>
 
     fun registerUserOnSwapMarket(userWalletAddress: String): Flow<Response<TransactionReceipt>>
 

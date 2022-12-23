@@ -3,6 +3,7 @@ import { ethers } from "hardhat";
 import { utils, BigNumber } from "ethers";
 import { time, loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { token } from "../typechain-types/@openzeppelin/contracts";
+import "./SwapChainV2";
 import "./SwapValue";
 
 describe.only("SwapChain V2 test", async function () {

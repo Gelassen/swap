@@ -16,11 +16,11 @@ class Value: DynamicStruct {
     var lockedUntil: BigInteger
 
     constructor(
-        offer: String,
-        availableSince: BigInteger,
-        availabilityEnd: BigInteger,
-        isConsumed: Boolean,
-        lockedUntil: BigInteger
+        offer: String = "",
+        availableSince: BigInteger = BigInteger.valueOf(0),
+        availabilityEnd: BigInteger = BigInteger.valueOf(0),
+        isConsumed: Boolean = false,
+        lockedUntil: BigInteger = BigInteger.valueOf(0)
     ) : super(
         Utf8String(offer),
         Uint256(availableSince),

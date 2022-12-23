@@ -139,8 +139,12 @@ class WalletViewModel
                 }
                 .map { it ->
                     // TODO consider to add async {} here to request offers asynchronously
-                    val value = repository.getOffer(it.tokenId.toString())
-                    Token(it.tokenId!!.toLong(), value)
+                    val valueResponse = repository.getOffer(it.tokenId.toString())
+                    if (valueResponse is Response.Data<*>) {
+                        Token(it.tokenId!!.toLong(), valueResponse.data as Value)
+                    } else {
+                        Token(it.tokenId!!.toLong(), Value())
+                    }
                 }
                 .filter { it ->
                     !it.value.isConsumed

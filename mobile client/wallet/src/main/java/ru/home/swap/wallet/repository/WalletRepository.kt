@@ -53,12 +53,14 @@ class WalletRepository(
     override fun balanceOf(owner: String): Flow<Response<BigInteger>> {
         return flow {
             try {
+                logger.d("[start] balanceOf() for owner $owner")
                 val balance = swapValueContract.balanceOf(owner).send()
-                logger.d("balanceOf() call result ${balance}")
                 emit(Response.Data(balance))
             } catch (e: Exception) {
                 logger.e("Failed to call balanceOf()", e)
                 emit(Response.Error.Exception(e))
+            } finally {
+                logger.d("[end] balanceOf()")
             }
         }
     }
@@ -70,17 +72,21 @@ class WalletRepository(
         * wei is omitted in web3j-cli generate wrapper,
         * */
         return flow {
-            val txReceipt = swapValueContract.safeMint(to, value, uri).send()
-            logger.d("safeMint() txReceipt ${txReceipt}")
-            emit(Response.Data<TransactionReceipt>(txReceipt))
-        }
-    }
+            try {
+                logger.d("[start] mintToken() $to, $value, $uri")
+                val txReceipt = swapValueContract.safeMint(to, value, uri).send()
+                if (txReceipt.isStatusOK) {
+                    emit(Response.Data<TransactionReceipt>(txReceipt))
+                } else {
+                    emit(Response.Error.Message("Reverted with reason: ${txReceipt.revertReason}"))
+                }
+            } catch (ex: Exception) {
+                logger.e("Failed to mint a token", ex)
+                emit(Response.Error.Exception(ex))
+            } finally {
+                logger.d("[end] mintToken()")
+            }
 
-    override fun mintToken(to: String, value: Value, uri: String, wei: BigInteger): Flow<TransactionReceipt> {
-        return flow {
-            val txReceipt = swapValueContract.safeMint(to, value, uri, wei).send()
-            logger.d("safeMint() txReceipt ${txReceipt}")
-            emit(txReceipt)
         }
     }
 
@@ -162,10 +168,14 @@ class WalletRepository(
 
     override fun swap(subj: Match): Flow<Response<TransactionReceipt>> {
         return flow {
-            logger.d("[start] swap call")
             try {
+                logger.d("[start] swap call")
                 val response = swapChainContract.swap(subj).send()
-                emit(Response.Data(response))
+                if (response.isStatusOK) {
+                    emit(Response.Data(response))
+                } else {
+                    emit(Response.Error.Message("Reverted with reason: ${response.revertReason}"))
+                }
             } catch (ex: Exception) {
                 emit(Response.Error.Exception(ex))
             } finally {
@@ -174,62 +184,18 @@ class WalletRepository(
         }
     }
 
-    private fun getFullTokenForTokenIds(tokenIds: List<*>, withConsumed: Boolean): MutableList<Token> {
-        val finalResult = mutableListOf<Token>()
-        for (item in tokenIds) {
-            val tokenId = (item as BigInteger).toString()
-            val value = swapValueContract.getOffer(tokenId).send()
-            if (!withConsumed && !value.isConsumed) {
-                finalResult.add(Token(tokenId = tokenId.toLong(), value = value))
-            } else {
-                finalResult.add(Token(tokenId = tokenId.toLong(), value = value))
+    override fun getOffer(tokenId: String): Flow<Response<Value>> {
+        return flow {
+            try {
+                logger.d("[start] getOffer() for tokenId $tokenId")
+                val response = swapValueContract.getOffer(tokenId).send()
+                emit(Response.Data(response))
+            } catch (ex: Exception) {
+                emit(Response.Error.Exception(ex))
+            } finally {
+                logger.d("[end] getOffer()")
             }
         }
-        return finalResult
-    }
-
-    @Deprecated(message = "User loadContract(key) method with explicitly passed user account key")
-    private suspend fun loadContract() = withContext(Dispatchers.IO) {
-        loadContract(R.string.test_account_private_key)
-    }
-
-    /*
-    * We do not need to have an option to change the user. Each user will have its own mobile device,
-    * own wallet, own contract instance. Just leave it for debug purpose.
-    * */
-    private suspend fun loadContract(userAccountPrivateKeyReference: Int) = withContext(Dispatchers.IO) {
-        // TODO chainId required to mint tokens based on new ethereum standard (see https://blog.ethereum.org/2021/03/03/geth-v1-10-0)
-        // it is only available over custom RawTransactionManager which is used for both balanceOf() and mint() methods
-        val swapValueContractAddress: String = context.getString(R.string.swap_value_contract_address)
-//        val privateKey: String = context.getString(R.string.private_key)
-        val chainId: Long = context.getString(R.string.chain_id).toLong()
-        swapValueContract = SwapValue.load(
-            swapValueContractAddress,
-            web3,
-            RawTransactionManager(web3, getCredentials(userAccountPrivateKeyReference)/*Credentials.create(privateKey)*/, chainId),
-            DefaultGasProvider()
-        )
-        val swapChainContractAddress: String = context.getString(R.string.swap_chain_contract_address)
-        swapChainContract = SwapChain.load(
-            swapChainContractAddress,
-            web3,
-            RawTransactionManager(web3, getCredentials(userAccountPrivateKeyReference), chainId),
-            DefaultGasProvider()
-        )
-    }
-
-    @Deprecated(message = "Use getCredentials(key) with explicitly passed user account key")
-    private fun getCredentials() : Credentials {
-//        return Credentials.create(context.getString(R.string.test_account_private_key/*R.string.wallet_password*/))
-        return getCredentials(R.string.test_account_private_key)
-    }
-
-    private fun getCredentials(userAccountPrivateKeyReference: Int): Credentials {
-        return Credentials.create(context.getString(userAccountPrivateKeyReference/*R.string.wallet_password*/))
-    }
-
-    override fun getOffer(tokenId: String): Value {
-        return swapValueContract.getOffer(tokenId).send()
     }
 
     override fun registerUserOnSwapMarket(userWalletAddress: String): Flow<Response<TransactionReceipt>> {
@@ -297,7 +263,11 @@ class WalletRepository(
                     Keys.toChecksumAddress(userWalletAddress).uppercase())
                 if (isValidEthAddress) {
                     val response: TransactionReceipt = swapChainContract.registerDemand(userWalletAddress, demand).send()
-                    emit(Response.Data(response))
+                    if (response.isStatusOK) {
+                        emit(Response.Data(response))
+                    } else {
+                        emit(Response.Error.Message("Reverted with reason: ${response.revertReason}"))
+                    }
                 } else {
                     val errMessage = "${userWalletAddress} is not valid ethereum address."
                     emit(Response.Error.Message(errMessage))
@@ -310,6 +280,59 @@ class WalletRepository(
                 logger.d("[end] register demand")
             }
         }
+    }
+
+    private fun getFullTokenForTokenIds(tokenIds: List<*>, withConsumed: Boolean): MutableList<Token> {
+        val finalResult = mutableListOf<Token>()
+        for (item in tokenIds) {
+            val tokenId = (item as BigInteger).toString()
+            val value = swapValueContract.getOffer(tokenId).send()
+            if (!withConsumed && !value.isConsumed) {
+                finalResult.add(Token(tokenId = tokenId.toLong(), value = value))
+            } else {
+                finalResult.add(Token(tokenId = tokenId.toLong(), value = value))
+            }
+        }
+        return finalResult
+    }
+
+    @Deprecated(message = "User loadContract(key) method with explicitly passed user account key")
+    private suspend fun loadContract() = withContext(Dispatchers.IO) {
+        loadContract(R.string.test_account_private_key)
+    }
+
+    /*
+    * We do not need to have an option to change the user. Each user will have its own mobile device,
+    * own wallet, own contract instance. Just leave it for debug purpose.
+    * */
+    private suspend fun loadContract(userAccountPrivateKeyReference: Int) = withContext(Dispatchers.IO) {
+        // TODO chainId required to mint tokens based on new ethereum standard (see https://blog.ethereum.org/2021/03/03/geth-v1-10-0)
+        // it is only available over custom RawTransactionManager which is used for both balanceOf() and mint() methods
+        val swapValueContractAddress: String = context.getString(R.string.swap_value_contract_address)
+//        val privateKey: String = context.getString(R.string.private_key)
+        val chainId: Long = context.getString(R.string.chain_id).toLong()
+        swapValueContract = SwapValue.load(
+            swapValueContractAddress,
+            web3,
+            RawTransactionManager(web3, getCredentials(userAccountPrivateKeyReference)/*Credentials.create(privateKey)*/, chainId),
+            DefaultGasProvider()
+        )
+        val swapChainContractAddress: String = context.getString(R.string.swap_chain_contract_address)
+        swapChainContract = SwapChain.load(
+            swapChainContractAddress,
+            web3,
+            RawTransactionManager(web3, getCredentials(userAccountPrivateKeyReference), chainId),
+            DefaultGasProvider()
+        )
+    }
+
+    @Deprecated(message = "Use getCredentials(key) with explicitly passed user account key")
+    private fun getCredentials() : Credentials {
+        return getCredentials(R.string.test_account_private_key)
+    }
+
+    private fun getCredentials(userAccountPrivateKeyReference: Int): Credentials {
+        return Credentials.create(context.getString(userAccountPrivateKeyReference/*R.string.wallet_password*/))
     }
 
 }
