@@ -66,7 +66,7 @@ class WalletRepository(
     }
 
     @Throws(TransactionException::class)
-    override fun mintToken(to: String, value: Value, uri: String): Flow<Response<TransactionReceipt>> {
+    override fun mintTokenAsFlow(to: String, value: Value, uri: String): Flow<Response<TransactionReceipt>> {
         /*
         * web3.ethEstimateGas() would require Transaction.createFunctionCallTransaction()
         * wei is omitted in web3j-cli generate wrapper,
@@ -75,11 +75,13 @@ class WalletRepository(
             try {
                 logger.d("[start] mintToken() $to, $value, $uri")
                 val txReceipt = swapValueContract.safeMint(to, value, uri).send()
-                if (txReceipt.isStatusOK) {
+                emit(Response.Data<TransactionReceipt>(txReceipt))
+
+                /*if (txReceipt.isStatusOK) {
                     emit(Response.Data<TransactionReceipt>(txReceipt))
                 } else {
                     emit(Response.Error.Message("Reverted with reason: ${txReceipt.revertReason}"))
-                }
+                }*/
             } catch (ex: Exception) {
                 logger.e("Failed to mint a token", ex)
                 emit(Response.Error.Exception(ex))
@@ -88,6 +90,21 @@ class WalletRepository(
             }
 
         }
+    }
+
+    override suspend fun mintToken(to: String, value: Value, uri: String): Response<TransactionReceipt> {
+        lateinit var response: Response<TransactionReceipt>
+        try {
+            logger.d("[start] mintToken() $to, $value, $uri")
+            val txReceipt = swapValueContract.safeMint(to, value, uri).send()
+            response = Response.Data<TransactionReceipt>(txReceipt)
+        } catch (ex: Exception) {
+            logger.e("Failed to mint a token", ex)
+            response = Response.Error.Exception(ex)
+        } finally {
+            logger.d("[end] mintToken()")
+        }
+        return response
     }
 
     override fun getTokensNotConsumedAndBelongingToMe(account: String): Flow<SwapValue.TransferEventResponse> {

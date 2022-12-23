@@ -11,12 +11,21 @@ interface ChainTransactionDao {
     }
 
     @Query("SELECT * FROM ${Const.tableName}")
-    fun getAll(): Flow<List<ChainTransaction>>
+    fun getAll(): Flow<List<ChainTransactionEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(vararg transactions: ChainTransaction)
+    suspend fun insertAll(vararg transactions: ChainTransactionEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(transactions: ChainTransactionEntity): Long
+
+//    @Query("SELECT * FROM ${Const.tableName} WHERE uid = :uid")
+//    fun getById(uid: Long): Flow<ChainTransactionEntity>
+
+    @Query("SELECT * FROM ${Const.tableName} WHERE uid = :uid")
+    suspend fun getById(uid: Long): ChainTransactionEntity
 
     @Delete
-    suspend fun delete(transactions: ChainTransaction)
+    suspend fun delete(transactions: ChainTransactionEntity)
 
 }

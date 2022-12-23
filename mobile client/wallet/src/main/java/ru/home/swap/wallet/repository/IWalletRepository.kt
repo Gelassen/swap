@@ -20,7 +20,9 @@ interface IWalletRepository {
     fun balanceOf(owner: String): Flow<Response<BigInteger>>
 
     @Throws(TransactionException::class)
-    fun mintToken(to: String, value: Value, uri: String): Flow<Response<TransactionReceipt>>
+    fun mintTokenAsFlow(to: String, value: Value, uri: String): Flow<Response<TransactionReceipt>>
+
+    suspend fun mintToken(to: String, value: Value, uri: String): Response<TransactionReceipt>
 
     fun getTokensNotConsumedAndBelongingToMe(account: String): Flow<SwapValue.TransferEventResponse>
 
@@ -34,7 +36,7 @@ interface IWalletRepository {
 
     fun approveSwap(matchSubj: Match): Flow<Response<TransactionReceipt>>
 
-    fun registerDemand(userAddress: String, demand: String): Flow<Response<TransactionReceipt>>
+    fun registerDemand(userWalletAddress: String, demand: String): Flow<Response<TransactionReceipt>>
 
     fun getTokenIdsForUser(userWalletAddress: String): Flow<Response<List<*>>>
 

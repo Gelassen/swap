@@ -80,48 +80,45 @@ class WalletViewModel
 
     fun mintToken(to: String, value: Value, uri: String) {
         logger.d("[start] mintToken()")
+        lateinit var newTx: Transaction
         viewModelScope.launch {
-            repository.mintToken(to, value, uri)
-                .catch { it ->
-                    if (it is TransactionException
-                        && it.message!!.contains("Transaction receipt was not generated after 600 seconds for transaction")) {
-                        cacheRepository.createChainTx(to, value, uri) // TODO consider always put in pending cache and remove after it confirms as succeeded
-                        val txReceipt = TransactionReceipt()
-                        txReceipt.transactionHash = ""
-                        emit(Response.Data(txReceipt))
-                    } else {
-                        emit(Response.Error.Exception(it))
+            cacheRepository.createChainTx(Transaction(0, to, value, uri, "pending"))
+                .map {
+                    newTx = it
+                    repository.mintToken(to, value, uri)
+                }
+                .onEach {
+                    when(it) {
+                        // TODO how to cover reverted, rejected and declined status of tx ?
+                        is Response.Data -> {
+                            if (it.data.isStatusOK) {
+                                newTx.status = "mined"
+                                cacheRepository.createChainTx(newTx)
+                            } else {
+                                newTx.status = "reverted"
+                                cacheRepository.createChainTx(newTx)
+                                updateStateWithError("Reverted cause: ${it.data.revertReason}")
+                            }
+                        }
+                        is Response.Error.Message -> {
+                            newTx.status = "exception"
+                            cacheRepository.createChainTx(newTx)
+                            updateStateWithError("Exception: ${it.msg}")
+                        }
+                        is Response.Error.Exception -> {
+                            newTx.status = "exception"
+                            cacheRepository.createChainTx(newTx)
+                            updateStateWithError("Exception: ${it.error.message}")
+                        }
                     }
                 }
                 .flowOn(Dispatchers.IO)
                 .collect {
-                    logger.d(it.toString())
-                    when (it) {
-                        is Response.Data -> {
-                            if (it.data.transactionHash.isEmpty()) {
-                                state.update {
-                                    it.copy(
-                                        status = Status.MINT_TOKEN,
-                                        pendingTx = it.pendingTx + Transaction(to, value, uri)
-                                    )
-                                }
-                            }
-                        }
-                        is Response.Error.Message -> {
-                            val errorMsg = "Something went wrong on mint a token with error ${it.msg}"
-                            logger.d(errorMsg)
-                            state.update {
-                                val newErrors = it.errors + "Something went wrong on mint a token with error ${errorMsg}"
-                                it.copy(status = Status.MINT_TOKEN, errors = newErrors)
-                            }
-                        }
-                        is Response.Error.Exception -> {
-                            logger.e("Something went wrong on mint a token ${to}, ${value}, ${uri}", it.error)
-                            state.update {
-                                val newErrors = it.errors + "Something went wrong on mint a token ${to}, ${value}, ${uri}"
-                                it.copy(status = Status.MINT_TOKEN, errors = newErrors)
-                            }
-                        }
+                    state.update { state ->
+                        state.copy(
+                            status = Status.MINT_TOKEN,
+                            pendingTx = state.pendingTx + newTx
+                        )
                     }
                 }
         }
@@ -319,6 +316,14 @@ class WalletViewModel
             is Response.Error.Exception -> {
                 logger.e("Failed to execute swap call:", response.error)
             }
+        }
+    }
+
+    private fun updateStateWithError(error: String) {
+        state.update { state ->
+            state.copy(
+                errors = state.errors + error
+            )
         }
     }
 
