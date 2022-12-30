@@ -87,10 +87,12 @@ dependencies {
     implementation ("com.squareup.retrofit2:retrofit:2.9.0")
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
 //    implementation "com.squareup.okhttp3:logging-interceptor:3.11.0"
-    implementation ("com.google.dagger:dagger:2.38.1")
-    implementation ("com.google.dagger:dagger-android-support:2.38.1")
+    implementation ("com.google.dagger:dagger:2.44.2")
+    implementation ("com.google.dagger:dagger-android-support:2.44.2")
+    implementation("com.google.dagger:dagger-android:2.44.2")
 
-    kapt("com.google.dagger:dagger-compiler:2.15")
+    kapt("com.google.dagger:dagger-compiler:2.44.2")
+    kapt("com.google.dagger:dagger-android-processor:2.44.2")
 
     testImplementation("org.mockito:mockito-core:3.12.4")
     testImplementation("org.mockito.kotlin:mockito-kotlin:3.2.0")

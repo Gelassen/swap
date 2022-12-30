@@ -1,6 +1,7 @@
 package ru.home.swap.di
 
 import dagger.Component
+import ru.home.swap.AppApplication
 import ru.home.swap.core.di.NetworkModule
 import ru.home.swap.ui.contacts.ContactsFragment
 import ru.home.swap.ui.demands.DemandsFragment
@@ -12,17 +13,21 @@ import ru.home.swap.ui.profile.SignInFragment
 import javax.inject.Singleton
 
 @Singleton
-@Component(modules = [
-    ViewModelModule::class,
-    NetworkModule::class,
-    AppModule::class
-])
+@Component(
+    modules = [
+        ViewModelModule::class,
+        NetworkModule::class,
+        AppModule::class,
+        InjectorModule::class
+    ]
+)
 interface AppComponent {
-    fun inject(subject: SignInFragment)
-    fun inject(subject: LauncherFragment)
-    fun inject(subject: AddItemBottomSheetDialogFragment)
-    fun inject(subject: ProfileFragment)
-    fun inject(subject: OffersFragment)
-    fun inject(subject: DemandsFragment)
-    fun inject(subject: ContactsFragment)
+    fun inject(subject: AppApplication)
+//    fun inject(subject: SignInFragment)
+//    fun inject(subject: LauncherFragment)
+//    fun inject(subject: AddItemBottomSheetDialogFragment)
+//    fun inject(subject: ProfileFragment)
+//    fun inject(subject: OffersFragment)
+//    fun inject(subject: DemandsFragment)
+//    fun inject(subject: ContactsFragment)
 }

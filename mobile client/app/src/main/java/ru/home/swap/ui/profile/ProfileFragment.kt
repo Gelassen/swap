@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
+import dagger.android.support.AndroidSupportInjection
 import kotlinx.coroutines.launch
 import ru.home.swap.App
 import ru.home.swap.AppApplication
@@ -30,12 +31,16 @@ class ProfileFragment : BaseFragment(), ItemAdapter.Listener {
 
     private lateinit var binding: ProfileFragmentBinding
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        AndroidSupportInjection.inject(this)
+        super.onCreate(savedInstanceState)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        (requireActivity().application as AppApplication).getComponent().inject(this)
         // keep an eye on owner parameter, it should be the same scope for view model which is shared among components
         viewModel = ViewModelProvider(this, viewModelFactory).get(ProfileViewModel::class.java)
         binding = ProfileFragmentBinding.inflate(inflater, container, false)

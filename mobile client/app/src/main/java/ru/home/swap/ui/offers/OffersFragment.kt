@@ -12,6 +12,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import dagger.android.AndroidInjection
+import dagger.android.support.AndroidSupportInjection
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import ru.home.swap.App
@@ -33,12 +35,16 @@ class OffersFragment: BaseFragment(), OffersAdapter.IListener {
     private lateinit var viewModel: OffersViewModel
     private lateinit var binding: OffersFragmentBinding
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        AndroidSupportInjection.inject(this)
+        super.onCreate(savedInstanceState)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        (requireActivity().application as AppApplication).getComponent().inject(this)
         viewModel = ViewModelProvider(this, viewModelFactory).get(OffersViewModel::class.java)
 
         binding = OffersFragmentBinding.inflate(inflater, container, false)

@@ -7,6 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import dagger.android.AndroidInjection
+import dagger.android.support.AndroidSupportInjection
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.launch
 import ru.home.swap.App
@@ -29,12 +31,16 @@ class ContactsFragment : BaseFragment() {
 
     private lateinit var binding: ContactsFragmentBinding
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        AndroidSupportInjection.inject(this)
+        super.onCreate(savedInstanceState)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        (requireActivity().application as AppApplication).getComponent().inject(this)
         viewModel = ViewModelProvider(this, viewModelFactory).get(ContactsViewModel::class.java)
         binding = ContactsFragmentBinding.inflate(inflater, container, false)
         binding.lifecycleOwner = this

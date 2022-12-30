@@ -53,8 +53,9 @@ dependencies {
     implementation("androidx.room:room-ktx:2.4.3")
 
     implementation("com.google.android.material:material:1.6.1")
-    implementation ("com.google.dagger:dagger:2.38.1")
-    implementation ("com.google.dagger:dagger-android-support:2.38.1")
+    implementation ("com.google.dagger:dagger:2.44.2")
+    implementation ("com.google.dagger:dagger-android-support:2.44.2")
+    implementation("com.google.dagger:dagger-android:2.44.2")
 
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0")
@@ -65,7 +66,9 @@ dependencies {
     annotationProcessor("androidx.room:room-compiler:2.4.3")
 
     kapt("androidx.room:room-compiler:2.4.3")
-    kapt("com.google.dagger:dagger-compiler:2.15")
+    kapt("com.google.dagger:dagger-compiler:2.44.2")
+    kapt("com.google.dagger:dagger-android-processor:2.44.2")
+
     // To use Kotlin Symbol Processing (KSP)
 //    ksp("androidx.room:room-compiler:$room_version")
 

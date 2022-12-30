@@ -9,6 +9,7 @@ import android.widget.TextView
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import dagger.android.support.AndroidSupportInjection
 import ru.home.swap.App
 import ru.home.swap.AppApplication
 import ru.home.swap.R
@@ -26,9 +27,9 @@ class AddItemBottomSheetDialogFragment: BottomSheetDialogFragment() {
     lateinit var viewModel: ProfileViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        AndroidSupportInjection.inject(this)
         super.onCreate(savedInstanceState)
         setStyle(DialogFragment.STYLE_NORMAL, R.style.DialogStyle)
-        (requireActivity().application as AppApplication).getComponent().inject(this)
     }
 
     override fun onCreateView(
