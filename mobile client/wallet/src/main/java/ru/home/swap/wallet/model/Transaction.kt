@@ -4,10 +4,10 @@ import ru.home.swap.wallet.contract.Value
 import ru.home.swap.wallet.storage.ChainTransactionEntity
 
 data class Transaction(
-    val uid: Long,
-    val to: String,
-    val value: Value,
-    val uri: String,
+    val uid: Long = -1,
+    val to: String = "",
+    val value: Value = Value(),
+    val uri: String = "",
     var status: String = ""
 )
 

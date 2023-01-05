@@ -2,6 +2,7 @@ package ru.home.swap.wallet
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineDispatcher
 import ru.home.swap.wallet.contract.Value
 import ru.home.swap.wallet.model.Token
 import ru.home.swap.wallet.model.Transaction
@@ -16,6 +17,7 @@ import org.web3j.protocol.exceptions.TransactionException
 import ru.home.swap.core.logger.Logger
 import ru.home.swap.core.network.Response
 import ru.home.swap.wallet.contract.Match
+import ru.home.swap.wallet.repository.IStorageRepository
 import java.math.BigInteger
 import javax.inject.Inject
 
@@ -32,7 +34,8 @@ enum class Status {
 class WalletViewModel
     @Inject constructor(
         val repository: IWalletRepository,
-        val cacheRepository: StorageRepository
+        val cacheRepository: IStorageRepository,
+        val backgroundDispatcher: CoroutineDispatcher = Dispatchers.IO
     ): ViewModel() {
 
     private val logger: Logger = Logger.getInstance()
@@ -46,7 +49,7 @@ class WalletViewModel
         logger.d("[start] balanceOf()")
         viewModelScope.launch {
             repository.balanceOf(owner)
-                .flowOn(Dispatchers.IO)
+                .flowOn(backgroundDispatcher)
                 .collect { value ->
                     logger.d("collect get balance result")
                     processBalanceOfResponse(value)
@@ -112,7 +115,7 @@ class WalletViewModel
                         }
                     }
                 }
-                .flowOn(Dispatchers.IO)
+                .flowOn(backgroundDispatcher)
                 .collect {
                     state.update { state ->
                         state.copy(
@@ -130,7 +133,7 @@ class WalletViewModel
         logger.d("[start] getTokens()")
         viewModelScope.launch {
             repository.getTransferEvents()
-                .flowOn(Dispatchers.IO) // explicitly choose network thread
+                .flowOn(backgroundDispatcher) // explicitly choose network thread
                 .filter { it ->
                     it.to?.lowercase().equals(account.lowercase())
                 }
@@ -147,7 +150,7 @@ class WalletViewModel
                     !it.value.isConsumed
                             && it.value.availabilityEnd.toLong() > System.currentTimeMillis()
                 }
-                .flowOn(Dispatchers.IO)
+                .flowOn(backgroundDispatcher)
                 .collect { token ->
                     logger.d("Collect result value for tokens owned by swap address $token")
                     state.update {
@@ -174,7 +177,7 @@ class WalletViewModel
                         it.copy(errors = it.errors + error, status = Status.NONE )
                     }
                 }
-                .flowOn(Dispatchers.IO)
+                .flowOn(backgroundDispatcher)
 /*                .map {
                     // TODO implement caching the result
                 }*/
@@ -201,7 +204,7 @@ class WalletViewModel
     fun approveTokenManager(swapChainAddress: String) {
         viewModelScope.launch {
             repository.approveTokenManager(swapChainAddress, true)
-                .flowOn(Dispatchers.IO)
+                .flowOn(backgroundDispatcher)
                 .collect {
                     processApproveTokenManagerResponse(it)
                 }
@@ -226,7 +229,7 @@ class WalletViewModel
     fun approveSwap(matchSubj: Match) {
         viewModelScope.launch {
             repository.approveSwap(matchSubj)
-                .flowOn(Dispatchers.IO)
+                .flowOn(backgroundDispatcher)
                 .collect {
                     processApproveSwapResponse(it)
                 }
@@ -250,7 +253,7 @@ class WalletViewModel
     fun registerDemand(userAddress: String, demand: String) {
         viewModelScope.launch {
             repository.registerDemand(userAddress, demand)
-                .flowOn(Dispatchers.IO)
+                .flowOn(backgroundDispatcher)
                 .collect {
                     processRegisterDemandResponse(it)
                 }
@@ -274,7 +277,7 @@ class WalletViewModel
     fun getTokenIdsForUser(userAddress: String) {
         viewModelScope.launch {
             repository.getTokenIdsWithValues(userAddress, false)
-                .flowOn(Dispatchers.IO)
+                .flowOn(backgroundDispatcher)
                 .collect {
                     processTokenIdsResponse(userAddress, it)
                 }
@@ -298,7 +301,7 @@ class WalletViewModel
     fun swap(subj: Match) {
         viewModelScope.launch {
             repository.swap(subj)
-                .flowOn(Dispatchers.IO)
+                .flowOn(backgroundDispatcher)
                 .collect {
                     processSwapResponse(it)
                 }

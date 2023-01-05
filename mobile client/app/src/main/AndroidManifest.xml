@@ -13,7 +13,7 @@
         android:networkSecurityConfig="@xml/security_config"
         android:theme="@style/Theme.Swap">
         <activity
-            android:name=".MainActivity"
+            android:name=".wallet.MintTokenActivity"
             android:screenOrientation="portrait"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:exported="true">

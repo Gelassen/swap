@@ -8,11 +8,14 @@ import ru.home.swap.wallet.repository.WalletRepository
 import ru.home.swap.wallet.storage.AppDatabase
 import dagger.Module
 import dagger.Provides
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.web3j.protocol.http.HttpService
 import ru.home.swap.core.network.interceptors.DefaultInterceptor
+import ru.home.swap.wallet.repository.IStorageRepository
 import javax.inject.Singleton
 
 @Module
@@ -32,7 +35,7 @@ class WalletModule(val context: Context) {
         logging.setLevel(HttpLoggingInterceptor.Level.BODY)
         val client = OkHttpClient
             .Builder()
-            .addInterceptor(DefaultInterceptor(context))
+            .addInterceptor(interceptor)
             .addInterceptor(logging)
             .build()
         return HttpService(url, client)
@@ -52,7 +55,12 @@ class WalletModule(val context: Context) {
 
     @Singleton
     @Provides
-    fun providesStorageRepository(database: AppDatabase): StorageRepository {
+    fun providesStorageRepository(database: AppDatabase): IStorageRepository {
         return StorageRepository(database.chainTransactionDao())
+    }
+
+    @Provides
+    fun providesBackgroundDispatcher(): CoroutineDispatcher {
+        return Dispatchers.IO
     }
 }
