@@ -7,7 +7,6 @@ import ru.home.swap.wallet.repository.IWalletRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.web3j.protocol.core.methods.response.TransactionReceipt
-import org.web3j.tx.response.EmptyTransactionReceipt
 import ru.home.swap.core.network.Response
 import ru.home.swap.wallet.contract.Match
 import ru.home.swap.wallet.model.Token
@@ -15,7 +14,7 @@ import java.math.BigInteger
 
 class FakeWalletRepository: IWalletRepository {
 
-    private val swapValueResponse: SwapValueResponse = SwapValueResponse()
+    /* omit private */ val swapValueResponse: SwapValueResponse = SwapValueResponse()
 
     override fun balanceOf(owner: String): Flow<Response<BigInteger>> {
         return flow {
@@ -125,7 +124,15 @@ class FakeWalletRepository: IWalletRepository {
         }
 
         fun setErrorMintTokenResponse() {
-            // TODO complete me
+            val txReceipt: TransactionReceipt = Gson().fromJson(MINT_TOKEN_NEGATIVE_RESPONSE, TransactionReceipt::class.java)
+            val response = Response.Error.Message(txReceipt.revertReason)
+            this.mintTokenResponse = response;
+        }
+
+        fun setExceptionErrorMintTokenResponse() {
+            val txReceipt: TransactionReceipt = Gson().fromJson(MINT_TOKEN_NEGATIVE_RESPONSE, TransactionReceipt::class.java)
+            val response = Response.Error.Exception(RuntimeException(txReceipt.revertReason))
+            this.mintTokenResponse = response;
         }
 
         private fun getDefaultBalanceResponse(): Response<BigInteger> {
@@ -203,6 +210,7 @@ class FakeWalletRepository: IWalletRepository {
                         "   ],\n" +
                         "   \"logsBloom\":\"0x04000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000008000000000000000000000000000000000100000000000000020000000000000000000800000000000000000000000010000000020000000000000000000000200000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000020000000000000001000000000000000000000000800008000000000000000000000\",\n" +
                         "   \"status\":\"0x0\",\n" +
+                        "   \"revertReason\":\"Artificially made negative response caused by 'revert'\",\n" +
                         "   \"to\":\"0xeb1aa6da9c4598ae28b793331a9b711c01670a7e\",\n" +
                         "   \"transactionHash\":\"0xfdc79086a0cf4a4bc90c49e2884eea38e912496b2984f1a2a29e48b11321f320\",\n" +
                         "   \"transactionIndex\":\"0x0\",\n" +

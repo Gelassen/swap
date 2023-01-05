@@ -3,8 +3,6 @@ package ru.home.swap.wallet
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.*
 import org.hamcrest.MatcherAssert.assertThat
@@ -57,7 +55,7 @@ internal class WalletViewModelTest {
     }
 
     @Test
-    fun `when balanceOf() is called with existing parameter model state is updated with correct value`() = runTest {
+    fun `on balanceOf() with existing parameter, model state is updated with correct value`() = runTest {
         fakeWalletRepository.setPositiveBalanceOfResponse()
         assertThat("Model balance is not default", subj.uiState.value.wallet.getBalance().toInt() == 0)
         assertThat("Errors queue is not empty", subj.uiState.value.errors.isEmpty())
@@ -72,7 +70,7 @@ internal class WalletViewModelTest {
     }
 
     @Test
-    fun `when mintToken() is called with valid data the first time, pending tx state is increased and cache has new record`() = runTest {
+    fun `on mintToken() with valid data the first time, pending tx state is increased and cache has new record`() = runTest {
         assertThat("Model has some pending tx", subj.uiState.value.pendingTx.isEmpty())
         assertThat("Model has some errors", subj.uiState.value.errors.isEmpty())
         var cacheInitialStatus = emptyList<Transaction>()
@@ -93,14 +91,182 @@ internal class WalletViewModelTest {
             BigInteger.valueOf(0)
         )
         val uri = "https://gelassen.github.io/blog/"
+        fakeWalletRepository.swapValueResponse.setPositiveMintTokenResponse()
 
         subj.mintToken(to, value, uri)
         advanceUntilIdle()
 
         val pendingTxFinalState = subj.uiState.value.pendingTx.count()
-        assertThat("Model does not have a single pending tx $pendingTxFinalState", pendingTxFinalState == 1)
-        assertThat("Model has some errors errors", subj.uiState.value.errors.isEmpty())
-        assertThat("Cache should have a single record", fakeStorageRepository.getAllChainTransactions().count() == 1)
+        var cacheFinalState = emptyList<Transaction>()
+        fakeStorageRepository.getAllChainTransactions()
+            .collect {
+                cacheFinalState = it
+            }
+        advanceUntilIdle()
+        assertThat("Model should have a single pending tx $pendingTxFinalState", pendingTxFinalState == 1)
+        assertThat("Model should not have errors", subj.uiState.value.errors.isEmpty())
+        assertThat("Cache should have a single record, but has ${cacheFinalState.count()}", cacheFinalState.count() == 1)
+        // cleanup
+        jobCacheInitialStatus.cancel()
+    }
+
+    @Test
+    fun `on mintToken() with negative response from server, pending tx state is increased and cache has new record with both negative state`() = runTest {
+        assertThat("Model has some pending tx", subj.uiState.value.pendingTx.isEmpty())
+        assertThat("Model has some errors", subj.uiState.value.errors.isEmpty())
+        var cacheInitialStatus = emptyList<Transaction>()
+        val jobCacheInitialStatus = launch(UnconfinedTestDispatcher(mainCoroutineRule.dispatcher.scheduler)) {
+            fakeStorageRepository.getAllChainTransactions()
+                .collect { it ->
+                    cacheInitialStatus = it
+                }
+        }
+        advanceUntilIdle()
+        assertThat("Cache is non empty with value count ${cacheInitialStatus.count()}", cacheInitialStatus.isEmpty())
+        val to = FIRST_USER
+        val value = Value(
+            FIRST_USER_OFFER,
+            BigInteger.valueOf(1665158348220),
+            BigInteger.valueOf(1669758348220),
+            false,
+            BigInteger.valueOf(0)
+        )
+        val uri = "https://gelassen.github.io/blog/"
+        fakeWalletRepository.swapValueResponse.setNegativeMintTokenResponse()
+
+        subj.mintToken(to, value, uri)
+        advanceUntilIdle()
+
+        val pendingTxFinalState = subj.uiState.value.pendingTx.count()
+        var cacheFinalState = emptyList<Transaction>()
+        fakeStorageRepository.getAllChainTransactions()
+            .collect {
+                cacheFinalState = it
+            }
+        advanceUntilIdle()
+        assertThat("Model should have a single pending tx $pendingTxFinalState", pendingTxFinalState == 1)
+        assertThat("Model should have a single error", subj.uiState.value.errors.count() == 1)
+        assertThat("Cache should have a single record ${cacheFinalState.count()}", cacheFinalState.count() == 1)
+        assertThat(
+            "Cache should have record with 'reverted' status, but has ${cacheFinalState.get(0).status}",
+            cacheFinalState.get(0).status.equals("reverted")
+        )
+        assertThat(
+            "Model should have a pending tx with 'reverted' status, but has ${subj.uiState.value.pendingTx.get(0).status}",
+            subj.uiState.value.pendingTx.get(0).status.equals("reverted")
+        )
+        assertThat(
+            "Error should have specific revert cause: ${subj.uiState.value.errors.first()}",
+            subj.uiState.value.errors.first().equals("Reverted cause: Artificially made negative response caused by 'revert'")
+        )
+        // cleanup
+        jobCacheInitialStatus.cancel()
+    }
+
+    @Test
+    fun `on mintToken() with exception, pending tx state is increased and cache has new record with both negative state`() = runTest {
+        assertThat("Model has some pending tx", subj.uiState.value.pendingTx.isEmpty())
+        assertThat("Model has some errors", subj.uiState.value.errors.isEmpty())
+        var cacheInitialStatus = emptyList<Transaction>()
+        val jobCacheInitialStatus = launch(UnconfinedTestDispatcher(mainCoroutineRule.dispatcher.scheduler)) {
+            fakeStorageRepository.getAllChainTransactions()
+                .collect { it ->
+                    cacheInitialStatus = it
+                }
+        }
+        advanceUntilIdle()
+        assertThat("Cache is non empty with value count ${cacheInitialStatus.count()}", cacheInitialStatus.isEmpty())
+        // prepare dataset
+        val to = FIRST_USER
+        val value = Value(
+            FIRST_USER_OFFER,
+            BigInteger.valueOf(1665158348220),
+            BigInteger.valueOf(1669758348220),
+            false,
+            BigInteger.valueOf(0)
+        )
+        val uri = "https://gelassen.github.io/blog/"
+        fakeWalletRepository.swapValueResponse.setExceptionErrorMintTokenResponse()
+
+        subj.mintToken(to, value, uri)
+        advanceUntilIdle()
+
+        val pendingTxFinalState = subj.uiState.value.pendingTx.count()
+        var cacheFinalState = emptyList<Transaction>()
+        fakeStorageRepository.getAllChainTransactions()
+            .collect {
+                cacheFinalState = it
+            }
+        advanceUntilIdle()
+        assertThat("Model should have a single pending tx $pendingTxFinalState", pendingTxFinalState == 1)
+        assertThat("Model should have a single error", subj.uiState.value.errors.count() == 1)
+        assertThat("Cache should have a single record ${cacheFinalState.count()}", cacheFinalState.count() == 1)
+        assertThat(
+            "Cache should have record with 'exception' status, but has ${cacheFinalState.get(0).status}",
+            cacheFinalState.get(0).status.equals("exception")
+        )
+        assertThat(
+            "Model should have a pending tx with 'exception' status, but has ${subj.uiState.value.pendingTx.get(0).status}",
+            subj.uiState.value.pendingTx.get(0).status.equals("exception")
+        )
+        assertThat(
+            "Error should have specific revert cause: ${subj.uiState.value.errors.first()}",
+            subj.uiState.value.errors.first().equals("Exception: Artificially made negative response caused by 'revert'")
+        )
+        // cleanup
+        jobCacheInitialStatus.cancel()
+    }
+
+    @Test
+    fun `on mintToken() with error message, pending tx state is increased and cache has new record with both negative state`() = runTest {
+        assertThat("Model has some pending tx", subj.uiState.value.pendingTx.isEmpty())
+        assertThat("Model has some errors", subj.uiState.value.errors.isEmpty())
+        var cacheInitialStatus = emptyList<Transaction>()
+        val jobCacheInitialStatus = launch(UnconfinedTestDispatcher(mainCoroutineRule.dispatcher.scheduler)) {
+            fakeStorageRepository.getAllChainTransactions()
+                .collect { it ->
+                    cacheInitialStatus = it
+                }
+        }
+        advanceUntilIdle()
+        assertThat("Cache is non empty with value count ${cacheInitialStatus.count()}", cacheInitialStatus.isEmpty())
+        // prepare dataset
+        val to = FIRST_USER
+        val value = Value(
+            FIRST_USER_OFFER,
+            BigInteger.valueOf(1665158348220),
+            BigInteger.valueOf(1669758348220),
+            false,
+            BigInteger.valueOf(0)
+        )
+        val uri = "https://gelassen.github.io/blog/"
+        fakeWalletRepository.swapValueResponse.setErrorMintTokenResponse()
+
+        subj.mintToken(to, value, uri)
+        advanceUntilIdle()
+
+        val pendingTxFinalState = subj.uiState.value.pendingTx.count()
+        var cacheFinalState = emptyList<Transaction>()
+        fakeStorageRepository.getAllChainTransactions()
+            .collect {
+                cacheFinalState = it
+            }
+        advanceUntilIdle()
+        assertThat("Model should have a single pending tx $pendingTxFinalState", pendingTxFinalState == 1)
+        assertThat("Model should have a single error", subj.uiState.value.errors.count() == 1)
+        assertThat("Cache should have a single record ${cacheFinalState.count()}", cacheFinalState.count() == 1)
+        assertThat(
+            "Cache should have record with 'exception' status, but has ${cacheFinalState.get(0).status}",
+            cacheFinalState.get(0).status.equals("exception")
+        )
+        assertThat(
+            "Model should have a pending tx with 'exception' status, but has ${subj.uiState.value.pendingTx.get(0).status}",
+            subj.uiState.value.pendingTx.get(0).status.equals("exception")
+        )
+        assertThat(
+            "Error should have specific revert cause: ${subj.uiState.value.errors.first()}",
+            subj.uiState.value.errors.first().equals("Exception: Artificially made negative response caused by 'revert'")
+        )
         // cleanup
         jobCacheInitialStatus.cancel()
     }
