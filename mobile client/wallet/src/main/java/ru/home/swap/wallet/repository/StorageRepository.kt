@@ -3,12 +3,9 @@ package ru.home.swap.wallet.repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
-import ru.home.swap.wallet.contract.Value
-import ru.home.swap.wallet.model.Transaction
+import ru.home.swap.wallet.model.MintTransaction
 import ru.home.swap.wallet.model.fromDomain
 import ru.home.swap.wallet.model.toDomain
-import ru.home.swap.wallet.storage.ChainTransactionEntity
 import ru.home.swap.wallet.storage.ChainTransactionDao
 
 class StorageRepository(val chainTransactionDao: ChainTransactionDao): IStorageRepository {
@@ -18,7 +15,7 @@ class StorageRepository(val chainTransactionDao: ChainTransactionDao): IStorageR
         chainTransactionDao.insertAll(tx)
     }*/
 
-    override fun createChainTx(tx: Transaction): Flow<Transaction> {
+    override fun createChainTx(tx: MintTransaction): Flow<MintTransaction> {
         return flow {
             val rowId = chainTransactionDao.insert(tx.fromDomain(tx))
             val cachedTx = chainTransactionDao.getById(rowId)
@@ -26,18 +23,21 @@ class StorageRepository(val chainTransactionDao: ChainTransactionDao): IStorageR
         }
     }
 
-    override fun getAllChainTransactions(): Flow<List<Transaction>> {
+    override fun getAllChainTransactions(): Flow<List<MintTransaction>> {
         return chainTransactionDao.getAll()
             .map {
-                val result = mutableListOf<Transaction>()
+                val result = mutableListOf<MintTransaction>()
                 for (item in it) {
-                    result.add(Transaction().toDomain(item))
+                    when(item.status) {
+                        "" -> {}
+                    }
+                    result.add(MintTransaction().toDomain(item))
                 }
                 result
             }
     }
 
-    override suspend fun removeChainTransaction(tx: Transaction) {
+    override suspend fun removeChainTransaction(tx: MintTransaction) {
         chainTransactionDao.delete(tx.fromDomain(tx))
     }
 

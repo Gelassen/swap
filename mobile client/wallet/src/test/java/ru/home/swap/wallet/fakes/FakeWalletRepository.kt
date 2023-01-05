@@ -146,6 +146,7 @@ class FakeWalletRepository: IWalletRepository {
         }
 
         private companion object {
+            // Revert reason: 'execution reverted: User already registered.'
             // Reverted tx (on require() call fail): {"jsonrpc":"2.0","id":4,"error":{"code":3,"message":"execution reverted: Minting a token is allowed only by person itself.","data":"0x08c379a0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000314d696e74696e67206120746f6b656e20697320616c6c6f776564206f6e6c7920627920706572736f6e20697473656c662e000000000000000000000000000000"}}
             const val MINT_TOKEN_OK_RESPONSE =
                 "{\n" +

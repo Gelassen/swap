@@ -12,7 +12,7 @@ import ru.home.swap.wallet.WalletViewModelTest.Const.FIRST_USER_OFFER
 import ru.home.swap.wallet.contract.Value
 import ru.home.swap.wallet.fakes.FakeStorageRepository
 import ru.home.swap.wallet.fakes.FakeWalletRepository
-import ru.home.swap.wallet.model.Transaction
+import ru.home.swap.wallet.model.MintTransaction
 import ru.home.swap.wallet.rules.MainCoroutineRule
 import java.math.BigInteger
 
@@ -73,7 +73,7 @@ internal class WalletViewModelTest {
     fun `on mintToken() with valid data the first time, pending tx state is increased and cache has new record`() = runTest {
         assertThat("Model has some pending tx", subj.uiState.value.pendingTx.isEmpty())
         assertThat("Model has some errors", subj.uiState.value.errors.isEmpty())
-        var cacheInitialStatus = emptyList<Transaction>()
+        var cacheInitialStatus = emptyList<MintTransaction>()
         val jobCacheInitialStatus = launch(UnconfinedTestDispatcher(mainCoroutineRule.dispatcher.scheduler)) {
             fakeStorageRepository.getAllChainTransactions()
                 .collect { it ->
@@ -97,7 +97,7 @@ internal class WalletViewModelTest {
         advanceUntilIdle()
 
         val pendingTxFinalState = subj.uiState.value.pendingTx.count()
-        var cacheFinalState = emptyList<Transaction>()
+        var cacheFinalState = emptyList<MintTransaction>()
         fakeStorageRepository.getAllChainTransactions()
             .collect {
                 cacheFinalState = it
@@ -114,7 +114,7 @@ internal class WalletViewModelTest {
     fun `on mintToken() with negative response from server, pending tx state is increased and cache has new record with both negative state`() = runTest {
         assertThat("Model has some pending tx", subj.uiState.value.pendingTx.isEmpty())
         assertThat("Model has some errors", subj.uiState.value.errors.isEmpty())
-        var cacheInitialStatus = emptyList<Transaction>()
+        var cacheInitialStatus = emptyList<MintTransaction>()
         val jobCacheInitialStatus = launch(UnconfinedTestDispatcher(mainCoroutineRule.dispatcher.scheduler)) {
             fakeStorageRepository.getAllChainTransactions()
                 .collect { it ->
@@ -138,7 +138,7 @@ internal class WalletViewModelTest {
         advanceUntilIdle()
 
         val pendingTxFinalState = subj.uiState.value.pendingTx.count()
-        var cacheFinalState = emptyList<Transaction>()
+        var cacheFinalState = emptyList<MintTransaction>()
         fakeStorageRepository.getAllChainTransactions()
             .collect {
                 cacheFinalState = it
@@ -167,7 +167,7 @@ internal class WalletViewModelTest {
     fun `on mintToken() with exception, pending tx state is increased and cache has new record with both negative state`() = runTest {
         assertThat("Model has some pending tx", subj.uiState.value.pendingTx.isEmpty())
         assertThat("Model has some errors", subj.uiState.value.errors.isEmpty())
-        var cacheInitialStatus = emptyList<Transaction>()
+        var cacheInitialStatus = emptyList<MintTransaction>()
         val jobCacheInitialStatus = launch(UnconfinedTestDispatcher(mainCoroutineRule.dispatcher.scheduler)) {
             fakeStorageRepository.getAllChainTransactions()
                 .collect { it ->
@@ -192,7 +192,7 @@ internal class WalletViewModelTest {
         advanceUntilIdle()
 
         val pendingTxFinalState = subj.uiState.value.pendingTx.count()
-        var cacheFinalState = emptyList<Transaction>()
+        var cacheFinalState = emptyList<MintTransaction>()
         fakeStorageRepository.getAllChainTransactions()
             .collect {
                 cacheFinalState = it
@@ -221,7 +221,7 @@ internal class WalletViewModelTest {
     fun `on mintToken() with error message, pending tx state is increased and cache has new record with both negative state`() = runTest {
         assertThat("Model has some pending tx", subj.uiState.value.pendingTx.isEmpty())
         assertThat("Model has some errors", subj.uiState.value.errors.isEmpty())
-        var cacheInitialStatus = emptyList<Transaction>()
+        var cacheInitialStatus = emptyList<MintTransaction>()
         val jobCacheInitialStatus = launch(UnconfinedTestDispatcher(mainCoroutineRule.dispatcher.scheduler)) {
             fakeStorageRepository.getAllChainTransactions()
                 .collect { it ->
@@ -246,7 +246,7 @@ internal class WalletViewModelTest {
         advanceUntilIdle()
 
         val pendingTxFinalState = subj.uiState.value.pendingTx.count()
-        var cacheFinalState = emptyList<Transaction>()
+        var cacheFinalState = emptyList<MintTransaction>()
         fakeStorageRepository.getAllChainTransactions()
             .collect {
                 cacheFinalState = it
@@ -272,7 +272,7 @@ internal class WalletViewModelTest {
     }
 
 /*    @Test
-    fun `balanceOf() turbine test`() = runTest {
+    fun `balanceOf() with turbine lib test`() = runTest {
         fakeWalletRepository.setPositiveBalanceOfResponse()
 
         subj.uiState.test {
@@ -288,47 +288,6 @@ internal class WalletViewModelTest {
             assertThat("Errors queue is not empty", finalState.errors.isEmpty())
             assertThat("State is not set as BALANCE", finalState.status == Status.BALANCE)
         }
-    }*/
-
-/*    @Test
-    fun `when balanceOf() is called with existing parameter model state is updated with correct value`() = runTest {
-        val balance = 42L
-        val balanceOfFlow = flow {
-            emit(BigInteger.valueOf(balance))
-        }
-        `when`(walletRepository.balanceOf(anyString())).thenReturn(balanceOfFlow)
-        mainCoroutineRule.dispatcher.pauseDispatcher()
-        assertThat("Model balance is not default", subj.uiState.value.wallet.getBalance().toInt() == 0)
-        assertThat("Errors queue is not empty", subj.uiState.value.errors.isEmpty())
-        assertThat("State is not default", subj.uiState.value.status == Status.NONE)
-
-        subj.balanceOf("0x6f1d841afce211dAead45e6109895c20f8ee92f0")
-        mainCoroutineRule.dispatcher.resumeDispatcher()
-
-        assertThat("Model balance is not updated with correct value", subj.uiState.value.wallet.getBalance().toLong() == balance)
-        assertThat("Errors queue is not empty", subj.uiState.value.errors.isEmpty())
-        assertThat("State is set as BALANCE", subj.uiState.value.status == Status.BALANCE)
-    }
-
-    @Ignore("Have not fixed yet the issue with not triggering catch block on error in flow{}. Test case is wrote for FakeRepository")
-    @Test
-    fun `when mintToken() is called with correct values, timeout exception is returned and pending tx are updated with new value`() = runTest {
-        val to = "0x6f1d841afce211dAead45e6109895c20f8ee92f0"
-        val url = "https://google.com"
-        val testValue = Value(
-            "Software Development",
-            BigInteger.valueOf(1000L),
-            BigInteger.valueOf(2000L),
-            false,
-            BigInteger.valueOf(0)
-        )
-
-        subj.mintToken(to, testValue, url)
-
-        assertThat(
-            "There is no pending transaction after mint a new token with timeout error",
-            subj.uiState.value.pendingTx.isNotEmpty()
-        )
     }*/
 
     object Const {

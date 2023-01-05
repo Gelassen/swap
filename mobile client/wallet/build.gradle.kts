@@ -54,6 +54,7 @@ dependencies {
     implementation("androidx.room:room-ktx:2.4.3")
 
     implementation("com.google.android.material:material:1.6.1")
+    implementation("com.google.code.gson:gson:2.10")
     implementation ("com.google.dagger:dagger:2.44.2")
     implementation ("com.google.dagger:dagger-android-support:2.44.2")
     implementation("com.google.dagger:dagger-android:2.44.2")

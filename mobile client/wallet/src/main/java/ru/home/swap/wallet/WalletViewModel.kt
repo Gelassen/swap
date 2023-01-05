@@ -5,26 +5,25 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineDispatcher
 import ru.home.swap.wallet.contract.Value
 import ru.home.swap.wallet.model.Token
-import ru.home.swap.wallet.model.Transaction
+import ru.home.swap.wallet.model.MintTransaction
 import ru.home.swap.wallet.model.Wallet
 import ru.home.swap.wallet.repository.IWalletRepository
-import ru.home.swap.wallet.repository.StorageRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.web3j.protocol.core.methods.response.TransactionReceipt
-import org.web3j.protocol.exceptions.TransactionException
 import ru.home.swap.core.logger.Logger
 import ru.home.swap.core.network.Response
 import ru.home.swap.wallet.contract.Match
 import ru.home.swap.wallet.repository.IStorageRepository
+import ru.home.swap.wallet.storage.TxStatus
 import java.math.BigInteger
 import javax.inject.Inject
 
 data class Model(
     var privateKey: String = "", // TODO refactor this dev mode solution
     val wallet: Wallet = Wallet(),
-    val pendingTx: List<Transaction> = mutableListOf(),
+    val pendingTx: List<MintTransaction> = mutableListOf(),
     val status: Status = Status.NONE,
     val errors: List<String> = mutableListOf()
 )
@@ -83,33 +82,32 @@ class WalletViewModel
 
     fun mintToken(to: String, value: Value, uri: String) {
         logger.d("[start] mintToken()")
-        lateinit var newTx: Transaction
+        lateinit var newTx: MintTransaction
         viewModelScope.launch {
-            cacheRepository.createChainTx(Transaction(0, to, value, uri, "pending"))
+            cacheRepository.createChainTx(MintTransaction(0, to, value, uri, TxStatus.TX_PENDING))
                 .map {
                     newTx = it
                     repository.mintToken(to, value, uri)
                 }
                 .onEach {
                     when(it) {
-                        // TODO how to cover reverted, rejected and declined status of tx ?
                         is Response.Data -> {
                             if (it.data.isStatusOK) {
-                                newTx.status = "mined"
+                                newTx.status = TxStatus.TX_MINED
                                 cacheRepository.createChainTx(newTx)
                             } else {
-                                newTx.status = "reverted"
+                                newTx.status = TxStatus.TX_REVERTED
                                 cacheRepository.createChainTx(newTx)
                                 updateStateWithError("Reverted cause: ${it.data.revertReason}")
                             }
                         }
                         is Response.Error.Message -> {
-                            newTx.status = "exception"
+                            newTx.status = TxStatus.TX_EXCEPTION
                             cacheRepository.createChainTx(newTx)
                             updateStateWithError("Exception: ${it.msg}")
                         }
                         is Response.Error.Exception -> {
-                            newTx.status = "exception"
+                            newTx.status = TxStatus.TX_EXCEPTION
                             cacheRepository.createChainTx(newTx)
                             updateStateWithError("Exception: ${it.error.message}")
                         }
