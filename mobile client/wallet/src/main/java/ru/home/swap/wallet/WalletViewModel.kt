@@ -15,6 +15,7 @@ import org.web3j.protocol.core.methods.response.TransactionReceipt
 import ru.home.swap.core.logger.Logger
 import ru.home.swap.core.network.Response
 import ru.home.swap.wallet.contract.Match
+import ru.home.swap.wallet.model.ITransaction
 import ru.home.swap.wallet.repository.IStorageRepository
 import ru.home.swap.wallet.storage.TxStatus
 import java.math.BigInteger
@@ -23,7 +24,7 @@ import javax.inject.Inject
 data class Model(
     var privateKey: String = "", // TODO refactor this dev mode solution
     val wallet: Wallet = Wallet(),
-    val pendingTx: List<MintTransaction> = mutableListOf(),
+    val pendingTx: List<ITransaction> = mutableListOf(),
     val status: Status = Status.NONE,
     val errors: List<String> = mutableListOf()
 )
@@ -82,9 +83,16 @@ class WalletViewModel
 
     fun mintToken(to: String, value: Value, uri: String) {
         logger.d("[start] mintToken()")
-        lateinit var newTx: MintTransaction
+        lateinit var newTx: ITransaction
         viewModelScope.launch {
-            cacheRepository.createChainTx(MintTransaction(0, to, value, uri, TxStatus.TX_PENDING))
+            val tx = MintTransaction(
+                uid = 0,
+                status = TxStatus.TX_PENDING,
+                to = to,
+                value = value,
+                uri = uri
+            )
+            cacheRepository.createChainTx(tx)
                 .map {
                     newTx = it
                     repository.mintToken(to, value, uri)
@@ -166,7 +174,10 @@ class WalletViewModel
     }
 
     fun registerUserOnSwapMarket(userWalletAddress: String) {
+        logger.d("[start] registerUserOnSwapMarket()")
         viewModelScope.launch {
+            cacheRepository.createChainTx(MintTransaction())
+
             repository.registerUserOnSwapMarket(userWalletAddress)
                 .catch { ex ->
                     logger.e("Get an exception due registerUser() call", ex)
@@ -183,6 +194,7 @@ class WalletViewModel
                     processRegisterUserResponse(it)
                 }
         }
+        logger.d("[end] registerUserOnSwapMarket()")
     }
 
     private fun processRegisterUserResponse(it: Response<TransactionReceipt>) {
