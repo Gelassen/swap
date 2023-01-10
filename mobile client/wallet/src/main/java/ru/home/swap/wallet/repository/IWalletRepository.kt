@@ -30,7 +30,9 @@ interface IWalletRepository {
 
     fun getOffer(tokenId: String): Flow<Response<Value>>
 
-    fun registerUserOnSwapMarket(userWalletAddress: String): Flow<Response<TransactionReceipt>>
+    fun registerUserOnSwapMarketAsFlow(userWalletAddress: String): Flow<Response<TransactionReceipt>>
+
+    suspend fun registerUserOnSwapMarket(userWalletAddress: String): Response<TransactionReceipt>
 
     fun approveTokenManager(operator: String, approved: Boolean): Flow<Response<TransactionReceipt>>
 

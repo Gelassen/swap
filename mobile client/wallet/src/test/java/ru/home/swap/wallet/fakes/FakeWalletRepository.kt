@@ -51,7 +51,11 @@ class FakeWalletRepository: IWalletRepository {
         TODO("Not yet implemented")
     }
 
-    override fun registerUserOnSwapMarket(userWalletAddress: String): Flow<Response<TransactionReceipt>> {
+    override fun registerUserOnSwapMarketAsFlow(userWalletAddress: String): Flow<Response<TransactionReceipt>> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun registerUserOnSwapMarket(userWalletAddress: String): Response<TransactionReceipt> {
         TODO("Not yet implemented")
     }
 

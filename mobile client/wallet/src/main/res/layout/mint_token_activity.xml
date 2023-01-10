@@ -141,6 +141,15 @@
                 android:text="Swap"
                 />
 
+            <Button
+                android:id="@+id/addTestRow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Add test row"
+                />
+
+
         </LinearLayout>
 
     </ScrollView>

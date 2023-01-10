@@ -215,23 +215,51 @@ class WalletRepository(
         }
     }
 
-    override fun registerUserOnSwapMarket(userWalletAddress: String): Flow<Response<TransactionReceipt>> {
+    override fun registerUserOnSwapMarketAsFlow(userWalletAddress: String): Flow<Response<TransactionReceipt>> {
         return flow {
             logger.d("[start] registerUserOnSwapMarket")
             val isValidEthAddress = WalletUtils.isValidAddress(userWalletAddress)
                     && userWalletAddress.uppercase().contentEquals(
                         Keys.toChecksumAddress(userWalletAddress).uppercase())
-            if (isValidEthAddress) {
-                val response: TransactionReceipt = swapChainContract.registerUser(userWalletAddress).send()
-                logger.d("Response from registerUser() + ${response}")
-                emit(Response.Data(response))
-            } else {
-                val response = Response.Error.Message("${userWalletAddress} is not valid ethereum address.Please check you pass a correct ethereum address.")
+            lateinit var response: Response<TransactionReceipt>
+            try {
+                if (isValidEthAddress) {
+                    val txReceipt: TransactionReceipt = swapChainContract.registerUser(userWalletAddress).send()
+                    logger.d("Response from registerUser() + ${txReceipt}")
+                    response = Response.Data(txReceipt)
+                } else {
+                    response = Response.Error.Message("${userWalletAddress} is not valid ethereum address.Please check you have passed a correct ethereum address.")
+                }
+            } catch (ex: Exception) {
+                response = Response.Error.Exception(ex)
+            } finally {
                 emit(response)
+                logger.d("[end] registerUserOnSwapMarket")
             }
-            logger.d("[end] registerUserOnSwapMarket")
         }
+    }
 
+    @Suppress("ReturnInsideFinallyBlock")
+    override suspend fun registerUserOnSwapMarket(userWalletAddress: String): Response<TransactionReceipt> {
+        logger.d("[start] registerUserOnSwapMarket")
+        val isValidEthAddress = WalletUtils.isValidAddress(userWalletAddress)
+                && userWalletAddress.uppercase().contentEquals(
+            Keys.toChecksumAddress(userWalletAddress).uppercase())
+        lateinit var response: Response<TransactionReceipt>
+        try {
+            if (isValidEthAddress) {
+                val txReceipt: TransactionReceipt = swapChainContract.registerUser(userWalletAddress).send()
+                logger.d("Response from registerUser() + ${txReceipt}")
+                response = Response.Data(txReceipt)
+            } else {
+                response = Response.Error.Message("${userWalletAddress} is not valid ethereum address.Please check you have passed a correct ethereum address.")
+            }
+        } catch (ex: Exception) {
+            response = Response.Error.Exception(ex)
+        } finally {
+            logger.d("[end] registerUserOnSwapMarket")
+            return response
+        }
     }
 
     override fun approveTokenManager(operator: String, approved: Boolean): Flow<Response<TransactionReceipt>> {

@@ -4,9 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineDispatcher
 import ru.home.swap.wallet.contract.Value
-import ru.home.swap.wallet.model.Token
-import ru.home.swap.wallet.model.MintTransaction
-import ru.home.swap.wallet.model.Wallet
 import ru.home.swap.wallet.repository.IWalletRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
@@ -15,7 +12,7 @@ import org.web3j.protocol.core.methods.response.TransactionReceipt
 import ru.home.swap.core.logger.Logger
 import ru.home.swap.core.network.Response
 import ru.home.swap.wallet.contract.Match
-import ru.home.swap.wallet.model.ITransaction
+import ru.home.swap.wallet.model.*
 import ru.home.swap.wallet.repository.IStorageRepository
 import ru.home.swap.wallet.storage.TxStatus
 import java.math.BigInteger
@@ -44,6 +41,25 @@ class WalletViewModel
     val uiState: StateFlow<Model> = state
         .asStateFlow()
         .stateIn(viewModelScope, SharingStarted.Eagerly, state.value)
+
+    init {
+        getTxFromCache()
+    }
+
+    fun getTxFromCache() {
+        viewModelScope.launch {
+            cacheRepository.getAllChainTransactions()
+                .flowOn(backgroundDispatcher)
+                .collect {
+                    logger.d("Collect result of getTxFromCache() call")
+                    state.update { state ->
+                        state.copy(
+                            pendingTx = it
+                        )
+                    }
+                }
+        }
+    }
 
     fun balanceOf(owner: String) {
         logger.d("[start] balanceOf()")
@@ -106,28 +122,24 @@ class WalletViewModel
                             } else {
                                 newTx.status = TxStatus.TX_REVERTED
                                 cacheRepository.createChainTx(newTx)
-                                updateStateWithError("Reverted cause: ${it.data.revertReason}")
                             }
                         }
                         is Response.Error.Message -> {
                             newTx.status = TxStatus.TX_EXCEPTION
                             cacheRepository.createChainTx(newTx)
-                            updateStateWithError("Exception: ${it.msg}")
                         }
                         is Response.Error.Exception -> {
                             newTx.status = TxStatus.TX_EXCEPTION
                             cacheRepository.createChainTx(newTx)
-                            updateStateWithError("Exception: ${it.error.message}")
                         }
                     }
                 }
                 .flowOn(backgroundDispatcher)
                 .collect {
-                    state.update { state ->
-                        state.copy(
-                            status = Status.MINT_TOKEN,
-                            pendingTx = state.pendingTx + newTx
-                        )
+                    when(it) {
+                        is Response.Data -> { if (!it.data.isStatusOK) updateStateWithError("Reverted cause: ${it.data.revertReason}") }
+                        is Response.Error.Message -> { updateStateWithError("Exception: ${it.msg}") }
+                        is Response.Error.Exception -> { updateStateWithError("Exception: ${it.error.message}") }
                     }
                 }
         }
@@ -176,9 +188,45 @@ class WalletViewModel
     fun registerUserOnSwapMarket(userWalletAddress: String) {
         logger.d("[start] registerUserOnSwapMarket()")
         viewModelScope.launch {
-            cacheRepository.createChainTx(MintTransaction())
+            val newTx = RegisterUserTransaction(userWalletAddress = userWalletAddress)
+            cacheRepository.createChainTx(newTx)
+                .map { it ->
+                    newTx.uid = it.uid
+                    repository.registerUserOnSwapMarket(userWalletAddress)
+                }
+                .onEach { it ->
+                    // TODO think about design decision: process result here or repeat all this branches in the collect{}
+                    when(it) {
+                        is Response.Data -> {
+                            if (it.data.isStatusOK) {
+                                newTx.status = TxStatus.TX_MINED
+                                cacheRepository.createChainTx(newTx)
+                            } else {
+                                newTx.status = TxStatus.TX_REVERTED
+                                cacheRepository.createChainTx(newTx)
+                                updateStateWithError("Reverted cause: ${it.data.revertReason}")
+                            }
+                        }
+                        is Response.Error.Message -> {
+                            newTx.status = TxStatus.TX_EXCEPTION
+                            cacheRepository.createChainTx(newTx)
+                            updateStateWithError("Exception: ${it.msg}")
+                        }
+                        is Response.Error.Exception -> {
+                            newTx.status = TxStatus.TX_EXCEPTION
+                            cacheRepository.createChainTx(newTx)
+                            updateStateWithError("Exception: ${it.error.message}")
+                        }
+                    }
+                }
+                .flowOn(backgroundDispatcher)
+                .collect { it ->
+//                    when(it) {}
+                    // TODO process result in the correct new way
+                    processRegisterUserResponse(it)
+                }
 
-            repository.registerUserOnSwapMarket(userWalletAddress)
+/*            repository.registerUserOnSwapMarket(userWalletAddress)
                 .catch { ex ->
                     logger.e("Get an exception due registerUser() call", ex)
                     state.update { it ->
@@ -187,12 +235,12 @@ class WalletViewModel
                     }
                 }
                 .flowOn(backgroundDispatcher)
-/*                .map {
+*//*                .map {
                     // TODO implement caching the result
-                }*/
+                }*//*
                 .collect { it ->
                     processRegisterUserResponse(it)
-                }
+                }*/
         }
         logger.d("[end] registerUserOnSwapMarket()")
     }
@@ -314,6 +362,15 @@ class WalletViewModel
                 .flowOn(backgroundDispatcher)
                 .collect {
                     processSwapResponse(it)
+                }
+        }
+    }
+
+    fun addTestRow(tx: ITransaction) {
+        viewModelScope.launch {
+            cacheRepository.createChainTx(tx)
+                .collect {
+                    logger.d("New row is inserted $it")
                 }
         }
     }

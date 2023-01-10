@@ -4,7 +4,10 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
+import ru.home.swap.wallet.contract.Value
+import ru.home.swap.wallet.converters.ValueTypeAdapter
 import ru.home.swap.wallet.model.ITransaction
 import ru.home.swap.wallet.model.MintTransaction
 import ru.home.swap.wallet.model.RegisterUserTransaction
@@ -20,8 +23,11 @@ data class ChainTransactionEntity (
 )
 
 inline fun <reified T : ITransaction> ChainTransactionEntity.toDomainGeneric(): ITransaction {
+    val gson = GsonBuilder()
+        .registerTypeAdapter(Value::class.java, ValueTypeAdapter())
+        .create()
     val fooType: Type = object : TypeToken<T>() {}.getType()
-    val result = Gson().fromJson<T>(this.payloadAsJson, fooType)
+    val result = gson.fromJson<T>(this.payloadAsJson, fooType)
     result.uid = this.uid // object is recovered from cached json and its uid is not automatically incremented
     return result
 }

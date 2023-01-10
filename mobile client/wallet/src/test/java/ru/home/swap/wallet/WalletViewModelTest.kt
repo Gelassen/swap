@@ -104,7 +104,7 @@ internal class WalletViewModelTest {
                 cacheFinalState = it
             }
         advanceUntilIdle()
-        assertThat("Model should have a single pending tx $pendingTxFinalState", pendingTxFinalState == 1)
+        assertThat("Model should have a single pending tx, but has $pendingTxFinalState", pendingTxFinalState == 1)
         assertThat("Model should not have errors", subj.uiState.value.errors.isEmpty())
         assertThat("Cache should have a single record, but has ${cacheFinalState.count()}", cacheFinalState.count() == 1)
         // cleanup
@@ -146,7 +146,7 @@ internal class WalletViewModelTest {
             }
         advanceUntilIdle()
         assertThat("Model should have a single pending tx $pendingTxFinalState", pendingTxFinalState == 1)
-        assertThat("Model should have a single error", subj.uiState.value.errors.count() == 1)
+        assertThat("Model should have a single error, but it has ${subj.uiState.value.errors.count()}", subj.uiState.value.errors.count() == 1)
         assertThat("Cache should have a single record ${cacheFinalState.count()}", cacheFinalState.count() == 1)
         assertThat(
             "Cache should have record with 'reverted' status, but has ${cacheFinalState.get(0).status}",

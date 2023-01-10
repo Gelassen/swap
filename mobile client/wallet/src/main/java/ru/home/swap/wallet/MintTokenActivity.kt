@@ -17,6 +17,7 @@ import org.web3j.protocol.http.HttpService
 import ru.home.swap.core.di.ViewModelFactory
 import ru.home.swap.core.logger.Logger
 import ru.home.swap.wallet.contract.Match
+import ru.home.swap.wallet.model.MintTransaction
 import java.math.BigInteger
 import javax.inject.Inject
 
@@ -146,6 +147,28 @@ class MintTokenActivity: AppCompatActivity() {
                 val subj = getMatchObj()
                 walletViewModel.swap(subj)
             }
+
+/*        var uid = 0L
+        findViewById<Button>(R.id.addTestRow)
+            .setOnClickListener {
+                val tx = MintTransaction(
+                    uid = 0L*//*uid++*//*,
+                    to = FIRST_USER,
+                    uri = "https://gelassen.github.io/blog/"
+                )
+                walletViewModel.addTestRow(tx)
+            }
+
+        lifecycleScope.launchWhenStarted {
+            walletViewModel.uiState
+                .collect {
+                    logger.d("Model state, item count ${it.pendingTx.count()}")
+                }
+        }*/
+
+/*        lifecycleScope.launchWhenStarted {
+            walletViewModel.getTxFromCache()
+        }*/
 
         // TODO test registerDemand() and approveSwap(), also check a whole flow (don't forget insert token ids!)
     }
