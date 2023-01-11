@@ -293,6 +293,27 @@ internal class WalletViewModelTest {
         jobCacheInitialStatus.cancel()
     }
 
+    @Test
+    fun `On registerUserOnSwapMarket() with valid data first time, pending tx state is increased and cache has a new record`() = runTest {
+        assertThat("Model has some pending tx", subj.uiState.value.pendingTx.isEmpty())
+        assertThat("Model has some errors", subj.uiState.value.errors.isEmpty())
+        var cacheInitialStatus = emptyList<ITransaction>()
+        val jobCacheInitialStatus = launch(UnconfinedTestDispatcher(mainCoroutineRule.dispatcher.scheduler)) {
+            fakeStorageRepository.getAllChainTransactions()
+                .collect { it ->
+                    cacheInitialStatus = it
+                }
+        }
+        advanceUntilIdle()
+        assertThat("Cache is non empty with value count ${cacheInitialStatus.count()}", cacheInitialStatus.isEmpty())
+        fakeWalletRepository.swapValueResponse.setPositiveRegisterUserResponse()
+
+        // TODO complete me
+
+        // cleanup
+        jobCacheInitialStatus.cancel()
+    }
+
 /*    @Test
     fun `balanceOf() with turbine lib test`() = runTest {
         fakeWalletRepository.setPositiveBalanceOfResponse()

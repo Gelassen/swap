@@ -255,6 +255,7 @@ class WalletRepository(
                 response = Response.Error.Message("${userWalletAddress} is not valid ethereum address.Please check you have passed a correct ethereum address.")
             }
         } catch (ex: Exception) {
+            logger.e("Get an exception on registerUserOnSwapMarket() call", ex)
             response = Response.Error.Exception(ex)
         } finally {
             logger.d("[end] registerUserOnSwapMarket")

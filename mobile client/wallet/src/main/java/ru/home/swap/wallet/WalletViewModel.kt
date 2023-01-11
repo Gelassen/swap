@@ -46,7 +46,8 @@ class WalletViewModel
         getTxFromCache()
     }
 
-    fun getTxFromCache() {
+    private fun getTxFromCache() {
+        logger.d("[start] getTxFromCache()")
         viewModelScope.launch {
             cacheRepository.getAllChainTransactions()
                 .flowOn(backgroundDispatcher)
@@ -59,6 +60,7 @@ class WalletViewModel
                     }
                 }
         }
+        logger.d("[end] getTxFromCache()")
     }
 
     fun balanceOf(owner: String) {
@@ -188,14 +190,13 @@ class WalletViewModel
     fun registerUserOnSwapMarket(userWalletAddress: String) {
         logger.d("[start] registerUserOnSwapMarket()")
         viewModelScope.launch {
-            val newTx = RegisterUserTransaction(userWalletAddress = userWalletAddress)
-            cacheRepository.createChainTx(newTx)
+            lateinit var newTx: ITransaction
+            cacheRepository.createChainTx(RegisterUserTransaction(userWalletAddress = userWalletAddress))
                 .map { it ->
-                    newTx.uid = it.uid
+                    newTx= it
                     repository.registerUserOnSwapMarket(userWalletAddress)
                 }
                 .onEach { it ->
-                    // TODO think about design decision: process result here or repeat all this branches in the collect{}
                     when(it) {
                         is Response.Data -> {
                             if (it.data.isStatusOK) {
@@ -204,59 +205,28 @@ class WalletViewModel
                             } else {
                                 newTx.status = TxStatus.TX_REVERTED
                                 cacheRepository.createChainTx(newTx)
-                                updateStateWithError("Reverted cause: ${it.data.revertReason}")
                             }
                         }
                         is Response.Error.Message -> {
                             newTx.status = TxStatus.TX_EXCEPTION
                             cacheRepository.createChainTx(newTx)
-                            updateStateWithError("Exception: ${it.msg}")
                         }
                         is Response.Error.Exception -> {
                             newTx.status = TxStatus.TX_EXCEPTION
                             cacheRepository.createChainTx(newTx)
-                            updateStateWithError("Exception: ${it.error.message}")
                         }
                     }
                 }
                 .flowOn(backgroundDispatcher)
                 .collect { it ->
-//                    when(it) {}
-                    // TODO process result in the correct new way
-                    processRegisterUserResponse(it)
-                }
-
-/*            repository.registerUserOnSwapMarket(userWalletAddress)
-                .catch { ex ->
-                    logger.e("Get an exception due registerUser() call", ex)
-                    state.update { it ->
-                        val error = "Can not register a new user: ${ex.message} ${ex.cause}"
-                        it.copy(errors = it.errors + error, status = Status.NONE )
+                    when(it) {
+                        is Response.Data -> { if (!it.data.isStatusOK) updateStateWithError("Reverted cause: ${it.data.revertReason}") }
+                        is Response.Error.Message -> { updateStateWithError("Exception: ${it.msg}") }
+                        is Response.Error.Exception -> { updateStateWithError("Exception: ${it.error.message}") }
                     }
                 }
-                .flowOn(backgroundDispatcher)
-*//*                .map {
-                    // TODO implement caching the result
-                }*//*
-                .collect { it ->
-                    processRegisterUserResponse(it)
-                }*/
         }
         logger.d("[end] registerUserOnSwapMarket()")
-    }
-
-    private fun processRegisterUserResponse(it: Response<TransactionReceipt>) {
-        when (it) {
-            is Response.Data -> {
-                logger.d("Collect response from registerUser() request ${it}")
-            }
-            is Response.Error.Message -> {
-                logger.d("Collect response from registerUser(). Get an error ${it.msg}")
-            }
-            is Response.Error.Exception -> {
-                logger.e("Collect response from registerUser(). Get an exception ", it.error)
-            }
-        }
     }
 
     fun approveTokenManager(swapChainAddress: String) {
