@@ -56,7 +56,7 @@ class FakeWalletRepository: IWalletRepository {
     }
 
     override suspend fun registerUserOnSwapMarket(userWalletAddress: String): Response<TransactionReceipt> {
-        TODO("Not yet implemented")
+        return swapValueResponse.getRegisterUserResponse()
     }
 
     override fun approveTokenManager(
@@ -149,6 +149,10 @@ class FakeWalletRepository: IWalletRepository {
         // END BLOCK
 
         // START BLOCK: register user
+
+        fun getRegisterUserResponse(): Response<TransactionReceipt> {
+            return registerUserResponse
+        }
 
         fun setPositiveRegisterUserResponse() {
             val txReceipt: TransactionReceipt = Gson().fromJson(REGISTER_USER_OK_RESPONSE, TransactionReceipt::class.java)
@@ -292,7 +296,7 @@ class FakeWalletRepository: IWalletRepository {
                     "   ],\n" +
                     "   \"logsBloom\":\"0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\",\n" +
                     "   \"status\":\"0x0\",\n" +
-                    "   \"revertReason\":\"Artificially made negative response caused by 'revert'\",\n" +
+                    "   \"revertReason\":\"Artificially made negative response\",\n" +
                     "   \"to\":\"0xf8c91ac48e437d3e56bfbffece2d0d4663f37e6f\",\n" +
                     "   \"transactionHash\":\"0xf3fdf99a245a0e7d40b8be77b6d032ccc88682d9f26fd9a7d1265738596186cd\",\n" +
                     "   \"transactionIndex\":\"0x0\",\n" +
