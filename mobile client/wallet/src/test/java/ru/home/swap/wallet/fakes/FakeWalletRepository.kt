@@ -59,7 +59,14 @@ class FakeWalletRepository: IWalletRepository {
         return swapValueResponse.getRegisterUserResponse()
     }
 
-    override fun approveTokenManager(
+    override suspend fun approveTokenManager(
+        operator: String,
+        approved: Boolean
+    ): Response<TransactionReceipt> {
+        TODO("Not yet implemented")
+    }
+
+    override fun approveTokenManagerAsFlow(
         operator: String,
         approved: Boolean
     ): Flow<Response<TransactionReceipt>> {
@@ -101,6 +108,7 @@ class FakeWalletRepository: IWalletRepository {
         private var balanceResponse: Response<BigInteger> = getDefaultBalanceResponse()
         private var mintTokenResponse: Response<TransactionReceipt> = getDefaultMintTokenResponse()
         private var registerUserResponse: Response<TransactionReceipt> = getDefaultRegisterUserResponse()
+        private var approveTokenManagerResponse: Response<TransactionReceipt> = getDefaultApproveTokenManager()
 
         // START BLOCK: balance
 
@@ -189,6 +197,10 @@ class FakeWalletRepository: IWalletRepository {
 
         private fun getDefaultRegisterUserResponse(): Response<TransactionReceipt> {
             return registerUserResponse
+        }
+
+        private fun getDefaultApproveTokenManager(): Response<TransactionReceipt> {
+            return approveTokenManagerResponse
         }
 
         private companion object {

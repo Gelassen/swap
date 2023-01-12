@@ -26,10 +26,4 @@ data class MintTransaction(
             status = this.status
         )
     }
-
-/*    override fun toDomain(tx: ChainTransactionEntity): ITransaction {
-        val result = Gson().fromJson(tx.payloadAsJson, MintTransaction::class.java)
-        result.uid = tx.uid // object is recovered from cached json and its uid is not automatically incremented
-        return result
-    }*/
 }

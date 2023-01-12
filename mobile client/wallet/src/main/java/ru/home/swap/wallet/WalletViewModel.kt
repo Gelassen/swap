@@ -115,35 +115,9 @@ class WalletViewModel
                     newTx = it
                     repository.mintToken(to, value, uri)
                 }
-                .onEach {
-                    when(it) {
-                        is Response.Data -> {
-                            if (it.data.isStatusOK) {
-                                newTx.status = TxStatus.TX_MINED
-                                cacheRepository.createChainTx(newTx)
-                            } else {
-                                newTx.status = TxStatus.TX_REVERTED
-                                cacheRepository.createChainTx(newTx)
-                            }
-                        }
-                        is Response.Error.Message -> {
-                            newTx.status = TxStatus.TX_EXCEPTION
-                            cacheRepository.createChainTx(newTx)
-                        }
-                        is Response.Error.Exception -> {
-                            newTx.status = TxStatus.TX_EXCEPTION
-                            cacheRepository.createChainTx(newTx)
-                        }
-                    }
-                }
+                .onEach { preProcessResponse(it, newTx) }
                 .flowOn(backgroundDispatcher)
-                .collect {
-                    when(it) {
-                        is Response.Data -> { if (!it.data.isStatusOK) updateStateWithError("Reverted cause: ${it.data.revertReason}") }
-                        is Response.Error.Message -> { updateStateWithError("Exception: ${it.msg}") }
-                        is Response.Error.Exception -> { updateStateWithError("Exception: ${it.error.message}") }
-                    }
-                }
+                .collect { processResponse(it) }
         }
         logger.d("[end] mintToken()")
     }
@@ -196,61 +170,29 @@ class WalletViewModel
                     newTx= it
                     repository.registerUserOnSwapMarket(userWalletAddress)
                 }
-                .onEach { it ->
-                    when(it) {
-                        is Response.Data -> {
-                            if (it.data.isStatusOK) {
-                                newTx.status = TxStatus.TX_MINED
-                                cacheRepository.createChainTx(newTx)
-                            } else {
-                                newTx.status = TxStatus.TX_REVERTED
-                                cacheRepository.createChainTx(newTx)
-                            }
-                        }
-                        is Response.Error.Message -> {
-                            newTx.status = TxStatus.TX_EXCEPTION
-                            cacheRepository.createChainTx(newTx)
-                        }
-                        is Response.Error.Exception -> {
-                            newTx.status = TxStatus.TX_EXCEPTION
-                            cacheRepository.createChainTx(newTx)
-                        }
-                    }
-                }
+                .onEach { it -> preProcessResponse(it, newTx) }
                 .flowOn(backgroundDispatcher)
-                .collect { it ->
-                    when(it) {
-                        is Response.Data -> { if (!it.data.isStatusOK) updateStateWithError("Reverted cause: ${it.data.revertReason}") }
-                        is Response.Error.Message -> { updateStateWithError("Exception: ${it.msg}") }
-                        is Response.Error.Exception -> { updateStateWithError("Exception: ${it.error.message}") }
-                    }
-                }
+                .collect { it -> processResponse(it) }
         }
         logger.d("[end] registerUserOnSwapMarket()")
     }
 
     fun approveTokenManager(swapChainAddress: String) {
         viewModelScope.launch {
-            repository.approveTokenManager(swapChainAddress, true)
+            val tx = ApproveTokenManagerTransaction(swapMarketContractAddress = swapChainAddress, isApproved = true)
+            lateinit var newTx: ITransaction
+            cacheRepository.createChainTx(tx)
+                .map {
+                    newTx = it
+                    repository.approveTokenManager(swapChainAddress, true)
+                }
+                .onEach {
+                    preProcessResponse(it, newTx)
+                }
                 .flowOn(backgroundDispatcher)
                 .collect {
-                    processApproveTokenManagerResponse(it)
+                    processResponse(it)
                 }
-        }
-    }
-
-    private fun processApproveTokenManagerResponse(response: Response<TransactionReceipt>) {
-        when(response) {
-            is Response.Data -> {
-                logger.d("Collect response from the approveTokenManager() call with the status "
-                        + "${response.data.status} and tx receipt ${response}")
-            }
-            is Response.Error.Message -> {
-                logger.d("Get an error on approveTokenManager() call ${response.msg}")
-            }
-            is Response.Error.Exception -> {
-                logger.e("Get an error on approveTokenManager() call", response.error)
-            }
         }
     }
 
@@ -356,6 +298,36 @@ class WalletViewModel
             is Response.Error.Exception -> {
                 logger.e("Failed to execute swap call:", response.error)
             }
+        }
+    }
+
+    private fun preProcessResponse(it: Response<TransactionReceipt>, newTx: ITransaction) {
+        when(it) {
+            is Response.Data -> {
+                if (it.data.isStatusOK) {
+                    newTx.status = TxStatus.TX_MINED
+                    cacheRepository.createChainTx(newTx)
+                } else {
+                    newTx.status = TxStatus.TX_REVERTED
+                    cacheRepository.createChainTx(newTx)
+                }
+            }
+            is Response.Error.Message -> {
+                newTx.status = TxStatus.TX_EXCEPTION
+                cacheRepository.createChainTx(newTx)
+            }
+            is Response.Error.Exception -> {
+                newTx.status = TxStatus.TX_EXCEPTION
+                cacheRepository.createChainTx(newTx)
+            }
+        }
+    }
+
+    private fun processResponse(it: Response<TransactionReceipt>) {
+        when(it) {
+            is Response.Data -> { if (!it.data.isStatusOK) updateStateWithError("Reverted cause: ${it.data.revertReason}") }
+            is Response.Error.Message -> { updateStateWithError("Exception: ${it.msg}") }
+            is Response.Error.Exception -> { updateStateWithError("Exception: ${it.error.message}") }
         }
     }
 

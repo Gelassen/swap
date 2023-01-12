@@ -43,6 +43,7 @@ fun ChainTransactionEntity.toDomain(): ITransaction {
 object TxType {
     const val TX_MINT_TOKEN = "mintToken"
     const val TX_REGISTER_USER = "registerUser"
+    const val TX_APPROVE_TOKEN_MANAGER = "approveTokenManager"
 }
 
 object TxStatus {

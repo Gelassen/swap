@@ -263,7 +263,7 @@ class WalletRepository(
         }
     }
 
-    override fun approveTokenManager(operator: String, approved: Boolean): Flow<Response<TransactionReceipt>> {
+    override fun approveTokenManagerAsFlow(operator: String, approved: Boolean): Flow<Response<TransactionReceipt>> {
         return flow {
             try {
                 logger.d("[start] approve token manager")
@@ -276,6 +276,22 @@ class WalletRepository(
             } finally {
                 logger.d("[end] approve token manager")
             }
+        }
+    }
+
+    @Suppress("ReturnInsideFinallyBlock")
+    override suspend fun approveTokenManager(operator: String, approved: Boolean): Response<TransactionReceipt> {
+        lateinit var result: Response<TransactionReceipt>
+        try {
+            logger.d("[start] approve token manager")
+            val response: TransactionReceipt = swapValueContract.setApprovalForAll(operator, approved).send()
+            result = Response.Data(response)
+        } catch (ex: Exception) {
+            logger.e("Failed to approve address as an operator over the tokens for this user", ex)
+            result = Response.Error.Exception(ex)
+        } finally {
+            logger.d("[end] approve token manager")
+            return result
         }
     }
 
