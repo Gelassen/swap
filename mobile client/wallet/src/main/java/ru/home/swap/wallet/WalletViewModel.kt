@@ -202,7 +202,8 @@ class WalletViewModel
                     newTx = it
                     repository.approveSwap(matchSubj)
                 }
-                .onEach { preProcessResponse(it, newTx) }
+                .onEach {
+                    preProcessResponse(it, newTx) }
                 .flowOn(backgroundDispatcher)
                 .collect { processResponse(it) }
         }

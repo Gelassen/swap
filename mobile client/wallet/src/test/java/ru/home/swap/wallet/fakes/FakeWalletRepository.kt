@@ -234,26 +234,26 @@ class FakeWalletRepository: IWalletRepository {
         fun setPositiveApproveSwapResponse() {
             val txReceipt: TransactionReceipt = Gson().fromJson(GENERAL_OK_RESPONSE, TransactionReceipt::class.java)
             val response: Response.Data<TransactionReceipt> = Response.Data(txReceipt)
-            this.registerUserResponse = response
+            this.approveSwapResponse = response
         }
 
         fun setNegativeApproveSwapResponse() {
             val txReceipt: TransactionReceipt = Gson().fromJson(GENERAL_NEGATIVE_RESPONSE, TransactionReceipt::class.java)
             val response: Response.Data<TransactionReceipt> = Response.Data(txReceipt)
-            this.registerUserResponse = response
+            this.approveSwapResponse = response
         }
 
         fun setErrorApproveSwapResponse() {
             val txReceipt: TransactionReceipt = Gson().fromJson(GENERAL_NEGATIVE_RESPONSE, TransactionReceipt::class.java)
             val response = Response.Error.Message(txReceipt.revertReason)
-            this.registerUserResponse = response;
+            this.approveSwapResponse = response;
         }
 
         fun setExceptionApproveSwapResponse() {
             val response = Response.Error.Exception(
                 RuntimeException(APPROVE_SWAP_SAMPLE_EXCEPTION_MESSAGE)
             )
-            this.registerUserResponse = response;
+            this.approveSwapResponse = response;
         }
 
         // END BLOCK
@@ -280,6 +280,7 @@ class FakeWalletRepository: IWalletRepository {
         }
 
         private fun getDefaultApproveSwapResponse(): Response<TransactionReceipt> {
+            setPositiveApproveSwapResponse()
             return approveSwapResponse
         }
 
