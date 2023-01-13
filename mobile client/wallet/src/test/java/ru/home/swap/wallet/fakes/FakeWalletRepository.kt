@@ -63,7 +63,7 @@ class FakeWalletRepository: IWalletRepository {
         operator: String,
         approved: Boolean
     ): Response<TransactionReceipt> {
-        TODO("Not yet implemented")
+        return swapValueResponse.getApproveTokenManagerResponse()
     }
 
     override fun approveTokenManagerAsFlow(
@@ -184,6 +184,41 @@ class FakeWalletRepository: IWalletRepository {
             val response = Response.Error.Exception(RuntimeException(REGISTER_USER_EXCEPTION_MESSAGE))
             this.registerUserResponse = response;
         }
+
+        // END BLOCK
+
+        // START BLOCK: approveTokenManger
+
+        fun getApproveTokenManagerResponse(): Response<TransactionReceipt> {
+            return approveTokenManagerResponse
+        }
+
+        fun setPositiveApproveTokenManagerResponse() {
+            val txReceipt: TransactionReceipt = Gson().fromJson(GENERAL_OK_RESPONSE, TransactionReceipt::class.java)
+            val response: Response.Data<TransactionReceipt> = Response.Data(txReceipt)
+            this.registerUserResponse = response
+        }
+
+        fun setNegativeApproveTokenManagerResponse() {
+            val txReceipt: TransactionReceipt = Gson().fromJson(GENERAL_NEGATIVE_RESPONSE, TransactionReceipt::class.java)
+            val response: Response.Data<TransactionReceipt> = Response.Data(txReceipt)
+            this.registerUserResponse = response
+        }
+
+        fun setErrorApproveTokenManagerResponse() {
+            val txReceipt: TransactionReceipt = Gson().fromJson(GENERAL_NEGATIVE_RESPONSE, TransactionReceipt::class.java)
+            val response = Response.Error.Message(txReceipt.revertReason)
+            this.registerUserResponse = response;
+        }
+
+        fun setExceptionErrorApproveTokenManagerResponse() {
+            val response = Response.Error.Exception(
+                RuntimeException(APPROVE_TOKEN_MANAGER_EXCEPTION_MESSAGE)
+            )
+            this.registerUserResponse = response;
+        }
+
+        // END BLOCK
 
         private fun getDefaultBalanceResponse(): Response<BigInteger> {
             val testValue = BigInteger.valueOf(0)
@@ -316,6 +351,48 @@ class FakeWalletRepository: IWalletRepository {
                     "}"
 
             const val REGISTER_USER_EXCEPTION_MESSAGE = "Transaction 0xe48d2704a0c3ec9d86288736709fb2cf0d3fcc4b1a0797f136ad59ebc83445b9 has failed with status: 0x0. Gas used: 33112. Revert reason: 'execution reverted: User already registered.'."
+
+            const val APPROVE_TOKEN_MANAGER_EXCEPTION_MESSAGE = "ERC721: approve to caller"
+
+            const val GENERAL_OK_RESPONSE = "{\n" +
+                    "   \"blockHash\":\"0xe330e6fcb19b1156a89a92f4a5790f0a6ea05df7d62de639d320218d96b6061e\",\n" +
+                    "   \"blockNumber\":\"0x1e7f\",\n" +
+                    "   \"contractAddress\":null,\n" +
+                    "   \"cumulativeGasUsed\":\"0xe1f1\",\n" +
+                    "   \"effectiveGasPrice\":\"0xf4610900\",\n" +
+                    "   \"from\":\"0x62f8dc8a5c80db6e8fcc042f0cc54a298f8f2ffd\",\n" +
+                    "   \"gasUsed\":\"0xe1f1\",\n" +
+                    "   \"logs\":[\n" +
+                    "      \n" +
+                    "   ],\n" +
+                    "   \"logsBloom\":\"0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\",\n" +
+                    "   \"status\":\"0x1\",\n" +
+                    "   \"to\":\"0xf8c91ac48e437d3e56bfbffece2d0d4663f37e6f\",\n" +
+                    "   \"transactionHash\":\"0xf3fdf99a245a0e7d40b8be77b6d032ccc88682d9f26fd9a7d1265738596186cd\",\n" +
+                    "   \"transactionIndex\":\"0x0\",\n" +
+                    "   \"type\":\"0x0\"\n" +
+                    "}"
+
+            const val GENERAL_NEGATIVE_RESPONSE = "{\n" +
+                    "   \"blockHash\":\"0xe330e6fcb19b1156a89a92f4a5790f0a6ea05df7d62de639d320218d96b6061e\",\n" +
+                    "   \"blockNumber\":\"0x1e7f\",\n" +
+                    "   \"contractAddress\":null,\n" +
+                    "   \"cumulativeGasUsed\":\"0xe1f1\",\n" +
+                    "   \"effectiveGasPrice\":\"0xf4610900\",\n" +
+                    "   \"from\":\"0x62f8dc8a5c80db6e8fcc042f0cc54a298f8f2ffd\",\n" +
+                    "   \"gasUsed\":\"0xe1f1\",\n" +
+                    "   \"logs\":[\n" +
+                    "      \n" +
+                    "   ],\n" +
+                    "   \"logsBloom\":\"0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\",\n" +
+                    "   \"status\":\"0x0\",\n" +
+                    "   \"revertReason\":\"Artificially made negative response\",\n" +
+                    "   \"to\":\"0xf8c91ac48e437d3e56bfbffece2d0d4663f37e6f\",\n" +
+                    "   \"transactionHash\":\"0xf3fdf99a245a0e7d40b8be77b6d032ccc88682d9f26fd9a7d1265738596186cd\",\n" +
+                    "   \"transactionIndex\":\"0x0\",\n" +
+                    "   \"type\":\"0x0\"\n" +
+                    "}"
+
         }
     }
 
