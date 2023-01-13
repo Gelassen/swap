@@ -44,6 +44,7 @@ object TxType {
     const val TX_MINT_TOKEN = "mintToken"
     const val TX_REGISTER_USER = "registerUser"
     const val TX_APPROVE_TOKEN_MANAGER = "approveTokenManager"
+    const val TX_SWAP = "txSwap"
 }
 
 object TxStatus {

@@ -73,8 +73,12 @@ class FakeWalletRepository: IWalletRepository {
         TODO("Not yet implemented")
     }
 
-    override fun approveSwap(matchSubj: Match): Flow<Response<TransactionReceipt>> {
+    override fun approveSwapAsFlow(matchSubj: Match): Flow<Response<TransactionReceipt>> {
         TODO("Not yet implemented")
+    }
+
+    override suspend fun approveSwap(matchSubj: Match): Response<TransactionReceipt> {
+        return swapValueResponse.getApproveSwapResponse()
     }
 
     override fun registerDemand(
@@ -109,6 +113,7 @@ class FakeWalletRepository: IWalletRepository {
         private var mintTokenResponse: Response<TransactionReceipt> = getDefaultMintTokenResponse()
         private var registerUserResponse: Response<TransactionReceipt> = getDefaultRegisterUserResponse()
         private var approveTokenManagerResponse: Response<TransactionReceipt> = getDefaultApproveTokenManager()
+        private var approveSwapResponse: Response<TransactionReceipt> = getDefaultApproveSwapResponse()
 
         // START BLOCK: balance
 
@@ -220,6 +225,39 @@ class FakeWalletRepository: IWalletRepository {
 
         // END BLOCK
 
+        // START BLOCK: approveSwap
+
+        fun getApproveSwapResponse() : Response<TransactionReceipt> {
+            return approveSwapResponse
+        }
+
+        fun setPositiveApproveSwapResponse() {
+            val txReceipt: TransactionReceipt = Gson().fromJson(GENERAL_OK_RESPONSE, TransactionReceipt::class.java)
+            val response: Response.Data<TransactionReceipt> = Response.Data(txReceipt)
+            this.registerUserResponse = response
+        }
+
+        fun setNegativeApproveSwapResponse() {
+            val txReceipt: TransactionReceipt = Gson().fromJson(GENERAL_NEGATIVE_RESPONSE, TransactionReceipt::class.java)
+            val response: Response.Data<TransactionReceipt> = Response.Data(txReceipt)
+            this.registerUserResponse = response
+        }
+
+        fun setErrorApproveSwapResponse() {
+            val txReceipt: TransactionReceipt = Gson().fromJson(GENERAL_NEGATIVE_RESPONSE, TransactionReceipt::class.java)
+            val response = Response.Error.Message(txReceipt.revertReason)
+            this.registerUserResponse = response;
+        }
+
+        fun setExceptionApproveSwapResponse() {
+            val response = Response.Error.Exception(
+                RuntimeException(APPROVE_SWAP_SAMPLE_EXCEPTION_MESSAGE)
+            )
+            this.registerUserResponse = response;
+        }
+
+        // END BLOCK
+
         private fun getDefaultBalanceResponse(): Response<BigInteger> {
             val testValue = BigInteger.valueOf(0)
             val response = Response.Data(testValue)
@@ -227,15 +265,22 @@ class FakeWalletRepository: IWalletRepository {
         }
 
         private fun getDefaultMintTokenResponse(): Response<TransactionReceipt> {
+            setPositiveMintTokenResponse()
             return mintTokenResponse
         }
 
         private fun getDefaultRegisterUserResponse(): Response<TransactionReceipt> {
+            setPositiveRegisterUserResponse()
             return registerUserResponse
         }
 
         private fun getDefaultApproveTokenManager(): Response<TransactionReceipt> {
+            setPositiveApproveTokenManagerResponse()
             return approveTokenManagerResponse
+        }
+
+        private fun getDefaultApproveSwapResponse(): Response<TransactionReceipt> {
+            return approveSwapResponse
         }
 
         private companion object {
@@ -353,6 +398,8 @@ class FakeWalletRepository: IWalletRepository {
             const val REGISTER_USER_EXCEPTION_MESSAGE = "Transaction 0xe48d2704a0c3ec9d86288736709fb2cf0d3fcc4b1a0797f136ad59ebc83445b9 has failed with status: 0x0. Gas used: 33112. Revert reason: 'execution reverted: User already registered.'."
 
             const val APPROVE_TOKEN_MANAGER_EXCEPTION_MESSAGE = "ERC721: approve to caller"
+
+            const val APPROVE_SWAP_SAMPLE_EXCEPTION_MESSAGE = "Match item is not found. Did you pass correct match object?"
 
             const val GENERAL_OK_RESPONSE = "{\n" +
                     "   \"blockHash\":\"0xe330e6fcb19b1156a89a92f4a5790f0a6ea05df7d62de639d320218d96b6061e\",\n" +

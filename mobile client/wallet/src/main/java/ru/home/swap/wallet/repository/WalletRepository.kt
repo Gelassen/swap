@@ -295,7 +295,7 @@ class WalletRepository(
         }
     }
 
-    override fun approveSwap(matchSubj: Match): Flow<Response<TransactionReceipt>> {
+    override fun approveSwapAsFlow(matchSubj: Match): Flow<Response<TransactionReceipt>> {
         return flow {
             try {
                 logger.d("[start] approve swap")
@@ -313,6 +313,28 @@ class WalletRepository(
             } finally {
                 logger.d("[end] approve swap")
             }
+        }
+    }
+
+    @Suppress("ReturnInsideFinallyBlock")
+    override suspend fun approveSwap(matchSubj: Match): Response<TransactionReceipt> {
+        lateinit var result: Response<TransactionReceipt>
+        try {
+            logger.d("[start] approve swap")
+            val response: TransactionReceipt = swapChainContract.approveSwap(
+                matchSubj.userFirst,
+                matchSubj.userSecond,
+                matchSubj
+            )
+                .send()
+            result = Response.Data(response)
+        } catch (ex: Exception) {
+            logger.e("Failed to approve match", ex)
+            val response = Response.Error.Exception(ex)
+            result = response
+        } finally {
+            logger.d("[end] approve swap")
+            return result
         }
     }
 

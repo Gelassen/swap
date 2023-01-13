@@ -186,9 +186,7 @@ class WalletViewModel
                     newTx = it
                     repository.approveTokenManager(swapChainAddress, true)
                 }
-                .onEach {
-                    preProcessResponse(it, newTx)
-                }
+                .onEach { preProcessResponse(it, newTx) }
                 .flowOn(backgroundDispatcher)
                 .collect {
                     processResponse(it)
@@ -198,25 +196,15 @@ class WalletViewModel
 
     fun approveSwap(matchSubj: Match) {
         viewModelScope.launch {
-            repository.approveSwap(matchSubj)
-                .flowOn(backgroundDispatcher)
-                .collect {
-                    processApproveSwapResponse(it)
+            lateinit var newTx: ITransaction
+            cacheRepository.createChainTx(SwapTransaction(match = matchSubj))
+                .map {
+                    newTx = it
+                    repository.approveSwap(matchSubj)
                 }
-        }
-    }
-
-    private fun processApproveSwapResponse(response: Response<TransactionReceipt>) {
-        when (response) {
-            is Response.Data -> {
-                logger.d("Collect approve swap response ")
-            }
-            is Response.Error.Message -> {
-                logger.d("Get an error on approve swap call ${response.msg}")
-            }
-            is Response.Error.Exception -> {
-                logger.e("Get an error on approve swap call", response.error)
-            }
+                .onEach { preProcessResponse(it, newTx) }
+                .flowOn(backgroundDispatcher)
+                .collect { processResponse(it) }
         }
     }
 

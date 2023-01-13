@@ -1,9 +1,16 @@
 package ru.home.swap.wallet.contract
 
+import org.json.JSONObject
 import org.web3j.abi.datatypes.Bool
 import org.web3j.abi.datatypes.DynamicStruct
 import org.web3j.abi.datatypes.Utf8String
 import org.web3j.abi.datatypes.generated.Uint256
+import ru.home.swap.wallet.contract.MatchConst.APPROVED_BY_FIRST_USER
+import ru.home.swap.wallet.contract.MatchConst.APPROVED_BY_SECOND_USER
+import ru.home.swap.wallet.contract.MatchConst.USER_FIRST
+import ru.home.swap.wallet.contract.MatchConst.USER_SECOND
+import ru.home.swap.wallet.contract.MatchConst.VALUE_OF_FIRST_USER
+import ru.home.swap.wallet.contract.MatchConst.VALUE_OF_SECOND_USER
 import java.math.BigInteger
 
 class Match: DynamicStruct {
@@ -15,12 +22,12 @@ class Match: DynamicStruct {
     var approvedBySecondUser: Boolean = false
 
     constructor(
-        userFirst: String,
-        valueOfFirstUser: BigInteger,
-        userSecond: String,
-        valueOfSecondUser: BigInteger,
-        approvedByFirstUser: Boolean,
-        approvedBySecondUser: Boolean
+        userFirst: String = "",
+        valueOfFirstUser: BigInteger = BigInteger.valueOf(0),
+        userSecond: String = "",
+        valueOfSecondUser: BigInteger = BigInteger.valueOf(0),
+        approvedByFirstUser: Boolean = false,
+        approvedBySecondUser: Boolean = false
     ) : super(
         Utf8String(userFirst),
         Uint256(valueOfFirstUser),
@@ -65,5 +72,36 @@ class Match: DynamicStruct {
 
     }
 
+}
 
+private object MatchConst {
+    const val USER_FIRST = "userFirst"
+    const val VALUE_OF_FIRST_USER = "valueOfFirstUser"
+    const val USER_SECOND = "userSecond"
+    const val VALUE_OF_SECOND_USER = "valueOfSecondUser"
+    const val APPROVED_BY_FIRST_USER = "approvedByFirstUser"
+    const val APPROVED_BY_SECOND_USER = "approvedBySecondUser"
+}
+
+fun Match.convertToJson(): String {
+    val result = JSONObject()
+    result.put(USER_FIRST, this.userFirst)
+    result.put(USER_SECOND, this.userSecond)
+    result.put(VALUE_OF_FIRST_USER, this.valueOfFirstUser)
+    result.put(VALUE_OF_SECOND_USER, this.valueOfSecondUser)
+    result.put(APPROVED_BY_FIRST_USER, this.approvedByFirstUser)
+    result.put(APPROVED_BY_SECOND_USER, this.approvedBySecondUser)
+    return result.toString()
+}
+
+fun Match.fromJson(json: String): Match {
+    val obj = JSONObject(json)
+    return Match(
+        userFirst = obj.getString(USER_FIRST),
+        valueOfFirstUser = BigInteger.valueOf(obj.getLong(VALUE_OF_FIRST_USER)),
+        userSecond = obj.getString(USER_SECOND),
+        valueOfSecondUser = BigInteger.valueOf(obj.getLong(VALUE_OF_SECOND_USER)),
+        approvedByFirstUser = obj.getBoolean(APPROVED_BY_FIRST_USER),
+        approvedBySecondUser = obj.getBoolean(APPROVED_BY_SECOND_USER)
+    )
 }

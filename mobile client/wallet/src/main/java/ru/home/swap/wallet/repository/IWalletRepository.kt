@@ -38,7 +38,9 @@ interface IWalletRepository {
 
     suspend fun approveTokenManager(operator: String, approved: Boolean): Response<TransactionReceipt>
 
-    fun approveSwap(matchSubj: Match): Flow<Response<TransactionReceipt>>
+    fun approveSwapAsFlow(matchSubj: Match): Flow<Response<TransactionReceipt>>
+
+    suspend fun approveSwap(matchSubj: Match): Response<TransactionReceipt>
 
     fun registerDemand(userWalletAddress: String, demand: String): Flow<Response<TransactionReceipt>>
 
