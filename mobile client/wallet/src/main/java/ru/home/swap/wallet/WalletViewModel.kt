@@ -19,8 +19,8 @@ import java.math.BigInteger
 import javax.inject.Inject
 
 data class Model(
-    var privateKey: String = "", // TODO refactor this dev mode solution
-    val wallet: Wallet = Wallet(),
+    var balance: BigInteger = BigInteger.valueOf(0),
+    val tokens: MutableList<Token> = mutableListOf(),
     val pendingTx: List<ITransaction> = mutableListOf(),
     val status: Status = Status.NONE,
     val errors: List<String> = mutableListOf()
@@ -80,8 +80,7 @@ class WalletViewModel
         when (value) {
             is Response.Data -> {
                 state.update {
-                    it.wallet.setBalance(value.data)
-                    it.copy(wallet = it.wallet, status = Status.BALANCE)
+                    it.copy(balance = value.data, status = Status.BALANCE)
                 }
             }
             is Response.Error.Message -> {
@@ -148,11 +147,11 @@ class WalletViewModel
                 .collect { token ->
                     logger.d("Collect result value for tokens owned by swap address $token")
                     state.update {
-                        it.wallet.addToken(token)
-                        logger.d("${account} tokens ${it.wallet.getTokens()}")
+                        it.tokens.add(token)
+                        logger.d("${account} tokens ${it.tokens}")
                         it.copy(
                             status = Status.MY_TOKENS,
-                            wallet = it.wallet
+                            tokens = it.tokens
                         )
 
                     }

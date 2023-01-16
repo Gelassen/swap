@@ -61,14 +61,14 @@ internal class WalletViewModelTest {
     @Test
     fun `on balanceOf() with existing parameter, model state is updated with correct value`() = runTest {
         fakeWalletRepository.setPositiveBalanceOfResponse()
-        assertThat("Model balance is not default", subj.uiState.value.wallet.getBalance().toInt() == 0)
+        assertThat("Model balance is not default", subj.uiState.value.balance.toInt() == 0)
         assertThat("Errors queue is not empty", subj.uiState.value.errors.isEmpty())
         assertThat("State is not default", subj.uiState.value.status == Status.NONE)
 
         subj.balanceOf("0x6f1d841afce211dAead45e6109895c20f8ee92f0")
         advanceUntilIdle()
 
-        assertThat("Model balance is not updated with correct value", subj.uiState.value.wallet.getBalance().toLong() == 42L)
+        assertThat("Model balance is not updated with correct value", subj.uiState.value.balance.toLong() == 42L)
         assertThat("Errors queue is not empty", subj.uiState.value.errors.isEmpty())
         assertThat("State is not set as BALANCE", subj.uiState.value.status == Status.BALANCE)
     }
