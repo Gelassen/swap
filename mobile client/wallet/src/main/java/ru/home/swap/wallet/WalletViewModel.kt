@@ -197,39 +197,30 @@ class WalletViewModel
     fun approveSwap(matchSubj: Match) {
         viewModelScope.launch {
             lateinit var newTx: ITransaction
-            cacheRepository.createChainTx(SwapTransaction(match = matchSubj))
+            cacheRepository.createChainTx(ApproveSwapTransaction(match = matchSubj))
                 .map {
                     newTx = it
                     repository.approveSwap(matchSubj)
                 }
-                .onEach {
-                    preProcessResponse(it, newTx) }
+                .onEach { preProcessResponse(it, newTx) }
                 .flowOn(backgroundDispatcher)
                 .collect { processResponse(it) }
         }
     }
 
+    @Deprecated("Since SwapChainV2.sol registerDemand() is not supported")
     fun registerDemand(userAddress: String, demand: String) {
         viewModelScope.launch {
-            repository.registerDemand(userAddress, demand)
-                .flowOn(backgroundDispatcher)
-                .collect {
-                    processRegisterDemandResponse(it)
+            val tx = RegisterDemandTransaction(userAddress = userAddress, demand = demand)
+            lateinit var newTx: ITransaction
+            cacheRepository.createChainTx(tx)
+                .map {
+                    newTx = it
+                    repository.registerDemand(userAddress, demand)
                 }
-        }
-    }
-
-    private fun processRegisterDemandResponse(response: Response<TransactionReceipt>) {
-        when (response) {
-            is Response.Data -> {
-                logger.d("Register demand response with status ${response.data.status} and tx receipt ${response.data}")
-            }
-            is Response.Error.Message -> {
-                logger.d("Get an error on register demand call ${response.msg}")
-            }
-            is Response.Error.Exception -> {
-                logger.e("Get an error on register demand call", response.error)
-            }
+                .onEach { preProcessResponse(it, newTx) }
+                .flowOn(backgroundDispatcher)
+                .collect { processResponse(it) }
         }
     }
 
@@ -259,11 +250,15 @@ class WalletViewModel
 
     fun swap(subj: Match) {
         viewModelScope.launch {
-            repository.swap(subj)
-                .flowOn(backgroundDispatcher)
-                .collect {
-                    processSwapResponse(it)
+            lateinit var newTx: ITransaction
+            cacheRepository.createChainTx(SwapTransaction(match = subj))
+                .map {
+                    newTx = it
+                    repository.swap(subj)
                 }
+                .onEach { preProcessResponse(it, newTx) }
+                .flowOn(backgroundDispatcher)
+                .collect { processResponse(it) }
         }
     }
 
@@ -273,20 +268,6 @@ class WalletViewModel
                 .collect {
                     logger.d("New row is inserted $it")
                 }
-        }
-    }
-
-    private fun processSwapResponse(response: Response<TransactionReceipt>) {
-        when (response) {
-            is Response.Data -> {
-                logger.d("Get response for swap call: ${response.data}")
-            }
-            is Response.Error.Message -> {
-                logger.d("Failed to execute swap call: ${response.msg}")
-            }
-            is Response.Error.Exception -> {
-                logger.e("Failed to execute swap call:", response.error)
-            }
         }
     }
 

@@ -183,7 +183,7 @@ class WalletRepository(
         }
     }
 
-    override fun swap(subj: Match): Flow<Response<TransactionReceipt>> {
+    override fun swapAsFlow(subj: Match): Flow<Response<TransactionReceipt>> {
         return flow {
             try {
                 logger.d("[start] swap call")
@@ -198,6 +198,24 @@ class WalletRepository(
             } finally {
                 logger.d("[end] swap call")
             }
+        }
+    }
+
+    override suspend fun swap(subj: Match): Response<TransactionReceipt> {
+        lateinit var result: Response<TransactionReceipt>
+        try {
+            logger.d("[start] swap call")
+            val response = swapChainContract.swap(subj).send()
+            if (response.isStatusOK) {
+                result = Response.Data(response)
+            } else {
+                result = Response.Error.Message("Reverted with reason: ${response.revertReason}")
+            }
+        } catch (ex: Exception) {
+            result = Response.Error.Exception(ex)
+        } finally {
+            logger.d("[end] swap call")
+            return result
         }
     }
 
@@ -338,7 +356,7 @@ class WalletRepository(
         }
     }
 
-    override fun registerDemand(userWalletAddress: String, demand: String): Flow<Response<TransactionReceipt>> {
+    override fun registerDemandAsFlow(userWalletAddress: String, demand: String): Flow<Response<TransactionReceipt>> {
         return flow {
             try {
                 logger.d("[start] register demand")
@@ -363,6 +381,33 @@ class WalletRepository(
             } finally {
                 logger.d("[end] register demand")
             }
+        }
+    }
+
+    override suspend fun registerDemand(userWalletAddress: String, demand: String): Response<TransactionReceipt> {
+        lateinit var result: Response<TransactionReceipt>
+        try {
+            logger.d("[start] register demand")
+            val isValidEthAddress = WalletUtils.isValidAddress(userWalletAddress)
+                    && userWalletAddress.uppercase().contentEquals(
+                Keys.toChecksumAddress(userWalletAddress).uppercase())
+            if (isValidEthAddress) {
+                val response: TransactionReceipt = swapChainContract.registerDemand(userWalletAddress, demand).send()
+                if (response.isStatusOK) {
+                    result = Response.Data(response)
+                } else {
+                    result = Response.Error.Message("Reverted with reason: ${response.revertReason}")
+                }
+            } else {
+                val errMessage = "${userWalletAddress} is not valid ethereum address."
+                result = Response.Error.Message(errMessage)
+            }
+        } catch (ex: Exception) {
+            logger.e("Failed to approve match", ex)
+            result = Response.Error.Exception(ex)
+        } finally {
+            logger.d("[end] register demand")
+            return result
         }
     }
 

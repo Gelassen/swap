@@ -42,12 +42,17 @@ interface IWalletRepository {
 
     suspend fun approveSwap(matchSubj: Match): Response<TransactionReceipt>
 
-    fun registerDemand(userWalletAddress: String, demand: String): Flow<Response<TransactionReceipt>>
+    @Deprecated(message = "Register demand is not supported since V2")
+    fun registerDemandAsFlow(userWalletAddress: String, demand: String): Flow<Response<TransactionReceipt>>
+
+    @Deprecated(message = "Register demand is not supported since V2")
+    suspend fun registerDemand(userWalletAddress: String, demand: String): Response<TransactionReceipt>
 
     fun getTokenIdsForUser(userWalletAddress: String): Flow<Response<List<*>>>
 
     fun getTokenIdsWithValues(userWalletAddress: String, withConsumed: Boolean): Flow<Response<List<Token>>>
 
-    fun swap(subj: Match): Flow<Response<TransactionReceipt>>
+    fun swapAsFlow(subj: Match): Flow<Response<TransactionReceipt>>
 
+    suspend fun swap(subj: Match): Response<TransactionReceipt>
 }

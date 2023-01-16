@@ -641,6 +641,131 @@ internal class WalletViewModelTest {
         assertThat("Model should have a single error with defined message, but it has ${subj.uiState.value.errors.get(0)}", subj.uiState.value.errors.get(0) == "Exception: Match item is not found. Did you pass correct match object?")
     }
 
+    @Test
+    @Ignore("Since SwapChainV2.sol registerDemand() is not supported")
+    fun `On registerDemand() with valid params, pending tx state is increased, cache has a new record, both has a 'mined' tx status, errors list is empty`() = runTest {
+        assertThat("Model should not have pending tx", subj.uiState.value.pendingTx.isEmpty())
+        assertThat("Model should not have errors", subj.uiState.value.errors.isEmpty())
+        var cacheInitialStatus = emptyList<ITransaction>()
+        fakeStorageRepository.getAllChainTransactions()
+            .collect { it ->
+                cacheInitialStatus = it
+            }
+        advanceUntilIdle()
+        assertThat("Cache is non empty with value count ${cacheInitialStatus.count()}", cacheInitialStatus.isEmpty())
+        // TOOD not completed
+    }
+
+    @Test
+    fun `On swap() with valid param, pending tx state is increased, cache has a new record, both has a 'mined' status, errors list is empty`() = runTest {
+        assertThat("Model has some pending tx", subj.uiState.value.pendingTx.isEmpty())
+        assertThat("Model has some errors", subj.uiState.value.errors.isEmpty())
+        var cacheInitialStatus = emptyList<ITransaction>()
+        fakeStorageRepository.getAllChainTransactions()
+            .collect { it ->
+                cacheInitialStatus = it
+            }
+        advanceUntilIdle()
+        assertThat("Cache is non empty with value count ${cacheInitialStatus.count()}", cacheInitialStatus.isEmpty())
+        fakeWalletRepository.swapValueResponse.setPositiveSwapResponse()
+
+        subj.swap(getMatchObj())
+        advanceUntilIdle()
+
+        var cacheFinalState = emptyList<ITransaction>()
+        fakeStorageRepository.getAllChainTransactions()
+            .collect {
+                cacheFinalState = it
+            }
+        advanceUntilIdle()
+        assertThat("Model should not have errors, but it has ${subj.uiState.value.errors.count()}", subj.uiState.value.errors.isEmpty())
+        assertThat("Cache should have a single record, but it has ${cacheFinalState.count()}", cacheFinalState.count() == 1)
+        assertThat("Cache should have a record with `mined` status, but it has ${cacheFinalState.get(0).status}", cacheFinalState.get(0).status == TxStatus.TX_MINED)
+    }
+
+    @Test
+    fun `On swap() with negative response, pending tx state is increased, cache has a new record, both has a 'reverted' status, errors list has an error`() = runTest {
+        assertThat("Model has some pending tx", subj.uiState.value.pendingTx.isEmpty())
+        assertThat("Model has some errors", subj.uiState.value.errors.isEmpty())
+        var cacheInitialStatus = emptyList<ITransaction>()
+        fakeStorageRepository.getAllChainTransactions()
+            .collect { it ->
+                cacheInitialStatus = it
+            }
+        advanceUntilIdle()
+        assertThat("Cache is non empty with value count ${cacheInitialStatus.count()}", cacheInitialStatus.isEmpty())
+        fakeWalletRepository.swapValueResponse.setNegativeSwapResponse()
+
+        subj.swap(getMatchObj())
+        advanceUntilIdle()
+
+        var cacheFinalState = emptyList<ITransaction>()
+        fakeStorageRepository.getAllChainTransactions()
+            .collect {
+                cacheFinalState = it
+            }
+        advanceUntilIdle()
+        assertThat("Model should have a single error, but it has ${subj.uiState.value.errors.count()}", subj.uiState.value.errors.count() == 1)
+        assertThat("Cache should have a single record, but it has ${cacheFinalState.count()}", cacheFinalState.count() == 1)
+        assertThat("Cache should have a record with `reverted` status, but it has ${cacheFinalState.get(0).status}", cacheFinalState.get(0).status == TxStatus.TX_REVERTED)
+        assertThat("Cache should have a single error with defined message, but it has ${subj.uiState.value.errors.get(0)}", subj.uiState.value.errors.get(0) == "Reverted cause: Artificially made negative response")
+    }
+
+    @Test
+    fun `On swap() with error response, pending tx state is increased, cache has a new record, both has an 'exception' status, errors list has an error`() = runTest {
+        assertThat("Model has some pending tx", subj.uiState.value.pendingTx.isEmpty())
+        assertThat("Model has some errors", subj.uiState.value.errors.isEmpty())
+        var cacheInitialStatus = emptyList<ITransaction>()
+        fakeStorageRepository.getAllChainTransactions()
+            .collect { it ->
+                cacheInitialStatus = it
+            }
+        advanceUntilIdle()
+        assertThat("Cache is non empty with value count ${cacheInitialStatus.count()}", cacheInitialStatus.isEmpty())
+        fakeWalletRepository.swapValueResponse.setErrorSwapResponse()
+
+        subj.swap(getMatchObj())
+        advanceUntilIdle()
+
+        var cacheFinalState = emptyList<ITransaction>()
+        fakeStorageRepository.getAllChainTransactions()
+            .collect {
+                cacheFinalState = it
+            }
+        advanceUntilIdle()
+        assertThat("Model should have single error, but it has ${subj.uiState.value.errors.count()}", subj.uiState.value.errors.count() == 1)
+        assertThat("Cache should have a single record, but it has ${cacheFinalState.count()}", cacheFinalState.count() == 1)
+        assertThat("Cache should have a record with `exception` status, but it has ${cacheFinalState.get(0).status}", cacheFinalState.get(0).status == TxStatus.TX_EXCEPTION)
+        assertThat("Model should have a single error with defined message, but it has ${subj.uiState.value.errors.get(0)}", subj.uiState.value.errors.get(0) == "Exception: Artificially made negative response")
+    }
+
+    @Test
+    fun `On swap() with exception response, pending tx state is increased, cache has a new record, both has an 'exception' status, errors list has an error`() = runTest {
+        assertThat("Model has some pending tx", subj.uiState.value.pendingTx.isEmpty())
+        assertThat("Model has some errors", subj.uiState.value.errors.isEmpty())
+        var cacheInitialStatus = emptyList<ITransaction>()
+        fakeStorageRepository.getAllChainTransactions()
+            .collect { it ->
+                cacheInitialStatus = it
+            }
+        advanceUntilIdle()
+        assertThat("Cache is non empty with value count ${cacheInitialStatus.count()}", cacheInitialStatus.isEmpty())
+        fakeWalletRepository.swapValueResponse.setExceptionSwapResponse()
+
+        subj.swap(getMatchObj())
+        advanceUntilIdle()
+
+        var cacheFinalState = emptyList<ITransaction>()
+        fakeStorageRepository.getAllChainTransactions()
+            .collect {
+                cacheFinalState = it
+            }
+        advanceUntilIdle()
+        assertThat("Model should have a single error, but it has ${subj.uiState.value.errors.count()}", subj.uiState.value.errors.count() == 1)
+        assertThat("Cache should have a single record, but it has ${cacheFinalState.count()}", cacheFinalState.count() == 1)
+        assertThat("Cache should have a record with `exception` status, but it has ${cacheFinalState.get(0).status}", cacheFinalState.get(0).status == TxStatus.TX_EXCEPTION)
+        assertThat("Model should have a single error with defined message, but it has ${subj.uiState.value.errors.get(0)}", subj.uiState.value.errors.get(0) == "Exception: Transaction 0x3292880f1157ff54c168cfa3b0485c1933c41263d76c90e9ba9fac26948f832a has failed with status: 0x0. Gas used: 48124. Revert reason: 'execution reverted: Tokens should not be already consumed.'.")
+    }
 /*    @Test
     fun `balanceOf() with turbine lib test`() = runTest {
         fakeWalletRepository.setPositiveBalanceOfResponse()

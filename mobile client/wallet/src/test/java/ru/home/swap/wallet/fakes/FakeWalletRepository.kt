@@ -81,11 +81,15 @@ class FakeWalletRepository: IWalletRepository {
         return swapValueResponse.getApproveSwapResponse()
     }
 
-    override fun registerDemand(
+    override fun registerDemandAsFlow(
         userWalletAddress: String,
         demand: String
     ): Flow<Response<TransactionReceipt>> {
         TODO("Not yet implemented")
+    }
+
+    override suspend fun registerDemand(userWalletAddress: String, demand: String): Response<TransactionReceipt> {
+        return Response.Data(TransactionReceipt())
     }
 
     override fun getTokenIdsForUser(userWalletAddress: String): Flow<Response<List<*>>> {
@@ -99,8 +103,12 @@ class FakeWalletRepository: IWalletRepository {
         TODO("Not yet implemented")
     }
 
-    override fun swap(subj: Match): Flow<Response<TransactionReceipt>> {
+    override fun swapAsFlow(subj: Match): Flow<Response<TransactionReceipt>> {
         TODO("Not yet implemented")
+    }
+
+    override suspend fun swap(subj: Match): Response<TransactionReceipt> {
+        return swapValueResponse.getSwapResponse()
     }
 
     fun setPositiveBalanceOfResponse() {
@@ -114,6 +122,7 @@ class FakeWalletRepository: IWalletRepository {
         private var registerUserResponse: Response<TransactionReceipt> = getDefaultRegisterUserResponse()
         private var approveTokenManagerResponse: Response<TransactionReceipt> = getDefaultApproveTokenManager()
         private var approveSwapResponse: Response<TransactionReceipt> = getDefaultApproveSwapResponse()
+        private var swapResponse: Response<TransactionReceipt> = getDefaultSwapResponse()
 
         // START BLOCK: balance
 
@@ -258,6 +267,42 @@ class FakeWalletRepository: IWalletRepository {
 
         // END BLOCK
 
+        // START BLOCK: register demand
+
+        // not supported since SwapChainV2.sol
+
+        // END BLOCK
+
+        // START BLOCK: swap()
+
+        fun getSwapResponse(): Response<TransactionReceipt> {
+            return swapResponse
+        }
+
+        fun setPositiveSwapResponse() {
+            val txReceipt: TransactionReceipt = Gson().fromJson(GENERAL_OK_RESPONSE, TransactionReceipt::class.java)
+            val response: Response.Data<TransactionReceipt> = Response.Data(txReceipt)
+            this.swapResponse = response
+        }
+
+        fun setNegativeSwapResponse() {
+            val txReceipt: TransactionReceipt = Gson().fromJson(GENERAL_NEGATIVE_RESPONSE, TransactionReceipt::class.java)
+            val response: Response.Data<TransactionReceipt> = Response.Data(txReceipt)
+            this.swapResponse = response
+        }
+
+        fun setErrorSwapResponse() {
+            val txReceipt: TransactionReceipt = Gson().fromJson(GENERAL_NEGATIVE_RESPONSE, TransactionReceipt::class.java)
+            val response = Response.Error.Message(txReceipt.revertReason)
+            this.swapResponse = response;
+        }
+
+        fun setExceptionSwapResponse() {
+            this.swapResponse = Response.Error.Exception(RuntimeException(SWAP_EXCEPTION_MESSAGE))
+        }
+
+        // END BLOCK
+
         private fun getDefaultBalanceResponse(): Response<BigInteger> {
             val testValue = BigInteger.valueOf(0)
             val response = Response.Data(testValue)
@@ -282,6 +327,10 @@ class FakeWalletRepository: IWalletRepository {
         private fun getDefaultApproveSwapResponse(): Response<TransactionReceipt> {
             setPositiveApproveSwapResponse()
             return approveSwapResponse
+        }
+
+        private fun getDefaultSwapResponse(): Response<TransactionReceipt> {
+            return swapResponse
         }
 
         private companion object {
@@ -401,6 +450,10 @@ class FakeWalletRepository: IWalletRepository {
             const val APPROVE_TOKEN_MANAGER_EXCEPTION_MESSAGE = "ERC721: approve to caller"
 
             const val APPROVE_SWAP_SAMPLE_EXCEPTION_MESSAGE = "Match item is not found. Did you pass correct match object?"
+
+            const val REGISTER_DEMAND_EXCEPTION_MESSAGE = "Transaction 0x988c97ca785448a193033727389607740311d7c815092f0976d16deb356c45b0 has failed with status: 0x0. Gas used: 22234. Revert reason: 'execution reverted'."
+
+            const val SWAP_EXCEPTION_MESSAGE = "Transaction 0x3292880f1157ff54c168cfa3b0485c1933c41263d76c90e9ba9fac26948f832a has failed with status: 0x0. Gas used: 48124. Revert reason: 'execution reverted: Tokens should not be already consumed.'."
 
             const val GENERAL_OK_RESPONSE = "{\n" +
                     "   \"blockHash\":\"0xe330e6fcb19b1156a89a92f4a5790f0a6ea05df7d62de639d320218d96b6061e\",\n" +

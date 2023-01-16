@@ -8,9 +8,7 @@ import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import ru.home.swap.wallet.contract.Value
 import ru.home.swap.wallet.converters.ValueTypeAdapter
-import ru.home.swap.wallet.model.ITransaction
-import ru.home.swap.wallet.model.MintTransaction
-import ru.home.swap.wallet.model.RegisterUserTransaction
+import ru.home.swap.wallet.model.*
 import java.lang.IllegalArgumentException
 import java.lang.reflect.Type
 
@@ -36,6 +34,10 @@ fun ChainTransactionEntity.toDomain(): ITransaction {
     return when(this.txType) {
         TxType.TX_MINT_TOKEN -> { this.toDomainGeneric<MintTransaction>() }
         TxType.TX_REGISTER_USER -> { this.toDomainGeneric<RegisterUserTransaction>() }
+        TxType.TX_APPROVE_TOKEN_MANAGER -> { this.toDomainGeneric<ApproveTokenManagerTransaction>() }
+        TxType.TX_REGISTER_DEMAND -> { this.toDomainGeneric<RegisterDemandTransaction>() }
+        TxType.TX_APPROVE_SWAP -> { this.toDomainGeneric<ApproveSwapTransaction>() }
+        TxType.TX_SWAP -> { this.toDomainGeneric<SwapTransaction>() }
         else -> { throw IllegalArgumentException("TxType from cache is unknown. Did you forget to add support of a new TxType?") }
     }
 }
@@ -44,7 +46,9 @@ object TxType {
     const val TX_MINT_TOKEN = "mintToken"
     const val TX_REGISTER_USER = "registerUser"
     const val TX_APPROVE_TOKEN_MANAGER = "approveTokenManager"
+    const val TX_APPROVE_SWAP = "txApproveSwap"
     const val TX_SWAP = "txSwap"
+    const val TX_REGISTER_DEMAND = "txRegisterDemand"
 }
 
 object TxStatus {
