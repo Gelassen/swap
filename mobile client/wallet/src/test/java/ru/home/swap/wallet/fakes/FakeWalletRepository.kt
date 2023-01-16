@@ -23,6 +23,7 @@ class FakeWalletRepository: IWalletRepository {
         }
     }
 
+    @Deprecated("Non-Flow implementation is used instead")
     override fun mintTokenAsFlow(
         to: String,
         value: Value,
@@ -51,6 +52,7 @@ class FakeWalletRepository: IWalletRepository {
         TODO("Not yet implemented")
     }
 
+    @Deprecated("Non-Flow implementation is used instead")
     override fun registerUserOnSwapMarketAsFlow(userWalletAddress: String): Flow<Response<TransactionReceipt>> {
         TODO("Not yet implemented")
     }
@@ -66,6 +68,7 @@ class FakeWalletRepository: IWalletRepository {
         return swapValueResponse.getApproveTokenManagerResponse()
     }
 
+    @Deprecated("Non-Flow implementation is used instead")
     override fun approveTokenManagerAsFlow(
         operator: String,
         approved: Boolean
@@ -73,6 +76,7 @@ class FakeWalletRepository: IWalletRepository {
         TODO("Not yet implemented")
     }
 
+    @Deprecated("Non-Flow implementation is used instead")
     override fun approveSwapAsFlow(matchSubj: Match): Flow<Response<TransactionReceipt>> {
         TODO("Not yet implemented")
     }
@@ -81,6 +85,7 @@ class FakeWalletRepository: IWalletRepository {
         return swapValueResponse.getApproveSwapResponse()
     }
 
+    @Deprecated("Register demand is not supported since V2")
     override fun registerDemandAsFlow(
         userWalletAddress: String,
         demand: String
@@ -88,6 +93,7 @@ class FakeWalletRepository: IWalletRepository {
         TODO("Not yet implemented")
     }
 
+    @Deprecated("Register demand is not supported since V2")
     override suspend fun registerDemand(userWalletAddress: String, demand: String): Response<TransactionReceipt> {
         return Response.Data(TransactionReceipt())
     }
@@ -103,6 +109,7 @@ class FakeWalletRepository: IWalletRepository {
         TODO("Not yet implemented")
     }
 
+    @Deprecated("Non-Flow implementation is used instead")
     override fun swapAsFlow(subj: Match): Flow<Response<TransactionReceipt>> {
         TODO("Not yet implemented")
     }

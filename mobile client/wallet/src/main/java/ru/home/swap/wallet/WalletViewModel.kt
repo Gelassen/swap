@@ -261,15 +261,6 @@ class WalletViewModel
         }
     }
 
-    fun addTestRow(tx: ITransaction) {
-        viewModelScope.launch {
-            cacheRepository.createChainTx(tx)
-                .collect {
-                    logger.d("New row is inserted $it")
-                }
-        }
-    }
-
     private fun preProcessResponse(it: Response<TransactionReceipt>, newTx: ITransaction) {
         when(it) {
             is Response.Data -> {
