@@ -65,6 +65,7 @@ class WalletRepository(
         }
     }
 
+    @Deprecated("Non-Flow implementation is used instead")
     @Throws(TransactionException::class)
     override fun mintTokenAsFlow(to: String, value: Value, uri: String): Flow<Response<TransactionReceipt>> {
         /*
@@ -75,13 +76,11 @@ class WalletRepository(
             try {
                 logger.d("[start] mintToken() $to, $value, $uri")
                 val txReceipt = swapValueContract.safeMint(to, value, uri).send()
-                emit(Response.Data<TransactionReceipt>(txReceipt))
-
-                /*if (txReceipt.isStatusOK) {
+                if (txReceipt.isStatusOK) {
                     emit(Response.Data<TransactionReceipt>(txReceipt))
                 } else {
                     emit(Response.Error.Message("Reverted with reason: ${txReceipt.revertReason}"))
-                }*/
+                }
             } catch (ex: Exception) {
                 logger.e("Failed to mint a token", ex)
                 emit(Response.Error.Exception(ex))
@@ -183,6 +182,7 @@ class WalletRepository(
         }
     }
 
+    @Deprecated("Non-Flow implementation is used instead")
     override fun swapAsFlow(subj: Match): Flow<Response<TransactionReceipt>> {
         return flow {
             try {
@@ -215,8 +215,8 @@ class WalletRepository(
             result = Response.Error.Exception(ex)
         } finally {
             logger.d("[end] swap call")
-            return result
         }
+        return result
     }
 
     override fun getOffer(tokenId: String): Flow<Response<Value>> {
@@ -233,6 +233,7 @@ class WalletRepository(
         }
     }
 
+    @Deprecated("Non-Flow implementation is used instead")
     override fun registerUserOnSwapMarketAsFlow(userWalletAddress: String): Flow<Response<TransactionReceipt>> {
         return flow {
             logger.d("[start] registerUserOnSwapMarket")
@@ -251,13 +252,12 @@ class WalletRepository(
             } catch (ex: Exception) {
                 response = Response.Error.Exception(ex)
             } finally {
-                emit(response)
                 logger.d("[end] registerUserOnSwapMarket")
             }
+            emit(response)
         }
     }
 
-    @Suppress("ReturnInsideFinallyBlock")
     override suspend fun registerUserOnSwapMarket(userWalletAddress: String): Response<TransactionReceipt> {
         logger.d("[start] registerUserOnSwapMarket")
         val isValidEthAddress = WalletUtils.isValidAddress(userWalletAddress)
@@ -277,10 +277,11 @@ class WalletRepository(
             response = Response.Error.Exception(ex)
         } finally {
             logger.d("[end] registerUserOnSwapMarket")
-            return response
         }
+        return response
     }
 
+    @Deprecated("Non-Flow implementation is used instead")
     override fun approveTokenManagerAsFlow(operator: String, approved: Boolean): Flow<Response<TransactionReceipt>> {
         return flow {
             try {
@@ -297,7 +298,6 @@ class WalletRepository(
         }
     }
 
-    @Suppress("ReturnInsideFinallyBlock")
     override suspend fun approveTokenManager(operator: String, approved: Boolean): Response<TransactionReceipt> {
         lateinit var result: Response<TransactionReceipt>
         try {
@@ -309,10 +309,11 @@ class WalletRepository(
             result = Response.Error.Exception(ex)
         } finally {
             logger.d("[end] approve token manager")
-            return result
         }
+        return result
     }
 
+    @Deprecated("Non-Flow implementation is used instead")
     override fun approveSwapAsFlow(matchSubj: Match): Flow<Response<TransactionReceipt>> {
         return flow {
             try {
@@ -334,7 +335,6 @@ class WalletRepository(
         }
     }
 
-    @Suppress("ReturnInsideFinallyBlock")
     override suspend fun approveSwap(matchSubj: Match): Response<TransactionReceipt> {
         lateinit var result: Response<TransactionReceipt>
         try {
@@ -352,10 +352,11 @@ class WalletRepository(
             result = response
         } finally {
             logger.d("[end] approve swap")
-            return result
         }
+        return result
     }
 
+    @Deprecated("Register demand is not supported since V2")
     override fun registerDemandAsFlow(userWalletAddress: String, demand: String): Flow<Response<TransactionReceipt>> {
         return flow {
             try {
@@ -384,6 +385,7 @@ class WalletRepository(
         }
     }
 
+    @Deprecated("Register demand is not supported since V2")
     override suspend fun registerDemand(userWalletAddress: String, demand: String): Response<TransactionReceipt> {
         lateinit var result: Response<TransactionReceipt>
         try {
@@ -407,8 +409,8 @@ class WalletRepository(
             result = Response.Error.Exception(ex)
         } finally {
             logger.d("[end] register demand")
-            return result
         }
+        return result
     }
 
     private fun getFullTokenForTokenIds(tokenIds: List<*>, withConsumed: Boolean): MutableList<Token> {
@@ -435,15 +437,16 @@ class WalletRepository(
     * own wallet, own contract instance. Just leave it for debug purpose.
     * */
     private suspend fun loadContract(userAccountPrivateKeyReference: Int) = withContext(Dispatchers.IO) {
-        // TODO chainId required to mint tokens based on new ethereum standard (see https://blog.ethereum.org/2021/03/03/geth-v1-10-0)
-        // it is only available over custom RawTransactionManager which is used for both balanceOf() and mint() methods
+        /*
+        *  chainId required to mint tokens based on new ethereum standard (see https://blog.ethereum.org/2021/03/03/geth-v1-10-0)
+        *  it is only available over custom RawTransactionManager which is used for both balanceOf() and mint() methods
+        * */
         val swapValueContractAddress: String = context.getString(R.string.swap_value_contract_address)
-//        val privateKey: String = context.getString(R.string.private_key)
         val chainId: Long = context.getString(R.string.chain_id).toLong()
         swapValueContract = SwapValue.load(
             swapValueContractAddress,
             web3,
-            RawTransactionManager(web3, getCredentials(userAccountPrivateKeyReference)/*Credentials.create(privateKey)*/, chainId),
+            RawTransactionManager(web3, getCredentials(userAccountPrivateKeyReference), chainId),
             DefaultGasProvider()
         )
         val swapChainContractAddress: String = context.getString(R.string.swap_chain_contract_address)
@@ -461,7 +464,7 @@ class WalletRepository(
     }
 
     private fun getCredentials(userAccountPrivateKeyReference: Int): Credentials {
-        return Credentials.create(context.getString(userAccountPrivateKeyReference/*R.string.wallet_password*/))
+        return Credentials.create(context.getString(userAccountPrivateKeyReference))
     }
 
 }

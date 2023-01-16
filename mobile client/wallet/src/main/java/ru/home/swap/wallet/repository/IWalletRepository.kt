@@ -19,6 +19,7 @@ interface IWalletRepository {
 
     fun balanceOf(owner: String): Flow<Response<BigInteger>>
 
+    @Deprecated("Non-Flow implementation is used instead")
     @Throws(TransactionException::class)
     fun mintTokenAsFlow(to: String, value: Value, uri: String): Flow<Response<TransactionReceipt>>
 
@@ -30,14 +31,17 @@ interface IWalletRepository {
 
     fun getOffer(tokenId: String): Flow<Response<Value>>
 
+    @Deprecated("Non-Flow implementation is used instead")
     fun registerUserOnSwapMarketAsFlow(userWalletAddress: String): Flow<Response<TransactionReceipt>>
 
     suspend fun registerUserOnSwapMarket(userWalletAddress: String): Response<TransactionReceipt>
 
+    @Deprecated("Non-Flow implementation is used instead")
     fun approveTokenManagerAsFlow(operator: String, approved: Boolean): Flow<Response<TransactionReceipt>>
 
     suspend fun approveTokenManager(operator: String, approved: Boolean): Response<TransactionReceipt>
 
+    @Deprecated("Non-Flow implementation is used instead")
     fun approveSwapAsFlow(matchSubj: Match): Flow<Response<TransactionReceipt>>
 
     suspend fun approveSwap(matchSubj: Match): Response<TransactionReceipt>
@@ -52,6 +56,7 @@ interface IWalletRepository {
 
     fun getTokenIdsWithValues(userWalletAddress: String, withConsumed: Boolean): Flow<Response<List<Token>>>
 
+    @Deprecated("Non-Flow implementation is used instead")
     fun swapAsFlow(subj: Match): Flow<Response<TransactionReceipt>>
 
     suspend fun swap(subj: Match): Response<TransactionReceipt>
