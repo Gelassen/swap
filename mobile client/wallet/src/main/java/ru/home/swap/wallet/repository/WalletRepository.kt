@@ -135,23 +135,24 @@ class WalletRepository(
     override fun getTokenIdsForUser(userWalletAddress: String): Flow<Response<List<*>>> {
         return flow {
             logger.d("[start] getTokenIdsForUser() for user ${userWalletAddress}")
+            lateinit var result: Response<List<*>>
             try {
                 val isValidEthAddress = WalletUtils.isValidAddress(userWalletAddress)
                         && userWalletAddress.uppercase().contentEquals(
                     Keys.toChecksumAddress(userWalletAddress).uppercase())
                 if (isValidEthAddress) {
                     val response = swapValueContract.getTokensIdsForUser(userWalletAddress).send()
-                    emit(Response.Data(response))
+                    result = Response.Data(response)
                 } else {
-                    val response = Response.Error.Message("${userWalletAddress} is not valid ethereum address.Please check you pass a correct ethereum address.")
-                    emit(response)
+                    result = Response.Error.Message("${userWalletAddress} is not valid ethereum address.Please check you pass a correct ethereum address.")
                 }
             } catch (ex: Exception) {
                 logger.e("Failed to obtain tokens ids for user", ex)
-                emit(Response.Error.Exception(ex))
+                result = Response.Error.Exception(ex)
             } finally {
                 logger.d("[end] getTokenIdsForUser() for user ${userWalletAddress}")
             }
+            emit(result)
         }
     }
 
@@ -161,6 +162,7 @@ class WalletRepository(
     ): Flow<Response<List<Token>>> {
         return flow {
             logger.d("[start] getTokenIdsWithValues() for user ${userWalletAddress}")
+            lateinit var result: Response<List<Token>>
             try {
                 val isValidEthAddress = WalletUtils.isValidAddress(userWalletAddress)
                         && userWalletAddress.uppercase().contentEquals(
@@ -168,17 +170,18 @@ class WalletRepository(
                 if (isValidEthAddress) {
                     val response = swapValueContract.getTokensIdsForUser(userWalletAddress).send()
                     val finalResult = getFullTokenForTokenIds(response, withConsumed)
-                    emit(Response.Data(finalResult))
+                    result = Response.Data(finalResult)
                 } else {
                     val response = Response.Error.Message("${userWalletAddress} is not valid ethereum address.Please check you pass a correct ethereum address.")
-                    emit(response)
+                    result = response
                 }
             } catch (ex: Exception) {
                 logger.e("Failed to obtain tokens ids for user", ex)
-                emit(Response.Error.Exception(ex))
+                result = Response.Error.Exception(ex)
             } finally {
                 logger.d("[end] getTokenIdsWithValues() for user ${userWalletAddress}")
             }
+            emit(result)
         }
     }
 
@@ -221,15 +224,17 @@ class WalletRepository(
 
     override fun getOffer(tokenId: String): Flow<Response<Value>> {
         return flow {
+            logger.d("[start] getOffer() for tokenId $tokenId")
+            lateinit var result: Response<Value>
             try {
-                logger.d("[start] getOffer() for tokenId $tokenId")
                 val response = swapValueContract.getOffer(tokenId).send()
-                emit(Response.Data(response))
+                result = Response.Data(response)
             } catch (ex: Exception) {
-                emit(Response.Error.Exception(ex))
+                result = Response.Error.Exception(ex)
             } finally {
                 logger.d("[end] getOffer()")
             }
+            emit(result)
         }
     }
 
