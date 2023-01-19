@@ -95,6 +95,56 @@ exports.requestToDomainService = function(reqBody) {
     }
 }
 
+exports.requestToDomainChainMatch = function(reqBody) {
+    return {
+        "userFirst" : reqBody.userFirst,
+        "valueOfFirstUser" : reqBody.valueOfFirstUser,
+        "userSecond" : reqBody.userSecond,
+        "valueOfSecondUser" : reqBody.valueOfSecondUser,
+        "approvedByFirstUser" : reqBody.approvedByFirstUser,
+        "approvedBySecondUser" : reqBody.approvedBySecondUser
+    }
+}
+
+// TOOD refactor row object fields
+exports.syntheticDbToDomainServerMatch = function(rows) {
+    let result = [];
+    if (rows.length == 0) return result;
+
+    for (id = 0; id < rows.length; id++) {
+        let match = {};
+        match.id = 0; // We omit id as it does not exist yet;
+        match.userFirstProfileId =  rows[id].Q1ProfileId; 
+        match.userSecondProfileId = rows[id].profileId;
+        match.userFirstServiceId = rows[id].Q1Id;
+        match.userSecondServiceId = rows[id].id;
+        match.approvedByFirstUser = false;
+        match.approvedBySecondUser = false;
+        result.push(service);
+    }
+    return result;
+}
+
+exports.matchesDbToDomainMatches = function(rows) {
+    let result = [];
+    if (rows.length == 0) return result;
+
+    for (id = 0; id < rows.length; id++) {
+        let match = {};
+        match.id = rows[id].id;
+        match.userFirstProfileId = rows[id].userFirstProfileId; 
+        match.userSecondProfileId = rows[id].userSecondProfileId;
+        match.userFirst = rows[id].userFirst; // TODO do we need user address on chain here?
+        match.valueOfFirstUser = rows[id].valueOfFirstUser;
+        match.userSecond = rows[id].userSecond; // TODO do we need user address on chain here?
+        match.valueOfSecondUser = rows[id].valueOfSecondUser;
+        match.approvedByFirstUser = rows[id].approvedByFirstUser;
+        match.approvedBySecondUser = rows[id].approvedBySecondUser;
+        result.push(service);
+    }
+    return result;
+}
+
 function prepareIndex(row) {
     let index = []
     if (row.serviceIndex != null || row.serviceIndex != undefined) {

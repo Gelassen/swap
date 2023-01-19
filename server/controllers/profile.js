@@ -232,6 +232,38 @@ exports.deleteDemand = async function(req, res) {
     logger.log('[delete demand] end');
 }
 
+// TODO complete me 
+exports.confirmMatch = async function(req, res) {
+    logger.log("[confirm match] start")
+    let result = network.getMsg(200, "Not defined")
+    let matchObjectFromRequest = converter.requestToDomainChainMatch(req.body)
+    if (req.get(global.authHeader) === undefined) {
+        result = network.getErrorMsg(401, "Did you forget to add authorization header?");
+    } else if (network.getAuthHeaderAsTokens(req).error) {
+        result = network.getErrorMsg(400, "Did you add correct authorization header?");
+    } else if (!validator.validateMatch(matchObjectFromRequest)) {
+        logger.log(`[confirm match] match payload ${matchObjectFromRequest} check - failed`);
+        result = network.getErrorMsg(400, "Did you forget to add a valid match object as a payload?");
+    } else {
+        let credentials = network.getAuthNameSecretPair(
+            network.getAuthHeaderAsTokens(req)
+        );
+        let profileResult = await profile.getFullProfile(credentials);
+        logger.log(`[confirm match] match object ${JSON.stringify(confirmMatch)}`);
+        logger.log(`[confirm match] full profile ${JSON.stringify(profileResult)}`);
+        if (network.noSuchData(profileResult)) {
+            result = network.getErrorMsg(401, "There is no account for this credentials. Are you authorized?")
+        } else if (/*TODO validate profile if there is such match object*//*isThereSuchService(profileResult.demands, demandFromRequest)*/) {
+            result = network.getErrorMsg(409, `The same demand for this profile already exist ${JSON.stringify(demandFromRequest)}`);
+        } else {
+            // TODO add record in databade match is confirmed
+            // logger.log(`[add demand] offer to insert ${JSON.stringify(demandFromRequest)}`);
+            // result = await profile.addDemand(demandFromRequest, profileResult.id); 
+        }
+    }
+    logger.log("[confirm match] end")
+}
+
 // TODO refactor it by grouping, exposing and encapsualting methods below in separate classes
 /*
     It is a stub for feature postponed for future. In original design it should be done on
