@@ -1,17 +1,120 @@
 const config = require('config')
 const { resolve } = require('path/posix');
 const pool = require('../database');
+const { MatchTable, ChainServicesTable, ServerServicesTable } = require('../models/tables/schema')
 const util = require('../utils/network')
 const logger = require('../utils/logger') 
 const converter = require('../utils/converter');
-const c = require('config');
+
+// TODO check connection.release() is called in each case
+exports.confirmMatch = function(requesterProfileId, match, req, res) {
+    return new Promise((resolve) => {
+        pool.getConnection(function(err, connection) {
+            let sqlQuery = "";
+            // keep hardcoded params in sql safe from sql injections by validating input data first 
+            if (requesterProfileId == match.userFirstProfileId) {
+                sqlQuery = `
+                    UPDATE ${MatchTable.TABLE_NAME} 
+                    SET ${MatchTable.approvedByFirstUser} = true 
+                    WHERE ${MatchTable.userFirstProfileId} = ${requesterProfileId};`;
+            } else if (requesterProfileId == match.userSecondProfileId) {
+                sqlQuery = `
+                    UPDATE ${MatchTable.TABLE_NAME} 
+                    SET ${MatchTable.approvedBySecondUser} = true 
+                    WHERE ${MatchTable.userSecondProfileId} = ${requesterProfileId};`;
+            } else {
+                let response = util.getMsg(400, {}, `${requesterProfileId} is not valid profile id for passed match ${match}`);
+                resolve(response);
+                connection.release()
+            }
+            connection.query(
+                {sql: sqlQuery, timeout: 60000}, 
+                function(error, rows, fields) {
+                    if (error != null) {
+                        logger.log(JSON.stringify(error));
+                        let response = util.getErrorMsg(500, error);
+                        resolve(response);
+                    } else {
+                        let response = util.getMsg(200, {}, (rows.affectedRows == 0) ? "No changes has been aplied" : `Match has been approved by user ${requesterProfileId}`);
+                        resolve(JSON.stringify(response));
+                    }
+                    connection.release();
+                }
+            )
+        })
+    })
+}
+
+exports.getByProfileIdAndServiceIds = function(profileId, firstServiceId, secondServiceId) {
+    return new Promise((resolve) => {
+        pool.getConnection(function(err, connection) {
+            if (err) throw err;
+
+            const sql = `SELECT * 
+                FROM ${MatchTable.TABLE_NAME} 
+                WHERE 
+                    (
+                        ${MatchTable.USER_FIRST_PROFILE_ID} == ${profileId}
+                         OR  
+                        ${MatchTable.USER_SECOND_PROFILE_ID} == ${profileId}
+                    )
+                     AND 
+                    (
+                        (
+                            ${MatchTable.USER_FIRST_SERVICE_ID} == ${firstServiceId} 
+                             AND
+                            ${MatchTable.USER_SECOND_SERVICE_ID} == ${secondServiceId}
+                        )
+                         OR 
+                        (
+                            ${MatchTable.USER_FIRST_SERVICE_ID} == ${secondServiceId} 
+                             AND
+                            ${MatchTable.USER_SECOND_SERVICE_ID} == ${firstServiceId}
+                        )
+
+                    ) 
+
+            ;`;
+            logger.log("sql query: " + sql)
+            connection.query(
+                {sql: sql, TIMEOUT},
+                [], 
+                function(error, rows, fields) {
+                    logger.log(`rows - ${JSON.stringify(rows)}`);
+                    if (error != null) {
+                        logger.log(JSON.stringify(error));
+                        let response = util.getErrorMsg(500, error);
+                        resolve(response);
+                    } else if (rows.count() != 1) {
+                        let msg = (rows.count() == 0) ? "There is no known matches for this input params" 
+                            : "There is more than a single row for this input params." 
+                        let response = util.getServiceMessage(409, msg);
+                        resolve(response);
+                    } else {
+                        let data = converter.dbToDomainServerMatch(rows);
+                        let response = util.getPayloadMessage(data);
+                        resolve(JSON.stringify(response));
+                    }
+                    connection.release();
+                }
+            )
+            connection.release();
+        })
+    })
+}
 
 exports.getByProfileId = function(profileId, req, res) {
     return new Promise((resolve) => {
         pool.getConnection(function(err, connection) {
             if (err) throw err;
 
-            const sql = `SELECT * FROM Matches WHERE profileId != ${profileId}`;
+            const sql = `SELECT * 
+                FROM ${MatchTable.TABLE_NAME} 
+                WHERE 
+                    ${MatchTable.USER_FIRST_PROFILE_ID} == ${profileId}
+                     OR  
+                    ${MatchTable.USER_SECOND_PROFILE_ID} == ${profileId}
+            ;`;
             logger.log("sql query: " + sql)
             connection.query(
                 {sql: sql, TIMEOUT},
@@ -23,8 +126,9 @@ exports.getByProfileId = function(profileId, req, res) {
                         let response = util.getErrorMsg(500, error);
                         resolve(response);
                     } else {
-                        let response = converter.syntheticDbToDomainServerMatch(rows);
-                        resolve(response);
+                        let data = converter.dbToDomainServerMatch(rows);
+                        let response = util.getPayloadMessage(data);
+                        resolve(JSON.stringify(response));
                     }
                     connection.release();
                 }
@@ -45,7 +149,7 @@ exports.makePotentialMatch = function(profileId, userDemand, req, res) {
                     FROM 
                         (
                             SELECT * 
-                            FROM Service 
+                            FROM ${ServerServicesTable.TABLE_NAME} 
                             WHERE offer = 1
                                 AND profileId != ${profileId}
                                 AND title LIKE('%${userDemand}%') 
@@ -56,7 +160,7 @@ exports.makePotentialMatch = function(profileId, userDemand, req, res) {
                             FROM
                             (
                                 SELECT * 
-                                FROM Service
+                                FROM ${ServerServicesTable.TABLE_NAME}
                                 WHERE 
                                     (
                                         offer = 1
@@ -66,7 +170,7 @@ exports.makePotentialMatch = function(profileId, userDemand, req, res) {
                             INNER JOIN LATERAL
                             (	
                                 SELECT *
-                                FROM Service
+                                FROM ${ServerServicesTable.TABLE_NAME}
                                 WHERE 
                                     (
                                         offer = 0
@@ -76,7 +180,12 @@ exports.makePotentialMatch = function(profileId, userDemand, req, res) {
                             ) q2
                             ON q1.title = q2.title
                         ) AS giveBack
-                    ON offers.profileId = giveBack.Q2ProfileId;
+                    ON offers.profileId = giveBack.Q2ProfileId
+                    INNER JOIN ${ChainServicesTable.TABLE_NAME} as chainServices
+                    ON id = chainServices.serverServiceId 
+                    LEFT OUTER JOIN ${ChainServicesTable.TABLE_NAME} as chainServices2
+                    ON Q1Id = chainServices2.serverServiceId 
+                    ORDER BY title;
                 `;
                 logger.log("sql query: " + sqlQuery);
                 connection.query(
@@ -128,7 +237,7 @@ function prepareMatchBulkInsertQuery(matches) {
     if (matches.length == 0) {
         throw { 'error' : "Empty array as input param is not allowed. Did you forget your input data before call?"};
     }
-    let baseSqlQuery = `INSERT 
+    let baseSqlQuery = `INSERT INTO ${MatchTable.TABLE_NAME}
         (
             id, userFirstProfileId, userSecondProfileId, 
             userFirstServiceId, userSecondServiceId,
@@ -143,5 +252,6 @@ function prepareMatchBulkInsertQuery(matches) {
             }
             )`;
     }
-    return baseSqlQuery;
+    return baseSqlQuery + ";";
 }
+

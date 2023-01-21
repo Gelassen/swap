@@ -1,4 +1,6 @@
 let profile = require('../models/profile')
+let match = require('../models/match')
+let profileProvider = require('../provider/profile');
 
 let auth = require('../utils/auth')
 let network = require('../utils/network')
@@ -232,7 +234,6 @@ exports.deleteDemand = async function(req, res) {
     logger.log('[delete demand] end');
 }
 
-// TODO complete me 
 exports.confirmMatch = async function(req, res) {
     logger.log("[confirm match] start")
     let result = network.getMsg(200, "Not defined")
@@ -249,25 +250,32 @@ exports.confirmMatch = async function(req, res) {
             network.getAuthHeaderAsTokens(req)
         );
         let profileResult = await profile.getFullProfile(credentials);
+        // TODO extend sql query and assigned convertor to support chain service data
+        let matchResponse = await match.getByProfileIdAndServiceIds(
+            profileResult.profileId,
+            matchObjectFromRequest.userFirstServiceId,
+            matchObjectFromRequest.userSecondServiceId
+        );
         logger.log(`[confirm match] match object ${JSON.stringify(confirmMatch)}`);
         logger.log(`[confirm match] full profile ${JSON.stringify(profileResult)}`);
         if (network.noSuchData(profileResult)) {
             result = network.getErrorMsg(401, "There is no account for this credentials. Are you authorized?")
-        } else if (/*TODO validate profile if there is such match object*//*isThereSuchService(profileResult.demands, demandFromRequest)*/) {
-            result = network.getErrorMsg(409, `The same demand for this profile already exist ${JSON.stringify(demandFromRequest)}`);
+        } else if (matchResponse.code != 200) {
+            result = matchResponse; 
         } else {
-            // TODO add record in databade match is confirmed
-            // logger.log(`[add demand] offer to insert ${JSON.stringify(demandFromRequest)}`);
-            // result = await profile.addDemand(demandFromRequest, profileResult.id); 
+            // TODO refactor all this method to ridoff unused validators and queries 
+            result = match.confirmMatch(profileResult.profileId, matchObjectFromRequest, req ,res);
         }
     }
     logger.log("[confirm match] end")
 }
 
-// TODO refactor it by grouping, exposing and encapsualting methods below in separate classes
 /*
     It is a stub for feature postponed for future. In original design it should be done on
     client side and offered for user to pick up right keys-indexes for search
+ */
+/**
+ * @deprecated use providers/profile.js version
  */
 function prepareIndex(str) {
     let index = [];
@@ -275,6 +283,16 @@ function prepareIndex(str) {
     return index;
 }
 
+/**
+ * @deprecated use providers/profile.js version
+ */
+function isAnyMatchForProfile(matches) {
+    return (matches.length > 0)
+}
+
+/**
+ * @deprecated use providers/profile.js version
+ */
 function isThereSuchService(profileServices, subject) {
     let result = false;
     for (let id = 0; id < profileServices.length; id++) {
@@ -289,6 +307,9 @@ function isThereSuchService(profileServices, subject) {
     return result;
 }
 
+/**
+ * @deprecated use providers/profile.js version
+ */
 function thereIsNoThisService(profileServices, requestId) {
     if (profileServices.length == 0) return true;
 
@@ -302,6 +323,9 @@ function thereIsNoThisService(profileServices, requestId) {
     return result;
 } 
 
+/**
+ * @deprecated use providers/profile.js version
+ */
 function thereIsSuchData(obj) {
     return Object.keys(obj).length
 }
@@ -313,6 +337,9 @@ function noSuchData(obj) {
     return !Object.keys(obj).length
 }
 
+/**
+ * @deprecated use providers/profile.js version
+ */
 function isAttemptToSignIn(profile, reqSecret) {
     return Object.keys(profile).length && profile.secret === reqSecret;
 }

@@ -1,3 +1,5 @@
+import { MatchTable } from ('../models/match');
+
 
 exports.dbToDomainProfile = function(rows) {
     if (rows.length == 0) return {};
@@ -96,14 +98,16 @@ exports.requestToDomainService = function(reqBody) {
 }
 
 exports.requestToDomainChainMatch = function(reqBody) {
-    return {
-        "userFirst" : reqBody.userFirst,
-        "valueOfFirstUser" : reqBody.valueOfFirstUser,
-        "userSecond" : reqBody.userSecond,
-        "valueOfSecondUser" : reqBody.valueOfSecondUser,
-        "approvedByFirstUser" : reqBody.approvedByFirstUser,
-        "approvedBySecondUser" : reqBody.approvedBySecondUser
-    }
+    let result = {};
+    result.userFirst = reqBody.userFirst;
+    result.valueOfFirstUser = reqBody.valueOfFirstUser;
+    result.userSecond = reqBody.userSecond;
+    result.valueOfSecondUser = reqBody.valueOfSecondUser;
+    result.approvedByFirstUser = reqBody.approvedByFirstUser;
+    result.approvedBySecondUser = reqBody.approvedBySecondUse;
+    result.userFirstServiceId = reqBody.userFirstServiceId; // TODO confirm it is passed from the client
+    result.userSecondServiceId = reqBody.userSecondServiceId; // TODO confirm it is passed from the client
+    return result;
 }
 
 // TOOD refactor row object fields
@@ -118,6 +122,7 @@ exports.syntheticDbToDomainServerMatch = function(rows) {
         match.userSecondProfileId = rows[id].profileId;
         match.userFirstServiceId = rows[id].Q1Id;
         match.userSecondServiceId = rows[id].id;
+        // match.idChainService = 
         match.approvedByFirstUser = false;
         match.approvedBySecondUser = false;
         result.push(service);
@@ -125,6 +130,26 @@ exports.syntheticDbToDomainServerMatch = function(rows) {
     return result;
 }
 
+exports.dbToDomainServerMatch = function(rows) {
+    let result = [];
+    if (rows.length == 0) return result;
+
+    for (id = 0; id < rows.length; id++) {
+        let serverMatch = {}
+        serverMatch.id = rows[id].id;
+        serverMatch.userFirstProfileId = rows[id].userFirstProfileId;
+        serverMatch.userSecondProfileId = rows[id].userSecondProfileId;
+        serverMatch.userFirstServiceId = rows[id].userFirstServiceId;
+        serverMatch.userSecondServiceId = rows[id].userSecondServiceId;
+        serverMatch.approvedByFirstUser = rows[id].approvedByFirstUser;
+        serverMatch.approvedBySecondUser = rows[id].approvedBySecondUser;
+
+        result.push(serverMatch);
+    }
+    return result;
+}
+
+// TODO clarify use case or remove it
 exports.matchesDbToDomainMatches = function(rows) {
     let result = [];
     if (rows.length == 0) return result;
