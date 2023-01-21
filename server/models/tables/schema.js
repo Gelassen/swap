@@ -1,5 +1,5 @@
 
-export class MatchTable {
+class MatchTable {
     TABLE_NAME = "PotentialMatches"
     ID = "id"
     USER_FIRST_PROFILE_ID = "userFirstProfileId"
@@ -12,7 +12,7 @@ export class MatchTable {
     constructor() { /* no op */}
 }
 
-export class ChainServicesTable {
+class ChainServicesTable {
     TABLE_NAME = "ChainServices"
     ID = "id"
     USER_ADDRESS = "userAddress"
@@ -22,8 +22,10 @@ export class ChainServicesTable {
     constructor() { /* no op */}
 }
 
-export class ServerServicesTable {
+class ServerServicesTable {
     TABLE_NAME = "Service"
 
     constructor() { /* no op */} 
 }
+
+module.exports = { MatchTable, ChainServicesTable, ServerServicesTable }

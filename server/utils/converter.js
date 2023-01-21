@@ -1,5 +1,3 @@
-import { MatchTable } from ('../models/match');
-
 
 exports.dbToDomainProfile = function(rows) {
     if (rows.length == 0) return {};

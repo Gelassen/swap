@@ -1,6 +1,6 @@
 let profile = require('../models/profile')
 let match = require('../models/match')
-let profileProvider = require('../provider/profile');
+let profileProvider = require('../providers/profile');
 
 let auth = require('../utils/auth')
 let network = require('../utils/network')
@@ -263,7 +263,6 @@ exports.confirmMatch = async function(req, res) {
         } else if (matchResponse.code != 200) {
             result = matchResponse; 
         } else {
-            // TODO refactor all this method to ridoff unused validators and queries 
             result = match.confirmMatch(profileResult.profileId, matchObjectFromRequest, req ,res);
         }
     }
