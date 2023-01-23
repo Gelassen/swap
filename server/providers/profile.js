@@ -36,17 +36,6 @@ exports.thereIsNoThisService = function(profileServices, requestId) {
     return result;
 } 
 
-exports.thereIsSuchData = function(obj) {
-    return Object.keys(obj).length
-}
-
-/**
- * @deprecated
- */
-exports.noSuchData = function(obj) {
-    return !Object.keys(obj).length
-}
-
 exports.isAttemptToSignIn = function(profile, reqSecret) {
     return Object.keys(profile).length && profile.secret === reqSecret;
 }

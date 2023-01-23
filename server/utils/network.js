@@ -46,7 +46,11 @@ exports.getAuthHeaderAsTokens = function getAuthHeaderAsTokens(req) {
     return auth.parse(req.get(global.authHeader));
 }
 
-exports.noSuchData = function noSuchData(obj) {
+exports.thereIsSuchData = function(obj) {
+    return Object.keys(obj).length
+}
+
+exports.noSuchData = function(obj) {
     return !Object.keys(obj).length
 }
 

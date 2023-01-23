@@ -35,7 +35,7 @@ exports.create = async function(req, res) {
             logger.log(`[auth header issue] ${JSON.stringify(network.getAuthHeaderAsTokens(req))}`);
             let profiles = await profile.getProfileByCell(req, res, credentials);
             logger.log(`[account::create] [7] profiles result: ${JSON.stringify(profiles)}`);
-            if (isAttemptToSignIn(profiles, credentials[1])) {
+            if (profileProvider.isAttemptToSignIn(profiles, credentials[1])) {
                 // we have to return back to the client a full profile
                 let model = await profile.getFullProfile(credentials)
                     .catch(e => network.getErrorMsg(500, JSON.stringify(e)));
@@ -47,7 +47,7 @@ exports.create = async function(req, res) {
                 } else {
                     result = network.getMsg(200, model);
                 }
-            } else if (thereIsSuchData(profiles)) {
+            } else if (network.thereIsSuchData(profiles)) {
                 logger.log(`[account::create] [8] there is already account with this contact ${req.body.contact}`);
                 result = network.getErrorMsg(409, `There is an account with contact ${req.body.contact}`);
             } else {
@@ -116,7 +116,7 @@ exports.addOffer = async function(req, res) {
     logger.log("[add offer] start");
     let result = network.getMsg(200, "Not defined");
     let offerFromRequest = converter.requestToDomainService(req.body);
-    offerFromRequest.index = prepareIndex(offerFromRequest.title);
+    offerFromRequest.index = profileProvider.prepareIndex(offerFromRequest.title);
     if (req.get(global.authHeader) === undefined) {
         result = network.getErrorMsg(401, "Did you forget to add authorization header?");
     } else if (network.getAuthHeaderAsTokens(req).error) {
@@ -133,7 +133,7 @@ exports.addOffer = async function(req, res) {
         logger.log(`[add offer] full profile ${JSON.stringify(profileResult)}`);
         if (network.noSuchData(profileResult)) {
             result = network.getErrorMsg(401, "There is no account for this credentials. Are you authorized?")
-        } else if (isThereSuchService(profileResult.offers, offerFromRequest)) {
+        } else if (profileProvider.isThereSuchService(profileResult.offers, offerFromRequest)) {
             result = network.getErrorMsg(409, `The same offer for this profile already exist ${JSON.stringify(offerFromRequest)}`);
         } else {
             logger.log(`[add ofer] offer to insert ${JSON.stringify(offerFromRequest)}`);
@@ -148,7 +148,7 @@ exports.addDemand = async function(req, res) {
     logger.log("[add demand] start");
     let result = network.getMsg(200, "Not defined");
     let demandFromRequest = converter.requestToDomainService(req.body);
-    demandFromRequest.index = prepareIndex(demandFromRequest.title);
+    demandFromRequest.index = profileProvider.prepareIndex(demandFromRequest.title);
     if (req.get(global.authHeader) === undefined) {
         result = network.getErrorMsg(401, "Did you forget to add authorization header?");
     } else if (network.getAuthHeaderAsTokens(req).error) {
@@ -165,7 +165,7 @@ exports.addDemand = async function(req, res) {
         logger.log(`[add demand] full profile ${JSON.stringify(profileResult)}`);
         if (network.noSuchData(profileResult)) {
             result = network.getErrorMsg(401, "There is no account for this credentials. Are you authorized?")
-        } else if (isThereSuchService(profileResult.demands, demandFromRequest)) {
+        } else if (profileProvider.isThereSuchService(profileResult.demands, demandFromRequest)) {
             result = network.getErrorMsg(409, `The same demand for this profile already exist ${JSON.stringify(demandFromRequest)}`);
         } else {
             logger.log(`[add demand] offer to insert ${JSON.stringify(demandFromRequest)}`);
@@ -190,7 +190,7 @@ exports.deleteOffer = async function(req, res) {
         let profileResult = await profile.getFullProfile(credentials);
         if (network.noSuchData(profileResult)) {
             result = network.getErrorMsg(401, "There is no account for this credentials. Are you authorized?");
-        } else if(thereIsNoThisService(profileResult.offers, req.param.id)) {
+        } else if(profileProvider.thereIsNoThisService(profileResult.offers, req.param.id)) {
             result = network.getErrorMsg(404, `There is an account for this credentials, but there is no offer in for this id ${req.params.id}`);
         } else {
             let isSuccess = await profile.deleteOffer(req);
@@ -219,7 +219,7 @@ exports.deleteDemand = async function(req, res) {
         let profileResult = await profile.getFullProfile(credentials);
         if (network.noSuchData(profileResult)) {
             result = network.getErrorMsg(401, "There is no account for this credentials. Are you authorized?");
-        } else if(thereIsNoThisService(profileResult.demands, req.param.id)) {
+        } else if(profileProvider.thereIsNoThisService(profileResult.demands, req.param.id)) {
             result = network.getErrorMsg(404, `There is an account for this credentials, but there is no demand in for this id ${req.params.id}`);
         } else {
             let isSuccess = await profile.deleteDemand(req);
@@ -267,78 +267,4 @@ exports.confirmMatch = async function(req, res) {
         }
     }
     logger.log("[confirm match] end")
-}
-
-/*
-    It is a stub for feature postponed for future. In original design it should be done on
-    client side and offered for user to pick up right keys-indexes for search
- */
-/**
- * @deprecated use providers/profile.js version
- */
-function prepareIndex(str) {
-    let index = [];
-    index.push(str);
-    return index;
-}
-
-/**
- * @deprecated use providers/profile.js version
- */
-function isAnyMatchForProfile(matches) {
-    return (matches.length > 0)
-}
-
-/**
- * @deprecated use providers/profile.js version
- */
-function isThereSuchService(profileServices, subject) {
-    let result = false;
-    for (let id = 0; id < profileServices.length; id++) {
-        if (profileServices.at(id).title === subject.title
-        && profileServices.at(id).date === subject.date
-        && profileServices.at(id).index.length === subject.index.length
-        && profileServices.at(id).index.sort().every((value, index) => value === subject.index[index])) {
-            result = true;
-            break;
-        }
-    }
-    return result;
-}
-
-/**
- * @deprecated use providers/profile.js version
- */
-function thereIsNoThisService(profileServices, requestId) {
-    if (profileServices.length == 0) return true;
-
-    let result = false;
-    for (let id = 0; id < profileServices.length; id++) {
-        if (profileServices.at(id) === requestId) {
-            /* return false */
-            break;
-        }
-    }
-    return result;
-} 
-
-/**
- * @deprecated use providers/profile.js version
- */
-function thereIsSuchData(obj) {
-    return Object.keys(obj).length
-}
-
-/**
- * @deprecated
- */
-function noSuchData(obj) {
-    return !Object.keys(obj).length
-}
-
-/**
- * @deprecated use providers/profile.js version
- */
-function isAttemptToSignIn(profile, reqSecret) {
-    return Object.keys(profile).length && profile.secret === reqSecret;
 }
