@@ -268,3 +268,34 @@ exports.confirmMatch = async function(req, res) {
     }
     logger.log("[confirm match] end")
 }
+
+exports.getMatchesByProfile = async function(req, res) {
+    let result;
+    if (req.get(global.authHeader) === undefined) {
+        result = network.getErrorMsg(401, global.noAuthHeaderMsg)
+    } else if (network.getAuthHeaderAsTokens(req).error) {
+        result = network.getErrorMsg(400, network.getAuthHeaderAsTokens(req).result);
+    } else {
+        let credentials = network.getAuthNameSecretPair(
+            network.getAuthHeaderAsTokens(req)
+        );
+        let profileResult = await profile.getFullProfile(credentials)
+            .catch(e => network.getErrorMsg(500, JSON.stringify(e)));
+        logger.log("Full profile response: " + JSON.stringify(profileResult));
+        logger.log(`Json response keys size ${Object.keys(profileResult).length}`);
+        if (network.noSuchData(profileResult)) {
+            result = network.getMsg(204, profileResult);
+        } else {
+            let model = await match.getByProfileId(profileResult.id);
+            console.log(`[debug] 2. get model`)
+            if (model.code !== undefined && model.code == 500) {
+                console.log(`[debug] 3a. getMatchesByProfile(), error branch`)
+                result = model;
+            } else {
+                console.log(`[debug] 3b. getMatchesByProfile(), ok branch ${JSON.stringify(model)}`)
+                result = network.getMsg(200, model);
+            }
+        }
+    }
+    network.send(req, res, result)
+}

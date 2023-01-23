@@ -807,7 +807,79 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .delete(`/api/v1/account/${response.body.payload.id}`)
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .expect(204);
-    })
+    });
+    it.only('on POST /api/v1/account/demands with valid payload and existing match, get matches returns single value', async() => {
+        // prepare initial database state
+        // prepare offer 
+        let jamesPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
+        let jamesTestPayload = {"title":"Software development","date": 1746057600,"index":["Hacking servers by nights"]};
+        await request(app)
+            .get('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(204, {});
+        await request(app)
+            .post('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(jamesPayload)
+            .expect('Content-Type', 'application/json; charset=utf-8')
+            .expect(200, { "payload" : jamesPayload })
+        let responseJames = await request(app)
+            .get('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(200)
+        await request(app)
+            .post('/api/v1/account/offers')    
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(jamesTestPayload)
+            .expect(200);
+        // prepare demands 
+        let janePayload = {"contact":"TestJane@gmail.com","secret":"jne123","name":"Test Jane","offers":[],"demands":[]};
+        let janeDemandPayload = {"title":"Software development","date": 1746057600,"index":["Software development"]};
+        await request(app)
+            .get('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(204, {});
+        await request(app)
+            .post('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(janePayload)
+            .expect('Content-Type', 'application/json; charset=utf-8')
+            .expect(200, { "payload" : janePayload })
+        let responseJane = await request(app)
+            .get('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(200)
+
+        await request(app)
+            .post('/api/v1/account/demands')    
+            .set('Authorization', 'Basic VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(janeDemandPayload)
+            .expect(200, {})
+        
+        let matchResponse = await request(app)
+            .get('/api/v1/account/matches')
+            .set('Authorization', 'Basic VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(200)
+        expect(matchResponse.body.payload.length).toEqual(1);
+        // clean database
+        await request(app)
+            .delete(`/api/v1/account/${responseJames.body.payload.id}`)
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .expect(204); 
+        await request(app)
+            .delete(`/api/v1/account/${responseJane.body.payload.id}`)
+            .set('Authorization', 'Basic VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==')
+            .expect(204); 
+    });
     it('on DELETE /api/v1/account/demands without authorization header receives UNAUTHORIZED code', async() => {
         await request(app)
             .delete('/api/v1/account/demands/101')

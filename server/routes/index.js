@@ -20,6 +20,8 @@ router.get('/api/v1', function(req, res) {
         + "GET /offers \n"
         + "GET /demands \n"
         + "GET /contacts \n"
+        + "GET /account/matches \n"
+        + "POST /account/matches \n"
     res.send({msg: responseMsg })
 });
 router.post('/api/v1/account', profile.create);
@@ -33,6 +35,8 @@ router.post('/api/v1/account/offers', profile.addOffer);
 router.post('/api/v1/account/demands', profile.addDemand);
 router.delete('/api/v1/account/offers/:id', profile.deleteOffer);
 router.delete('/api/v1/account/demands/:id', profile.deleteDemand);
+router.get('/api/v1/account/matches', profile.getMatchesByProfile);
+router.post('/api/v1/account/matches', profile.confirmMatch)
 
 router.get('/api/v1/offers', offers.get);
 

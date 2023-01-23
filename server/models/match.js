@@ -6,6 +6,8 @@ const util = require('../utils/network')
 const logger = require('../utils/logger') 
 const converter = require('../utils/converter');
 
+const TIMEOUT = config.dbConfig.timeout;
+
 // TODO check connection.release() is called in each case
 exports.confirmMatch = function(requesterProfileId, match, req, res) {
     return new Promise((resolve) => {
@@ -92,7 +94,7 @@ exports.getByProfileIdAndServiceIds = function(profileId, firstServiceId, second
                         resolve(response);
                     } else {
                         let data = converter.dbToDomainServerMatch(rows);
-                        let response = util.getPayloadMessage(data);
+                        let response = util.getMsg(200, data);
                         resolve(JSON.stringify(response));
                     }
                     connection.release();
@@ -107,13 +109,14 @@ exports.getByProfileId = function(profileId, req, res) {
     return new Promise((resolve) => {
         pool.getConnection(function(err, connection) {
             if (err) throw err;
-
+            // make sure you prevent sql injection by validating first ${profileId}
+            console.log(`Profile id: ${profileId}`);
             const sql = `SELECT * 
                 FROM ${MatchTable.TABLE_NAME} 
                 WHERE 
-                    ${MatchTable.USER_FIRST_PROFILE_ID} == ${profileId}
+                    ${MatchTable.USER_FIRST_PROFILE_ID} = ${profileId}
                      OR  
-                    ${MatchTable.USER_SECOND_PROFILE_ID} == ${profileId}
+                    ${MatchTable.USER_SECOND_PROFILE_ID} = ${profileId}
             ;`;
             logger.log("sql query: " + sql)
             connection.query(
@@ -127,7 +130,8 @@ exports.getByProfileId = function(profileId, req, res) {
                         resolve(response);
                     } else {
                         let data = converter.dbToDomainServerMatch(rows);
-                        let response = util.getPayloadMessage(data);
+                        console.log(`[debug] 1. getByProfileId(), prepare data ${data}`)
+                        let response = util.getMsg(200, data);
                         resolve(JSON.stringify(response));
                     }
                     connection.release();
@@ -218,7 +222,7 @@ exports.makePotentialMatch = function(profileId, userDemand, req, res) {
                                         });
                                     }
                                     var payload = util.getServiceMessage(util.statusSuccess, "")
-                                    var response = util.getPayloadMessage(payload)
+                                    var response = util.getMsg(payload)
                                     console.log(JSON.stringify(response))
                                     connection.release()
                                     resolve(JSON.stringify(response))
