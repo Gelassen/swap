@@ -147,6 +147,7 @@ exports.makePotentialMatch = function(profileId, userDemand, req, res) {
             connection.beginTransaction(function(error) {
                 if (error) throw err;
                 // TODO check LIKE('%${userDemand}%') works as well as LIKE('%Software%'), there wss a precedent this was not the same
+                console.log(JSON.stringify(userDemand))
                 const sqlQuery = 
                 `
                     SELECT *
@@ -156,9 +157,9 @@ exports.makePotentialMatch = function(profileId, userDemand, req, res) {
                             FROM ${ServerServicesTable.TABLE_NAME} 
                             WHERE offer = 1
                                 AND profileId != ${profileId}
-                                AND title LIKE('%${userDemand}%') 
+                                AND title LIKE('%${userDemand.title}%') 
                         ) AS offers
-                    LEFT OUTER JOIN LATERAL
+                    INNER JOIN LATERAL
                         (
                             SELECT q1.id as Q1Id, q2.id as Q2Id, q1.title as Q1Title, q2.title as Q2Title, q1.profileId as Q1ProfileId, q2.profileId as Q2ProfileId
                             FROM
@@ -196,7 +197,7 @@ exports.makePotentialMatch = function(profileId, userDemand, req, res) {
                     {sql: sqlQuery, TIMEOUT},
                     [],
                     function(error, rows, fields) {
-                        logger.log(`rows - ${JSON.stringify(error)}`);
+                        logger.log(`rows - ${JSON.stringify(rows)}`);
                         if (error != null) {
                             return connection.rollback(function() {
                                 connection.release();
@@ -204,10 +205,20 @@ exports.makePotentialMatch = function(profileId, userDemand, req, res) {
                             })
                         }
                         let matches = converter.syntheticDbToDomainServerMatch(rows);
+                        logger.log(`potential matches before insert: ${JSON.stringify(matches)}`);
+                        if (matches.length == 0) {
+                            var response = util.getMsg(200, [])
+                            connection.release()
+                            resolve(JSON.stringify(response))
+                            return;
+                        }
                         const sqlBulkInsert = prepareMatchBulkInsertQuery(matches);
+                        logger.log(`bulk insert query: ${sqlBulkInsert}`);
                         connection.query(
                             { sql: sqlBulkInsert, timeout: TIMEOUT }, 
                             function(error, rows, fields) {
+                                logger.log(`[sqlBulkInsert] Rows for insert: ${JSON.stringify(rows)}`);
+                                logger.log(`[sqlBulkInsert] errors: ${JSON.stringify(error)}`);
                                 if (error != null) {
                                     return connection.rollback(function() {
                                         connection.release();
@@ -225,7 +236,7 @@ exports.makePotentialMatch = function(profileId, userDemand, req, res) {
                                     var response = util.getMsg(payload)
                                     console.log(JSON.stringify(response))
                                     connection.release()
-                                    resolve(JSON.stringify(response))
+                                    resolve(response)
                                 })                                
                             });
                     }
@@ -234,6 +245,113 @@ exports.makePotentialMatch = function(profileId, userDemand, req, res) {
             })
         });
     })
+}
+
+/*
+    Do the same like makePotentialMatch() call, but synchronously. Make sure it 
+    is called from async thread. 
+ */
+exports.makePotentialMatchSync = function(profileId, userDemand, callback) {
+    pool.getConnection(function(err, connection) {
+        connection.beginTransaction(function(error) {
+            if (error) throw err;
+            // TODO check LIKE('%${userDemand}%') works as well as LIKE('%Software%'), there wss a precedent this was not the same
+            console.log(JSON.stringify(userDemand))
+            const sqlQuery = 
+            `
+                SELECT *
+                FROM 
+                    (
+                        SELECT * 
+                        FROM ${ServerServicesTable.TABLE_NAME} 
+                        WHERE offer = 1
+                            AND profileId != ${profileId}
+                            AND title LIKE('%${userDemand.title}%') 
+                    ) AS offers
+                INNER JOIN LATERAL
+                    (
+                        SELECT q1.id as Q1Id, q2.id as Q2Id, q1.title as Q1Title, q2.title as Q2Title, q1.profileId as Q1ProfileId, q2.profileId as Q2ProfileId
+                        FROM
+                        (
+                            SELECT * 
+                            FROM ${ServerServicesTable.TABLE_NAME}
+                            WHERE 
+                                (
+                                    offer = 1
+                                    AND profileId = ${profileId}
+                                )
+                        ) as q1
+                        INNER JOIN LATERAL
+                        (	
+                            SELECT *
+                            FROM ${ServerServicesTable.TABLE_NAME}
+                            WHERE 
+                                (
+                                    offer = 0
+                                    AND profileId != ${profileId}
+                                    AND title LIKE(q1.title)
+                                ) 
+                        ) q2
+                        ON q1.title = q2.title
+                    ) AS giveBack
+                ON offers.profileId = giveBack.Q2ProfileId
+                INNER JOIN ${ChainServicesTable.TABLE_NAME} as chainServices
+                ON id = chainServices.serverServiceId 
+                LEFT OUTER JOIN ${ChainServicesTable.TABLE_NAME} as chainServices2
+                ON Q1Id = chainServices2.serverServiceId 
+                ORDER BY title;
+            `;
+            logger.log("sql query: " + sqlQuery);
+            connection.query(
+                {sql: sqlQuery, TIMEOUT},
+                [],
+                function(error, rows, fields) {
+                    logger.log(`rows - ${JSON.stringify(rows)}`);
+                    if (error != null) {
+                        return connection.rollback(function() {
+                            connection.release();
+                            throw error;
+                        })
+                    }
+                    let matches = converter.syntheticDbToDomainServerMatch(rows);
+                    logger.log(`potential matches before insert: ${JSON.stringify(matches)}`);
+                    if (matches.length == 0) {
+                        var response = util.getMsg(200, [])
+                        connection.release()
+                        callback(JSON.stringify(response))
+                        return;
+                    }
+                    const sqlBulkInsert = prepareMatchBulkInsertQuery(matches);
+                    logger.log(`bulk insert query: ${sqlBulkInsert}`);
+                    connection.query(
+                        { sql: sqlBulkInsert, timeout: TIMEOUT }, 
+                        function(error, rows, fields) {
+                            logger.log(`[sqlBulkInsert] Rows for insert: ${JSON.stringify(rows)}`);
+                            logger.log(`[sqlBulkInsert] errors: ${JSON.stringify(error)}`);
+                            if (error != null) {
+                                return connection.rollback(function() {
+                                    connection.release();
+                                    throw error;
+                                });
+                            }
+                            connection.commit(function(error) {
+                                if (error != null) {
+                                    return connection.rollback(function() {
+                                        connection.release();
+                                        throw error;
+                                    });
+                                }
+                                var response = {}
+                                console.log(JSON.stringify(response))
+                                connection.release()
+                                callback(response)
+                            })                                
+                        });
+                }
+            )
+            
+        })
+    });
 }
 
 // TODO check baseSqlQuery string is built with commas between inserted values
@@ -248,14 +366,20 @@ function prepareMatchBulkInsertQuery(matches) {
             approvedByFirstUser, approvedBySecondUser
         ) 
         VALUES `;
-    for (item in matches) {
+        logger.log(`matches: ${JSON.stringify(matches)}`);
+    for (var idx = 0; idx < matches.length; idx++) {
+        let item = matches[idx];
+        logger.log(`Item in matches loop: ${JSON.stringify(item)}`);
         baseSqlQuery += `(
-            ${  item.id, item.userFirstProfileId, item.userSecondProfileId, 
-                item.userFirstServiceId, item.userSecondServiceId,
-                item.approvedByFirstUser, item.approvedBySecondUser
-            }
-            )`;
+            ${item.id}, 
+            ${item.userFirstProfileId}, 
+            ${item.userSecondProfileId}, 
+            ${item.userFirstServiceId}, 
+            ${item.userSecondServiceId},
+            ${item.approvedByFirstUser}, 
+            ${item.approvedBySecondUser}
+            ),`;
     }
-    return baseSqlQuery + ";";
+    return baseSqlQuery.substring(0, baseSqlQuery.length - 1) + ";";
 }
 

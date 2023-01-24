@@ -1,9 +1,11 @@
 const config = require('config')
 const { resolve } = require('path/posix');
 const pool = require('../database');
-const util = require('../utils/network')
-const logger = require('../utils/logger') 
-const converter = require('../utils/converter')
+const util = require('../utils/network');
+const logger = require('../utils/logger');
+const converter = require('../utils/converter');
+
+const match = require('../models/match');
 
 const TIMEOUT = config.dbConfig.timeout;
 const OFFER = 1;
@@ -202,13 +204,32 @@ exports.addDemand = function(demandAsObj, profileId) {
                     let response;
                     if (error != null) {
                         response = util.getErrorMsg(500, error); 
+                        resolve(response);
+                        connection.release();
                     } else if (rows.affectedRows == 0) {
                         response = util.getErrorMsg(401, 'No row in db is affected');
+                        resolve(response);
+                        connection.release();
                     } else {
-                        response = {};
+                        // match.makePotentialMatch
+                        //     .then(function(result) {
+                        //         logger.log(`[makePotentialMatch] result ${JSON.stringify(result)}`);
+                        //         response = JSON.stringify(result);
+                        //         resolve(response);
+                        //         connection.release();
+                        //     })
+                        //     .error((error) => {
+                        //         logger.log(`[makePotentialMatch] error ${JSON.stringify(error)}`);
+                        //         resolve(error);
+                        //         connection.release();
+                        //     })
+                        match.makePotentialMatchSync(profileId, demandAsObj, function(result) {
+                            console.log(`[debug] b. with makePotentialMatch() callback ${JSON.stringify(result)}`);
+                            response = result
+                            resolve(response);
+                            connection.release();
+                        });
                     }
-                    resolve(response);
-                    connection.release();
                 }
             )
         });

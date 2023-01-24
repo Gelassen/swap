@@ -170,6 +170,7 @@ exports.addDemand = async function(req, res) {
         } else {
             logger.log(`[add demand] offer to insert ${JSON.stringify(demandFromRequest)}`);
             result = await profile.addDemand(demandFromRequest, profileResult.id); 
+            logger.log(`Add demand response ${JSON.stringify(result)}`);
         }
     }
     network.send(req, res, result); 

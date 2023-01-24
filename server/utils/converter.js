@@ -123,7 +123,7 @@ exports.syntheticDbToDomainServerMatch = function(rows) {
         // match.idChainService = 
         match.approvedByFirstUser = false;
         match.approvedBySecondUser = false;
-        result.push(service);
+        result.push(match);
     }
     return result;
 }

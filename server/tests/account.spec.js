@@ -879,6 +879,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .delete(`/api/v1/account/${responseJane.body.payload.id}`)
             .set('Authorization', 'Basic VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==')
             .expect(204); 
+        // TODO clean associated tables like service and matches (CASCADE trigger) 
     });
     it('on DELETE /api/v1/account/demands without authorization header receives UNAUTHORIZED code', async() => {
         await request(app)
