@@ -253,24 +253,26 @@ exports.confirmMatch = async function(req, res) {
         let profileResult = await profile.getFullProfile(credentials);
         // TODO extend sql query and assigned convertor to support chain service data
         let matchResponse = await match.getByProfileIdAndServiceIds(
-            profileResult.profileId,
+            profileResult.id,
             matchObjectFromRequest.userFirstServiceId,
             matchObjectFromRequest.userSecondServiceId
         );
-        logger.log(`[confirm match] match object ${JSON.stringify(confirmMatch)}`);
+        logger.log(`[confirm match] match object ${JSON.stringify(matchResponse)}`);
         logger.log(`[confirm match] full profile ${JSON.stringify(profileResult)}`);
         if (network.noSuchData(profileResult)) {
             result = network.getErrorMsg(401, "There is no account for this credentials. Are you authorized?")
         } else if (matchResponse.code != 200) {
             result = matchResponse; 
         } else {
-            result = match.confirmMatch(profileResult.profileId, matchObjectFromRequest, req ,res);
+            result = await match.confirmMatch(profileResult.id, matchObjectFromRequest, req ,res);
         }
     }
+    network.send(req, res, result)
     logger.log("[confirm match] end")
 }
 
 exports.getMatchesByProfile = async function(req, res) {
+    logger.log("[getMatchesByProfile] start");
     let result;
     if (req.get(global.authHeader) === undefined) {
         result = network.getErrorMsg(401, global.noAuthHeaderMsg)
@@ -296,4 +298,5 @@ exports.getMatchesByProfile = async function(req, res) {
         }
     }
     network.send(req, res, result)
+    logger.log("[getMatchesByProfile] end");
 }

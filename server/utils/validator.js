@@ -27,13 +27,13 @@ exports.validateMatch = function(matchSubj) {
         && this.isBool(matchSubj.approvedBySecondUser)
 }
 
-function isInt(value) {
+exports.isInt = function(value) {
     return !isNaN(value) 
         && parseInt(Number(value)) == value 
         && !isNaN(parseInt(value, 10));
 }
 
-function isBool(value) {
+exports.isBool = function(value) {
     return value === true 
         || value === false 
         || toString.call(value) === '[object Boolean]';

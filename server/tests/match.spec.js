@@ -73,7 +73,7 @@ afterAll(async() => {
 
 describe('Test suite to cover match logic', () => {
 
-    it.only('on POST /api/v1/account/demands with valid payload and existing match, get matches returns single value', async() => {
+    it('on POST /api/v1/account/demands with valid payload and existing match, get matches returns single value', async() => {
         // prepare initial database state
         // prepare demands 
         let janeDemandPayload = {"title":"Software development","date": 1746057600,"index":["Software development"]};
@@ -95,4 +95,47 @@ describe('Test suite to cover match logic', () => {
         expect(JSON.parse(matchResponse.text).payload.length).toEqual(1);
     });
 
+    it.only('on POST /api/v1/account/matches with approve from the first user server returns positive result and query to matches returns response with approved flag', async() => {
+        // prepare initial database state
+        let janeDemandPayload = {"title":"Software development","date": 1746057600,"index":["Software development"]};
+        await request(app)
+            .post('/api/v1/account/demands')    
+            .set('Authorization', 'Basic VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(janeDemandPayload)
+            .expect(200, {})
+        let matchResponse = await request(app)
+            .get('/api/v1/account/matches')
+            .set('Authorization', 'Basic VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(200);
+        console.log(`matchResponse ${JSON.stringify(matchResponse)}`);
+        let matchResponsePayload = JSON.parse(matchResponse.text).payload;
+        let janeConfirmPayload = { 
+            "userFirst" : matchResponsePayload[0].userFirstProfileId, 
+            "userSecond" : matchResponsePayload[0].userSecondProfileId,
+            "valueOfFirstUser" : 1001,
+            "valueOfSecondUser" : 1002,
+            "approvedByFirstUser" : true,
+            "approvedBySecondUser" : matchResponsePayload[0].approvedBySecondUser,
+            "userFirstServiceId" : matchResponsePayload[0].userFirstServiceId,
+            "userSecondServiceId" : matchResponsePayload[0].userSecondServiceId
+        }
+        expect(matchResponsePayload[0].approvedByFirstUser).toEqual(false);
+        
+        await request(app)
+            .post('/api/v1/account/matches')    
+            .set('Authorization', 'Basic VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(janeConfirmPayload)
+            .expect(200)
+
+        let matchSecondResponse = await request(app)
+            .get('/api/v1/account/matches')
+            .set('Authorization', 'Basic VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(200)
+        let matchSecondResponsePayload = JSON.parse(matchSecondResponse.text).payload; 
+        expect(matchSecondResponsePayload[0].approvedByFirstUser).toEqual(true);
+    });
 })

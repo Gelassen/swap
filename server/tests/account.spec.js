@@ -808,7 +808,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .expect(204);
     });
-    it.only('on POST /api/v1/account/demands with valid payload and existing match, get matches returns single value', async() => {
+    it('on POST /api/v1/account/demands with valid payload and existing match, get matches returns single value', async() => {
         // prepare initial database state
         // prepare offer 
         let jamesPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};

@@ -102,7 +102,7 @@ exports.requestToDomainChainMatch = function(reqBody) {
     result.userSecond = reqBody.userSecond;
     result.valueOfSecondUser = reqBody.valueOfSecondUser;
     result.approvedByFirstUser = reqBody.approvedByFirstUser;
-    result.approvedBySecondUser = reqBody.approvedBySecondUse;
+    result.approvedBySecondUser = reqBody.approvedBySecondUser;
     result.userFirstServiceId = reqBody.userFirstServiceId; // TODO confirm it is passed from the client
     result.userSecondServiceId = reqBody.userSecondServiceId; // TODO confirm it is passed from the client
     return result;
@@ -139,8 +139,8 @@ exports.dbToDomainServerMatch = function(rows) {
         serverMatch.userSecondProfileId = rows[id].userSecondProfileId;
         serverMatch.userFirstServiceId = rows[id].userFirstServiceId;
         serverMatch.userSecondServiceId = rows[id].userSecondServiceId;
-        serverMatch.approvedByFirstUser = rows[id].approvedByFirstUser;
-        serverMatch.approvedBySecondUser = rows[id].approvedBySecondUser;
+        serverMatch.approvedByFirstUser = rows[id].approvedByFirstUser === 1; // 0 is false, 1 is true
+        serverMatch.approvedBySecondUser = rows[id].approvedBySecondUser === 1; // 0 is false, 1 is true
 
         result.push(serverMatch);
     }

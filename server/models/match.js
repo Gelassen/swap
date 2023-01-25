@@ -14,20 +14,21 @@ exports.confirmMatch = function(requesterProfileId, match, req, res) {
         pool.getConnection(function(err, connection) {
             let sqlQuery = "";
             // keep hardcoded params in sql safe from sql injections by validating input data first 
-            if (requesterProfileId == match.userFirstProfileId) {
+            if (requesterProfileId === match.userFirst) {
                 sqlQuery = `
                     UPDATE ${MatchTable.TABLE_NAME} 
-                    SET ${MatchTable.approvedByFirstUser} = true 
-                    WHERE ${MatchTable.userFirstProfileId} = ${requesterProfileId};`;
-            } else if (requesterProfileId == match.userSecondProfileId) {
+                    SET ${MatchTable.APPROVED_BY_FIRST_USER} = true 
+                    WHERE ${MatchTable.USER_FIRST_PROFILE_ID} = ${requesterProfileId};`;
+            } else if (requesterProfileId === match.userSecond) {
                 sqlQuery = `
                     UPDATE ${MatchTable.TABLE_NAME} 
-                    SET ${MatchTable.approvedBySecondUser} = true 
-                    WHERE ${MatchTable.userSecondProfileId} = ${requesterProfileId};`;
+                    SET ${MatchTable.APPROVED_BY_SECOND_USER} = true 
+                    WHERE ${MatchTable.USER_SECOND_PROFILE_ID} = ${requesterProfileId};`;
             } else {
                 let response = util.getMsg(400, {}, `${requesterProfileId} is not valid profile id for passed match ${match}`);
                 resolve(response);
                 connection.release()
+                return;
             }
             connection.query(
                 {sql: sqlQuery, timeout: 60000}, 
@@ -56,22 +57,22 @@ exports.getByProfileIdAndServiceIds = function(profileId, firstServiceId, second
                 FROM ${MatchTable.TABLE_NAME} 
                 WHERE 
                     (
-                        ${MatchTable.USER_FIRST_PROFILE_ID} == ${profileId}
+                        ${MatchTable.USER_FIRST_PROFILE_ID} = ${profileId}
                          OR  
-                        ${MatchTable.USER_SECOND_PROFILE_ID} == ${profileId}
+                        ${MatchTable.USER_SECOND_PROFILE_ID} = ${profileId}
                     )
                      AND 
                     (
                         (
-                            ${MatchTable.USER_FIRST_SERVICE_ID} == ${firstServiceId} 
+                            ${MatchTable.USER_FIRST_SERVICE_ID} = ${firstServiceId} 
                              AND
-                            ${MatchTable.USER_SECOND_SERVICE_ID} == ${secondServiceId}
+                            ${MatchTable.USER_SECOND_SERVICE_ID} = ${secondServiceId}
                         )
                          OR 
                         (
-                            ${MatchTable.USER_FIRST_SERVICE_ID} == ${secondServiceId} 
+                            ${MatchTable.USER_FIRST_SERVICE_ID} = ${secondServiceId} 
                              AND
-                            ${MatchTable.USER_SECOND_SERVICE_ID} == ${firstServiceId}
+                            ${MatchTable.USER_SECOND_SERVICE_ID} = ${firstServiceId}
                         )
 
                     ) 
@@ -87,7 +88,7 @@ exports.getByProfileIdAndServiceIds = function(profileId, firstServiceId, second
                         logger.log(JSON.stringify(error));
                         let response = util.getErrorMsg(500, error);
                         resolve(response);
-                    } else if (rows.count() != 1) {
+                    } else if (rows.length != 1) {
                         let msg = (rows.count() == 0) ? "There is no known matches for this input params" 
                             : "There is more than a single row for this input params." 
                         let response = util.getServiceMessage(409, msg);
@@ -95,12 +96,11 @@ exports.getByProfileIdAndServiceIds = function(profileId, firstServiceId, second
                     } else {
                         let data = converter.dbToDomainServerMatch(rows);
                         let response = util.getMsg(200, data);
-                        resolve(JSON.stringify(response));
+                        resolve(response);
                     }
                     connection.release();
                 }
             )
-            connection.release();
         })
     })
 }
