@@ -91,10 +91,8 @@ describe('Test suite to cover match logic', () => {
             .set('Content-Type', 'application/json; charset=utf-8')
             .expect(200)
         console.log(`[matchResponse] ${JSON.stringify(matchResponse)}`)
-        expect(matchResponse.status).toEqual(200);
-        // TODO fix the test, the result is not correct format
-        // expect(matchResponse.text.payload.code).toEqual(200);
-        // expect(matchResponse.text.payload.payload.length).toEqual(1);
+        expect(matchResponse.status).toEqual(200); 
+        expect(JSON.parse(matchResponse.text).payload.length).toEqual(1);
     });
 
 })

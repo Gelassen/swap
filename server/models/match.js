@@ -110,7 +110,6 @@ exports.getByProfileId = function(profileId, req, res) {
         pool.getConnection(function(err, connection) {
             if (err) throw err;
             // make sure you prevent sql injection by validating first ${profileId}
-            console.log(`Profile id: ${profileId}`);
             const sql = `SELECT * 
                 FROM ${MatchTable.TABLE_NAME} 
                 WHERE 
@@ -130,9 +129,7 @@ exports.getByProfileId = function(profileId, req, res) {
                         resolve(response);
                     } else {
                         let data = converter.dbToDomainServerMatch(rows);
-                        console.log(`[debug] 1. getByProfileId(), prepare data ${data}`)
-                        let response = util.getMsg(200, data);
-                        resolve(JSON.stringify(response));
+                        resolve(data);
                     }
                     connection.release();
                 }
@@ -146,8 +143,6 @@ exports.makePotentialMatch = function(profileId, userDemand, req, res) {
         pool.getConnection(function(err, connection) {
             connection.beginTransaction(function(error) {
                 if (error) throw err;
-                // TODO check LIKE('%${userDemand}%') works as well as LIKE('%Software%'), there wss a precedent this was not the same
-                console.log(JSON.stringify(userDemand))
                 const sqlQuery = 
                 `
                     SELECT *
@@ -234,7 +229,6 @@ exports.makePotentialMatch = function(profileId, userDemand, req, res) {
                                     }
                                     var payload = util.getServiceMessage(util.statusSuccess, "")
                                     var response = util.getMsg(payload)
-                                    console.log(JSON.stringify(response))
                                     connection.release()
                                     resolve(response)
                                 })                                
@@ -255,8 +249,6 @@ exports.makePotentialMatchSync = function(profileId, userDemand, callback) {
     pool.getConnection(function(err, connection) {
         connection.beginTransaction(function(error) {
             if (error) throw err;
-            // TODO check LIKE('%${userDemand}%') works as well as LIKE('%Software%'), there wss a precedent this was not the same
-            console.log(JSON.stringify(userDemand))
             const sqlQuery = 
             `
                 SELECT *
@@ -342,7 +334,6 @@ exports.makePotentialMatchSync = function(profileId, userDemand, callback) {
                                     });
                                 }
                                 var response = {}
-                                console.log(JSON.stringify(response))
                                 connection.release()
                                 callback(response)
                             })                                

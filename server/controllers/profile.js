@@ -288,12 +288,9 @@ exports.getMatchesByProfile = async function(req, res) {
             result = network.getMsg(204, profileResult);
         } else {
             let model = await match.getByProfileId(profileResult.id);
-            console.log(`[debug] 2. get model`)
             if (model.code !== undefined && model.code == 500) {
-                console.log(`[debug] 3a. getMatchesByProfile(), error branch`)
                 result = model;
             } else {
-                console.log(`[debug] 3b. getMatchesByProfile(), ok branch ${JSON.stringify(model)}`)
                 result = network.getMsg(200, model);
             }
         }

@@ -224,7 +224,6 @@ exports.addDemand = function(demandAsObj, profileId) {
                         //         connection.release();
                         //     })
                         match.makePotentialMatchSync(profileId, demandAsObj, function(result) {
-                            console.log(`[debug] b. with makePotentialMatch() callback ${JSON.stringify(result)}`);
                             response = result
                             resolve(response);
                             connection.release();
