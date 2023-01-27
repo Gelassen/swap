@@ -814,9 +814,9 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
     });
     it('on POST /api/v1/account/demands with valid payload and existing match, get matches returns single value', async() => {
         // prepare initial database state
-        // prepare offer 
+        // prepare james offer and demand 
         let jamesPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
-        let jamesTestPayload = {"title":"Software development","date": 1746057600,"index":["Hacking servers by nights"]};
+        let jamesOfferPayload = {"title":"Software development","date": 1746057600,"index":["Hacking servers by nights"]};
         await request(app)
             .get('/api/v1/account')
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
@@ -838,10 +838,18 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .post('/api/v1/account/offers')    
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .set('Content-Type', 'application/json; charset=utf-8')
-            .send(jamesTestPayload)
+            .send(jamesOfferPayload)
             .expect(200);
-        // prepare demands 
+        let jamesDemandResponse = {"title":"Product management","date": 1746057600,"index":["Product management"]};
+        await request(app)
+            .post('/api/v1/account/demands')    
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(jamesDemandResponse)
+            .expect(200);
+        // prepare jane demand 
         let janePayload = {"contact":"TestJane@gmail.com","secret":"jne123","name":"Test Jane","offers":[],"demands":[]};
+        let janeOfferPayload = {"title":"Product management","date": 1746057600,"index":["Product management"]};
         let janeDemandPayload = {"title":"Software development","date": 1746057600,"index":["Software development"]};
         await request(app)
             .get('/api/v1/account')
@@ -859,6 +867,12 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .get('/api/v1/account')
             .set('Authorization', 'Basic VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==')
             .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(200)
+        await request(app)
+            .post('/api/v1/account/offers')    
+            .set('Authorization', 'Basic VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(janeOfferPayload)
             .expect(200)
 
         await request(app)

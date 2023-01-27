@@ -172,7 +172,9 @@ exports.addDemand = async function(req, res) {
             let addDemandResponse = await profile.addDemand(demandFromRequest, profileResult.id); 
             logger.log(`[add demand] response '${JSON.stringify(addDemandResponse)}'`);
             if (network.isEmpty(addDemandResponse)) {
-                result = await match.makePotentialMatch(profileResult.id, demandFromRequest.title);
+                logger.log(`[makePotentialMatch] demandFromRequest: ${JSON.stringify(demandFromRequest)}`);
+                logger.log(`[makePotentialMatch] title: ${JSON.stringify(demandFromRequest.title)}`);
+                result = await match.makePotentialMatch(profileResult.id, demandFromRequest, req, res);
             } else if (addDemandResponse === undefined) {
                 result = network.getErrorMsg(500, {});
             } else {
