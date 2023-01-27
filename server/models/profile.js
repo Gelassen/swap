@@ -223,11 +223,14 @@ exports.addDemand = function(demandAsObj, profileId) {
                         //         resolve(error);
                         //         connection.release();
                         //     })
-                        match.makePotentialMatchSync(profileId, demandAsObj, function(result) {
-                            response = result
-                            resolve(response);
-                            connection.release();
-                        });
+                        // match.makePotentialMatchSync(profileId, demandAsObj, function(result) {
+                        //     response = result
+                        //     resolve(response);
+                        //     connection.release();
+                        // });
+                        response = {};
+                        resolve(response);
+                        connection.release();
                     }
                 }
             )

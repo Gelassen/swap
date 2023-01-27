@@ -23,6 +23,8 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             + "GET /offers \n"
             + "GET /demands \n"
             + "GET /contacts \n"
+            + 'GET /account/matches \n' 
+            + 'POST /account/matches \n'
         await request(app)
             .get('/api/v1/')
             .expect('Content-Type', 'application/json; charset=utf-8')
@@ -737,6 +739,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .set('Content-Type', 'application/json; charset=utf-8')
             .send(testPayload)
             .expect(200, {})
+        console.log(`[debug] received response from register demand`)
 
         response = await request(app)
             .get('/api/v1/account')
@@ -748,6 +751,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
         postPayload.demands.push(testPayload);
         const newExpectedObj = postPayload;
         expect(response.body.payload).toEqual(newExpectedObj);
+        console.log(`[debug] ${JSON.stringify(response.body)}`)
         // clean database
         await request(app)
             .delete(`/api/v1/account/${response.body.payload.id}`)

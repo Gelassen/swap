@@ -54,6 +54,10 @@ exports.noSuchData = function(obj) {
     return !Object.keys(obj).length
 }
 
+exports.isEmpty = function(obj) {
+    return Object.keys(obj).length === 0 && obj.constructor === Object;
+}
+
 exports.send = async function send (req, res, result) {
     if (result.code === undefined) {
         logger.log(`[reply] ${JSON.stringify(result)}`);

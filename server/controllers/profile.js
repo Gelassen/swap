@@ -169,7 +169,15 @@ exports.addDemand = async function(req, res) {
             result = network.getErrorMsg(409, `The same demand for this profile already exist ${JSON.stringify(demandFromRequest)}`);
         } else {
             logger.log(`[add demand] offer to insert ${JSON.stringify(demandFromRequest)}`);
-            result = await profile.addDemand(demandFromRequest, profileResult.id); 
+            let addDemandResponse = await profile.addDemand(demandFromRequest, profileResult.id); 
+            logger.log(`[add demand] response '${JSON.stringify(addDemandResponse)}'`);
+            if (network.isEmpty(addDemandResponse)) {
+                result = await match.makePotentialMatch(profileResult.id, demandFromRequest.title);
+            } else if (addDemandResponse === undefined) {
+                result = network.getErrorMsg(500, {});
+            } else {
+                result = addDemandResponse;
+            }
             logger.log(`Add demand response ${JSON.stringify(result)}`);
         }
     }

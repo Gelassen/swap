@@ -10,6 +10,7 @@ const TIMEOUT = config.dbConfig.timeout;
 
 // TODO check connection.release() is called in each case
 exports.confirmMatch = function(requesterProfileId, match, req, res) {
+    logger.log(`[confirmMatch] for profile #${requesterProfileId} with object ${JSON.stringify(match)}`);
     return new Promise((resolve) => {
         pool.getConnection(function(err, connection) {
             let sqlQuery = "";
@@ -89,7 +90,7 @@ exports.getByProfileIdAndServiceIds = function(profileId, firstServiceId, second
                         let response = util.getErrorMsg(500, error);
                         resolve(response);
                     } else if (rows.length != 1) {
-                        let msg = (rows.count() == 0) ? "There is no known matches for this input params" 
+                        let msg = (rows.length == 0) ? "There is no known matches for this input params" 
                             : "There is more than a single row for this input params." 
                         let response = util.getServiceMessage(409, msg);
                         resolve(response);
@@ -181,12 +182,12 @@ exports.makePotentialMatch = function(profileId, userDemand, req, res) {
                             ON q1.title = q2.title
                         ) AS giveBack
                     ON offers.profileId = giveBack.Q2ProfileId
-                    INNER JOIN ${ChainServicesTable.TABLE_NAME} as chainServices
-                    ON id = chainServices.serverServiceId 
-                    LEFT OUTER JOIN ${ChainServicesTable.TABLE_NAME} as chainServices2
-                    ON Q1Id = chainServices2.serverServiceId 
                     ORDER BY title;
                 `;
+                // INNER JOIN ${ChainServicesTable.TABLE_NAME} as chainServices
+                // ON id = chainServices.serverServiceId 
+                // LEFT OUTER JOIN ${ChainServicesTable.TABLE_NAME} as chainServices2
+                // ON Q1Id = chainServices2.serverServiceId 
                 logger.log("sql query: " + sqlQuery);
                 connection.query(
                     {sql: sqlQuery, TIMEOUT},
@@ -201,38 +202,47 @@ exports.makePotentialMatch = function(profileId, userDemand, req, res) {
                         }
                         let matches = converter.syntheticDbToDomainServerMatch(rows);
                         logger.log(`potential matches before insert: ${JSON.stringify(matches)}`);
+                        // TODO ref issue with appearing profile - had a thought caused by transaction has not been finished 
                         if (matches.length == 0) {
-                            var response = util.getMsg(200, [])
-                            connection.release()
-                            resolve(JSON.stringify(response))
-                            return;
-                        }
-                        const sqlBulkInsert = prepareMatchBulkInsertQuery(matches);
-                        logger.log(`bulk insert query: ${sqlBulkInsert}`);
-                        connection.query(
-                            { sql: sqlBulkInsert, timeout: TIMEOUT }, 
-                            function(error, rows, fields) {
-                                logger.log(`[sqlBulkInsert] Rows for insert: ${JSON.stringify(rows)}`);
-                                logger.log(`[sqlBulkInsert] errors: ${JSON.stringify(error)}`);
+                            connection.commit(function(error) {
                                 if (error != null) {
                                     return connection.rollback(function() {
                                         connection.release();
                                         throw error;
                                     });
                                 }
-                                connection.commit(function(error) {
+                                var response = {}
+                                connection.release()
+                                resolve(response)
+                            })  
+                        } else {
+                            const sqlBulkInsert = prepareMatchBulkInsertQuery(matches);
+                            logger.log(`bulk insert query: ${sqlBulkInsert}`);
+                            connection.query(
+                                { sql: sqlBulkInsert, timeout: TIMEOUT }, 
+                                function(error, rows, fields) {
+                                    logger.log(`[sqlBulkInsert] Rows for insert: ${JSON.stringify(rows)}`);
+                                    logger.log(`[sqlBulkInsert] errors: ${JSON.stringify(error)}`);
                                     if (error != null) {
                                         return connection.rollback(function() {
                                             connection.release();
                                             throw error;
                                         });
                                     }
-                                    var payload = util.getServiceMessage(util.statusSuccess, "")
-                                    var response = util.getMsg(payload)
-                                    connection.release()
-                                    resolve(response)
-                                })                                
-                            });
+                                    connection.commit(function(error) {
+                                        if (error != null) {
+                                            return connection.rollback(function() {
+                                                connection.release();
+                                                throw error;
+                                            });
+                                        }
+                                        var response = {};
+                                        connection.release()
+                                        resolve(response)
+                                    })                                
+                                });
+                        }
+                        
                     }
                 )
                 
@@ -246,6 +256,7 @@ exports.makePotentialMatch = function(profileId, userDemand, req, res) {
     is called from async thread. 
  */
 exports.makePotentialMatchSync = function(profileId, userDemand, callback) {
+    logger.log(`[makePotentialMatchSync] start for profile #${profileId}`);
     pool.getConnection(function(err, connection) {
         connection.beginTransaction(function(error) {
             if (error) throw err;
@@ -287,12 +298,13 @@ exports.makePotentialMatchSync = function(profileId, userDemand, callback) {
                         ON q1.title = q2.title
                     ) AS giveBack
                 ON offers.profileId = giveBack.Q2ProfileId
-                INNER JOIN ${ChainServicesTable.TABLE_NAME} as chainServices
-                ON id = chainServices.serverServiceId 
-                LEFT OUTER JOIN ${ChainServicesTable.TABLE_NAME} as chainServices2
-                ON Q1Id = chainServices2.serverServiceId 
+
                 ORDER BY title;
             `;
+                            // INNER JOIN ${ChainServicesTable.TABLE_NAME} as chainServices
+                // ON id = chainServices.serverServiceId 
+                // LEFT OUTER JOIN ${ChainServicesTable.TABLE_NAME} as chainServices2
+                // ON Q1Id = chainServices2.serverServiceId 
             logger.log("sql query: " + sqlQuery);
             connection.query(
                 {sql: sqlQuery, TIMEOUT},
@@ -308,9 +320,9 @@ exports.makePotentialMatchSync = function(profileId, userDemand, callback) {
                     let matches = converter.syntheticDbToDomainServerMatch(rows);
                     logger.log(`potential matches before insert: ${JSON.stringify(matches)}`);
                     if (matches.length == 0) {
-                        var response = util.getMsg(200, [])
+                        var response = {}
                         connection.release()
-                        callback(JSON.stringify(response))
+                        callback(response)
                         return;
                     }
                     const sqlBulkInsert = prepareMatchBulkInsertQuery(matches);
@@ -343,6 +355,7 @@ exports.makePotentialMatchSync = function(profileId, userDemand, callback) {
             
         })
     });
+    logger.log(`[makePotentialMatchSync] end for profile #${profileId}`);
 }
 
 // TODO check baseSqlQuery string is built with commas between inserted values
