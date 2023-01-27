@@ -5,7 +5,7 @@ const dbConfig = config.dbConfig;
 
 const MAX_PAGE_SIZE = dbConfig.maxPageSize;
 
-beforeAll(async() => {
+beforeEach(async() => {
     let jamesPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
     let jamesTestPayload = {"title":"Software development","date": 1746057600,"index":["Hacking servers by nights"]};
 
@@ -48,28 +48,28 @@ beforeAll(async() => {
         .expect(200)
 });
 
-// afterAll(async() => {
-//     // clean database from test data
-//     const jamesResponse = await request(app)
-//         .get('/api/v1/account')
-//         .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
-//         .expect('Content-Type', 'application/json; charset=utf-8')
-//         .expect(200);
-//     await request(app)
-//         .delete(`/api/v1/account/${jamesResponse.body.payload.id}`)
-//         .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
-//         .expect(204);
+afterEach(async() => {
+    // clean database from test data
+    const jamesResponse = await request(app)
+        .get('/api/v1/account')
+        .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+        .expect('Content-Type', 'application/json; charset=utf-8')
+        .expect(200);
+    await request(app)
+        .delete(`/api/v1/account/${jamesResponse.body.payload.id}`)
+        .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+        .expect(204);
 
-//     const janeResponse = await request(app)
-//         .get('/api/v1/account')
-//         .set('Authorization', 'Basic VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==')
-//         .expect('Content-Type', 'application/json; charset=utf-8')
-//         .expect(200);
-//     await request(app)
-//         .delete(`/api/v1/account/${janeResponse.body.payload.id}`)
-//         .set('Authorization', 'Basic VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==')
-//         .expect(204);
-// });
+    const janeResponse = await request(app)
+        .get('/api/v1/account')
+        .set('Authorization', 'Basic VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==')
+        .expect('Content-Type', 'application/json; charset=utf-8')
+        .expect(200);
+    await request(app)
+        .delete(`/api/v1/account/${janeResponse.body.payload.id}`)
+        .set('Authorization', 'Basic VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==')
+        .expect(204);
+});
 
 describe('Test suite to cover match logic', () => {
 
@@ -139,7 +139,7 @@ describe('Test suite to cover match logic', () => {
         expect(matchSecondResponsePayload[0].approvedByFirstUser).toEqual(true);
     });
 
-    it.only('on POST /api/v1/account/matches with approve from the first and the second users server returns positive result and query to matches returns response with both approved flag', async() => {
+    it('on POST /api/v1/account/matches with approve from the first and the second users server returns positive result and query to matches returns response with both approved flag', async() => {
         // prepare initial database state
         let janeDemandPayload = {"title":"Software development","date": 1746057600,"index":["Software development"]};
         await request(app)
