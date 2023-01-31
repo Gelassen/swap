@@ -64,6 +64,11 @@ contract SwapChainV2Debug is ISwapChainV2 {
     function getUsers() public view override returns (address[] memory) {
         return _users;
     }
+
+    function getMatches(address userFirst, address userSecond) external view returns (Match[] memory) {
+        int256 hashedKey = _getValidHash(userFirst, userSecond);
+        return _matchesByUser[uint256(hashedKey)];
+    }
     
     function swap(Match calldata subj) public override {
         _swap(msg.sender, subj);

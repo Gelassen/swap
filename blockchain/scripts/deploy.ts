@@ -11,7 +11,7 @@ async function main() {
   
     const factoryValue = await ethers.getContractFactory("SwapValue");
     const contractValue = await factoryValue.deploy();
-    console.log("contractValue adddress: ", contractValue.address);
+    console.log("SwapValueContract adddress: ", contractValue.address);
 
     // estimate gas cost for deployment
     const factorySwapChain = await ethers.getContractFactory("SwapChainV2");

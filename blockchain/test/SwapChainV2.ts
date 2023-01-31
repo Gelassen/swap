@@ -6,6 +6,12 @@ import { token } from "../typechain-types/@openzeppelin/contracts";
 import "./SwapChainV2";
 import "./SwapValue";
 
+/**
+ * If you have method overloading, in test and the rest js code you have to
+ * deine a full function signature which is already done in code below. 
+ * 
+ * Ref https://stackoverflow.com/a/70686426/3649629
+ */
 describe.only("SwapChain V2 test", async function () {
 
     const DATE_2022_12_14 = 1671014555000;
@@ -56,7 +62,7 @@ describe.only("SwapChain V2 test", async function () {
             _approvedByFirstUser : false,
             _approvedBySecondUser : false
         }
-        await expect(contractSwapChain.connect(unknownUser).approveSwap(matchObj)).to.be.revertedWith("Caller should be an one of the users defined in the passed match object.");
+        await expect(contractSwapChain.connect(unknownUser)["approveSwap((address,uint256,address,uint256,bool,bool))"](matchObj)).to.be.revertedWith("Caller should be an one of the users defined in the passed match object.");
     });
 
     it("On approve swap for both users who do not exist would lead to reverted tx", async function() {
@@ -75,7 +81,8 @@ describe.only("SwapChain V2 test", async function () {
             _approvedByFirstUser : false,
             _approvedBySecondUser : false
         }
-        await expect(contractSwapChain.connect(firstUser).approveSwap(matchObj)).to.be.revertedWith("The first user should be registered.");
+        await expect(contractSwapChain.connect(firstUser)["approveSwap((address,uint256,address,uint256,bool,bool))"](matchObj))
+            .to.be.revertedWith("The first user should be registered.");
     });
 
     it("On approve swap when only one of the users is registered would lead to reverted tx", async function() {
@@ -93,7 +100,8 @@ describe.only("SwapChain V2 test", async function () {
             _approvedByFirstUser : false,
             _approvedBySecondUser : false
         }
-        await expect(contractSwapChain.connect(firstUser).approveSwap(matchObj)).to.be.revertedWith("The second user should be registered.");
+        await expect(contractSwapChain.connect(firstUser)["approveSwap((address,uint256,address,uint256,bool,bool))"](matchObj))
+            .to.be.revertedWith("The second user should be registered.");
     });
 
     it("On approve swap when both users are registered, but no token is valid would lead to reverted tx", async function() {
@@ -112,7 +120,8 @@ describe.only("SwapChain V2 test", async function () {
             _approvedByFirstUser : false,
             _approvedBySecondUser : false
         }
-        await expect(contractSwapChain.connect(firstUser).approveSwap(matchObj)).to.be.revertedWith("This token does not exist.");
+        await expect(contractSwapChain.connect(firstUser)["approveSwap((address,uint256,address,uint256,bool,bool))"](matchObj))
+            .to.be.revertedWith("This token does not exist.");
     });
 
     it("On approve swap when both users are registered and has tokens, but their date is not valid would lead to reverted tx.", async function() {
@@ -149,7 +158,8 @@ describe.only("SwapChain V2 test", async function () {
             _approvedByFirstUser : false,
             _approvedBySecondUser : false
         }
-        await expect(contractSwapChain.connect(firstUser).approveSwap(matchObj)).to.be.revertedWith("One or both tokens has been expired.");
+        await expect(contractSwapChain.connect(firstUser)["approveSwap((address,uint256,address,uint256,bool,bool))"](matchObj))
+            .to.be.revertedWith("One or both tokens has been expired.");
     });
 
     it("On approve swap with valid tokens call tx is not reverted", async function() {
@@ -186,7 +196,8 @@ describe.only("SwapChain V2 test", async function () {
             _approvedByFirstUser : false,
             _approvedBySecondUser : false
         }
-        await expect(contractSwapChain.connect(firstUser).approveSwap(matchObj)).not.to.be.reverted;
+        await expect(contractSwapChain.connect(firstUser)["approveSwap((address,uint256,address,uint256,bool,bool))"](matchObj))
+            .not.to.be.reverted;
     })
 
     it("On approve swap by the same user twice would lead to tx reverted", async function() {
@@ -223,9 +234,10 @@ describe.only("SwapChain V2 test", async function () {
             _approvedByFirstUser : false,
             _approvedBySecondUser : false
         }
-        await contractSwapChain.connect(firstUser).approveSwap(matchObj);
+        await contractSwapChain.connect(firstUser)["approveSwap((address,uint256,address,uint256,bool,bool))"](matchObj);
 
-        await expect(contractSwapChain.connect(firstUser).approveSwap(matchObj)).to.be.revertedWith("Match is already approved by this, first, user.");
+        await expect(contractSwapChain.connect(firstUser)["approveSwap((address,uint256,address,uint256,bool,bool))"](matchObj))
+            .to.be.revertedWith("Match is already approved by this, first, user.");
     })
 
     it("On approve swap when both users are registered and has valid tokens, but one of them already consumed would lead tx reverted", async function() {
@@ -263,7 +275,8 @@ describe.only("SwapChain V2 test", async function () {
             _approvedByFirstUser : false,
             _approvedBySecondUser : false
         }
-        await expect(contractSwapChain.connect(firstUser).approveSwap(matchObj)).to.be.revertedWith("Tokens should not be already consumed.")
+        await expect(contractSwapChain.connect(firstUser)["approveSwap((address,uint256,address,uint256,bool,bool))"](matchObj))
+            .to.be.revertedWith("Tokens should not be already consumed.")
     })
 
     it("On swap call when everything is ok get tx not reverted and both tokens are consumed", async function() {
@@ -307,7 +320,8 @@ describe.only("SwapChain V2 test", async function () {
             _approvedByFirstUser : false,
             _approvedBySecondUser : false
         }
-        await expect(contractSwapChain.connect(firstUser).approveSwap(matchObj)).not.to.be.reverted
+        await expect(contractSwapChain.connect(firstUser)["approveSwap((address,uint256,address,uint256,bool,bool))"](matchObj))
+            .not.to.be.reverted
         const anotherMatchObj = {
             _userFirst : anotherUser.address,
             _valueOfFirstUser : anotherUserToken,
@@ -316,9 +330,11 @@ describe.only("SwapChain V2 test", async function () {
             _approvedByFirstUser : false,
             _approvedBySecondUser : false
         }
-        await expect(contractSwapChain.connect(anotherUser).approveSwap(anotherMatchObj)).not.to.be.reverted
+        await expect(contractSwapChain.connect(anotherUser)["approveSwap((address,uint256,address,uint256,bool,bool))"](anotherMatchObj))
+            .not.to.be.reverted
 
-        await expect(contractSwapChain.connect(firstUser).swap(matchObj)).not.to.be.reverted;
+        await expect(contractSwapChain.connect(firstUser)["swap((address,uint256,address,uint256,bool,bool))"](matchObj))
+            .not.to.be.reverted;
 
         await expect((await contractValue.offer(firstUserToken))._isConsumed).to.be.true;
         await expect((await contractValue.offer(anotherUserToken))._isConsumed).to.be.true;
@@ -374,7 +390,8 @@ describe.only("SwapChain V2 test", async function () {
             _approvedByFirstUser : false,
             _approvedBySecondUser : false
         }
-        await expect(contractSwapChain.connect(firstUser).approveSwap(matchObj)).not.to.be.reverted
+        await expect(contractSwapChain.connect(firstUser)["approveSwap((address,uint256,address,uint256,bool,bool))"](matchObj))
+            .not.to.be.reverted
         const anotherMatchObj = {
             _userFirst : anotherUser.address,
             _valueOfFirstUser : anotherUserToken,
@@ -383,7 +400,8 @@ describe.only("SwapChain V2 test", async function () {
             _approvedByFirstUser : false,
             _approvedBySecondUser : false
         }
-        await expect(contractSwapChain.connect(anotherUser).approveSwap(anotherMatchObj)).not.to.be.reverted    
+        await expect(contractSwapChain.connect(anotherUser)["approveSwap((address,uint256,address,uint256,bool,bool))"](anotherMatchObj))
+            .not.to.be.reverted    
         // prepare extra tokens 
         const firstUserExtraCustomMetadata = { 
             _offer : "Product management", 
@@ -412,7 +430,8 @@ describe.only("SwapChain V2 test", async function () {
             _approvedByFirstUser : false,
             _approvedBySecondUser : false
         }
-        await expect(contractSwapChain.connect(firstUser).swap(notValidMatchObj)).to.be.reverted;
+        await expect(contractSwapChain.connect(firstUser)["swap((address,uint256,address,uint256,bool,bool))"](notValidMatchObj))
+            .to.be.reverted;
     });
 
     it("On swap call when everything is ok and there is one more pending match only a single and correct tokens have been exchanged", async function() {
@@ -461,7 +480,8 @@ describe.only("SwapChain V2 test", async function () {
             _approvedByFirstUser : false,
             _approvedBySecondUser : false
         }
-        await expect(contractSwapChain.connect(firstUser).approveSwap(matchObj)).not.to.be.reverted
+        await expect(contractSwapChain.connect(firstUser)["approveSwap((address,uint256,address,uint256,bool,bool))"](matchObj))
+            .not.to.be.reverted
         const anotherMatchObj = {
             _userFirst : anotherUser.address,
             _valueOfFirstUser : anotherUserToken,
@@ -470,7 +490,8 @@ describe.only("SwapChain V2 test", async function () {
             _approvedByFirstUser : false,
             _approvedBySecondUser : false
         }
-        await expect(contractSwapChain.connect(anotherUser).approveSwap(anotherMatchObj)).not.to.be.reverted    
+        await expect(contractSwapChain.connect(anotherUser)["approveSwap((address,uint256,address,uint256,bool,bool))"](anotherMatchObj))
+            .not.to.be.reverted    
         // prepare extra tokens 
         const firstUserExtraCustomMetadata = { 
             _offer : "Product management", 
@@ -499,7 +520,8 @@ describe.only("SwapChain V2 test", async function () {
             _approvedByFirstUser : false,
             _approvedBySecondUser : false
         }
-        await expect(contractSwapChain.connect(firstUser).approveSwap(extraMatchObj)).not.to.be.reverted
+        await expect(contractSwapChain.connect(firstUser)["approveSwap((address,uint256,address,uint256,bool,bool))"](extraMatchObj))
+            .not.to.be.reverted
         const anotherExtraMatchObj = {
             _userFirst : anotherUser.address,
             _valueOfFirstUser : anotherUserExtraToken,
@@ -508,9 +530,11 @@ describe.only("SwapChain V2 test", async function () {
             _approvedByFirstUser : false,
             _approvedBySecondUser : false
         }
-        await expect(contractSwapChain.connect(anotherUser).approveSwap(anotherExtraMatchObj)).not.to.be.reverted  
+        await expect(contractSwapChain.connect(anotherUser)["approveSwap((address,uint256,address,uint256,bool,bool))"](anotherExtraMatchObj))
+            .not.to.be.reverted  
 
-        await expect(contractSwapChain.connect(firstUser).swap(matchObj)).not.to.be.reverted;
+        await expect(contractSwapChain.connect(firstUser)["swap((address,uint256,address,uint256,bool,bool))"](matchObj))
+            .not.to.be.reverted;
     
         await expect((await contractValue.offer(firstUserToken))._isConsumed).to.be.true;
         await expect((await contractValue.offer(anotherUserToken))._isConsumed).to.be.true;
