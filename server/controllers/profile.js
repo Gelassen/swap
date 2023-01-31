@@ -8,6 +8,8 @@ let validator = require('../utils/validator')
 let logger = require('../utils/logger')
 let converter = require('../utils/converter')
 
+const config = require('config');
+
 const { SwapToken, SwapChainV2 } = require('../models/chain/chain');
 
 /*
@@ -66,12 +68,6 @@ exports.create = async function(req, res) {
 }
 
 exports.get = async function(req, res) {
-        
-    // logger.log("[profile/get] start")
-    // let swapToken = new SwapToken();
-    // let result = await swapToken.balanceOf("0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd");
-    // logger.log(`Get balanceOf() result ${JSON.stringify(result)}`);
-
     let result;
     if (req.get(global.authHeader) === undefined) {
         result = network.getErrorMsg(401, global.noAuthHeaderMsg)
@@ -317,4 +313,14 @@ exports.getMatchesByProfile = async function(req, res) {
     }
     network.send(req, res, result)
     logger.log("[getMatchesByProfile] end");
+}
+
+function testChainModuleCall() {
+    let nodeUrl = `http://${config.get("chain").host}:${config.get("chain").port}`;
+    let privateKey = config.get("chain").privateKey;
+    let swapTokenAddress = config.get("chain").swapTokenAddress;
+    logger.log("[profile/get] start")
+    let swapToken = new SwapToken(privateKey, nodeUrl, swapTokenAddress);
+    let result = await swapToken.balanceOf("0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd");
+    logger.log(`Get balanceOf() result ${JSON.stringify(result)}`);
 }

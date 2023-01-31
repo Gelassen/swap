@@ -3,7 +3,6 @@ const express = require('express');
 const app = express();
 const config = require('config');
 const indexRouter = require('./routes/index');
-const { SwapToken, SwapChainV2 } = require('./models/chain/chain');
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
