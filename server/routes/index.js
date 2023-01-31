@@ -37,7 +37,8 @@ router.post('/api/v1/account/demands', profile.addDemand);
 router.delete('/api/v1/account/offers/:id', profile.deleteOffer);
 router.delete('/api/v1/account/demands/:id', profile.deleteDemand);
 router.get('/api/v1/account/matches', profile.getMatchesByProfile);
-router.post('/api/v1/account/matches', profile.confirmMatch)
+router.post('/api/v1/account/matches', profile.confirmMatch);
+router.get('/api/v1/account/matches/debug', profile.getChainOnlyMatches);
 
 router.get('/api/v1/offers', offers.get);
 

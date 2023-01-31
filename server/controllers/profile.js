@@ -315,12 +315,32 @@ exports.getMatchesByProfile = async function(req, res) {
     logger.log("[getMatchesByProfile] end");
 }
 
+exports.getChainOnlyMatches = async function(req, res) {
+    let nodeUrl = `http://${config.get("chain").host}:${config.get("chain").port}`;
+    let privateKey = config.get("chain").privateKey;
+    let swapTokenAddress = config.get("chain").swapTokenAddress;
+
+    let chain = new SwapChainV2(privateKey, nodeUrl, swapTokenAddress);
+    let firstUser = "0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd";
+    let secondUser = "0x52E7400Ba1B956B11394a5045F8BC3682792E1AC";
+    let result = await chain.getMatches(firstUser, secondUser);
+
+    let response = ""
+    if (result.length >= 0) {
+        response = network.getMsg(200, response);
+    } else {
+        response = network.getMsg(409, response, "Failed to obtain matches from chain")
+    }
+
+    network.send(req, res, response);
+}
+
 function testChainModuleCall() {
     let nodeUrl = `http://${config.get("chain").host}:${config.get("chain").port}`;
     let privateKey = config.get("chain").privateKey;
     let swapTokenAddress = config.get("chain").swapTokenAddress;
     logger.log("[profile/get] start")
     let swapToken = new SwapToken(privateKey, nodeUrl, swapTokenAddress);
-    let result = await swapToken.balanceOf("0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd");
-    logger.log(`Get balanceOf() result ${JSON.stringify(result)}`);
+    // let result = await swapToken.balanceOf("0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd");
+    // logger.log(`Get balanceOf() result ${JSON.stringify(result)}`);
 }
