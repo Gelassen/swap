@@ -10,10 +10,10 @@
     <string name="my_account">0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd</string>
     <string name="my_account_2">0x52E7400Ba1B956B11394a5045F8BC3682792E1AC</string>
     <!-- 0x3106248fbb449ed92b03d6f93f43f464cd95b74d -->
-    <string name="swap_value_contract_address">0xEb1aA6da9c4598AE28b793331a9B711c01670A7e</string>
+    <string name="swap_value_contract_address">0x608b6F62Eb361686db34C2af5454917E8c1bFC1F</string>
     <!-- Origin swap chain address: 0xbEC5032A1A14f94169Fcfd69B9DB637e1902AD65 -->
     <!-- Debug swap chain address: 0x8bC0B5C62dD269256587E46d465c9091808C3BaA -->
-    <string name="swap_chain_contract_address">0xF8C91Ac48e437d3e56BFBFFECe2d0D4663f37e6F</string>
+    <string name="swap_chain_contract_address">0x9ceAECB2931a9681Bf23c79F68615ec96BcB0EFd</string>
 
     <!-- by legacy reason originally it was rinkeby -->
 <!--    https://goerli.infura.io/v3/ce67e157fc964d3bbf7ff1db09aa316a-->
