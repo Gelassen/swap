@@ -6,6 +6,7 @@ import { Match, MatchDebug } from "../contracts/structs/StructDeclaration.sol";
 interface ISwapChainV2 {
     function registerUser(address user) external;
     function getUsers() external returns (address[] memory);
+    function getMatches(address userFirst, address userSecond) external view returns (Match[] memory);
     function swap(Match calldata subj) external;
     function approveSwap(Match calldata subj) external;
     /**
