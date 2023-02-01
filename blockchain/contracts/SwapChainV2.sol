@@ -89,16 +89,16 @@ contract SwapChainV2 is ISwapChainV2 {
         _approveSwap(msg.sender, subj);
     }
 
-    // function approveSwap(address firstUser, address secondUser, MatchDebug calldata subj) public {
-    //     Match memory matchParam;
-    //     matchParam._userFirst = firstUser;
-    //     matchParam._userSecond = secondUser;
-    //     matchParam._valueOfFirstUser = subj._valueOfFirstUser;
-    //     matchParam._valueOfSecondUser = subj._valueOfSecondUser;
-    //     matchParam._approvedByFirstUser = false;
-    //     matchParam._approvedBySecondUser = false;
-    //     _approveSwap(msg.sender, matchParam);
-    // }
+    function approveSwap(address firstUser, address secondUser, MatchDebug calldata subj) public override {
+        Match memory matchParam;
+        matchParam._userFirst = firstUser;
+        matchParam._userSecond = secondUser;
+        matchParam._valueOfFirstUser = subj._valueOfFirstUser;
+        matchParam._valueOfSecondUser = subj._valueOfSecondUser;
+        matchParam._approvedByFirstUser = false;
+        matchParam._approvedBySecondUser = false;
+        _approveSwap(msg.sender, matchParam);
+    }
 
     function _approveSwap(address msgSender, Match memory subj) private 
         callerIsRegisteredUser(msgSender, subj._userFirst, subj._userSecond)

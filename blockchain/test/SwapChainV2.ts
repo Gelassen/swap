@@ -607,7 +607,7 @@ describe.only("SwapChain V2 test", async function () {
         await expect((await contractSwapChain.getMatches(firstUser.address, anotherUser.address)).length).to.be.equal(1);
     });
 
-    it.only("On getMatches() when there is a match, but it is already swaped(), gets a zero match", async function() {
+    it("On getMatches() when there is a match, but it is already swaped(), gets a zero match", async function() {
         const accounts = await ethers.getSigners();
         const firstUser = accounts[0];
         const anotherUser = accounts[1];

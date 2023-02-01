@@ -13,7 +13,7 @@ interface ISwapChainV2 {
      * We have to pass address fields out of struct because struct with address inside is not
      * supported by web3j yet. Call from js client side works fine. 
      */
-    // function approveSwap(address firstUser, address secondUser, MatchDebug calldata subj) external;
+    function approveSwap(address firstUser, address secondUser, MatchDebug calldata subj) external;
     /**
      * We have to pass address fields out of struct because struct with address inside is not
      * supported by web3j yet. Call from js client side works fine. 

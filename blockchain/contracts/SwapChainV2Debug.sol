@@ -89,7 +89,7 @@ contract SwapChainV2Debug is ISwapChainV2 {
         _approveSwap(msg.sender, subj);
     }
 
-    function approveSwap(address firstUser, address secondUser, MatchDebug calldata subj) public {
+    function approveSwap(address firstUser, address secondUser, MatchDebug calldata subj) public override {
         Match memory matchParam;
         matchParam._userFirst = firstUser;
         matchParam._userSecond = secondUser;
