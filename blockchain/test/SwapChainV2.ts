@@ -8,7 +8,7 @@ import "./SwapValue";
 
 /**
  * If you have method overloading, in test and the rest js code you have to
- * deine a full function signature which is already done in code below. 
+ * define a full function signature which is already done in code below. 
  * 
  * Ref https://stackoverflow.com/a/70686426/3649629
  */

@@ -138,6 +138,11 @@ class TestWalletActivity: AppCompatActivity() {
                 walletViewModel.registerDemand(SECOND_USER, demandOfSecondUser)
             }
 
+        findViewById<Button>(R.id.getMatches)
+            .setOnClickListener {
+                walletViewModel.getMatchesForProfile(FIRST_USER, SECOND_USER)
+            }
+
         findViewById<Button>(R.id.swap)
             .setOnClickListener {
                 val subj = getMatchObj()

@@ -36,7 +36,8 @@ class SwapChainV2 extends Contract {
         super();
         let swapChainAbiJson = [
             "function registerUser(address user) public override",
-            "function getMatches(address userFirst, address userSecond) external view override returns (Match[] memory)"
+            "function getUsers() public view override returns (address[] memory)",
+            "function getMatches(address userFirst, address userSecond) external view override returns ((address,uint,address,uint,bool,bool)[])"
         ];
         this.signerInstance = this.getWalletWithProvider(privateKey, nodeUrl);
         this.swapChainContract = new ethers.Contract(
@@ -49,6 +50,10 @@ class SwapChainV2 extends Contract {
 
     async getMatches(userFirstAddress, userSecondAddress) {
         return await this.swapChainContract.getMatches(userFirstAddress, userSecondAddress);
+    }
+
+    async getUsers() {
+        return await this.swapChainContract.getUsers();
     }
 }
 

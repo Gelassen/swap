@@ -318,19 +318,22 @@ exports.getMatchesByProfile = async function(req, res) {
 exports.getChainOnlyMatches = async function(req, res) {
     let nodeUrl = `http://${config.get("chain").host}:${config.get("chain").port}`;
     let privateKey = config.get("chain").privateKey;
-    let swapTokenAddress = config.get("chain").swapTokenAddress;
+    let swapTokenAddress = config.get("chain").swapChainV2Address;
 
     let chain = new SwapChainV2(privateKey, nodeUrl, swapTokenAddress);
     let firstUser = "0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd";
     let secondUser = "0x52E7400Ba1B956B11394a5045F8BC3682792E1AC";
     let result = await chain.getMatches(firstUser, secondUser);
 
+    logger.log(`[get matches] result ${JSON.stringify(result)}`);
     let response = ""
     if (result.length >= 0) {
-        response = network.getMsg(200, response);
+        response = network.getMsg(200, result);
     } else {
-        response = network.getMsg(409, response, "Failed to obtain matches from chain")
+        response = network.getMsg(409, result, "Failed to obtain matches from chain")
     }
+    // let usersResult = await chain.getUsers();
+    // let response = network.getMsg(200, usersResult);
 
     network.send(req, res, response);
 }

@@ -60,4 +60,8 @@ interface IWalletRepository {
     fun swapAsFlow(subj: Match): Flow<Response<TransactionReceipt>>
 
     suspend fun swap(subj: Match): Response<TransactionReceipt>
+
+    suspend fun getMatches(userFirst: String, userSecond: String): Response<List<Match>>
+
+    fun getMatchesAsFlow(userFirst: String, userSecond: String): Flow<Response<List<Match>>>
 }

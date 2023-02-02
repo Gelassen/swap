@@ -222,6 +222,34 @@ class WalletRepository(
         return result
     }
 
+    override suspend fun getMatches(userFirst: String, userSecond: String): Response<List<Match>> {
+        logger.d("[start] getMatches()")
+        lateinit var result: Response<List<Match>>
+        try {
+            val response = swapChainContract.getMatches(userFirst, userSecond).send()
+            result = Response.Data(response)
+        } catch (ex: Exception) {
+            result = Response.Error.Exception(ex)
+        }
+        logger.d("[end] getMatches()");
+        return result;
+    }
+
+    override fun getMatchesAsFlow(userFirst: String, userSecond: String): Flow<Response<List<Match>>> {
+        return flow {
+            logger.d("[start] getMatches() ${userFirst} and ${userSecond}")
+            lateinit var result: Response<List<Match>>
+            try {
+                val response = swapChainContract.getMatches(userFirst, userSecond).send()
+                result = Response.Data(response)
+            } catch (ex: Exception) {
+                result = Response.Error.Exception(ex)
+            }
+            logger.d("[end] getMatches()");
+            emit(result)
+        }
+    }
+
     override fun getOffer(tokenId: String): Flow<Response<Value>> {
         return flow {
             logger.d("[start] getOffer() for tokenId $tokenId")

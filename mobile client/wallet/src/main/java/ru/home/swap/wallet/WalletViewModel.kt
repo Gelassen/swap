@@ -233,6 +233,18 @@ class WalletViewModel
         }
     }
 
+    fun getMatchesForProfile(firstUserAddress: String, secondUserAddress: String) {
+        viewModelScope.launch {
+            repository.getMatchesAsFlow(firstUserAddress, secondUserAddress)
+                .flowOn(backgroundDispatcher)
+                .collect { it ->
+                    logger.d("Get matches result ${it.toString()}")
+                }
+        }
+    }
+
+
+
     private fun processTokenIdsResponse(userAddress: String, response: Response<List<*>>) {
         when (response) {
             is Response.Data -> {
