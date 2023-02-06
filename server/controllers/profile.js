@@ -10,6 +10,7 @@ let converter = require('../utils/converter')
 
 const config = require('config');
 
+const chain = require('../models/chain/chain');
 const { SwapToken, SwapChainV2 } = require('../models/chain/chain');
 
 /*
@@ -303,7 +304,13 @@ exports.getMatchesByProfile = async function(req, res) {
         if (network.noSuchData(profileResult)) {
             result = network.getMsg(204, profileResult);
         } else {
-            let model = await match.getByProfileId(profileResult.id);
+            let model = await match.getByProfileId(profileResult.id)
+                // .then((result) => 
+                //     result.map(item => 
+                //         getSwapChainContractInstance().getMatches(item.userFirst, item.userSecond)
+                //     )
+                // )
+
             if (model.code !== undefined && model.code == 500) {
                 result = model;
             } else {
@@ -316,14 +323,10 @@ exports.getMatchesByProfile = async function(req, res) {
 }
 
 exports.getChainOnlyMatches = async function(req, res) {
-    let nodeUrl = `http://${config.get("chain").host}:${config.get("chain").port}`;
-    let privateKey = config.get("chain").privateKey;
-    let swapTokenAddress = config.get("chain").swapChainV2Address;
-
-    let chain = new SwapChainV2(privateKey, nodeUrl, swapTokenAddress);
+    let swapChainContract = getSwapChainContractInstance();
     let firstUser = "0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd";
     let secondUser = "0x52E7400Ba1B956B11394a5045F8BC3682792E1AC";
-    let result = await chain.getMatches(firstUser, secondUser);
+    let result = await swapChainContract.getMatches(firstUser, secondUser);
 
     logger.log(`[get matches] result ${JSON.stringify(result)}`);
     let response = ""
@@ -332,7 +335,7 @@ exports.getChainOnlyMatches = async function(req, res) {
     } else {
         response = network.getMsg(409, result, "Failed to obtain matches from chain")
     }
-    // let usersResult = await chain.getUsers();
+    // let usersResult = await swapChainContract.getUsers();
     // let response = network.getMsg(200, usersResult);
 
     network.send(req, res, response);
@@ -346,4 +349,20 @@ function testChainModuleCall() {
     let swapToken = new SwapToken(privateKey, nodeUrl, swapTokenAddress);
     // let result = await swapToken.balanceOf("0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd");
     // logger.log(`Get balanceOf() result ${JSON.stringify(result)}`);
+}
+
+function getSwapChainContractInstance() {
+    let nodeUrl = `http://${config.get("chain").host}:${config.get("chain").port}`;
+    let privateKey = config.get("chain").privateKey;
+    let swapChainAddress = config.get("chain").swapChainV2Address;
+
+    return new SwapChainV2(privateKey, nodeUrl, swapChainAddress);
+}
+
+function getSwapValueContractInstance() {
+    let nodeUrl = `http://${config.get("chain").host}:${config.get("chain").port}`;
+    let privateKey = config.get("chain").privateKey;
+    let swapTokenAddress = config.get("chain").swapTokenAddress;
+
+    return new SwapToken(privateKey, nodeUrl, swapTokenAddress);
 }
