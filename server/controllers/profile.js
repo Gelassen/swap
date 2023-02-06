@@ -304,13 +304,20 @@ exports.getMatchesByProfile = async function(req, res) {
         if (network.noSuchData(profileResult)) {
             result = network.getMsg(204, profileResult);
         } else {
-            let model = await match.getByProfileId(profileResult.id)
-                // .then((result) => 
-                //     result.map(item => 
-                //         getSwapChainContractInstance().getMatches(item.userFirst, item.userSecond)
-                //     )
-                // )
-
+            // TODO draft, has not been tested yet. 
+            // TODO first return back chain serivce ids in response, after that add request to chain for aggregated response
+            let model = await match.getByProfileId(profileResult.id);
+            let aggregatedModel = [];
+            await Promise.all(model.map(async (matchItem) => {
+                let matchOnChain = await chain.getSwapChainContractInstance()
+                                            .getMatches(
+                                                matchItem.userFirstServiceId,
+                                                userFirstServiceId.userSecondServiceId
+                                            );
+                matchItem.chainObject = matchOnChain;
+                aggregatedModel.add(matchItem);
+            }));
+            result = network.getMsg(200, aggregatedModel);
             if (model.code !== undefined && model.code == 500) {
                 result = model;
             } else {
