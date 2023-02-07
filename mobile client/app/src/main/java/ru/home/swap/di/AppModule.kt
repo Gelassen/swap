@@ -5,16 +5,13 @@ import android.content.Context
 import dagger.Module
 import dagger.Provides
 import ru.home.swap.R
-import ru.home.swap.core.di.CoreMainScope
-import ru.home.swap.core.di.NetworkModule
 import ru.home.swap.core.network.IApi
 import ru.home.swap.repository.Cache
 import ru.home.swap.repository.PersonRepository
 import ru.home.swap.repository.pagination.DemandsPagingSource
 import ru.home.swap.repository.pagination.OffersPagingSource
-import javax.inject.Singleton
 
-@Module(/*includes = [NetworkModule::class]*/)
+@Module()
 class AppModule(val application: Application) {
 
     @AppMainScope
@@ -39,17 +36,5 @@ class AppModule(val application: Application) {
     @Provides
     fun providePersonRepository(api: IApi, cache: Cache, context: Context): PersonRepository {
         return PersonRepository(api, cache, context)
-    }
-
-    @AppMainScope
-    @Provides
-    fun provideApplication(): Application {
-        return application
-    }
-
-    @AppMainScope
-    @Provides
-    fun provideContext(): Context {
-        return application
     }
 }

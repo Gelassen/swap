@@ -6,12 +6,10 @@ import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoMap
 import ru.home.swap.core.di.ViewModelKey
-import javax.inject.Singleton
 
 
 @Module
 abstract class WalletViewModelModule {
-
 
     @WalletMainScope
     @Binds

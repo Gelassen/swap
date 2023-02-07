@@ -1,16 +1,22 @@
 package ru.home.swap.core.di
 
+import android.app.Application
 import android.content.Context
 import dagger.Module
 import dagger.Provides
-import javax.inject.Singleton
 
-@Module(/*includes = [NetworkModule::class]*/)
-class CoreModule(val context: Context) {
+@Module()
+class CoreModule(val application: Application) {
 
     @CoreMainScope
     @Provides
-    fun provideApplication(): Context {
-        return context.applicationContext
+    fun provideApplication(): Application {
+        return application
+    }
+
+    @CoreMainScope
+    @Provides
+    fun provideContext(): Context {
+        return application
     }
 }

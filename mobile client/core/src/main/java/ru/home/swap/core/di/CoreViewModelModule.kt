@@ -3,7 +3,6 @@ package ru.home.swap.core.di
 import androidx.lifecycle.ViewModelProvider
 import dagger.Binds
 import dagger.Module
-import ru.home.swap.core.di.ViewModelFactory
 
 @Module
 abstract class CoreViewModelModule {

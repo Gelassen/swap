@@ -30,6 +30,7 @@ class AppApplication: Application(), HasAndroidInjector {
             .coreComponent(
                 DaggerCoreComponent
                     .builder()
+                    .coreModule(CoreModule(this))
                     .networkModule(NetworkModule(this))
                     .build()
             )
@@ -39,9 +40,6 @@ class AppApplication: Application(), HasAndroidInjector {
                     .walletModule(WalletModule(this))
                     .build()
             )
-//            .networkModule(NetworkModule(this))
-//            .coreModule(CoreModule(this))
-//            .walletModule(WalletModule(this))
             .build()
         component.inject(this)
     }

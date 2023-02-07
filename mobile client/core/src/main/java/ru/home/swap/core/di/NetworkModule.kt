@@ -12,7 +12,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 import ru.home.swap.core.R
 import ru.home.swap.core.network.IApi
 import javax.inject.Named
-import javax.inject.Singleton
 
 @Module
 class NetworkModule(val context: Context) {
