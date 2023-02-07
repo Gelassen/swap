@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import dagger.android.support.AndroidSupportInjection
 import kotlinx.coroutines.launch
 import ru.home.swap.App
-import ru.home.swap.AppApplication
 import ru.home.swap.core.model.Service
 import ru.home.swap.databinding.ProfileFragmentBinding
 import ru.home.swap.core.di.ViewModelFactory
@@ -63,27 +62,12 @@ class ProfileFragment : BaseFragment(), ItemAdapter.Listener {
                 viewModel.uiState.collect { it ->
                     Log.d(App.TAG, "[collect] collected #${it.profile.offers.count()} offers items")
                     (binding.offersList.adapter as ItemAdapter).submitList(it.profile.offers)
-                }
-            }
-        }
-
-        lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                viewModel.uiState.collect { it ->
                     Log.d(App.TAG, "[collect] collected #${it.profile.demands.count()} demands items")
                     (binding.demandsList.adapter as ItemAdapter).submitList(it.profile.demands)
-                }
-            }
-        }
-
-        lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                viewModel.uiState.collect { it ->
                     onModelUpdate(it)
                 }
             }
         }
-
         binding.fab.apply {
             setOnClickListener {
                 childFragmentManager.let {
