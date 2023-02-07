@@ -24,20 +24,21 @@ class AppApplication: Application(), HasAndroidInjector {
     override fun onCreate() {
         super.onCreate()
 
+        val coreComponent = DaggerCoreComponent
+            .builder()
+            .coreModule(CoreModule(this))
+            .networkModule(NetworkModule(this))
+            .build()
+
         component = DaggerAppComponent
             .builder()
             .appModule(AppModule(this))
-            .coreComponent(
-                DaggerCoreComponent
-                    .builder()
-                    .coreModule(CoreModule(this))
-                    .networkModule(NetworkModule(this))
-                    .build()
-            )
+            .coreComponent(coreComponent)
             .walletComponent(
                 DaggerWalletComponent
                     .builder()
                     .walletModule(WalletModule(this))
+                    .coreComponent(coreComponent)
                     .build()
             )
             .build()

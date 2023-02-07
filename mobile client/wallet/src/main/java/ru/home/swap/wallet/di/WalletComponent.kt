@@ -2,6 +2,7 @@ package ru.home.swap.wallet.di
 
 import ru.home.swap.wallet.TestWalletActivity
 import dagger.Component
+import ru.home.swap.core.di.CoreComponent
 import javax.inject.Scope
 
 @Scope
@@ -9,7 +10,9 @@ import javax.inject.Scope
 annotation class WalletMainScope
 
 @WalletMainScope
-@Component(modules = [WalletModule::class, WalletViewModelModule::class])
+@Component(
+    dependencies = [CoreComponent::class],
+    modules = [WalletModule::class, WalletViewModelModule::class])
 interface WalletComponent {
     fun inject(subj: TestWalletActivity)
 }

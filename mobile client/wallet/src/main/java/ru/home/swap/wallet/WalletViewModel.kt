@@ -9,6 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.web3j.protocol.core.methods.response.TransactionReceipt
+import ru.home.swap.core.di.NetworkModule
 import ru.home.swap.core.logger.Logger
 import ru.home.swap.core.network.Response
 import ru.home.swap.wallet.contract.Match
@@ -17,6 +18,7 @@ import ru.home.swap.wallet.repository.IStorageRepository
 import ru.home.swap.wallet.storage.TxStatus
 import java.math.BigInteger
 import javax.inject.Inject
+import javax.inject.Named
 
 data class Model(
     var balance: BigInteger = BigInteger.valueOf(0),
@@ -32,7 +34,7 @@ class WalletViewModel
     @Inject constructor(
         val repository: IWalletRepository,
         val cacheRepository: IStorageRepository,
-        val backgroundDispatcher: CoroutineDispatcher = Dispatchers.IO
+        @Named(NetworkModule.DISPATCHER_IO) val backgroundDispatcher: CoroutineDispatcher = Dispatchers.IO
     ): ViewModel() {
 
     private val logger: Logger = Logger.getInstance()

@@ -59,9 +59,4 @@ class WalletModule(val context: Context) {
         return StorageRepository(database.chainTransactionDao())
     }
 
-    @WalletMainScope
-    @Provides
-    fun providesBackgroundDispatcher(): CoroutineDispatcher {
-        return Dispatchers.IO
-    }
 }
