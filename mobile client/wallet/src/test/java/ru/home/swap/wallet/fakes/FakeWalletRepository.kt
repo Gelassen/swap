@@ -118,6 +118,17 @@ class FakeWalletRepository: IWalletRepository {
         return swapValueResponse.getSwapResponse()
     }
 
+    override suspend fun getMatches(userFirst: String, userSecond: String): Response<List<Match>> {
+        TODO("Not yet implemented")
+    }
+
+    override fun getMatchesAsFlow(
+        userFirst: String,
+        userSecond: String
+    ): Flow<Response<List<Match>>> {
+        TODO("Not yet implemented")
+    }
+
     fun setPositiveBalanceOfResponse() {
         swapValueResponse.setPositiveBalance()
     }

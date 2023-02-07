@@ -8,15 +8,12 @@ import ru.home.swap.wallet.repository.WalletRepository
 import ru.home.swap.wallet.storage.AppDatabase
 import dagger.Module
 import dagger.Provides
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.web3j.protocol.http.HttpService
 import ru.home.swap.core.network.interceptors.DefaultInterceptor
 import ru.home.swap.wallet.repository.IStorageRepository
-import javax.inject.Singleton
 
 @Module
 class WalletModule(val context: Context) {
