@@ -21,7 +21,31 @@ data class Model(
     val isLoading: Boolean = false,
     val errors: List<String> = emptyList(),
     val status: StateFlag = StateFlag.NONE
-)
+
+
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Model
+
+        if (profile != other.profile) return false
+        if (isLoading != other.isLoading) return false
+        if (errors != other.errors) return false
+        if (status != other.status) return false
+
+        return false
+    }
+
+    override fun hashCode(): Int {
+        var result = profile.hashCode()
+        result = 31 * result + isLoading.hashCode()
+        result = 31 * result + errors.hashCode()
+        result = 31 * result + status.hashCode()
+        return result
+    }
+}
 
 enum class StateFlag {
     CREDENTIALS,
@@ -62,6 +86,7 @@ class ProfileViewModel
                 contact = uiState.value.profile.contact,
                 secret = uiState.value.profile.secret,
                 newService = newService)
+//                .onStart { state.update { state -> state.copy(isLoading = true) } }
                 .flatMapConcat { it ->
                     if (it is Response.Data) {
                         repository.cacheAccount(it.data)
