@@ -21,13 +21,13 @@ import javax.inject.Singleton
 @Module
 class WalletModule(val context: Context) {
 
-    @Singleton
+    @WalletMainScope
     @Provides
     fun providesInterceptor(): Interceptor {
         return DefaultInterceptor(context)
     }
 
-    @Singleton
+    @WalletMainScope
     @Provides
     fun providesWeb3jHttpService(interceptor: Interceptor): HttpService {
         val url: String = context.getString(R.string.ethereum_api_endpoint)
@@ -41,24 +41,25 @@ class WalletModule(val context: Context) {
         return HttpService(url, client)
     }
 
-    @Singleton
+    @WalletMainScope
     @Provides
     fun providesWalletRepository(httpService: HttpService): IWalletRepository {
         return WalletRepository(context, httpService)
     }
 
-    @Singleton
+    @WalletMainScope
     @Provides
     fun providesDatabase(): AppDatabase {
         return AppDatabase.getInstance(context)
     }
 
-    @Singleton
+    @WalletMainScope
     @Provides
     fun providesStorageRepository(database: AppDatabase): IStorageRepository {
         return StorageRepository(database.chainTransactionDao())
     }
 
+    @WalletMainScope
     @Provides
     fun providesBackgroundDispatcher(): CoroutineDispatcher {
         return Dispatchers.IO

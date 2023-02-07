@@ -4,10 +4,14 @@ import android.app.Application
 import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector
+import ru.home.swap.core.di.CoreModule
+import ru.home.swap.core.di.DaggerCoreComponent
 import ru.home.swap.core.di.NetworkModule
 import ru.home.swap.di.AppComponent
 import ru.home.swap.di.AppModule
 import ru.home.swap.di.DaggerAppComponent
+import ru.home.swap.wallet.di.DaggerWalletComponent
+import ru.home.swap.wallet.di.WalletModule
 import javax.inject.Inject
 
 class AppApplication: Application(), HasAndroidInjector {
@@ -23,7 +27,21 @@ class AppApplication: Application(), HasAndroidInjector {
         component = DaggerAppComponent
             .builder()
             .appModule(AppModule(this))
-            .networkModule(NetworkModule(this))
+            .coreComponent(
+                DaggerCoreComponent
+                    .builder()
+                    .networkModule(NetworkModule(this))
+                    .build()
+            )
+            .walletComponent(
+                DaggerWalletComponent
+                    .builder()
+                    .walletModule(WalletModule(this))
+                    .build()
+            )
+//            .networkModule(NetworkModule(this))
+//            .coreModule(CoreModule(this))
+//            .walletModule(WalletModule(this))
             .build()
         component.inject(this)
     }

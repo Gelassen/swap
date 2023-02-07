@@ -3,18 +3,26 @@ package ru.home.swap.core.di
 import android.content.Context
 import dagger.Module
 import dagger.Provides
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import ru.home.swap.core.R
 import ru.home.swap.core.network.IApi
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
 class NetworkModule(val context: Context) {
 
-    @Singleton
+    companion object {
+        const val DISPATCHER_IO = "Dispatchers.IO"
+        const val DISPATCHER_MAIN = "Dispatchers.Main"
+    }
+
+    @CoreMainScope
     @Provides
     fun providesApi(httpClient: OkHttpClient): IApi {
 //        val customGson = GsonBuilder().registerTypeAdapterFactory(CustomTypeAdapterFactory()).create()
@@ -29,7 +37,7 @@ class NetworkModule(val context: Context) {
         return retrofit.create(IApi::class.java)
     }
 
-    @Singleton
+    @CoreMainScope
     @Provides
     fun providesClient(): OkHttpClient {
         val logging = HttpLoggingInterceptor()
@@ -41,5 +49,12 @@ class NetworkModule(val context: Context) {
             .build()
 
         return httpClient
+    }
+
+    @CoreMainScope
+    @Provides
+    @Named(DISPATCHER_IO)
+    fun providesNetworkDispatcher(): CoroutineDispatcher {
+        return Dispatchers.IO
     }
 }

@@ -1,20 +1,26 @@
 package ru.home.swap.ui.profile
 
-import android.content.Context
+import android.app.Application
 import android.util.Log
 import androidx.databinding.ObservableField
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import ru.home.swap.App
 import ru.home.swap.R
+import ru.home.swap.core.di.NetworkModule
 import ru.home.swap.core.model.PersonProfile
 import ru.home.swap.core.model.Service
 import ru.home.swap.providers.PersonProvider
 import ru.home.swap.repository.PersonRepository
 import ru.home.swap.repository.PersonRepository.*
+import ru.home.swap.wallet.repository.IStorageRepository
+import ru.home.swap.wallet.repository.IWalletRepository
 import javax.inject.Inject
+import javax.inject.Named
 
 data class Model(
     var profile: PersonProfile = PersonProfile(),
@@ -56,8 +62,11 @@ enum class StateFlag {
 class ProfileViewModel
 @Inject constructor(
     private val repository: PersonRepository,
-    private val application: Context
-): ViewModel()  {
+    private val app: Application/*,
+    val walletRepository: IWalletRepository,
+    val cacheRepository: IStorageRepository,
+    @Named(NetworkModule.DISPATCHER_IO) val backgroundDispatcher: CoroutineDispatcher = Dispatchers.IO*/
+): AndroidViewModel(app)  {
 
     init {
         Log.d(App.TAG, "ProfileViewModel::init call")
@@ -86,7 +95,7 @@ class ProfileViewModel
                 contact = uiState.value.profile.contact,
                 secret = uiState.value.profile.secret,
                 newService = newService)
-//                .onStart { state.update { state -> state.copy(isLoading = true) } }
+                .onStart { state.update { state -> state.copy(isLoading = true) } }
                 .flatMapConcat { it ->
                     if (it is Response.Data) {
                         repository.cacheAccount(it.data)
@@ -184,7 +193,7 @@ class ProfileViewModel
         if (PersonProvider().isAnyOfCredentialsEmpty(uiState.value.profile.contact, uiState.value.profile.secret)) {
             state.update { state ->
                 state.copy(
-                    errors = state.errors + application.getString(R.string.empty_credentials_error)
+                    errors = state.errors + app.getString(R.string.empty_credentials_error)
                 )
             }
         } else {

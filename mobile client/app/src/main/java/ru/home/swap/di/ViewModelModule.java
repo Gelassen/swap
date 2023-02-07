@@ -20,24 +20,25 @@ public abstract class ViewModelModule {
     @Binds
     @IntoMap
     @ViewModelKey(ProfileViewModel.class)
-    @Singleton
+    @AppMainScope
     abstract ViewModel profileViewModel(ProfileViewModel vm);
 
     @Binds
     @IntoMap
     @ViewModelKey(OffersViewModel.class)
-    @Singleton
+    @AppMainScope
     abstract ViewModel offersViewModel(OffersViewModel vm);
 
     @Binds
     @IntoMap
     @ViewModelKey(DemandsViewModel.class)
-    @Singleton
+    @AppMainScope
     abstract ViewModel demandsViewModel(DemandsViewModel vm);
 
     @Binds
     @IntoMap
     @ViewModelKey(ContactsViewModel.class)
+    @AppMainScope
     abstract ViewModel contactsViewModel(ContactsViewModel vm);
 
 }

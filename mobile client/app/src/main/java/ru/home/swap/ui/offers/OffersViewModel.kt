@@ -22,6 +22,7 @@ data class Model(
     val errors: List<String> = emptyList(),
 )
 
+@Deprecated("Use OffersV2ViewModel instead. It supports on-chain operations")
 class OffersViewModel
 @Inject constructor(
     private val offersPagingSource: OffersPagingSource,
