@@ -26,7 +26,7 @@ class ProfileFragment : BaseFragment(), ItemAdapter.Listener {
 
     @Inject
     lateinit var viewModelFactory: ViewModelFactory
-    lateinit var viewModel: ProfileViewModel
+    lateinit var viewModel: ProfileV2ViewModel
 
     private lateinit var binding: ProfileFragmentBinding
 
@@ -41,7 +41,7 @@ class ProfileFragment : BaseFragment(), ItemAdapter.Listener {
         savedInstanceState: Bundle?
     ): View? {
         // keep an eye on owner parameter, it should be the same scope for view model which is shared among components
-        viewModel = ViewModelProvider(this, viewModelFactory).get(ProfileViewModel::class.java)
+        viewModel = ViewModelProvider(this, viewModelFactory).get(ProfileV2ViewModel::class.java)
         binding = ProfileFragmentBinding.inflate(inflater, container, false)
         binding.viewmodel = viewModel
         return binding.root

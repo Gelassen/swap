@@ -7,6 +7,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import ru.home.swap.App
 import ru.home.swap.R
 import ru.home.swap.ui.profile.Model
+import ru.home.swap.ui.profile.ModelV2
 
 abstract class BaseFragment: Fragment(), IDialogListener {
 
@@ -21,7 +22,7 @@ abstract class BaseFragment: Fragment(), IDialogListener {
         ).show(childFragmentManager, ErrorDialogFragment.TAG)
     }
 
-    fun onModelUpdate(model: Model) {
+    fun onModelUpdate(model: ModelV2) {
         if (model.errors.isNotEmpty()) {
             showErrorDialog(model.errors.first())
         }

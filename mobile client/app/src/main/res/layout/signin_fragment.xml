@@ -5,7 +5,7 @@
     <data>
         <variable
             name="model"
-            type="ru.home.swap.ui.profile.ProfileViewModel" />
+            type="ru.home.swap.ui.profile.ProfileV2ViewModel" />
         <variable
             name="provider"
             type="ru.home.swap.providers.PersonProvider" />

@@ -12,9 +12,10 @@ import ru.home.swap.core.di.ViewModelKey;
 import ru.home.swap.ui.contacts.ContactsViewModel;
 import ru.home.swap.ui.demands.DemandsViewModel;
 import ru.home.swap.ui.offers.OffersViewModel;
+import ru.home.swap.ui.profile.ProfileV2ViewModel;
 import ru.home.swap.ui.profile.ProfileViewModel;
 
-@Module/*(includes = [CoreViewModelModule::class.java])*/
+@Module
 public abstract class ViewModelModule {
 
     @Binds
@@ -22,6 +23,12 @@ public abstract class ViewModelModule {
     @ViewModelKey(ProfileViewModel.class)
     @AppMainScope
     abstract ViewModel profileViewModel(ProfileViewModel vm);
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(ProfileV2ViewModel.class)
+    @AppMainScope
+    abstract ViewModel profileV2ViewModel(ProfileV2ViewModel vm);
 
     @Binds
     @IntoMap

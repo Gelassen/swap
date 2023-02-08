@@ -11,11 +11,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
-import dagger.android.AndroidInjection
 import dagger.android.support.AndroidSupportInjection
 import kotlinx.coroutines.launch
 import ru.home.swap.App
-import ru.home.swap.AppApplication
 import ru.home.swap.BuildConfig
 import ru.home.swap.R
 import ru.home.swap.core.model.DebugProfiles
@@ -35,7 +33,7 @@ class SignInFragment: BaseFragment() {
 
     @Inject
     lateinit var viewModelFactory: ViewModelFactory
-    lateinit var viewModel: ProfileViewModel
+    lateinit var viewModel: ProfileV2ViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidSupportInjection.inject(this)
@@ -49,7 +47,7 @@ class SignInFragment: BaseFragment() {
     ): View? {
         binding = SigninFragmentBinding.inflate(inflater, container, false)
         binding.provider = PersonProvider()
-        viewModel = ViewModelProvider(this, viewModelFactory).get(ProfileViewModel::class.java)
+        viewModel = ViewModelProvider(this, viewModelFactory).get(ProfileV2ViewModel::class.java)
         return binding.root
     }
 
@@ -80,14 +78,14 @@ class SignInFragment: BaseFragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 viewModel.uiState.collect { it ->
                     when(it.status) {
-                        StateFlag.CREDENTIALS -> {
+                        StateFlagV2.CREDENTIALS -> {
                             Log.d(App.TAG, "[6a] UI state: credentials")
                         }
-                        StateFlag.PROFILE -> {
+                        StateFlagV2.PROFILE -> {
                             Log.d(App.TAG, "[6b] UI state: profile")
                             findNavController().navigate(R.id.action_signInFragment_to_profileFragment)
                         }
-                        StateFlag.NONE -> {
+                        StateFlagV2.NONE -> {
                             Log.d(App.TAG, "[6c] UI state: none ")
                         }
                     }

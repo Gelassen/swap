@@ -22,12 +22,11 @@ import ru.home.swap.wallet.repository.IWalletRepository
 import javax.inject.Inject
 import javax.inject.Named
 
-@Deprecated("Use ProfileV2ViewModel instead.")
-data class Model(
+data class ModelV2(
     var profile: PersonProfile = PersonProfile(),
     val isLoading: Boolean = false,
     val errors: List<String> = emptyList(),
-    val status: StateFlag = StateFlag.NONE
+    val status: StateFlagV2 = StateFlagV2.NONE
 
 
 ) {
@@ -35,7 +34,7 @@ data class Model(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as Model
+        other as ModelV2
 
         if (profile != other.profile) return false
         if (isLoading != other.isLoading) return false
@@ -54,28 +53,27 @@ data class Model(
     }
 }
 
-enum class StateFlag {
+enum class StateFlagV2 {
     CREDENTIALS,
     PROFILE,
     NONE
 }
 
-@Deprecated("Use ProfileV2ViewModel instead. It supports on-chain operations.")
-class ProfileViewModel
+class ProfileV2ViewModel
 @Inject constructor(
     private val repository: PersonRepository,
-    private val app: Application/*,
+    private val app: Application,
     val walletRepository: IWalletRepository,
     val cacheRepository: IStorageRepository,
-    @Named(NetworkModule.DISPATCHER_IO) val backgroundDispatcher: CoroutineDispatcher = Dispatchers.IO*/
+    @Named(NetworkModule.DISPATCHER_IO) val backgroundDispatcher: CoroutineDispatcher = Dispatchers.IO
 ): AndroidViewModel(app)  {
 
     init {
         Log.d(App.TAG, "ProfileViewModel::init call")
     }
 
-    /*private*/ val state: MutableStateFlow<Model> = MutableStateFlow(Model())
-    val uiState: StateFlow<Model> = state
+    /*private*/ val state: MutableStateFlow<ModelV2> = MutableStateFlow(ModelV2())
+    val uiState: StateFlow<ModelV2> = state
         .asStateFlow()
         .stateIn(viewModelScope, SharingStarted.Eagerly, state.value)
 
@@ -293,7 +291,7 @@ class ProfileViewModel
                 state.update { state ->
                     state.copy(
                         profile = it.data,
-                        status = StateFlag.PROFILE,
+                        status = StateFlagV2.PROFILE,
                         isLoading = false
                     )
                 }
@@ -330,7 +328,7 @@ class ProfileViewModel
                 state.update { state ->
                     state.copy(
                         profile = it.data,
-                        status = if (it.data.contact.isEmpty() && it.data.secret.isEmpty()) StateFlag.CREDENTIALS else StateFlag.PROFILE,
+                        status = if (it.data.contact.isEmpty() && it.data.secret.isEmpty()) StateFlagV2.CREDENTIALS else StateFlagV2.PROFILE,
                         isLoading = false
                     )
                 }
@@ -340,7 +338,7 @@ class ProfileViewModel
                 state.update { state ->
                     state.copy(
                         errors = state.errors + getErrorMessage(it),
-                        status = StateFlag.NONE,
+                        status = StateFlagV2.NONE,
                         isLoading = false
                     )
                 }

@@ -12,7 +12,7 @@
     <data>
         <variable
             name="viewmodel"
-            type="ru.home.swap.ui.profile.ProfileViewModel" />
+            type="ru.home.swap.ui.profile.ProfileV2ViewModel" />
     </data>
 
     <FrameLayout
