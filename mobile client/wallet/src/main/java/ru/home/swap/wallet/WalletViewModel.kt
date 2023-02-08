@@ -111,7 +111,7 @@ class WalletViewModel
                 value = value,
                 uri = uri
             )
-            cacheRepository.createChainTx(tx)
+            cacheRepository.createChainTxAsFlow(tx)
                 .map {
                     newTx = it
                     repository.mintToken(to, value, uri)
@@ -166,7 +166,7 @@ class WalletViewModel
         logger.d("[start] registerUserOnSwapMarket()")
         viewModelScope.launch {
             lateinit var newTx: ITransaction
-            cacheRepository.createChainTx(RegisterUserTransaction(userWalletAddress = userWalletAddress))
+            cacheRepository.createChainTxAsFlow(RegisterUserTransaction(userWalletAddress = userWalletAddress))
                 .map { it ->
                     newTx= it
                     repository.registerUserOnSwapMarket(userWalletAddress)
@@ -182,7 +182,7 @@ class WalletViewModel
         viewModelScope.launch {
             val tx = ApproveTokenManagerTransaction(swapMarketContractAddress = swapChainAddress, isApproved = true)
             lateinit var newTx: ITransaction
-            cacheRepository.createChainTx(tx)
+            cacheRepository.createChainTxAsFlow(tx)
                 .map {
                     newTx = it
                     repository.approveTokenManager(swapChainAddress, true)
@@ -198,7 +198,7 @@ class WalletViewModel
     fun approveSwap(matchSubj: Match) {
         viewModelScope.launch {
             lateinit var newTx: ITransaction
-            cacheRepository.createChainTx(ApproveSwapTransaction(match = matchSubj))
+            cacheRepository.createChainTxAsFlow(ApproveSwapTransaction(match = matchSubj))
                 .map {
                     newTx = it
                     repository.approveSwap(matchSubj)
@@ -214,7 +214,7 @@ class WalletViewModel
         viewModelScope.launch {
             val tx = RegisterDemandTransaction(userAddress = userAddress, demand = demand)
             lateinit var newTx: ITransaction
-            cacheRepository.createChainTx(tx)
+            cacheRepository.createChainTxAsFlow(tx)
                 .map {
                     newTx = it
                     repository.registerDemand(userAddress, demand)
@@ -264,7 +264,7 @@ class WalletViewModel
     fun swap(subj: Match) {
         viewModelScope.launch {
             lateinit var newTx: ITransaction
-            cacheRepository.createChainTx(SwapTransaction(match = subj))
+            cacheRepository.createChainTxAsFlow(SwapTransaction(match = subj))
                 .map {
                     newTx = it
                     repository.swap(subj)
@@ -275,31 +275,31 @@ class WalletViewModel
         }
     }
 
-    private fun preProcessResponse(it: Response<TransactionReceipt>, newTx: ITransaction) {
+    private fun preProcessResponse(it: Response<TransactionReceiptDomain>, newTx: ITransaction) {
         when(it) {
             is Response.Data -> {
-                if (it.data.isStatusOK) {
+                if (it.data.isStatusOK()) {
                     newTx.status = TxStatus.TX_MINED
-                    cacheRepository.createChainTx(newTx)
+                    cacheRepository.createChainTxAsFlow(newTx)
                 } else {
                     newTx.status = TxStatus.TX_REVERTED
-                    cacheRepository.createChainTx(newTx)
+                    cacheRepository.createChainTxAsFlow(newTx)
                 }
             }
             is Response.Error.Message -> {
                 newTx.status = TxStatus.TX_EXCEPTION
-                cacheRepository.createChainTx(newTx)
+                cacheRepository.createChainTxAsFlow(newTx)
             }
             is Response.Error.Exception -> {
                 newTx.status = TxStatus.TX_EXCEPTION
-                cacheRepository.createChainTx(newTx)
+                cacheRepository.createChainTxAsFlow(newTx)
             }
         }
     }
 
-    private fun processResponse(it: Response<TransactionReceipt>) {
+    private fun processResponse(it: Response<TransactionReceiptDomain>) {
         when(it) {
-            is Response.Data -> { if (!it.data.isStatusOK) updateStateWithError("Reverted cause: ${it.data.revertReason}") }
+            is Response.Data -> { if (!it.data.isStatusOK()) updateStateWithError("Reverted cause: ${it.data.getRevertReason()}") }
             is Response.Error.Message -> { updateStateWithError("Exception: ${it.msg}") }
             is Response.Error.Exception -> { updateStateWithError("Exception: ${it.error.message}") }
         }

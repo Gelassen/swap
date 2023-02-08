@@ -6,7 +6,9 @@ import ru.home.swap.wallet.model.MintTransaction
 
 interface IStorageRepository {
 
-    fun createChainTx(tx: ITransaction): Flow<ITransaction>
+    fun createChainTxAsFlow(tx: ITransaction): Flow<ITransaction>
+
+    suspend fun createChainTx(tx: ITransaction): ITransaction
 
     fun getAllChainTransactions(): Flow<List<ITransaction>>
 

@@ -91,6 +91,8 @@ dependencies {
     implementation ("com.google.dagger:dagger-android-support:2.44.2")
     implementation("com.google.dagger:dagger-android:2.44.2")
 
+//    implementation("org.web3j:core:4.9.4")
+
     kapt("com.google.dagger:dagger-compiler:2.44.2")
     kapt("com.google.dagger:dagger-android-processor:2.44.2")
 

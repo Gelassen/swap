@@ -17,8 +17,12 @@ import ru.home.swap.core.model.Service
 import ru.home.swap.providers.PersonProvider
 import ru.home.swap.repository.PersonRepository
 import ru.home.swap.repository.PersonRepository.*
+import ru.home.swap.wallet.model.ITransaction
+import ru.home.swap.wallet.model.RegisterUserTransaction
+import ru.home.swap.wallet.model.TransactionReceiptDomain
 import ru.home.swap.wallet.repository.IStorageRepository
 import ru.home.swap.wallet.repository.IWalletRepository
+import ru.home.swap.wallet.storage.TxStatus
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -27,8 +31,6 @@ data class ModelV2(
     val isLoading: Boolean = false,
     val errors: List<String> = emptyList(),
     val status: StateFlagV2 = StateFlagV2.NONE
-
-
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -203,24 +205,39 @@ class ProfileV2ViewModel
 
     fun createAnAccount(person: PersonProfile) {
         Log.d(App.TAG, "[1] create account call (cache)")
+        // TODO integrate functionality from WalletViewModel
         viewModelScope.launch {
+            lateinit var newTx: ITransaction
             repository.cacheAccount(person)
                 .flatMapConcat { it->
                     Log.d(App.TAG, "[2] create account call (server)")
                     repository.createAccount(person)
                 }
                 .flatMapConcat { it ->
-                    if (it is Response.Data) {
-                        repository.cacheAccount(it.data)
-                            .collect { it ->
-                                // no op, just execute the command
-                                Log.d(App.TAG, "account has been cached")
-                            }
+                    when(it) {
+                        is Response.Data -> { repository.cacheAccount(it.data).collect{ /* no op, just execute the command */ } }
+                        else -> { /* no op, just emit the value further */ }
                     }
                     flow {
                         emit(it)
                     }
                 }
+                .map {
+                    // TODO process previous response, including errors
+                    cacheRepository.createChainTx(RegisterUserTransaction(userWalletAddress = person.userWalletAddress))
+
+//                        it ->
+/*                    when(it) {
+                        is Response.Data -> { walletRepository.registerUserOnSwapMarket(it.data.userWallet) }
+                        else -> { it }
+                    }*/
+                }
+                .map {
+                    newTx= it
+                    walletRepository.registerUserOnSwapMarket(person.userWalletAddress)
+                }
+                .map { it -> preProcessResponse(it, newTx) }
+                .flowOn(backgroundDispatcher)
                 .catch { e ->
                     Log.d(App.TAG, "[3] get an exception in catch block")
                     Log.e(App.TAG, "Got an exception during network call", e)
@@ -231,7 +248,7 @@ class ProfileV2ViewModel
                 }
                 .collect { it ->
                     Log.d(App.TAG, "[4] collect the result")
-                    updateStateProfile(it)
+//                    updateStateProfile(it) TODO complete me
                 }
         }
     }
@@ -451,6 +468,28 @@ class ProfileV2ViewModel
                         errors = state.errors + getErrorMessage(response)
                     )
                 }
+            }
+        }
+    }
+
+    private fun preProcessResponse(it: ru.home.swap.core.network.Response<TransactionReceiptDomain>, newTx: ITransaction) {
+        when(it) {
+            is ru.home.swap.core.network.Response.Data -> {
+                if (it.data.isStatusOK()) {
+                    newTx.status = TxStatus.TX_MINED
+                    cacheRepository.createChainTxAsFlow(newTx)
+                } else {
+                    newTx.status = TxStatus.TX_REVERTED
+                    cacheRepository.createChainTxAsFlow(newTx)
+                }
+            }
+            is ru.home.swap.core.network.Response.Error.Message -> {
+                newTx.status = TxStatus.TX_EXCEPTION
+                cacheRepository.createChainTxAsFlow(newTx)
+            }
+            is ru.home.swap.core.network.Response.Error.Exception -> {
+                newTx.status = TxStatus.TX_EXCEPTION
+                cacheRepository.createChainTxAsFlow(newTx)
             }
         }
     }

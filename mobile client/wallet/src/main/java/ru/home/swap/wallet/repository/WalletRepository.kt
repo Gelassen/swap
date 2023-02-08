@@ -27,6 +27,8 @@ import ru.home.swap.core.logger.Logger
 import ru.home.swap.core.network.Response
 import ru.home.swap.wallet.contract.*
 import ru.home.swap.wallet.model.Token
+import ru.home.swap.wallet.model.TransactionReceiptDomain
+import ru.home.swap.wallet.model.toDomain
 import java.math.BigInteger
 
 
@@ -91,12 +93,12 @@ class WalletRepository(
         }
     }
 
-    override suspend fun mintToken(to: String, value: Value, uri: String): Response<TransactionReceipt> {
-        lateinit var response: Response<TransactionReceipt>
+    override suspend fun mintToken(to: String, value: Value, uri: String): Response<TransactionReceiptDomain> {
+        lateinit var response: Response<TransactionReceiptDomain>
         try {
             logger.d("[start] mintToken() $to, $value, $uri")
             val txReceipt = swapValueContract.safeMint(to, value, uri).send()
-            response = Response.Data<TransactionReceipt>(txReceipt)
+            response = Response.Data<TransactionReceiptDomain>(txReceipt.toDomain())
         } catch (ex: Exception) {
             logger.e("Failed to mint a token", ex)
             response = Response.Error.Exception(ex)
@@ -204,13 +206,13 @@ class WalletRepository(
         }
     }
 
-    override suspend fun swap(subj: Match): Response<TransactionReceipt> {
-        lateinit var result: Response<TransactionReceipt>
+    override suspend fun swap(subj: Match): Response<TransactionReceiptDomain> {
+        lateinit var result: Response<TransactionReceiptDomain>
         try {
             logger.d("[start] swap call")
             val response = swapChainContract.swap(subj).send()
             if (response.isStatusOK) {
-                result = Response.Data(response)
+                result = Response.Data(response.toDomain())
             } else {
                 result = Response.Error.Message("Reverted with reason: ${response.revertReason}")
             }
@@ -291,17 +293,17 @@ class WalletRepository(
         }
     }
 
-    override suspend fun registerUserOnSwapMarket(userWalletAddress: String): Response<TransactionReceipt> {
+    override suspend fun registerUserOnSwapMarket(userWalletAddress: String): Response<TransactionReceiptDomain> {
         logger.d("[start] registerUserOnSwapMarket")
         val isValidEthAddress = WalletUtils.isValidAddress(userWalletAddress)
                 && userWalletAddress.uppercase().contentEquals(
             Keys.toChecksumAddress(userWalletAddress).uppercase())
-        lateinit var response: Response<TransactionReceipt>
+        lateinit var response: Response<TransactionReceiptDomain>
         try {
             if (isValidEthAddress) {
                 val txReceipt: TransactionReceipt = swapChainContract.registerUser(userWalletAddress).send()
                 logger.d("Response from registerUser() + ${txReceipt}")
-                response = Response.Data(txReceipt)
+                response = Response.Data(txReceipt.toDomain())
             } else {
                 response = Response.Error.Message("${userWalletAddress} is not valid ethereum address.Please check you have passed a correct ethereum address.")
             }
@@ -331,12 +333,12 @@ class WalletRepository(
         }
     }
 
-    override suspend fun approveTokenManager(operator: String, approved: Boolean): Response<TransactionReceipt> {
-        lateinit var result: Response<TransactionReceipt>
+    override suspend fun approveTokenManager(operator: String, approved: Boolean): Response<TransactionReceiptDomain> {
+        lateinit var result: Response<TransactionReceiptDomain>
         try {
             logger.d("[start] approve token manager")
             val response: TransactionReceipt = swapValueContract.setApprovalForAll(operator, approved).send()
-            result = Response.Data(response)
+            result = Response.Data(response.toDomain())
         } catch (ex: Exception) {
             logger.e("Failed to approve address as an operator over the tokens for this user", ex)
             result = Response.Error.Exception(ex)
@@ -368,8 +370,8 @@ class WalletRepository(
         }
     }
 
-    override suspend fun approveSwap(matchSubj: Match): Response<TransactionReceipt> {
-        lateinit var result: Response<TransactionReceipt>
+    override suspend fun approveSwap(matchSubj: Match): Response<TransactionReceiptDomain> {
+        lateinit var result: Response<TransactionReceiptDomain>
         try {
             logger.d("[start] approve swap")
             val response: TransactionReceipt = swapChainContract.approveSwap(
@@ -378,7 +380,7 @@ class WalletRepository(
                 matchSubj
             )
                 .send()
-            result = Response.Data(response)
+            result = Response.Data(response.toDomain())
         } catch (ex: Exception) {
             logger.e("Failed to approve match", ex)
             val response = Response.Error.Exception(ex)
@@ -419,8 +421,8 @@ class WalletRepository(
     }
 
     @Deprecated("Register demand is not supported since V2")
-    override suspend fun registerDemand(userWalletAddress: String, demand: String): Response<TransactionReceipt> {
-        lateinit var result: Response<TransactionReceipt>
+    override suspend fun registerDemand(userWalletAddress: String, demand: String): Response<TransactionReceiptDomain> {
+        lateinit var result: Response<TransactionReceiptDomain>
         try {
             logger.d("[start] register demand")
             val isValidEthAddress = WalletUtils.isValidAddress(userWalletAddress)
@@ -429,7 +431,7 @@ class WalletRepository(
             if (isValidEthAddress) {
                 val response: TransactionReceipt = swapChainContract.registerDemand(userWalletAddress, demand).send()
                 if (response.isStatusOK) {
-                    result = Response.Data(response)
+                    result = Response.Data(response.toDomain())
                 } else {
                     result = Response.Error.Message("Reverted with reason: ${response.revertReason}")
                 }

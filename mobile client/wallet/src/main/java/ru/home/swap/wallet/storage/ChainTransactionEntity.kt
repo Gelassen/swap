@@ -52,6 +52,7 @@ object TxType {
 }
 
 object TxStatus {
+    const val TX_NONE = "not-set-yet"
     const val TX_PENDING = "pending"
     const val TX_MINED = "mined"
     const val TX_REVERTED = "reverted"

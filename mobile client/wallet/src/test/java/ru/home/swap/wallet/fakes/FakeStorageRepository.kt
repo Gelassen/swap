@@ -11,11 +11,15 @@ class FakeStorageRepository: IStorageRepository {
 
     val txPool = ConcurrentLinkedQueue<ITransaction>()
 
-    override fun createChainTx(tx: ITransaction): Flow<ITransaction> {
+    override fun createChainTxAsFlow(tx: ITransaction): Flow<ITransaction> {
         return flow {
             txPool.add(tx)
             emit(tx)
         }
+    }
+
+    override suspend fun createChainTx(tx: ITransaction): ITransaction {
+        TODO("Not yet implemented")
     }
 
     override fun getAllChainTransactions(): Flow<List<ITransaction>> {

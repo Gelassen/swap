@@ -7,11 +7,12 @@ data class PersonProfile(
     var contact: String = "",
     var secret: String = "",
     var name: String = "",
+    var userWalletAddress: String = "",
     var offers: List<Service> = emptyList(),
     var demands: List<Service> = emptyList(),
 
 
-) {
+    ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -24,6 +25,7 @@ data class PersonProfile(
         if (name != other.name) return false
         if (offers != other.offers) return false
         if (demands != other.demands) return false
+        if (userWalletAddress != other.userWalletAddress) return false
 
         return true
     }
@@ -35,6 +37,7 @@ data class PersonProfile(
         result = 31 * result + name.hashCode()
         result = 31 * result + offers.hashCode()
         result = 31 * result + demands.hashCode()
+        result = 31 * result + userWalletAddress.hashCode()
         return result
     }
 }

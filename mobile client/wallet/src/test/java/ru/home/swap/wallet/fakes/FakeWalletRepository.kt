@@ -10,6 +10,8 @@ import org.web3j.protocol.core.methods.response.TransactionReceipt
 import ru.home.swap.core.network.Response
 import ru.home.swap.wallet.contract.Match
 import ru.home.swap.wallet.model.Token
+import ru.home.swap.wallet.model.TransactionReceiptDomain
+import ru.home.swap.wallet.model.toDomain
 import java.math.BigInteger
 
 class FakeWalletRepository: IWalletRepository {
@@ -36,7 +38,7 @@ class FakeWalletRepository: IWalletRepository {
         to: String,
         value: Value,
         uri: String
-    ): Response<TransactionReceipt> {
+    ): Response<TransactionReceiptDomain> {
         return swapValueResponse.getMintTokenResponse()
     }
 
@@ -57,14 +59,14 @@ class FakeWalletRepository: IWalletRepository {
         TODO("Not yet implemented")
     }
 
-    override suspend fun registerUserOnSwapMarket(userWalletAddress: String): Response<TransactionReceipt> {
+    override suspend fun registerUserOnSwapMarket(userWalletAddress: String): Response<TransactionReceiptDomain> {
         return swapValueResponse.getRegisterUserResponse()
     }
 
     override suspend fun approveTokenManager(
         operator: String,
         approved: Boolean
-    ): Response<TransactionReceipt> {
+    ): Response<TransactionReceiptDomain> {
         return swapValueResponse.getApproveTokenManagerResponse()
     }
 
@@ -81,7 +83,7 @@ class FakeWalletRepository: IWalletRepository {
         TODO("Not yet implemented")
     }
 
-    override suspend fun approveSwap(matchSubj: Match): Response<TransactionReceipt> {
+    override suspend fun approveSwap(matchSubj: Match): Response<TransactionReceiptDomain> {
         return swapValueResponse.getApproveSwapResponse()
     }
 
@@ -94,8 +96,8 @@ class FakeWalletRepository: IWalletRepository {
     }
 
     @Deprecated("Register demand is not supported since V2")
-    override suspend fun registerDemand(userWalletAddress: String, demand: String): Response<TransactionReceipt> {
-        return Response.Data(TransactionReceipt())
+    override suspend fun registerDemand(userWalletAddress: String, demand: String): Response<TransactionReceiptDomain> {
+        return Response.Data(TransactionReceipt().toDomain())
     }
 
     override fun getTokenIdsForUser(userWalletAddress: String): Flow<Response<List<*>>> {
@@ -114,7 +116,7 @@ class FakeWalletRepository: IWalletRepository {
         TODO("Not yet implemented")
     }
 
-    override suspend fun swap(subj: Match): Response<TransactionReceipt> {
+    override suspend fun swap(subj: Match): Response<TransactionReceiptDomain> {
         return swapValueResponse.getSwapResponse()
     }
 
@@ -136,11 +138,11 @@ class FakeWalletRepository: IWalletRepository {
     class SwapValueResponse {
 
         private var balanceResponse: Response<BigInteger> = getDefaultBalanceResponse()
-        private var mintTokenResponse: Response<TransactionReceipt> = getDefaultMintTokenResponse()
-        private var registerUserResponse: Response<TransactionReceipt> = getDefaultRegisterUserResponse()
-        private var approveTokenManagerResponse: Response<TransactionReceipt> = getDefaultApproveTokenManager()
-        private var approveSwapResponse: Response<TransactionReceipt> = getDefaultApproveSwapResponse()
-        private var swapResponse: Response<TransactionReceipt> = getDefaultSwapResponse()
+        private var mintTokenResponse: Response<TransactionReceiptDomain> = getDefaultMintTokenResponse()
+        private var registerUserResponse: Response<TransactionReceiptDomain> = getDefaultRegisterUserResponse()
+        private var approveTokenManagerResponse: Response<TransactionReceiptDomain> = getDefaultApproveTokenManager()
+        private var approveSwapResponse: Response<TransactionReceiptDomain> = getDefaultApproveSwapResponse()
+        private var swapResponse: Response<TransactionReceiptDomain> = getDefaultSwapResponse()
 
         // START BLOCK: balance
 
@@ -158,19 +160,19 @@ class FakeWalletRepository: IWalletRepository {
 
         // START BLOCK: mint token
 
-        fun getMintTokenResponse(): Response<TransactionReceipt> {
+        fun getMintTokenResponse(): Response<TransactionReceiptDomain> {
             return mintTokenResponse
         }
 
         fun setPositiveMintTokenResponse() {
             val txReceipt: TransactionReceipt = Gson().fromJson(MINT_TOKEN_OK_RESPONSE, TransactionReceipt::class.java)
-            val response: Response.Data<TransactionReceipt> = Response.Data(txReceipt)
+            val response: Response.Data<TransactionReceiptDomain> = Response.Data(txReceipt.toDomain())
             this.mintTokenResponse = response
         }
 
         fun setNegativeMintTokenResponse() {
             val txReceipt: TransactionReceipt = Gson().fromJson(MINT_TOKEN_NEGATIVE_RESPONSE, TransactionReceipt::class.java)
-            val response: Response.Data<TransactionReceipt> = Response.Data(txReceipt)
+            val response: Response.Data<TransactionReceiptDomain> = Response.Data(txReceipt.toDomain())
             this.mintTokenResponse = response;
         }
 
@@ -190,19 +192,19 @@ class FakeWalletRepository: IWalletRepository {
 
         // START BLOCK: register user
 
-        fun getRegisterUserResponse(): Response<TransactionReceipt> {
+        fun getRegisterUserResponse(): Response<TransactionReceiptDomain> {
             return registerUserResponse
         }
 
         fun setPositiveRegisterUserResponse() {
             val txReceipt: TransactionReceipt = Gson().fromJson(REGISTER_USER_OK_RESPONSE, TransactionReceipt::class.java)
-            val response: Response.Data<TransactionReceipt> = Response.Data(txReceipt)
+            val response: Response.Data<TransactionReceiptDomain> = Response.Data(txReceipt.toDomain())
             this.registerUserResponse = response
         }
 
         fun setNegativeRegisterUserResponse() {
             val txReceipt: TransactionReceipt = Gson().fromJson(REGISTER_USER_NEGATIVE_RESPONSE, TransactionReceipt::class.java)
-            val response: Response.Data<TransactionReceipt> = Response.Data(txReceipt)
+            val response: Response.Data<TransactionReceiptDomain> = Response.Data(txReceipt.toDomain())
             this.registerUserResponse = response
         }
 
@@ -221,19 +223,19 @@ class FakeWalletRepository: IWalletRepository {
 
         // START BLOCK: approveTokenManger
 
-        fun getApproveTokenManagerResponse(): Response<TransactionReceipt> {
+        fun getApproveTokenManagerResponse(): Response<TransactionReceiptDomain> {
             return approveTokenManagerResponse
         }
 
         fun setPositiveApproveTokenManagerResponse() {
             val txReceipt: TransactionReceipt = Gson().fromJson(GENERAL_OK_RESPONSE, TransactionReceipt::class.java)
-            val response: Response.Data<TransactionReceipt> = Response.Data(txReceipt)
+            val response: Response.Data<TransactionReceiptDomain> = Response.Data(txReceipt.toDomain())
             this.registerUserResponse = response
         }
 
         fun setNegativeApproveTokenManagerResponse() {
             val txReceipt: TransactionReceipt = Gson().fromJson(GENERAL_NEGATIVE_RESPONSE, TransactionReceipt::class.java)
-            val response: Response.Data<TransactionReceipt> = Response.Data(txReceipt)
+            val response: Response.Data<TransactionReceiptDomain> = Response.Data(txReceipt.toDomain())
             this.registerUserResponse = response
         }
 
@@ -254,19 +256,19 @@ class FakeWalletRepository: IWalletRepository {
 
         // START BLOCK: approveSwap
 
-        fun getApproveSwapResponse() : Response<TransactionReceipt> {
+        fun getApproveSwapResponse() : Response<TransactionReceiptDomain> {
             return approveSwapResponse
         }
 
         fun setPositiveApproveSwapResponse() {
             val txReceipt: TransactionReceipt = Gson().fromJson(GENERAL_OK_RESPONSE, TransactionReceipt::class.java)
-            val response: Response.Data<TransactionReceipt> = Response.Data(txReceipt)
+            val response: Response.Data<TransactionReceiptDomain> = Response.Data(txReceipt.toDomain())
             this.approveSwapResponse = response
         }
 
         fun setNegativeApproveSwapResponse() {
             val txReceipt: TransactionReceipt = Gson().fromJson(GENERAL_NEGATIVE_RESPONSE, TransactionReceipt::class.java)
-            val response: Response.Data<TransactionReceipt> = Response.Data(txReceipt)
+            val response: Response.Data<TransactionReceiptDomain> = Response.Data(txReceipt.toDomain())
             this.approveSwapResponse = response
         }
 
@@ -293,19 +295,19 @@ class FakeWalletRepository: IWalletRepository {
 
         // START BLOCK: swap()
 
-        fun getSwapResponse(): Response<TransactionReceipt> {
+        fun getSwapResponse(): Response<TransactionReceiptDomain> {
             return swapResponse
         }
 
         fun setPositiveSwapResponse() {
             val txReceipt: TransactionReceipt = Gson().fromJson(GENERAL_OK_RESPONSE, TransactionReceipt::class.java)
-            val response: Response.Data<TransactionReceipt> = Response.Data(txReceipt)
+            val response: Response.Data<TransactionReceiptDomain> = Response.Data(txReceipt.toDomain())
             this.swapResponse = response
         }
 
         fun setNegativeSwapResponse() {
             val txReceipt: TransactionReceipt = Gson().fromJson(GENERAL_NEGATIVE_RESPONSE, TransactionReceipt::class.java)
-            val response: Response.Data<TransactionReceipt> = Response.Data(txReceipt)
+            val response: Response.Data<TransactionReceiptDomain> = Response.Data(txReceipt.toDomain())
             this.swapResponse = response
         }
 
@@ -327,27 +329,27 @@ class FakeWalletRepository: IWalletRepository {
             return response
         }
 
-        private fun getDefaultMintTokenResponse(): Response<TransactionReceipt> {
+        private fun getDefaultMintTokenResponse(): Response<TransactionReceiptDomain> {
             setPositiveMintTokenResponse()
             return mintTokenResponse
         }
 
-        private fun getDefaultRegisterUserResponse(): Response<TransactionReceipt> {
+        private fun getDefaultRegisterUserResponse(): Response<TransactionReceiptDomain> {
             setPositiveRegisterUserResponse()
             return registerUserResponse
         }
 
-        private fun getDefaultApproveTokenManager(): Response<TransactionReceipt> {
+        private fun getDefaultApproveTokenManager(): Response<TransactionReceiptDomain> {
             setPositiveApproveTokenManagerResponse()
             return approveTokenManagerResponse
         }
 
-        private fun getDefaultApproveSwapResponse(): Response<TransactionReceipt> {
+        private fun getDefaultApproveSwapResponse(): Response<TransactionReceiptDomain> {
             setPositiveApproveSwapResponse()
             return approveSwapResponse
         }
 
-        private fun getDefaultSwapResponse(): Response<TransactionReceipt> {
+        private fun getDefaultSwapResponse(): Response<TransactionReceiptDomain> {
             return swapResponse
         }
 

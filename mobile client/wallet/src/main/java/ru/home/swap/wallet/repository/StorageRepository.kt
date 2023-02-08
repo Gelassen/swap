@@ -18,12 +18,18 @@ class StorageRepository(val chainTransactionDao: ChainTransactionDao): IStorageR
         chainTransactionDao.insertAll(tx)
     }*/
 
-    override fun createChainTx(tx: ITransaction): Flow<ITransaction> {
+    override fun createChainTxAsFlow(tx: ITransaction): Flow<ITransaction> {
         return flow {
             val rowId = chainTransactionDao.insert(tx.fromDomain())
             val cachedTx = chainTransactionDao.getById(rowId)
             emit(cachedTx.toDomain())
         }
+    }
+
+    override suspend fun createChainTx(tx: ITransaction): ITransaction {
+        val rowId = chainTransactionDao.insert(tx.fromDomain())
+        val cachedTx = chainTransactionDao.getById(rowId)
+        return cachedTx.toDomain()
     }
 
     override fun getAllChainTransactions(): Flow<List<ITransaction>> {

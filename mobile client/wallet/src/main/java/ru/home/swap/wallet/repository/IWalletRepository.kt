@@ -8,6 +8,7 @@ import org.web3j.protocol.exceptions.TransactionException
 import ru.home.swap.core.network.Response
 import ru.home.swap.wallet.contract.Match
 import ru.home.swap.wallet.model.Token
+import ru.home.swap.wallet.model.TransactionReceiptDomain
 import java.math.BigInteger
 
 interface IWalletRepository {
@@ -23,7 +24,7 @@ interface IWalletRepository {
     @Throws(TransactionException::class)
     fun mintTokenAsFlow(to: String, value: Value, uri: String): Flow<Response<TransactionReceipt>>
 
-    suspend fun mintToken(to: String, value: Value, uri: String): Response<TransactionReceipt>
+    suspend fun mintToken(to: String, value: Value, uri: String): Response<TransactionReceiptDomain>
 
     fun getTokensNotConsumedAndBelongingToMe(account: String): Flow<SwapValue.TransferEventResponse>
 
@@ -34,23 +35,23 @@ interface IWalletRepository {
     @Deprecated("Non-Flow implementation is used instead")
     fun registerUserOnSwapMarketAsFlow(userWalletAddress: String): Flow<Response<TransactionReceipt>>
 
-    suspend fun registerUserOnSwapMarket(userWalletAddress: String): Response<TransactionReceipt>
+    suspend fun registerUserOnSwapMarket(userWalletAddress: String): Response<TransactionReceiptDomain>
 
     @Deprecated("Non-Flow implementation is used instead")
     fun approveTokenManagerAsFlow(operator: String, approved: Boolean): Flow<Response<TransactionReceipt>>
 
-    suspend fun approveTokenManager(operator: String, approved: Boolean): Response<TransactionReceipt>
+    suspend fun approveTokenManager(operator: String, approved: Boolean): Response<TransactionReceiptDomain>
 
     @Deprecated("Non-Flow implementation is used instead")
     fun approveSwapAsFlow(matchSubj: Match): Flow<Response<TransactionReceipt>>
 
-    suspend fun approveSwap(matchSubj: Match): Response<TransactionReceipt>
+    suspend fun approveSwap(matchSubj: Match): Response<TransactionReceiptDomain>
 
     @Deprecated(message = "Register demand is not supported since V2")
     fun registerDemandAsFlow(userWalletAddress: String, demand: String): Flow<Response<TransactionReceipt>>
 
     @Deprecated(message = "Register demand is not supported since V2")
-    suspend fun registerDemand(userWalletAddress: String, demand: String): Response<TransactionReceipt>
+    suspend fun registerDemand(userWalletAddress: String, demand: String): Response<TransactionReceiptDomain>
 
     fun getTokenIdsForUser(userWalletAddress: String): Flow<Response<List<*>>>
 
@@ -59,7 +60,7 @@ interface IWalletRepository {
     @Deprecated("Non-Flow implementation is used instead")
     fun swapAsFlow(subj: Match): Flow<Response<TransactionReceipt>>
 
-    suspend fun swap(subj: Match): Response<TransactionReceipt>
+    suspend fun swap(subj: Match): Response<TransactionReceiptDomain>
 
     suspend fun getMatches(userFirst: String, userSecond: String): Response<List<Match>>
 
