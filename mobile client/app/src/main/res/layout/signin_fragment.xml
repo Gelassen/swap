@@ -109,7 +109,7 @@
                 android:layout_below="@+id/secret_container">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/chain_address"
+                    android:id="@+id/wallet_address"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Enter your wallet"
@@ -124,7 +124,7 @@
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/secret_container"
+                android:layout_below="@+id/chain_address_container"
                 android:layout_centerHorizontal="true"
                 android:layout_marginStart="@dimen/component_margin"
                 android:layout_marginEnd="@dimen/component_margin"

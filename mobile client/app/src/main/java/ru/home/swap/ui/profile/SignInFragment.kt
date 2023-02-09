@@ -70,6 +70,7 @@ class SignInFragment: BaseFragment() {
                 binding.name.setText(profile.name)
                 binding.contactPhone.setText(profile.contact)
                 binding.secret.setText(profile.secret)
+                binding.walletAddress.setText(profile.userWalletAddress)
             }
         }
 
