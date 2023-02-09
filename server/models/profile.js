@@ -19,7 +19,7 @@ exports.create = function(req) {
             
             var body = req.body;
             connection.query(
-                {sql : 'INSERT INTO Profile SET name = ?, contact = ?, secret = ?, userAddressOnChain = ?', timeout: TIMEOUT},
+                {sql : 'INSERT INTO Profile SET name = ?, contact = ?, secret = ?, userWalletAddress = ?', timeout: TIMEOUT},
                 [body.name, body.contact, body.secret, body.userWalletAddress], 
                 function(error, rows, fields) {
                     logger.log(`[account::create (model)] [1] rows: ${JSON.stringify(rows)}`);
@@ -119,7 +119,7 @@ exports.getFullProfile = function(credentials) {
             if (err) throw err;
             
             connection.query(
-                {sql: 'select profile.id as profileId, profile.name as profileName, profile.contact as profileContact, profile.secret as profileSecret, service.id as serviceId, service.title as serviceTitle, service.date as serviceDate, service.offer as serviceOffer, service.index as serviceIndex, service.profileId as serviceProfileId FROM Profile as profile  LEFT OUTER JOIN Service as service  ON profile.id = service.profileId  WHERE profile.contact = ? AND profile.secret = ?', timeout: TIMEOUT},
+                {sql: 'select profile.id as profileId, profile.name as profileName, profile.contact as profileContact, profile.secret as profileSecret, profile.userWalletAddress as profileUserWalletAddress, service.id as serviceId, service.title as serviceTitle, service.date as serviceDate, service.offer as serviceOffer, service.index as serviceIndex, service.profileId as serviceProfileId FROM Profile as profile  LEFT OUTER JOIN Service as service  ON profile.id = service.profileId  WHERE profile.contact = ? AND profile.secret = ?', timeout: TIMEOUT},
                 [credentials[0], credentials[1]],
                 function(error, rows, fields) {
                     if (error != null) {

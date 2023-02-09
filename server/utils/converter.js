@@ -8,6 +8,7 @@ exports.dbToDomainProfile = function(rows) {
         profile.name = rows[id].name;
         profile.contact = rows[id].contact;
         profile.secret = rows[id].secret;
+        profile.userWalletAddress = rows[id].userWalletAddress;
         result.push(profile);
     }
     return result;
@@ -34,6 +35,7 @@ exports.dbToDomainFullProfile = function(rows) {
         id: rows[0].profileId,
         contact: rows[0].profileContact,
         secret: rows[0].profileSecret,
+        userWalletAddress: rows[0].profileUserWalletAddress,
         name: rows[0].profileName,
         offers: offers,
         demands: demands
