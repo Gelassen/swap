@@ -19,8 +19,8 @@ exports.create = function(req) {
             
             var body = req.body;
             connection.query(
-                {sql : 'INSERT INTO Profile SET name = ?, contact = ?, secret = ?', timeout: TIMEOUT},
-                [body.name, body.contact, body.secret], 
+                {sql : 'INSERT INTO Profile SET name = ?, contact = ?, secret = ?, userAddressOnChain = ?', timeout: TIMEOUT},
+                [body.name, body.contact, body.secret, body.userWalletAddress], 
                 function(error, rows, fields) {
                     logger.log(`[account::create (model)] [1] rows: ${JSON.stringify(rows)}`);
                     if (error != null) {

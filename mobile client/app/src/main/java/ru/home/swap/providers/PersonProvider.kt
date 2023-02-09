@@ -4,6 +4,7 @@ import android.content.Context
 import android.telephony.PhoneNumberUtils
 import android.text.TextUtils
 import android.util.Patterns
+import ru.home.swap.wallet.providers.WalletProvider
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -45,6 +46,10 @@ class PersonProvider {
 
     fun contactIsEmail(contact: String) : Boolean {
         return android.util.Patterns.EMAIL_ADDRESS.matcher(contact).matches()
+    }
+
+    fun inputIsEthereumAddress(input: String) : Boolean {
+        return WalletProvider().isValidEthereumAddress(input)
     }
 
 }

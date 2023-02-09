@@ -14,7 +14,8 @@ class DebugProfiles {
             PersonProfile(
                 contact = "+79207008090",
                 name = "Dmitry",
-                secret = "onemoretime"
+                secret = "onemoretime",
+                userWalletAddress = "0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd"
             )
         )
         profiles.add(

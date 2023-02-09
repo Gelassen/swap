@@ -193,10 +193,18 @@ class ProfileV2ViewModel
 
     fun createAnAccount() {
         Log.d(App.TAG, "[check] contact value (${uiState.value.profile.contact}) and secret value(${uiState.value.profile.secret})")
-        if (PersonProvider().isAnyOfCredentialsEmpty(uiState.value.profile.contact, uiState.value.profile.secret)) {
+        val validator = PersonProvider()
+        val profile = uiState.value.profile
+        if (validator.isAnyOfCredentialsEmpty(profile.contact, profile.secret)
+                || validator.inputIsEthereumAddress(profile.userWalletAddress)) {
+            val errorMsg = if (validator.inputIsEthereumAddress(profile.userWalletAddress)) {
+                app.getString(R.string.bad_eth_address_error)
+            } else {
+                app.getString(R.string.empty_credentials_error)
+            }
             state.update { state ->
                 state.copy(
-                    errors = state.errors + app.getString(R.string.empty_credentials_error)
+                    errors = state.errors + errorMsg
                 )
             }
         } else {
@@ -237,7 +245,6 @@ class ProfileV2ViewModel
                                         isLoading = false,
                                         profile = createAccountResponse.data,
                                         status = StateFlagV2.PROFILE
-                                        // TODO double check if there any other changes in the model required
                                     )
                                 } else {
                                     val txError = "Failed register the profile on chain with status ${TxStatus.TX_MINED}"

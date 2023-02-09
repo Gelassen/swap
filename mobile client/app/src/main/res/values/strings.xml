@@ -5,6 +5,7 @@
     <string name="error_message_with_server_response">Something went wrong with the server response: \n %1$s</string>
     <string name="default_error_title_dialog">Error</string>
     <string name="empty_credentials_error">Please check your contact and secret. They should not be empty.</string>
+    <string name="bad_eth_address_error">Please check ethereum address. It should 64 signs long like `0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd`.</string>
 
     <!-- Profile screen -->
     <string name="offers_title">Offers</string>

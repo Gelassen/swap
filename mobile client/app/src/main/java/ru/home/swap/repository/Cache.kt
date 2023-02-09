@@ -24,6 +24,7 @@ class Cache(val context: Context) {
     val PROFILE_ID_KEY = stringPreferencesKey("PROFILE_ID_KEY")
     val PROFILE_CONTACT_KEY = stringPreferencesKey("PROFILE_CONTACT_KEY")
     val PROFILE_SECRET_KEY = stringPreferencesKey("PROFILE_SECRET_KEY")
+    val PROFILE_WALLET_ADDRESS_KEY = stringPreferencesKey("PROFILE_WALLET_ADDRESS_KEY")
     val PROFILE_NAME_KEY = stringPreferencesKey("PROFILE_NAME_KEY")
     val PROFILE_OFFERS_KEY = stringPreferencesKey("PROFILE_OFFERS_KEY")
     val PROFILE_DEMANDS_KEY = stringPreferencesKey("PROFILE_DEMANDS_KEY")
@@ -36,6 +37,7 @@ class Cache(val context: Context) {
             settings[PROFILE_CONTACT_KEY] = person.contact
             settings[PROFILE_SECRET_KEY] = person.secret
             settings[PROFILE_NAME_KEY] = person.name
+            settings[PROFILE_WALLET_ADDRESS_KEY] = person.userWalletAddress
             settings[PROFILE_OFFERS_KEY] = person.offers.toJson()
             settings[PROFILE_DEMANDS_KEY] = person.demands.toJson()
         }
@@ -51,7 +53,8 @@ class Cache(val context: Context) {
                     contact = preferences[PROFILE_CONTACT_KEY] ?: "",
                     secret = preferences[PROFILE_SECRET_KEY] ?: "",
                     offers = restoreFromJson(preferences[PROFILE_OFFERS_KEY] ?: "[]"),
-                    demands = restoreFromJson(preferences[PROFILE_DEMANDS_KEY] ?: "[]")
+                    demands = restoreFromJson(preferences[PROFILE_DEMANDS_KEY] ?: "[]"),
+                    userWalletAddress = preferences[PROFILE_WALLET_ADDRESS_KEY] ?: ""
                 )
             }
     }

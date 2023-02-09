@@ -99,6 +99,26 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/chain_address_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="@dimen/base_margin_extra"
+                android:paddingEnd="@dimen/base_margin_extra"
+                android:paddingBottom="@dimen/component_margin"
+                android:layout_below="@+id/secret_container">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/chain_address"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Enter your wallet"
+                    android:singleLine="true"
+                    android:text="@={model.state.profile.userWalletAddress}"
+                    tools:text="0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/confirm"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
