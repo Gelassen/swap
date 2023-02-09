@@ -5,22 +5,16 @@ import android.util.Log
 import androidx.databinding.ObservableField
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import ru.home.swap.App
 import ru.home.swap.R
-import ru.home.swap.core.di.NetworkModule
 import ru.home.swap.core.model.PersonProfile
 import ru.home.swap.core.model.Service
 import ru.home.swap.providers.PersonProvider
 import ru.home.swap.repository.PersonRepository
 import ru.home.swap.repository.PersonRepository.*
-import ru.home.swap.wallet.repository.IStorageRepository
-import ru.home.swap.wallet.repository.IWalletRepository
 import javax.inject.Inject
-import javax.inject.Named
 
 @Deprecated("Use ProfileV2ViewModel instead.")
 data class Model(
@@ -100,7 +94,7 @@ class ProfileViewModel
                 .onStart { state.update { state -> state.copy(isLoading = true) } }
                 .flatMapConcat { it ->
                     if (it is Response.Data) {
-                        repository.cacheAccount(it.data)
+                        repository.cacheAccountAsFlow(it.data)
                             .collect { it ->
                                 // no op, just execute the command
                                 Log.d(App.TAG, "account has been cached")
@@ -125,7 +119,7 @@ class ProfileViewModel
                 id = item.id)
                 .flatMapConcat { it ->
                     if (it is Response.Data) {
-                        repository.cacheAccount(it.data)
+                        repository.cacheAccountAsFlow(it.data)
                             .collect { it ->
                                 // no op, just execute the command
                                 Log.d(App.TAG, "account has been cached")
@@ -150,7 +144,7 @@ class ProfileViewModel
                 newService = newService)
                 .flatMapConcat { it ->
                     if (it is Response.Data) {
-                        repository.cacheAccount(it.data)
+                        repository.cacheAccountAsFlow(it.data)
                             .collect { it ->
                                 // no op, just execute the command
                                 Log.d(App.TAG, "account has been cached")
@@ -174,7 +168,7 @@ class ProfileViewModel
                 id = item.id)
                 .flatMapConcat { it ->
                     if (it is Response.Data) {
-                        repository.cacheAccount(it.data)
+                        repository.cacheAccountAsFlow(it.data)
                             .collect { it ->
                                 // no op, just execute the command
                                 Log.d(App.TAG, "account has been cached")
@@ -206,14 +200,14 @@ class ProfileViewModel
     fun createAnAccount(person: PersonProfile) {
         Log.d(App.TAG, "[1] create account call (cache)")
         viewModelScope.launch {
-            repository.cacheAccount(person)
+            repository.cacheAccountAsFlow(person)
                 .flatMapConcat { it->
                     Log.d(App.TAG, "[2] create account call (server)")
-                    repository.createAccount(person)
+                    repository.createAccountAsFlow(person)
                 }
                 .flatMapConcat { it ->
                     if (it is Response.Data) {
-                        repository.cacheAccount(it.data)
+                        repository.cacheAccountAsFlow(it.data)
                             .collect { it ->
                                 // no op, just execute the command
                                 Log.d(App.TAG, "account has been cached")
@@ -255,7 +249,7 @@ class ProfileViewModel
                 }
                 .flatMapConcat { it ->
                     if (it is Response.Data) {
-                        repository.cacheAccount(it.data)
+                        repository.cacheAccountAsFlow(it.data)
                             .collect { it ->
                                 // no op, just execute the command
                                 Log.d(App.TAG, "account has been cached")
@@ -348,7 +342,7 @@ class ProfileViewModel
         }
     }
 
-    protected fun getErrorMessage(errorResponse: Response.Error): String {
+    private fun getErrorMessage(errorResponse: Response.Error): String {
         var errorMessage = ""
         if (errorResponse is Response.Error.Exception) {
             errorMessage = "Something went wrong"

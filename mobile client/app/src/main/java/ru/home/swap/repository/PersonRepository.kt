@@ -14,9 +14,9 @@ import ru.home.swap.core.network.IApi
 import ru.home.swap.utils.AppCredentials
 import java.net.HttpURLConnection
 
-class PersonRepository(val api: IApi, val cache: Cache, val context: Context) {
+class PersonRepository(val api: IApi, val cache: Cache, val context: Context): IPersonRepository {
 
-    fun createAccount(person: PersonProfile): Flow<Response<PersonProfile>> {
+    override fun createAccountAsFlow(person: PersonProfile): Flow<Response<PersonProfile>> {
         return flow {
             Log.d(App.TAG, "[a] createProfile() call")
             val response = api.createProfile(
@@ -40,18 +40,28 @@ class PersonRepository(val api: IApi, val cache: Cache, val context: Context) {
             }
     }
 
-    fun cacheAccount(person: PersonProfile): Flow<PersonProfile> {
+    override suspend fun createAccount(person: PersonProfile): Response<PersonProfile> {
+        cache.saveProfile(person)
+        return Response.Data(person)
+    }
+
+    override fun cacheAccountAsFlow(person: PersonProfile): Flow<PersonProfile> {
         return flow {
             cache.saveProfile(person)
             emit(person)
         }
     }
 
-    fun getCachedAccount(): Flow<PersonProfile> {
+    override suspend fun cacheAccount(person: PersonProfile): PersonProfile {
+        cache.saveProfile(person)
+        return person
+    }
+
+    override fun getCachedAccount(): Flow<PersonProfile> {
         return cache.getProfile()
     }
 
-    fun getAccount(person: PersonProfile): Flow<Response<PersonProfile>> {
+    override fun getAccount(person: PersonProfile): Flow<Response<PersonProfile>> {
         return flow {
             Log.d(App.TAG, "[a] getProfile() call")
             val response = api.getProfile(
@@ -77,7 +87,7 @@ class PersonRepository(val api: IApi, val cache: Cache, val context: Context) {
             }
     }
 
-    fun addOffer(contact: String, secret: String, newService: Service):  Flow<Response<PersonProfile>> {
+    override fun addOffer(contact: String, secret: String, newService: Service):  Flow<Response<PersonProfile>> {
         return flow {
             Log.d(App.TAG, "[add offer] start")
             val response = api.addOffer(
@@ -108,7 +118,7 @@ class PersonRepository(val api: IApi, val cache: Cache, val context: Context) {
             }
     }
 
-    fun addDemand(contact: String, secret: String, newService: Service): Flow<Response<PersonProfile>> {
+    override fun addDemand(contact: String, secret: String, newService: Service): Flow<Response<PersonProfile>> {
         return flow {
             val response = api.addDemand(
                 credentials = AppCredentials.basic(contact, secret),
@@ -132,7 +142,7 @@ class PersonRepository(val api: IApi, val cache: Cache, val context: Context) {
             }
     }
 
-    fun removeOffer(contact: String, secret: String, id: Long): Flow<Response<PersonProfile>> {
+    override fun removeOffer(contact: String, secret: String, id: Long): Flow<Response<PersonProfile>> {
         return flow {
             val response = api.removeOffer(
                 credentials = AppCredentials.basic(contact, secret),
@@ -155,7 +165,7 @@ class PersonRepository(val api: IApi, val cache: Cache, val context: Context) {
             }
     }
 
-    fun removeDemand(contact: String, secret: String, id: Long): Flow<Response<PersonProfile>>  {
+    override fun removeDemand(contact: String, secret: String, id: Long): Flow<Response<PersonProfile>>  {
         return flow {
             val response = api.removeDemand(
                 credentials = AppCredentials.basic(contact, secret),
@@ -177,7 +187,7 @@ class PersonRepository(val api: IApi, val cache: Cache, val context: Context) {
             }
     }
 
-    fun getContacts(contact: String, secret: String, serviceId: Long): Flow<Response<PersonProfile>> {
+    override fun getContacts(contact: String, secret: String, serviceId: Long): Flow<Response<PersonProfile>> {
         return flow {
             val response = api.getContacts(
                 credentials = AppCredentials.basic(contact, secret),
@@ -196,7 +206,7 @@ class PersonRepository(val api: IApi, val cache: Cache, val context: Context) {
             }
     }
 
-    fun cleanCachedAccount(): Flow<Any> {
+    override fun cleanCachedAccount(): Flow<Any> {
         return cache.cleanProfile()
     }
 

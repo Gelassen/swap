@@ -9,6 +9,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import ru.home.swap.App
 import ru.home.swap.R
 import ru.home.swap.core.di.NetworkModule
@@ -100,7 +101,7 @@ class ProfileV2ViewModel
                 .onStart { state.update { state -> state.copy(isLoading = true) } }
                 .flatMapConcat { it ->
                     if (it is Response.Data) {
-                        repository.cacheAccount(it.data)
+                        repository.cacheAccountAsFlow(it.data)
                             .collect { it ->
                                 // no op, just execute the command
                                 Log.d(App.TAG, "account has been cached")
@@ -125,7 +126,7 @@ class ProfileV2ViewModel
                 id = item.id)
                 .flatMapConcat { it ->
                     if (it is Response.Data) {
-                        repository.cacheAccount(it.data)
+                        repository.cacheAccountAsFlow(it.data)
                             .collect { it ->
                                 // no op, just execute the command
                                 Log.d(App.TAG, "account has been cached")
@@ -150,7 +151,7 @@ class ProfileV2ViewModel
                 newService = newService)
                 .flatMapConcat { it ->
                     if (it is Response.Data) {
-                        repository.cacheAccount(it.data)
+                        repository.cacheAccountAsFlow(it.data)
                             .collect { it ->
                                 // no op, just execute the command
                                 Log.d(App.TAG, "account has been cached")
@@ -174,7 +175,7 @@ class ProfileV2ViewModel
                 id = item.id)
                 .flatMapConcat { it ->
                     if (it is Response.Data) {
-                        repository.cacheAccount(it.data)
+                        repository.cacheAccountAsFlow(it.data)
                             .collect { it ->
                                 // no op, just execute the command
                                 Log.d(App.TAG, "account has been cached")
@@ -204,52 +205,60 @@ class ProfileV2ViewModel
     }
 
     fun createAnAccount(person: PersonProfile) {
-        Log.d(App.TAG, "[1] create account call (cache)")
-        // TODO integrate functionality from WalletViewModel
-        viewModelScope.launch {
-            lateinit var newTx: ITransaction
-            repository.cacheAccount(person)
-                .flatMapConcat { it->
-                    Log.d(App.TAG, "[2] create account call (server)")
-                    repository.createAccount(person)
-                }
-                .flatMapConcat { it ->
-                    when(it) {
-                        is Response.Data -> { repository.cacheAccount(it.data).collect{ /* no op, just execute the command */ } }
-                        else -> { /* no op, just emit the value further */ }
+        viewModelScope.launch(backgroundDispatcher) {
+            try {
+                var cachedPersonProfile = repository.cacheAccount(person)
+                var createAccountResponse = repository.createAccount(person)
+                when(createAccountResponse) {
+                    is Response.Data -> {
+                        repository.cacheAccount(createAccountResponse.data)
+                        val cachedTx = cacheRepository.createChainTx(RegisterUserTransaction(userWalletAddress = person.userWalletAddress))
+                        val chainTx = walletRepository.registerUserOnSwapMarket(userWalletAddress = person.userWalletAddress)
+                        when(chainTx) {
+                            is ru.home.swap.core.network.Response.Data -> {
+                                if (chainTx.data.isStatusOK()) {
+                                    cachedTx.status = TxStatus.TX_MINED
+                                } else {
+                                    cachedTx.status = TxStatus.TX_REVERTED
+                                }
+                            }
+                            is ru.home.swap.core.network.Response.Error.Message -> {
+                                cachedTx.status = TxStatus.TX_EXCEPTION
+                            }
+                            is ru.home.swap.core.network.Response.Error.Exception -> {
+                                cachedTx.status = TxStatus.TX_EXCEPTION
+                            }
+                        }
+                        cacheRepository.createChainTx(cachedTx)
+                        withContext(Dispatchers.Main) {
+                            state.update { state ->
+                                if (cachedTx.status == TxStatus.TX_MINED) {
+                                    state.copy(
+                                        isLoading = false,
+                                        profile = createAccountResponse.data,
+                                        status = StateFlagV2.PROFILE
+                                        // TODO double check if there any other changes in the model required
+                                    )
+                                } else {
+                                    val txError = "Failed register the profile on chain with status ${TxStatus.TX_MINED}"
+                                    state.copy(
+                                        isLoading = false,
+                                        errors = state.errors + txError
+                                    )
+                                }
+                            }
+                        }
                     }
-                    flow {
-                        emit(it)
-                    }
+                    else -> { updateStateProfile(createAccountResponse) }
                 }
-                .map {
-                    // TODO process previous response, including errors
-                    cacheRepository.createChainTx(RegisterUserTransaction(userWalletAddress = person.userWalletAddress))
-
-//                        it ->
-/*                    when(it) {
-                        is Response.Data -> { walletRepository.registerUserOnSwapMarket(it.data.userWallet) }
-                        else -> { it }
-                    }*/
-                }
-                .map {
-                    newTx= it
-                    walletRepository.registerUserOnSwapMarket(person.userWalletAddress)
-                }
-                .map { it -> preProcessResponse(it, newTx) }
-                .flowOn(backgroundDispatcher)
-                .catch { e ->
-                    Log.d(App.TAG, "[3] get an exception in catch block")
-                    Log.e(App.TAG, "Got an exception during network call", e)
+            } catch (ex: Exception) {
+                withContext(Dispatchers.Main) {
                     state.update { state ->
-                        val errors = state.errors + getErrorMessage(PersonRepository.Response.Error.Exception(e))
+                        val errors = state.errors + getErrorMessage(PersonRepository.Response.Error.Exception(ex))
                         state.copy(errors = errors, isLoading = false)
                     }
                 }
-                .collect { it ->
-                    Log.d(App.TAG, "[4] collect the result")
-//                    updateStateProfile(it) TODO complete me
-                }
+            }
         }
     }
 
@@ -270,7 +279,7 @@ class ProfileV2ViewModel
                 }
                 .flatMapConcat { it ->
                     if (it is Response.Data) {
-                        repository.cacheAccount(it.data)
+                        repository.cacheAccountAsFlow(it.data)
                             .collect { it ->
                                 // no op, just execute the command
                                 Log.d(App.TAG, "account has been cached")
