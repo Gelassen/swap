@@ -248,7 +248,7 @@ class ProfileV2ViewModel
                                         status = StateFlagV2.PROFILE
                                     )
                                 } else {
-                                    val txError = "Failed register the profile on chain with status ${TxStatus.TX_MINED}"
+                                    val txError = "Failed register the profile on chain with status ${cachedTx.status}"
                                     state.copy(
                                         isLoading = false,
                                         errors = state.errors + txError
