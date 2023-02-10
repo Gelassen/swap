@@ -213,6 +213,7 @@ class ProfileV2ViewModel
     }
 
     fun createAnAccount(person: PersonProfile) {
+        state.update { state -> state.copy(isLoading = true) }
         viewModelScope.launch(backgroundDispatcher) {
             try {
                 var cachedPersonProfile = repository.cacheAccount(person)

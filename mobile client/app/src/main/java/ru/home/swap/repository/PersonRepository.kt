@@ -41,8 +41,28 @@ class PersonRepository(val api: IApi, val cache: Cache, val context: Context): I
     }
 
     override suspend fun createAccount(person: PersonProfile): Response<PersonProfile> {
-        cache.saveProfile(person)
-        return Response.Data(person)
+        lateinit var result: Response<PersonProfile>
+        try {
+            Log.d(App.TAG, "[a] createProfile() call")
+            val response = api.createProfile(
+                credentials = AppCredentials.basic(person.contact, person.secret),
+                person = person
+            )
+            Log.d(App.TAG, "[b] get profile response")
+            if (response.isSuccessful) {
+                Log.d(App.TAG, "[c] response is ok")
+                var payload = response.body()!!
+                result = Response.Data(payload.payload)
+            } else {
+                Log.d(App.TAG, "[d] response is not ok")
+                val errorPayload = ApiResponseConverter().toDomain(response.errorBody()?.string()!!);
+                result = Response.Error.Message("${response.message()}:\n\n${errorPayload.payload}")
+            }
+        } catch (ex: Exception) {
+            Log.e(App.TAG, "Failed to create account and process result on network layer", ex)
+            result = Response.Error.Exception(ex)
+        }
+        return result
     }
 
     override fun cacheAccountAsFlow(person: PersonProfile): Flow<PersonProfile> {

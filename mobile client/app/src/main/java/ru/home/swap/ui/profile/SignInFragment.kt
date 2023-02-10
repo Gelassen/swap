@@ -25,6 +25,8 @@ import javax.inject.Inject
 
 class SignInFragment: BaseFragment() {
 
+    // TODO add progress indicator for chain request and validate user created on the backend too
+
     companion object {
         fun newInstance() = SignInFragment()
     }
@@ -61,6 +63,7 @@ class SignInFragment: BaseFragment() {
         binding.confirm.setOnClickListener {
             viewModel.createAnAccount()
         }
+        binding.progressIndicator.visibility = View.GONE
 
         if (BuildConfig.DEBUG) {
             binding.debugBadge.visibility = View.VISIBLE

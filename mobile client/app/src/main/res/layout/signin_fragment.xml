@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
+        <import type="android.view.View"/>
         <variable
             name="model"
             type="ru.home.swap.ui.profile.ProfileV2ViewModel" />
@@ -129,11 +130,24 @@
                 android:layout_marginStart="@dimen/component_margin"
                 android:layout_marginEnd="@dimen/component_margin"
                 android:minEms="8"
+                android:onClick="onConfirm"
                 android:text="Confirm"
                 android:textColor="@color/white"
-                android:onClick="onConfirm"
+                android:visibility="@{model.state.isLoading ? View.GONE : View.VISIBLE}"
                 app:backgroundTint="@color/blue_dark"
                 app:strokeColor="@color/white" />
+
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:id="@+id/progress_indicator"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/chain_address_container"
+                android:layout_centerHorizontal="true"
+                android:layout_marginStart="@dimen/component_margin"
+                android:layout_marginEnd="@dimen/component_margin"
+                android:indeterminate="true"
+                android:visibility="@{model.state.isLoading ? View.VISIBLE : View.GONE}"
+                app:indicatorColor="#88FFFFFF" />
 
         </RelativeLayout>
 
