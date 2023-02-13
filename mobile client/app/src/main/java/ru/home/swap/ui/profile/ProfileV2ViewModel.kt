@@ -15,6 +15,7 @@ import ru.home.swap.R
 import ru.home.swap.core.di.NetworkModule
 import ru.home.swap.core.extensions.registerIdlingResource
 import ru.home.swap.core.extensions.unregisterIdlingResource
+import ru.home.swap.core.logger.Logger
 import ru.home.swap.core.model.PersonProfile
 import ru.home.swap.core.model.Service
 import ru.home.swap.providers.PersonProvider
@@ -76,6 +77,8 @@ class ProfileV2ViewModel
     init {
         Log.d(App.TAG, "ProfileViewModel::init call")
     }
+
+    private val logger = Logger.getInstance()
 
     /*private*/ val state: MutableStateFlow<ModelV2> = MutableStateFlow(ModelV2())
     val uiState: StateFlow<ModelV2> = state
@@ -238,13 +241,20 @@ class ProfileV2ViewModel
                                 cachedTx.status = TxStatus.TX_EXCEPTION
                             }
                             is ru.home.swap.core.network.Response.Error.Exception -> {
-                                cachedTx.status = TxStatus.TX_EXCEPTION
+                                if (chainTx.error.message?.contains("User already registered") == true) {
+                                    // we consider previous successful tx as sharing its mined status with this tx
+                                    // to avoid confusion from user perspective who will observe UI
+                                    cachedTx.status = TxStatus.TX_MINED
+                                } else {
+                                    cachedTx.status = TxStatus.TX_EXCEPTION
+                                }
                             }
                         }
                         cacheRepository.createChainTx(cachedTx)
                         withContext(Dispatchers.Main) {
                             state.update { state ->
-                                if (cachedTx.status == TxStatus.TX_MINED) {
+                                if (cachedTx.status == TxStatus.TX_MINED
+                                    || (chainTx as ru.home.swap.core.network.Response.Error.Exception).error.message?.contains("User already registered") == true) {
                                     state.copy(
                                         isLoading = false,
                                         profile = createAccountResponse.data,
