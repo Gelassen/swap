@@ -25,8 +25,6 @@ import javax.inject.Inject
 
 class SignInFragment: BaseFragment() {
 
-    // TODO add progress indicator for chain request and validate user created on the backend too
-
     companion object {
         fun newInstance() = SignInFragment()
     }
