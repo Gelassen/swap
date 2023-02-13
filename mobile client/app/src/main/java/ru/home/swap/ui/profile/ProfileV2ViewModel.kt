@@ -13,6 +13,8 @@ import kotlinx.coroutines.withContext
 import ru.home.swap.App
 import ru.home.swap.R
 import ru.home.swap.core.di.NetworkModule
+import ru.home.swap.core.extensions.registerIdlingResource
+import ru.home.swap.core.extensions.unregisterIdlingResource
 import ru.home.swap.core.model.PersonProfile
 import ru.home.swap.core.model.Service
 import ru.home.swap.providers.PersonProvider
@@ -216,6 +218,7 @@ class ProfileV2ViewModel
         state.update { state -> state.copy(isLoading = true) }
         viewModelScope.launch(backgroundDispatcher) {
             try {
+                app.registerIdlingResource()
                 var cachedPersonProfile = repository.cacheAccount(person)
                 var createAccountResponse = repository.createAccount(person)
                 when(createAccountResponse) {
@@ -266,6 +269,9 @@ class ProfileV2ViewModel
                         state.copy(errors = errors, isLoading = false)
                     }
                 }
+            }
+            finally {
+                app.unregisterIdlingResource()
             }
         }
     }

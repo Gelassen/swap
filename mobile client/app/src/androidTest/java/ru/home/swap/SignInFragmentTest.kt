@@ -8,6 +8,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import ru.home.swap.core.tests.NetworkIdlingResource
 
 @LargeTest
 @RunWith(AndroidJUnit4::class)
@@ -19,15 +20,13 @@ class SignInFragmentTest {
 
     @Before
     fun setUp() {
-//        IdlingRegistry.getInstance().register(NetworkIdlingResource.countingIdlingResource)
-//        IdlingRegistry.getInstance().register(dataBindingIdlingResource)
+        IdlingRegistry.getInstance().register(NetworkIdlingResource.countingIdlingResource)
         IdlingRegistry.getInstance().register(dataBindingIdlingResource)
     }
 
     @After
     fun tearDown() {
-//        IdlingRegistry.getInstance().unregister(NetworkIdlingResource.countingIdlingResource)
-//        IdlingRegistry.getInstance().unregister(dataBindingIdlingResource)
+        IdlingRegistry.getInstance().unregister(NetworkIdlingResource.countingIdlingResource)
         IdlingRegistry.getInstance().unregister(dataBindingIdlingResource)
     }
 

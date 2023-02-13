@@ -2,6 +2,8 @@ plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
     id("kotlin-kapt")
+    id("kotlin-android")
+    id("kotlin-android-extensions")
 //    id("jvm") version "1.6.21"
 }
 

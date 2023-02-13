@@ -3,6 +3,8 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("kotlin-kapt")
     id("project-report")
+    id("kotlin-android")
+    id("kotlin-android-extensions")
 }
 
 android {
