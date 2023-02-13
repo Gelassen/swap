@@ -65,7 +65,7 @@
                     android:layout_marginEnd="@dimen/base_margin_extra"
                     android:layout_marginBottom="@dimen/component_margin"
                     android:gravity="center_vertical"
-                    android:text="Offers"
+                    android:text="@string/title_offers"
                     android:textColor="@color/white"
                     android:textSize="@dimen/title_text_size" />
 
@@ -87,7 +87,7 @@
                     android:layout_marginEnd="@dimen/base_margin_extra"
                     android:layout_marginBottom="@dimen/component_margin"
                     android:gravity="center_vertical"
-                    android:text="Demands"
+                    android:text="@string/title_demands"
                     android:textColor="@color/white"
                     android:textSize="@dimen/title_text_size" />
 
