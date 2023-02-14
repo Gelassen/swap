@@ -6,7 +6,7 @@
         <import type="android.view.View"/>
         <variable
             name="state"
-            type="ru.home.swap.ui.profile.Model" />
+            type="ru.home.swap.ui.profile.ModelV2" />
     </data>
 
     <FrameLayout

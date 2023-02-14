@@ -23,7 +23,6 @@ data class Model(
     val errors: List<String> = emptyList(),
     val status: StateFlag = StateFlag.NONE
 
-
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -48,6 +47,7 @@ data class Model(
     }
 }
 
+@Deprecated("Use StateFlagV2 version instead")
 enum class StateFlag {
     CREDENTIALS,
     PROFILE,

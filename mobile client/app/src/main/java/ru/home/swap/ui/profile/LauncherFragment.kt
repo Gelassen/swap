@@ -29,7 +29,7 @@ class LauncherFragment: BaseFragment() {
 
     @Inject
     lateinit var viewModelFactory: ViewModelFactory
-    lateinit var viewModel: ProfileViewModel
+    lateinit var viewModel: ProfileV2ViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidSupportInjection.inject(this)
@@ -41,7 +41,7 @@ class LauncherFragment: BaseFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        viewModel = ViewModelProvider(this, viewModelFactory).get(ProfileViewModel::class.java)
+        viewModel = ViewModelProvider(this, viewModelFactory).get(ProfileV2ViewModel::class.java)
         binding = LauncherFragmentBinding.inflate(inflater, container, false)
         binding.state = viewModel.uiState.value
         return binding.root
@@ -56,14 +56,14 @@ class LauncherFragment: BaseFragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 viewModel.uiState.collect { it ->
                     when(it.status) {
-                        StateFlag.CREDENTIALS -> {
+                        StateFlagV2.CREDENTIALS -> {
                             findNavController().navigate(R.id.action_launcherFragment_to_signInFragment)
                         }
-                        StateFlag.PROFILE -> {
+                        StateFlagV2.PROFILE -> {
                             Log.d(App.TAG, "[navigation] call navigation action from launcher fragment")
                             findNavController().navigate(R.id.action_launcherFragment_to_profileFragment)
                         }
-                        StateFlag.NONE -> {
+                        StateFlagV2.NONE -> {
                             /* no op */
                         }
                     }

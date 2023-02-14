@@ -241,6 +241,7 @@ class ProfileV2ViewModel
                                 cachedTx.status = TxStatus.TX_EXCEPTION
                             }
                             is ru.home.swap.core.network.Response.Error.Exception -> {
+                                // cover the case when user has been registered on both backend and chain, aka sign-in
                                 if (chainTx.error.message?.contains("User already registered") == true) {
                                     // we consider previous successful tx as sharing its mined status with this tx
                                     // to avoid confusion from user perspective who will observe UI
