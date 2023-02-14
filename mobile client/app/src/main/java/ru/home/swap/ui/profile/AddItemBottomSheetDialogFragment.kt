@@ -24,7 +24,7 @@ class AddItemBottomSheetDialogFragment: BottomSheetDialogFragment() {
 
     @Inject
     lateinit var viewModelFactory: ViewModelFactory
-    lateinit var viewModel: ProfileViewModel
+    lateinit var viewModel: ProfileV2ViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidSupportInjection.inject(this)
@@ -37,7 +37,7 @@ class AddItemBottomSheetDialogFragment: BottomSheetDialogFragment() {
         savedInstanceState: Bundle?
     ): View? {
         // keep an eye on owner parameter, it should be the same scope for view model which is shared among component
-        viewModel = ViewModelProvider(requireParentFragment(), viewModelFactory).get(ProfileViewModel::class.java)
+        viewModel = ViewModelProvider(requireParentFragment(), viewModelFactory).get(ProfileV2ViewModel::class.java)
         binding = AddItemFragmentBinding.inflate(inflater, container, false)
         binding.model = viewModel
         return binding.root

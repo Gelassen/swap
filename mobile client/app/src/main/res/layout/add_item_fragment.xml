@@ -10,7 +10,7 @@
             type="ru.home.swap.providers.PersonProvider" />
         <variable
             name="model"
-            type="ru.home.swap.ui.profile.ProfileViewModel" />
+            type="ru.home.swap.ui.profile.ProfileV2ViewModel" />
     </data>
 
     <RelativeLayout

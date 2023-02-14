@@ -11,11 +11,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
-import dagger.android.AndroidInjection
 import dagger.android.support.AndroidSupportInjection
 import kotlinx.coroutines.launch
 import ru.home.swap.App
-import ru.home.swap.AppApplication
 import ru.home.swap.R
 import ru.home.swap.databinding.LauncherFragmentBinding
 import ru.home.swap.core.di.ViewModelFactory
