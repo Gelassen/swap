@@ -13,7 +13,6 @@ import ru.home.swap.core.model.PersonProfile
 import ru.home.swap.core.model.Service
 import ru.home.swap.repository.PersonRepository
 import ru.home.swap.repository.pagination.DemandsPagingSource
-import ru.home.swap.ui.offers.Model
 import javax.inject.Inject
 
 data class Model(

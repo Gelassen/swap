@@ -15,6 +15,7 @@
         <entry key="app/src/main/res/drawable/ic_incoming_offers.xml" value="0.161" />
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.19" />
         <entry key="app/src/main/res/drawable/ic_launcher_foreground.xml" value="0.19" />
+        <entry key="app/src/main/res/drawable/ic_tx_view_item.xml" value="0.19" />
         <entry key="app/src/main/res/drawable/navigation_view_item_selector.xml" value="0.2475" />
         <entry key="app/src/main/res/drawable/selector_two_state_view.xml" value="0.193" />
         <entry key="app/src/main/res/layout/add_item_fragment.xml" value="0.33605072463768115" />
@@ -35,6 +36,7 @@
         <entry key="app/src/main/res/layout/test_activity.xml" value="0.18489583333333334" />
         <entry key="app/src/main/res/layout/test_fragment.xml" value="0.18177083333333333" />
         <entry key="app/src/main/res/layout/test_layout.xml" value="0.18177083333333333" />
+        <entry key="app/src/main/res/layout/tx_view_item.xml" value="0.6251728907330567" />
         <entry key="app/src/main/res/menu/menu_bottom_nav.xml" value="0.18177083333333333" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.19" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.19" />

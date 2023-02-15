@@ -3,12 +3,11 @@ package ru.home.swap.di;
 
 import androidx.lifecycle.ViewModel;
 
-import javax.inject.Singleton;
-
 import dagger.Binds;
 import dagger.Module;
 import dagger.multibindings.IntoMap;
 import ru.home.swap.core.di.ViewModelKey;
+import ru.home.swap.ui.chains.ChainsViewModel;
 import ru.home.swap.ui.contacts.ContactsViewModel;
 import ru.home.swap.ui.demands.DemandsViewModel;
 import ru.home.swap.ui.offers.OffersViewModel;
@@ -47,6 +46,12 @@ public abstract class ViewModelModule {
     @ViewModelKey(ContactsViewModel.class)
     @AppMainScope
     abstract ViewModel contactsViewModel(ContactsViewModel vm);
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(ChainsViewModel.class)
+    @AppMainScope
+    abstract ViewModel chainsViewModel(ChainsViewModel vm);
 
 }
 

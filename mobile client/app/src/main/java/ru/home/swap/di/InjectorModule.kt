@@ -4,6 +4,7 @@ import dagger.Module
 import dagger.android.AndroidInjectionModule
 import dagger.android.ContributesAndroidInjector
 import dagger.android.support.AndroidSupportInjectionModule
+import ru.home.swap.ui.chains.ChainsFragment
 import ru.home.swap.ui.contacts.ContactsFragment
 import ru.home.swap.ui.demands.DemandsFragment
 import ru.home.swap.ui.offers.OffersFragment
@@ -41,4 +42,6 @@ abstract class InjectorModule {
     @ContributesAndroidInjector
     abstract fun provideContactsFragment(): ContactsFragment
 
+    @ContributesAndroidInjector
+    abstract fun provideChainsFragment(): ChainsFragment
 }

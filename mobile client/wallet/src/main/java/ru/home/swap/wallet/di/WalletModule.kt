@@ -1,10 +1,8 @@
 package ru.home.swap.wallet.di
 
+import android.app.Application
 import android.content.Context
 import com.example.wallet.R
-import ru.home.swap.wallet.repository.IWalletRepository
-import ru.home.swap.wallet.repository.StorageRepository
-import ru.home.swap.wallet.repository.WalletRepository
 import ru.home.swap.wallet.storage.AppDatabase
 import dagger.Module
 import dagger.Provides
@@ -13,10 +11,11 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.web3j.protocol.http.HttpService
 import ru.home.swap.core.network.interceptors.DefaultInterceptor
-import ru.home.swap.wallet.repository.IStorageRepository
+import ru.home.swap.wallet.repository.*
+import ru.home.swap.wallet.storage.ChainTransactionDao
 
 @Module
-class WalletModule(val context: Context) {
+class WalletModule(val context: Application) {
 
     @WalletMainScope
     @Provides
@@ -52,8 +51,19 @@ class WalletModule(val context: Context) {
 
     @WalletMainScope
     @Provides
-    fun providesStorageRepository(database: AppDatabase): IStorageRepository {
-        return StorageRepository(database.chainTransactionDao())
+    fun providesChainTransactionDao(database: AppDatabase): ChainTransactionDao {
+        return database.chainTransactionDao()
     }
 
+    @WalletMainScope
+    @Provides
+    fun providesTxDataSource(dao: ChainTransactionDao): TxDataSource {
+        return TxDataSource(context, dao, ChainTransactionDao.Const.DEFAULT_PAGE_SIZE)
+    }
+
+    @WalletMainScope
+    @Provides
+    fun providesStorageRepository(dao: ChainTransactionDao, pagedDataSource: TxDataSource): IStorageRepository {
+        return StorageRepository(dao, pagedDataSource)
+    }
 }

@@ -5,6 +5,7 @@ import dagger.Component
 import ru.home.swap.core.di.CoreComponent
 import ru.home.swap.wallet.repository.IStorageRepository
 import ru.home.swap.wallet.repository.IWalletRepository
+import ru.home.swap.wallet.storage.ChainTransactionDao
 import javax.inject.Scope
 
 @Scope
@@ -19,4 +20,5 @@ interface WalletComponent {
     fun inject(subj: TestWalletActivity)
     fun providesWalletRepository(): IWalletRepository
     fun providesStorageRepository(): IStorageRepository
+    fun providesChainTransactionDao(): ChainTransactionDao
 }

@@ -1,17 +1,25 @@
 package ru.home.swap.wallet.repository
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import ru.home.swap.core.extensions.attachIdlingResource
 import ru.home.swap.wallet.model.ITransaction
 import ru.home.swap.wallet.model.MintTransaction
 import ru.home.swap.wallet.model.RegisterUserTransaction
 import ru.home.swap.wallet.storage.ChainTransactionDao
+import ru.home.swap.wallet.storage.ChainTransactionDao.Const.DEFAULT_PAGE_SIZE
 import ru.home.swap.wallet.storage.TxType
 import ru.home.swap.wallet.storage.toDomain
 import java.lang.IllegalArgumentException
 
-class StorageRepository(val chainTransactionDao: ChainTransactionDao): IStorageRepository {
+class StorageRepository(
+    val chainTransactionDao: ChainTransactionDao,
+    val pagedDataSource: TxDataSource)
+    : IStorageRepository {
 
 /*    suspend fun createChainTx(uid: Int, to: String, value: Value, uri: String, status: String) {
         val tx = ChainTransactionEntity(uid, to, value, uri, status)
@@ -41,6 +49,21 @@ class StorageRepository(val chainTransactionDao: ChainTransactionDao): IStorageR
                 }
                 result
             }
+    }
+
+    override fun getChainTransactionsByPage(): Flow<PagingData<ITransaction>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = DEFAULT_PAGE_SIZE,
+                initialLoadSize = DEFAULT_PAGE_SIZE,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = {
+                pagedDataSource
+            }
+        )
+            .flow
+            .attachIdlingResource()
     }
 
     override suspend fun removeChainTransaction(tx: ITransaction) {

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="tx"
+            type="ru.home.swap.wallet.model.ITransaction" />
+    </data>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="84dp"
+        android:padding="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="2dp"
+        android:background="@drawable/bg_tx_view_item">
+
+        <TextView
+            android:id="@+id/txName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/txStatus"
+            android:layout_alignParentTop="true"
+            android:textColor="#000000"
+            android:text="@{tx.type}"
+            tools:text="Offer software development and consulting"
+            />
+
+        <TextView
+            android:id="@+id/txStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginTop="4dp"
+            android:text="@{tx.status}"
+            tools:text="MINED"
+            />
+
+    </RelativeLayout>
+
+</layout>

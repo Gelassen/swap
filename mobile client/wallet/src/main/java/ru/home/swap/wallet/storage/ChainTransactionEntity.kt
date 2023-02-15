@@ -3,7 +3,6 @@ package ru.home.swap.wallet.storage
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import ru.home.swap.wallet.contract.Value
@@ -12,7 +11,7 @@ import ru.home.swap.wallet.model.*
 import java.lang.IllegalArgumentException
 import java.lang.reflect.Type
 
-@Entity(tableName = ChainTransactionDao.Const.tableName)
+@Entity(tableName = ChainTransactionDao.Const.TABLE_NAME)
 data class ChainTransactionEntity (
     @PrimaryKey(autoGenerate = true) val uid: Long,
     @ColumnInfo(name = "txType") val txType: String,

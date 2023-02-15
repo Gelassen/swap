@@ -10,6 +10,8 @@ import ru.home.swap.repository.Cache
 import ru.home.swap.repository.PersonRepository
 import ru.home.swap.repository.pagination.DemandsPagingSource
 import ru.home.swap.repository.pagination.OffersPagingSource
+import ru.home.swap.wallet.repository.TxDataSource
+import ru.home.swap.wallet.storage.ChainTransactionDao
 
 @Module()
 class AppModule(val application: Application) {
@@ -36,5 +38,11 @@ class AppModule(val application: Application) {
     @Provides
     fun providePersonRepository(api: IApi, cache: Cache, context: Context): PersonRepository {
         return PersonRepository(api, cache, context)
+    }
+
+    @AppMainScope
+    @Provides
+    fun provideDataSource(dao: ChainTransactionDao, context: Context): TxDataSource {
+        return TxDataSource(application, dao, Integer.parseInt(context.getString(R.string.page_size)))
     }
 }

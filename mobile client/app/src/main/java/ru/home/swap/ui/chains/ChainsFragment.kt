@@ -4,19 +4,63 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import dagger.android.support.AndroidSupportInjection
+import kotlinx.coroutines.Dispatchers
+import ru.home.swap.core.di.ViewModelFactory
 import ru.home.swap.databinding.ChainsFragmentBinding
 import ru.home.swap.ui.common.BaseFragment
+import ru.home.swap.ui.demands.DemandsViewModel
+import ru.home.swap.ui.profile.ProfileV2ViewModel
+import ru.home.swap.wallet.model.ITransaction
+import javax.inject.Inject
 
-class ChainsFragment: BaseFragment() {
+class ChainsFragment: BaseFragment(), ChainsAdapter.ClickListener {
 
     private lateinit var binding: ChainsFragmentBinding
+
+    @Inject
+    lateinit var viewModelFactory: ViewModelFactory
+    lateinit var viewModel: ChainsViewModel
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        AndroidSupportInjection.inject(this)
+        super.onCreate(savedInstanceState)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        viewModel = ViewModelProvider(this, viewModelFactory).get(ChainsViewModel::class.java)
         binding = ChainsFragmentBinding.inflate(inflater, container, false)
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        binding.txList.adapter = ChainsAdapter(
+            this,
+            mainDispatcher = Dispatchers.Main,
+            workerDispatcher = Dispatchers.IO)
+
+        lifecycleScope.launchWhenStarted {
+            viewModel.uiState
+                .collect{ it ->
+                    if (it.pagedData == null) return@collect
+                    (binding.txList.adapter as ChainsAdapter).submitData(it.pagedData)
+                }
+        }
+        lifecycleScope.launchWhenStarted {
+            viewModel.loadByPage()
+        }
+    }
+
+    override fun onItemClick(item: ITransaction) {
+        TODO("Not yet implemented")
     }
 }

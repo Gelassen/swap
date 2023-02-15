@@ -52,6 +52,7 @@ dependencies {
     implementation("androidx.activity:activity-ktx:1.6.0")
     implementation("androidx.room:room-runtime:2.4.3")
     implementation("androidx.room:room-ktx:2.4.3")
+    implementation("androidx.paging:paging-runtime:3.1.1")
 
     implementation("com.google.android.material:material:1.6.1")
     implementation("com.google.code.gson:gson:2.10")

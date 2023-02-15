@@ -5,6 +5,8 @@ import android.util.Log
 import androidx.databinding.ObservableField
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
@@ -333,6 +335,13 @@ class ProfileV2ViewModel
                     updateState(it)
                 }
         }
+    }
+
+    fun loadByPage(): Flow<PagingData<ITransaction>> {
+        return cacheRepository
+            .getChainTransactionsByPage()
+            .flowOn(backgroundDispatcher)
+            .cachedIn(viewModelScope)
     }
 
     private fun updateStateProfile(it: Response<PersonProfile>) {
