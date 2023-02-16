@@ -1,18 +1,20 @@
 package ru.home.swap.wallet.di
 
 import android.app.Application
-import android.content.Context
 import com.example.wallet.R
 import ru.home.swap.wallet.storage.AppDatabase
 import dagger.Module
 import dagger.Provides
+import kotlinx.coroutines.CoroutineDispatcher
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.web3j.protocol.http.HttpService
+import ru.home.swap.core.di.NetworkModule
 import ru.home.swap.core.network.interceptors.DefaultInterceptor
 import ru.home.swap.wallet.repository.*
 import ru.home.swap.wallet.storage.ChainTransactionDao
+import javax.inject.Named
 
 @Module
 class WalletModule(val context: Application) {
@@ -66,4 +68,5 @@ class WalletModule(val context: Application) {
     fun providesStorageRepository(dao: ChainTransactionDao, pagedDataSource: TxDataSource): IStorageRepository {
         return StorageRepository(dao, pagedDataSource)
     }
+
 }

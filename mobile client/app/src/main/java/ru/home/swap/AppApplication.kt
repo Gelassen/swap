@@ -1,6 +1,6 @@
 package ru.home.swap
 
-import android.app.Application
+import androidx.work.Configuration
 import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector
@@ -10,14 +10,17 @@ import ru.home.swap.core.di.NetworkModule
 import ru.home.swap.di.AppComponent
 import ru.home.swap.di.AppModule
 import ru.home.swap.di.DaggerAppComponent
-import ru.home.swap.wallet.di.DaggerWalletComponent
-import ru.home.swap.wallet.di.WalletModule
+import ru.home.swap.network.MyWorkerFactory
+import ru.home.swap.wallet.WalletApplication
 import javax.inject.Inject
 
-class AppApplication: Application(), HasAndroidInjector {
+class AppApplication: WalletApplication(), Configuration.Provider, HasAndroidInjector {
 
     @Inject
     lateinit var androidInjector : DispatchingAndroidInjector<Any>
+
+    @Inject
+    lateinit var myWorkerFactory: MyWorkerFactory
 
     protected lateinit var component: AppComponent
 
@@ -35,11 +38,12 @@ class AppApplication: Application(), HasAndroidInjector {
             .appModule(AppModule(this))
             .coreComponent(coreComponent)
             .walletComponent(
-                DaggerWalletComponent
+                walletComponent
+/*                DaggerWalletComponent
                     .builder()
                     .walletModule(WalletModule(this))
                     .coreComponent(coreComponent)
-                    .build()
+                    .build()*/
             )
             .build()
         component.inject(this)
@@ -48,6 +52,13 @@ class AppApplication: Application(), HasAndroidInjector {
     @JvmName("getComponent1")
     fun getComponent(): AppComponent {
         return component
+    }
+
+    override fun getWorkManagerConfiguration(): Configuration {
+        return Configuration.Builder()
+            .setMinimumLoggingLevel(android.util.Log.INFO)
+            .setWorkerFactory(myWorkerFactory)
+            .build()
     }
 
     override fun androidInjector(): AndroidInjector<Any> {

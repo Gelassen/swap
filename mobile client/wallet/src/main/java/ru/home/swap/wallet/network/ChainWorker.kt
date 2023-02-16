@@ -40,6 +40,16 @@ class ChainWorker
         private const val KEY_URI = "KEY_URI"
     }
 
+    object Builder {
+        fun build(to: String, valueAsJson: String, uri: String): Data {
+            return workDataOf(
+                Pair(KEY_TO, to),
+                Pair(KEY_VALUE_JSON, valueAsJson),
+                Pair(KEY_URI, uri)
+            )
+        }
+    }
+
     private val notificationId = 1001
 
     private val notificationManager =

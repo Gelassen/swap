@@ -1,7 +1,11 @@
 package ru.home.swap.wallet
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
+import androidx.work.*
 import kotlinx.coroutines.CoroutineDispatcher
 import ru.home.swap.wallet.contract.Value
 import ru.home.swap.wallet.repository.IWalletRepository
@@ -13,7 +17,9 @@ import ru.home.swap.core.di.NetworkModule
 import ru.home.swap.core.logger.Logger
 import ru.home.swap.core.network.Response
 import ru.home.swap.wallet.contract.Match
+import ru.home.swap.wallet.contract.convertToJson
 import ru.home.swap.wallet.model.*
+import ru.home.swap.wallet.network.ChainWorker
 import ru.home.swap.wallet.repository.IStorageRepository
 import ru.home.swap.wallet.storage.TxStatus
 import java.math.BigInteger
@@ -32,10 +38,11 @@ enum class Status {
 }
 class WalletViewModel
     @Inject constructor(
-        val repository: IWalletRepository,
-        val cacheRepository: IStorageRepository,
+        private val app: Application,
+        private val repository: IWalletRepository,
+        private val cacheRepository: IStorageRepository,
         @Named(NetworkModule.DISPATCHER_IO) val backgroundDispatcher: CoroutineDispatcher = Dispatchers.IO
-    ): ViewModel() {
+    ): AndroidViewModel(app) {
 
     private val logger: Logger = Logger.getInstance()
 
@@ -44,8 +51,31 @@ class WalletViewModel
         .asStateFlow()
         .stateIn(viewModelScope, SharingStarted.Eagerly, state.value)
 
+/*    private val work = OneTimeWorkRequestBuilder<ChainWorker>()
+        .setConstraints(
+            Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+        )
+        .setInputData(*//* input data *//*)
+        .build()*/
+/*    private val workInfo = WorkManager.getInstance(app)
+        .getWorkInfoByIdLiveData(work.id)
+        .asFlow()*/
+
     init {
         getTxFromCache()
+    }
+
+    private fun getWorkRequest(inputData: Data): OneTimeWorkRequest {
+        return OneTimeWorkRequestBuilder<ChainWorker>()
+            .setConstraints(
+                Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .build()
+            )
+            .setInputData(inputData) /* input data for worker */
+            .build()
     }
 
     private fun getTxFromCache() {
@@ -102,7 +132,21 @@ class WalletViewModel
 
     fun mintToken(to: String, value: Value, uri: String) {
         logger.d("[start] mintToken()")
-        lateinit var newTx: ITransaction
+        viewModelScope.launch {
+            val work = getWorkRequest(ChainWorker.Builder.build(to, value.convertToJson(), uri))
+            WorkManager.getInstance(app).enqueue(work)
+            WorkManager.getInstance(app)
+                .getWorkInfoByIdLiveData(work.id)
+                .asFlow()
+                .collect { it ->
+                    when(it.state) {
+                        WorkInfo.State.SUCCEEDED -> { logger.d("[mint token] succeeded status with result: ${it.toString()}")}
+                        WorkInfo.State.FAILED -> { logger.d("[mint token] failed status with result: ${it.toString()}") }
+                        else -> { logger.d("[mint token] unexpected state with result: ${it.toString()}") }
+                    }
+            }
+        }
+/*        lateinit var newTx: ITransaction
         viewModelScope.launch {
             val tx = MintTransaction(
                 uid = 0,
@@ -119,7 +163,7 @@ class WalletViewModel
                 .onEach { preProcessResponse(it, newTx) }
                 .flowOn(backgroundDispatcher)
                 .collect { processResponse(it) }
-        }
+        }*/
         logger.d("[end] mintToken()")
     }
 

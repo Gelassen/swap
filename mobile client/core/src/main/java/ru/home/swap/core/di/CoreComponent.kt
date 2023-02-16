@@ -15,7 +15,7 @@ annotation class CoreMainScope
 @CoreMainScope
 @Component(
     dependencies = [],
-    modules = [CoreModule::class, CoreViewModelModule::class, NetworkModule::class]
+    modules = [CoreModule::class, CoreViewModelModule::class, NetworkModule::class],
 )
 interface CoreComponent {
     fun providesAPI(): IApi

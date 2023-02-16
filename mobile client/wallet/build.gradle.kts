@@ -53,7 +53,6 @@ dependencies {
     implementation("androidx.room:room-runtime:2.5.0")
     implementation("androidx.room:room-ktx:2.5.0")
     implementation("androidx.paging:paging-runtime:3.1.1")
-    implementation("androidx.work:work-runtime:2.8.0")
 
     implementation("com.google.android.material:material:1.6.1")
     implementation("com.google.code.gson:gson:2.10")
@@ -66,6 +65,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactive:1.6.4")
 
     implementation("org.web3j:core:4.9.4")
+    implementation("androidx.work:work-runtime:2.8.0")
     implementation("androidx.work:work-runtime-ktx:2.8.0")
 
 //    annotationProcessor("androidx.room:room-compiler:2.5.0")

@@ -82,6 +82,8 @@ dependencies {
     implementation("androidx.navigation:navigation-ui-ktx:2.4.2")
     implementation("androidx.navigation:navigation-dynamic-features-fragment:2.4.2")
     implementation("androidx.paging:paging-runtime:3.1.1")
+    implementation("androidx.work:work-runtime:2.8.0")
+    implementation("androidx.work:work-runtime-ktx:2.8.0")
 
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0")
