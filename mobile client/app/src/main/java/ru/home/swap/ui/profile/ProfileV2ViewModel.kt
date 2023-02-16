@@ -4,9 +4,11 @@ import android.app.Application
 import android.util.Log
 import androidx.databinding.ObservableField
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import androidx.work.*
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
@@ -23,9 +25,13 @@ import ru.home.swap.core.model.Service
 import ru.home.swap.providers.PersonProvider
 import ru.home.swap.repository.PersonRepository
 import ru.home.swap.repository.PersonRepository.*
+import ru.home.swap.wallet.contract.Value
+import ru.home.swap.wallet.contract.convertToJson
 import ru.home.swap.wallet.model.ITransaction
 import ru.home.swap.wallet.model.RegisterUserTransaction
 import ru.home.swap.wallet.model.TransactionReceiptDomain
+import ru.home.swap.wallet.network.ChainWorker
+import ru.home.swap.wallet.providers.WalletProvider
 import ru.home.swap.wallet.repository.IStorageRepository
 import ru.home.swap.wallet.repository.IWalletRepository
 import ru.home.swap.wallet.storage.TxStatus
@@ -535,5 +541,54 @@ class ProfileV2ViewModel
                 cacheRepository.createChainTxAsFlow(newTx)
             }
         }
+    }
+
+    private fun getWorkRequest(inputData: Data): OneTimeWorkRequest {
+        return OneTimeWorkRequestBuilder<ChainWorker>()
+            .setConstraints(
+                Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .build()
+            )
+            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+            .setInputData(inputData) /* input data for worker */
+            .build()
+    }
+
+    fun mintToken(to: String, value: Value, uri: String) {
+        logger.d("[start] mintToken()")
+        viewModelScope.launch {
+            val work = getWorkRequest(ChainWorker.Builder.build(to, WalletProvider().getValueAsJson(value), uri))
+            WorkManager.getInstance(app).enqueue(work)
+            WorkManager.getInstance(app)
+                .getWorkInfoByIdLiveData(work.id)
+                .asFlow()
+                .collect { it ->
+                    when(it.state) {
+                        WorkInfo.State.SUCCEEDED -> { logger.d("[mint token] succeeded status with result: ${it.toString()}")}
+                        WorkInfo.State.FAILED -> { logger.d("[mint token] failed status with result: ${it.toString()}") }
+                        else -> { logger.d("[mint token] unexpected state with result: ${it.toString()}") }
+                    }
+                }
+        }
+/*        lateinit var newTx: ITransaction
+        viewModelScope.launch {
+            val tx = MintTransaction(
+                uid = 0,
+                status = TxStatus.TX_PENDING,
+                to = to,
+                value = value,
+                uri = uri
+            )
+            cacheRepository.createChainTxAsFlow(tx)
+                .map {
+                    newTx = it
+                    repository.mintToken(to, value, uri)
+                }
+                .onEach { preProcessResponse(it, newTx) }
+                .flowOn(backgroundDispatcher)
+                .collect { processResponse(it) }
+        }*/
+        logger.d("[end] mintToken()")
     }
 }

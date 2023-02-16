@@ -1,7 +1,10 @@
 package ru.home.swap.wallet.network
 
+import android.app.Notification
+import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.graphics.Color
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -51,16 +54,23 @@ class ChainWorker
     }
 
     private val notificationId = 1001
+    private val notificationChannelId = 10001
+    private val notificationChannelName = "Ongoing work with ethereum ledger"
 
     private val notificationManager =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as
                 NotificationManager
 
+    private lateinit var foregroundIndo: ForegroundInfo
+
+    init {
+        val progress = "Start execute tx on the chain"
+        foregroundIndo = createForegroundInfo(progress)
+    }
 
     override suspend fun doWork(): Result {
         Log.d(TAG_CHAIN, "Start work on minting a token")
-        val progress = "Start execute tx on the chain"
-        setForeground(createForegroundInfo(progress))
+        setForeground(foregroundIndo)
 
         val inputData: Data = inputData
         val to = inputData.getString(KEY_TO)!!
@@ -86,6 +96,24 @@ class ChainWorker
         return Result.success()
     }
 
+    override suspend fun getForegroundInfo(): ForegroundInfo {
+        return foregroundIndo
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun createChannel(): Int {
+        // Create a Notification channel
+        val chan = NotificationChannel(
+            notificationChannelId.toString(),
+            notificationChannelName,
+            NotificationManager.IMPORTANCE_DEFAULT
+        )
+        chan.lightColor = Color.BLUE
+        chan.lockscreenVisibility = Notification.VISIBILITY_PRIVATE
+        notificationManager.createNotificationChannel(chan)
+        return notificationChannelId
+    }
+
     private fun createForegroundInfo(progress: String): ForegroundInfo {
         val id = "10001"//applicationContext.getString(R.string.notification_channel_id)
         val title = "title"//applicationContext.getString(R.string.notification_title)
@@ -99,10 +127,12 @@ class ChainWorker
             createChannel()
         }
 
-        val notification = NotificationCompat.Builder(applicationContext, id)
+        val notification = NotificationCompat.Builder(applicationContext, notificationChannelId.toString())
             .setContentTitle(title)
             .setTicker(title)
             .setContentText(progress)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setSmallIcon(dagger.android.support.R.drawable.abc_ic_arrow_drop_right_black_24dp)
             .setOngoing(true)
             // Add the cancel action to the notification which can
@@ -111,12 +141,6 @@ class ChainWorker
             .build()
 
         return ForegroundInfo(notificationId, notification)  // TODO shall we add FOREGROUND_TYPE  field here?
-
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun createChannel() {
-        // Create a Notification channel
     }
 
 }

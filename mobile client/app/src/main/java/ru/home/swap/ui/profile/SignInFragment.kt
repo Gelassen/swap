@@ -21,6 +21,9 @@ import ru.home.swap.databinding.SigninFragmentBinding
 import ru.home.swap.core.di.ViewModelFactory
 import ru.home.swap.providers.PersonProvider
 import ru.home.swap.ui.common.BaseFragment
+import ru.home.swap.wallet.TestWalletActivity
+import ru.home.swap.wallet.contract.Value
+import java.math.BigInteger
 import javax.inject.Inject
 
 class SignInFragment: BaseFragment() {
@@ -72,6 +75,20 @@ class SignInFragment: BaseFragment() {
                 binding.contactPhone.setText(profile.contact)
                 binding.secret.setText(profile.secret)
                 binding.walletAddress.setText(profile.userWalletAddress)
+            }
+
+            binding.debugClickMe.visibility = View.VISIBLE
+            binding.debugClickMe.setOnClickListener {
+                val to = TestWalletActivity.SECOND_USER/*getString(R.string.my_account)*/
+                val value = Value(
+                    TestWalletActivity.SECOND_USER_OFFER,
+                    BigInteger.valueOf(1665158348220),
+                    BigInteger.valueOf(1669758348220),
+                    false,
+                    BigInteger.valueOf(0)
+                )
+                val uri = "https://gelassen.github.io/blog/"
+                viewModel.mintToken(to, value, uri)
             }
         }
 
