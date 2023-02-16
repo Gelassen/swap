@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.example.wallet">
 
     <application>
-        <activity
+<!--        <activity
             android:name="ru.home.swap.wallet.TestWalletActivity"
             android:screenOrientation="portrait"
             android:configChanges="keyboardHidden|orientation|screenSize"
@@ -13,7 +14,13 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+        </activity>-->
+
+<!--        <service-->
+<!--            android:name="androidx.work.impl.foreground.SystemForegroundService"-->
+<!--            android:foregroundServiceType="specialUse"-->
+<!--            tools:node="merge" />-->
+
     </application>
 
 

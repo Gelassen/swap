@@ -50,9 +50,10 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.5.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1")
     implementation("androidx.activity:activity-ktx:1.6.0")
-    implementation("androidx.room:room-runtime:2.4.3")
-    implementation("androidx.room:room-ktx:2.4.3")
+    implementation("androidx.room:room-runtime:2.5.0")
+    implementation("androidx.room:room-ktx:2.5.0")
     implementation("androidx.paging:paging-runtime:3.1.1")
+    implementation("androidx.work:work-runtime:2.8.0")
 
     implementation("com.google.android.material:material:1.6.1")
     implementation("com.google.code.gson:gson:2.10")
@@ -65,10 +66,11 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactive:1.6.4")
 
     implementation("org.web3j:core:4.9.4")
+    implementation("androidx.work:work-runtime-ktx:2.8.0")
 
-    annotationProcessor("androidx.room:room-compiler:2.4.3")
+//    annotationProcessor("androidx.room:room-compiler:2.5.0")
 
-    kapt("androidx.room:room-compiler:2.4.3")
+    kapt("androidx.room:room-compiler:2.5.0")
     kapt("com.google.dagger:dagger-compiler:2.44.2")
     kapt("com.google.dagger:dagger-android-processor:2.44.2")
 
