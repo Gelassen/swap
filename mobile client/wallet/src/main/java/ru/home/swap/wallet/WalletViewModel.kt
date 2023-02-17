@@ -51,18 +51,6 @@ class WalletViewModel
         .asStateFlow()
         .stateIn(viewModelScope, SharingStarted.Eagerly, state.value)
 
-/*    private val work = OneTimeWorkRequestBuilder<ChainWorker>()
-        .setConstraints(
-            Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .build()
-        )
-        .setInputData(*//* input data *//*)
-        .build()*/
-/*    private val workInfo = WorkManager.getInstance(app)
-        .getWorkInfoByIdLiveData(work.id)
-        .asFlow()*/
-
     init {
         getTxFromCache()
     }

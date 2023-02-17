@@ -1,24 +1,21 @@
 package ru.home.swap.wallet.network
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.content.Context
-import android.graphics.Color
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
-import androidx.core.app.NotificationCompat
 import androidx.work.*
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import ru.home.swap.core.App
 import ru.home.swap.core.di.NetworkModule
+import ru.home.swap.core.network.Response
 import ru.home.swap.wallet.contract.Value
 import ru.home.swap.wallet.contract.fromJson
+import ru.home.swap.wallet.model.ITransaction
 import ru.home.swap.wallet.model.MintTransaction
+import ru.home.swap.wallet.model.TransactionReceiptDomain
 import ru.home.swap.wallet.repository.IStorageRepository
 import ru.home.swap.wallet.repository.IWalletRepository
 import ru.home.swap.wallet.storage.TxStatus
@@ -30,10 +27,10 @@ class ChainWorker
 @Inject constructor(
     context: Context,
     params: WorkerParameters,
-    val repository: IWalletRepository,
-    val cacheRepository: IStorageRepository,
-    @Named(NetworkModule.DISPATCHER_IO) val backgroundDispatcher: CoroutineDispatcher = Dispatchers.IO
-): CoroutineWorker(context, params) {
+    repository: IWalletRepository,
+    cacheRepository: IStorageRepository,
+    @Named(NetworkModule.DISPATCHER_IO) backgroundDispatcher: CoroutineDispatcher = Dispatchers.IO
+): BaseChainWorker(context, params, repository, cacheRepository, backgroundDispatcher) {
 
     companion object {
         private val TAG_CHAIN = "CHAIN"
@@ -41,6 +38,9 @@ class ChainWorker
         private const val KEY_TO = "KEY_TO"
         private const val KEY_VALUE_JSON = "KEY_VALUE_JSON"
         private const val KEY_URI = "KEY_URI"
+        // output keys
+        public const val KEY_ERROR = "KEY_ERROR"
+        public const val KEY_ERROR_MSG = "KEY_ERROR_MSG"
     }
 
     object Builder {
@@ -53,23 +53,9 @@ class ChainWorker
         }
     }
 
-    private val notificationId = 1001
-    private val notificationChannelId = 10001
-    private val notificationChannelName = "Ongoing work with ethereum ledger"
-
-    private val notificationManager =
-        context.getSystemService(Context.NOTIFICATION_SERVICE) as
-                NotificationManager
-
-    private lateinit var foregroundIndo: ForegroundInfo
-
-    init {
-        val progress = "Start execute tx on the chain"
-        foregroundIndo = createForegroundInfo(progress)
-    }
-
     override suspend fun doWork(): Result {
         Log.d(TAG_CHAIN, "Start work on minting a token")
+        var result = Result.failure()
         setForeground(foregroundIndo)
 
         val inputData: Data = inputData
@@ -83,64 +69,59 @@ class ChainWorker
             value = value,
             uri = uri
         )
+
+        lateinit var newTx: ITransaction
+
         cacheRepository.createChainTxAsFlow(tx)
             .map {
-                /*newTx = it*/
+                newTx = it
                 repository.mintToken(to, value, uri)
             }
-            .onEach { /*preProcessResponse(it, newTx)*/ }
+            .onEach { preProcessResponse(it, newTx) }
             .flowOn(backgroundDispatcher)
-            .collect {/* processResponse(it)*/
+            .collect {
                 Log.d(TAG_CHAIN, "Get result on mint() call ${it}")
+                result = processResponse(it)
             }
-        return Result.success()
+        Log.d(App.TAG, "[ChainWorker] before Result.success()")
+        return result
     }
 
-    override suspend fun getForegroundInfo(): ForegroundInfo {
-        return foregroundIndo
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun createChannel(): Int {
-        // Create a Notification channel
-        val chan = NotificationChannel(
-            notificationChannelId.toString(),
-            notificationChannelName,
-            NotificationManager.IMPORTANCE_DEFAULT
-        )
-        chan.lightColor = Color.BLUE
-        chan.lockscreenVisibility = Notification.VISIBILITY_PRIVATE
-        notificationManager.createNotificationChannel(chan)
-        return notificationChannelId
-    }
-
-    private fun createForegroundInfo(progress: String): ForegroundInfo {
-        val id = "10001"//applicationContext.getString(R.string.notification_channel_id)
-        val title = "title"//applicationContext.getString(R.string.notification_title)
-        val cancel = "cancel"//applicationContext.getString(R.string.cancel_download)
-        // This PendingIntent can be used to cancel the worker
-        val intent = WorkManager.getInstance(applicationContext)
-            .createCancelPendingIntent(getId())
-
-        // Create a Notification channel if necessary
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            createChannel()
+    private fun processResponse(it: Response<TransactionReceiptDomain>): Result {
+        var result = Result.failure()
+        when(it) {
+            is Response.Data -> {
+                if (!it.data.isStatusOK()) {
+                    result = Result.failure(workDataOf(Pair(KEY_ERROR, true), Pair(KEY_ERROR_MSG, it.data.getRevertReason())))
+                } else {
+                    result = Result.success(workDataOf(Pair(KEY_ERROR, false)))
+                }
+            }
+            is Response.Error.Message -> { result = Result.failure(workDataOf(Pair(KEY_ERROR, true), Pair(KEY_ERROR_MSG, it.msg))) }
+            is Response.Error.Exception -> { result = Result.failure(workDataOf(Pair(KEY_ERROR, true), Pair(KEY_ERROR_MSG, it.error.message))) }
         }
-
-        val notification = NotificationCompat.Builder(applicationContext, notificationChannelId.toString())
-            .setContentTitle(title)
-            .setTicker(title)
-            .setContentText(progress)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .setCategory(NotificationCompat.CATEGORY_SERVICE)
-            .setSmallIcon(dagger.android.support.R.drawable.abc_ic_arrow_drop_right_black_24dp)
-            .setOngoing(true)
-            // Add the cancel action to the notification which can
-            // be used to cancel the worker
-            .addAction(android.R.drawable.ic_delete, cancel, intent)
-            .build()
-
-        return ForegroundInfo(notificationId, notification)  // TODO shall we add FOREGROUND_TYPE  field here?
+        return result
     }
 
+    private suspend fun preProcessResponse(it: Response<TransactionReceiptDomain>, newTx: ITransaction) {
+        when(it) {
+            is Response.Data -> {
+                if (it.data.isStatusOK()) {
+                    newTx.status = TxStatus.TX_MINED
+                    cacheRepository.createChainTx(newTx)
+                } else {
+                    newTx.status = TxStatus.TX_REVERTED
+                    cacheRepository.createChainTx(newTx)
+                }
+            }
+            is Response.Error.Message -> {
+                newTx.status = TxStatus.TX_EXCEPTION
+                cacheRepository.createChainTx(newTx)
+            }
+            is Response.Error.Exception -> {
+                newTx.status = TxStatus.TX_EXCEPTION
+                cacheRepository.createChainTx(newTx)
+            }
+        }
+    }
 }

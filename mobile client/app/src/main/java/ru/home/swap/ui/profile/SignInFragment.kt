@@ -12,6 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import dagger.android.support.AndroidSupportInjection
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import ru.home.swap.App
 import ru.home.swap.BuildConfig
@@ -91,7 +92,6 @@ class SignInFragment: BaseFragment() {
                 viewModel.mintToken(to, value, uri)
             }
         }
-
 
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {

@@ -31,6 +31,8 @@ import ru.home.swap.wallet.model.ITransaction
 import ru.home.swap.wallet.model.RegisterUserTransaction
 import ru.home.swap.wallet.model.TransactionReceiptDomain
 import ru.home.swap.wallet.network.ChainWorker
+import ru.home.swap.wallet.network.ChainWorker.Companion.KEY_ERROR_MSG
+import ru.home.swap.wallet.network.getWorkRequest
 import ru.home.swap.wallet.providers.WalletProvider
 import ru.home.swap.wallet.repository.IStorageRepository
 import ru.home.swap.wallet.repository.IWalletRepository
@@ -343,11 +345,23 @@ class ProfileV2ViewModel
         }
     }
 
+    // FIXME it does not notify client after changes in db
     fun loadByPage(): Flow<PagingData<ITransaction>> {
         return cacheRepository
             .getChainTransactionsByPage()
             .flowOn(backgroundDispatcher)
             .cachedIn(viewModelScope)
+    }
+
+    // it successfully notifies client after changes in db
+    fun loadAllFromCache() {
+        viewModelScope.launch {
+            cacheRepository.getAllChainTransactions()
+                .flowOn(backgroundDispatcher)
+                .collect {
+                    logger.d("[loadAllFromCache] Collect result ${it.toString()}")
+                }
+        }
     }
 
     private fun updateStateProfile(it: Response<PersonProfile>) {
@@ -543,52 +557,27 @@ class ProfileV2ViewModel
         }
     }
 
-    private fun getWorkRequest(inputData: Data): OneTimeWorkRequest {
-        return OneTimeWorkRequestBuilder<ChainWorker>()
-            .setConstraints(
-                Constraints.Builder()
-                    .setRequiredNetworkType(NetworkType.CONNECTED)
-                    .build()
-            )
-            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-            .setInputData(inputData) /* input data for worker */
-            .build()
-    }
-
     fun mintToken(to: String, value: Value, uri: String) {
         logger.d("[start] mintToken()")
         viewModelScope.launch {
-            val work = getWorkRequest(ChainWorker.Builder.build(to, WalletProvider().getValueAsJson(value), uri))
-            WorkManager.getInstance(app).enqueue(work)
-            WorkManager.getInstance(app)
+            val workManager = WorkManager.getInstance(app)
+            val work = workManager.getWorkRequest<ChainWorker>(ChainWorker.Builder.build(to, WalletProvider().getValueAsJson(value), uri))
+            workManager.enqueue(work)
+            workManager
                 .getWorkInfoByIdLiveData(work.id)
                 .asFlow()
                 .collect { it ->
                     when(it.state) {
                         WorkInfo.State.SUCCEEDED -> { logger.d("[mint token] succeeded status with result: ${it.toString()}")}
-                        WorkInfo.State.FAILED -> { logger.d("[mint token] failed status with result: ${it.toString()}") }
+                        WorkInfo.State.FAILED -> {
+                            logger.d("[mint token] failed status with result: ${it.toString()}")
+                            state.update { state -> state.copy(isLoading = false, errors = state.errors.plus(it.outputData.keyValueMap.get(KEY_ERROR_MSG) as String)) }
+                        }
                         else -> { logger.d("[mint token] unexpected state with result: ${it.toString()}") }
                     }
                 }
         }
-/*        lateinit var newTx: ITransaction
-        viewModelScope.launch {
-            val tx = MintTransaction(
-                uid = 0,
-                status = TxStatus.TX_PENDING,
-                to = to,
-                value = value,
-                uri = uri
-            )
-            cacheRepository.createChainTxAsFlow(tx)
-                .map {
-                    newTx = it
-                    repository.mintToken(to, value, uri)
-                }
-                .onEach { preProcessResponse(it, newTx) }
-                .flowOn(backgroundDispatcher)
-                .collect { processResponse(it) }
-        }*/
         logger.d("[end] mintToken()")
     }
+
 }
