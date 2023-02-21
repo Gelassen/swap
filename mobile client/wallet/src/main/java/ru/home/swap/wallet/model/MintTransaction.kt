@@ -13,7 +13,8 @@ data class MintTransaction(
     override var status: String = TxStatus.TX_PENDING,
     val to: String = "",
     val value: Value = Value(),
-    val uri: String = ""
+    val uri: String = "",
+    var tokenId: Int = -1
 ) : ITransaction {
     override fun fromDomain(): ChainTransactionEntity {
         val gson = GsonBuilder()

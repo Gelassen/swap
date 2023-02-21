@@ -15,11 +15,21 @@ import androidx.work.WorkerParameters
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import ru.home.swap.core.di.NetworkModule
+import ru.home.swap.core.network.Response
+import ru.home.swap.wallet.model.ITransaction
+import ru.home.swap.wallet.model.TransactionReceiptDomain
 import ru.home.swap.wallet.repository.IStorageRepository
 import ru.home.swap.wallet.repository.IWalletRepository
+import ru.home.swap.wallet.storage.TxStatus
 import javax.inject.Inject
 import javax.inject.Named
 
+/**
+ * The cause of migration of WorkManager is possible changes in business requirements and\or
+ * increasing time to mine a transaction. We will have to put operations with chain in the
+ * foreground service and since API 28 foreground service is allowed only for several cases,
+ * the rest use cases should be done over WorkManager.
+ * */
 open class BaseChainWorker
 @Inject constructor(
     context: Context,
@@ -64,6 +74,28 @@ open class BaseChainWorker
         chan.lockscreenVisibility = Notification.VISIBILITY_PRIVATE
         notificationManager.createNotificationChannel(chan)
         return notificationChannelId
+    }
+
+    protected suspend fun preProcessResponse(it: Response<TransactionReceiptDomain>, newTx: ITransaction) {
+        when(it) {
+            is Response.Data -> {
+                if (it.data.isStatusOK()) {
+                    newTx.status = TxStatus.TX_MINED
+                    cacheRepository.createChainTx(newTx)
+                } else {
+                    newTx.status = TxStatus.TX_REVERTED
+                    cacheRepository.createChainTx(newTx)
+                }
+            }
+            is Response.Error.Message -> {
+                newTx.status = TxStatus.TX_EXCEPTION
+                cacheRepository.createChainTx(newTx)
+            }
+            is Response.Error.Exception -> {
+                newTx.status = TxStatus.TX_EXCEPTION
+                cacheRepository.createChainTx(newTx)
+            }
+        }
     }
 
     private fun createForegroundInfo(progress: String): ForegroundInfo {

@@ -8,6 +8,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import org.web3j.abi.FunctionReturnDecoder
+import org.web3j.abi.TypeReference
+import org.web3j.abi.datatypes.Uint
+import org.web3j.abi.datatypes.generated.Uint256
 import ru.home.swap.core.App
 import ru.home.swap.core.di.NetworkModule
 import ru.home.swap.core.network.Response
@@ -21,7 +25,6 @@ import ru.home.swap.wallet.repository.IWalletRepository
 import ru.home.swap.wallet.storage.TxStatus
 import javax.inject.Inject
 import javax.inject.Named
-
 
 class ChainWorker
 @Inject constructor(
@@ -70,19 +73,26 @@ class ChainWorker
             uri = uri
         )
 
-        lateinit var newTx: ITransaction
+        lateinit var newTx: MintTransaction
+
+//        val str = FunctionReturnDecoder.decodeIndexedValue("", object: TypeReference<Uint256>() {})
 
         cacheRepository.createChainTxAsFlow(tx)
             .map {
-                newTx = it
+                newTx = it as MintTransaction
                 repository.mintToken(to, value, uri)
             }
-            .onEach { preProcessResponse(it, newTx) }
+            .onEach {
+                if (it is Response.Data) {
+                    val tokenId = FunctionReturnDecoder.decodeIndexedValue(
+                        it.data.topics.get(it.data.topics.size - 1),
+                        object: TypeReference<Uint256>()  {}
+                    ) as Uint256
+                    newTx.tokenId = tokenId.value.toInt()
+                }
+                preProcessResponse(it, newTx) }
             .flowOn(backgroundDispatcher)
-            .collect {
-                Log.d(TAG_CHAIN, "Get result on mint() call ${it}")
-                result = processResponse(it)
-            }
+            .collect { result = processResponse(it) }
         Log.d(App.TAG, "[ChainWorker] before Result.success()")
         return result
     }
@@ -103,25 +113,4 @@ class ChainWorker
         return result
     }
 
-    private suspend fun preProcessResponse(it: Response<TransactionReceiptDomain>, newTx: ITransaction) {
-        when(it) {
-            is Response.Data -> {
-                if (it.data.isStatusOK()) {
-                    newTx.status = TxStatus.TX_MINED
-                    cacheRepository.createChainTx(newTx)
-                } else {
-                    newTx.status = TxStatus.TX_REVERTED
-                    cacheRepository.createChainTx(newTx)
-                }
-            }
-            is Response.Error.Message -> {
-                newTx.status = TxStatus.TX_EXCEPTION
-                cacheRepository.createChainTx(newTx)
-            }
-            is Response.Error.Exception -> {
-                newTx.status = TxStatus.TX_EXCEPTION
-                cacheRepository.createChainTx(newTx)
-            }
-        }
-    }
 }

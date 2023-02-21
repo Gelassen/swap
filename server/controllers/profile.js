@@ -142,6 +142,7 @@ exports.addOffer = async function(req, res) {
             result = network.getErrorMsg(409, `The same offer for this profile already exist ${JSON.stringify(offerFromRequest)}`);
         } else {
             logger.log(`[add ofer] offer to insert ${JSON.stringify(offerFromRequest)}`);
+            // TODO also add record to ChainServices 
             result = await profile.addOffer(offerFromRequest, profileResult.id); 
         }
     }

@@ -58,4 +58,5 @@ object TxStatus {
     const val TX_EXCEPTION = "exception"
     const val TX_REJECTED = "rejected" // TODO 'rejected' status was mentioned somewhere in docs, but never met - require more research
     const val TX_DECLINED = "declined" // TODO 'declined' status was mentioned somewhere in docs, but never met - require more research
+    const val TX_MINED_AND_PROCESSED = "mined&processed" // extra status for POSTing data to the backend
 }

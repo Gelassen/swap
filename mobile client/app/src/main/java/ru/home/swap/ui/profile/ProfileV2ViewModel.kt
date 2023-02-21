@@ -9,11 +9,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.work.*
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import ru.home.swap.App
 import ru.home.swap.R
 import ru.home.swap.core.di.NetworkModule
@@ -28,6 +25,7 @@ import ru.home.swap.repository.PersonRepository.*
 import ru.home.swap.wallet.contract.Value
 import ru.home.swap.wallet.contract.convertToJson
 import ru.home.swap.wallet.model.ITransaction
+import ru.home.swap.wallet.model.MintTransaction
 import ru.home.swap.wallet.model.RegisterUserTransaction
 import ru.home.swap.wallet.model.TransactionReceiptDomain
 import ru.home.swap.wallet.network.ChainWorker
@@ -37,12 +35,16 @@ import ru.home.swap.wallet.providers.WalletProvider
 import ru.home.swap.wallet.repository.IStorageRepository
 import ru.home.swap.wallet.repository.IWalletRepository
 import ru.home.swap.wallet.storage.TxStatus
+import java.util.*
+import java.util.concurrent.ConcurrentLinkedQueue
 import javax.inject.Inject
 import javax.inject.Named
 
 data class ModelV2(
     var profile: PersonProfile = PersonProfile(),
+    var pendingTx: ConcurrentLinkedQueue<ITransaction> = ConcurrentLinkedQueue(),
     val isLoading: Boolean = false,
+    val isAllowedToProcess: Boolean = false,
     val errors: List<String> = emptyList(),
     val status: StateFlagV2 = StateFlagV2.NONE
 ) {
@@ -79,8 +81,8 @@ class ProfileV2ViewModel
 @Inject constructor(
     private val repository: PersonRepository,
     private val app: Application,
-    val walletRepository: IWalletRepository,
-    val cacheRepository: IStorageRepository,
+    private val walletRepository: IWalletRepository,
+    private val cacheRepository: IStorageRepository,
     @Named(NetworkModule.DISPATCHER_IO) val backgroundDispatcher: CoroutineDispatcher = Dispatchers.IO
 ): AndroidViewModel(app)  {
 
@@ -96,6 +98,37 @@ class ProfileV2ViewModel
         .stateIn(viewModelScope, SharingStarted.Eagerly, state.value)
 
     val proposal: ObservableField<String> = ObservableField<String>("")
+
+    @Deprecated("Work on this method has been frozen")
+    fun backgroundProcessMinedTx() {
+        viewModelScope.launch {
+            flow<Boolean> {
+                while (uiState.value.isAllowedToProcess) {
+                    val delay = 1120L
+                    if (state.value.pendingTx.isEmpty()) { delay(delay) }
+                    val item = state.value.pendingTx.poll()
+                    when(item.type) {
+                        MintTransaction::class.java.simpleName -> {
+                            /* token are created only for offer, demands registered just as a db record */
+//                            (item as MintTransaction).
+                            // TODO check documentation regarding how to handle scenario of lack tx receipt
+                            //  from the chain
+                            val newService = Service(title = proposal.get()!!, date = 0L, index = listOf())
+                            repository.addOffer(
+                                contact = uiState.value.profile.contact,
+                                secret = uiState.value.profile.secret,
+                                newService = newService
+                            ).onStart {  }
+                            //  or repository.addDemand()
+                        }
+                        else -> { throw UnsupportedOperationException("Did you forget to add support of ${item.type} class tx?") }
+                    }
+                    delay(delay)
+                }
+            }
+
+        }
+    }
 
     fun addItem(isOfferSelected: Boolean) {
         if (proposal.get()!!.isEmpty()) return
@@ -356,10 +389,19 @@ class ProfileV2ViewModel
     // it successfully notifies client after changes in db
     fun loadAllFromCache() {
         viewModelScope.launch {
-            cacheRepository.getAllChainTransactions()
+            cacheRepository
+                .getAllChainTransactions()
+                .map { it -> it.filter { it.status == TxStatus.TX_MINED } }
                 .flowOn(backgroundDispatcher)
                 .collect {
                     logger.d("[loadAllFromCache] Collect result ${it.toString()}")
+                    state.update { state ->
+                        val newValues = it.subtract(uiState.value.pendingTx)
+                        val data = ConcurrentLinkedQueue(state.pendingTx)
+                        data.addAll(newValues)
+                        /*state.pendingTx.addAll(newValues)*/ // not sure if this insert changes the state
+                        state.copy(pendingTx = data)
+                    }
                 }
         }
     }
