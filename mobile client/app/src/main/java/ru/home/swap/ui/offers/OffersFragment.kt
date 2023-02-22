@@ -6,8 +6,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -91,31 +93,37 @@ class OffersFragment: BaseFragment(), OffersAdapter.IListener {
 
     private fun listenUpdates() {
         lifecycleScope.launch {
-            viewModel.uiState.collect { it ->
-                Log.d(App.PAGING, "[offers] get update from viewmodel ${it.pagingData}")
-                binding.progressIndicator.visibility = if (it.isLoading) View.VISIBLE else View.GONE
-                if (it.errors.isNotEmpty()) {
-                    showErrorDialog(it.errors.get(0))
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                viewModel.uiState.collect { it ->
+                    Log.d(App.PAGING, "[offers] get update from viewmodel ${it.pagingData}")
+                    binding.progressIndicator.visibility = if (it.isLoading) View.VISIBLE else View.GONE
+                    if (it.errors.isNotEmpty()) {
+                        showErrorDialog(it.errors.get(0))
+                    }
+                    if (it.pagingData != null) {
+                        (binding.offersList.adapter as OffersAdapter).submitData(it.pagingData)
+                    }
+                    binding.noContent.visibility = if (binding.offersList.adapter!!.itemCount == 0) View.VISIBLE else View.GONE
                 }
-                if (it.pagingData != null) {
-                    (binding.offersList.adapter as OffersAdapter).submitData(it.pagingData)
-                }
-                binding.noContent.visibility = if (binding.offersList.adapter!!.itemCount == 0) View.VISIBLE else View.GONE
             }
+
         }
         lifecycleScope.launch {
-            (binding.offersList.adapter as OffersAdapter).loadStateFlow.collectLatest { loadState ->
-                when (loadState.refresh) {
-                    is LoadState.Loading -> {
-                        // no op
-                    }
-                    is LoadState.Error -> {
-                        viewModel.addError((loadState.refresh as LoadState.Error).error.localizedMessage!!)
-                    }
-                    is LoadState.NotLoading -> {
-                        val isNoContent = binding.offersList.adapter!!.itemCount == 0
-                        binding.noContent.visibility = if (isNoContent) View.VISIBLE else View.GONE
-                        binding.progressIndicator.visibility = View.GONE
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                (binding.offersList.adapter as OffersAdapter).loadStateFlow.collectLatest { loadState ->
+                    when (loadState.refresh) {
+                        is LoadState.Loading -> {
+                            // no op
+                        }
+                        is LoadState.Error -> {
+                            viewModel.addError((loadState.refresh as LoadState.Error).error.localizedMessage!!)
+                        }
+                        is LoadState.NotLoading -> {
+                            val isNoContent = binding.offersList.adapter!!.itemCount == 0
+                            binding.noContent.visibility =
+                                if (isNoContent) View.VISIBLE else View.GONE
+                            binding.progressIndicator.visibility = View.GONE
+                        }
                     }
                 }
             }

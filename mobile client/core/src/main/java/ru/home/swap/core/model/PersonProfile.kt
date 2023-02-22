@@ -10,9 +10,14 @@ data class PersonProfile(
     var userWalletAddress: String = "",
     var offers: List<Service> = emptyList(),
     var demands: List<Service> = emptyList(),
-
-
     ) {
+
+    constructor(profile: PersonProfile): this(
+        profile.id, profile.contact,
+        profile.secret, profile.name,
+        profile.userWalletAddress, profile.offers,
+        profile.demands) { }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

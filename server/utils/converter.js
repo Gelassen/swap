@@ -90,10 +90,11 @@ exports.dbToDomainService = function(rows) {
 }
 
 exports.requestToDomainService = function(reqBody) {
-    return {
+    return { // TODO check will be auto increment work if zero is passed as an id? 
         "title" : reqBody.title,
         "date" : reqBody.date,
-        "index" : reqBody.index
+        "index" : reqBody.index,
+        "chainService" : requestToDomainChainService(reqBody)
     }
 }
 
@@ -179,4 +180,12 @@ function prepareIndex(row) {
         }
     }
     return index;
+}
+
+function requestToDomainChainService(reqBody) {
+    return {
+        "userWalletAddress" : reqBody.chainService.userWalletAddress,
+        "tokenId" : reqBody.chainService.tokenId,
+        "serverServiceId" : reqBody.chainService.serverServiceId
+    }
 }

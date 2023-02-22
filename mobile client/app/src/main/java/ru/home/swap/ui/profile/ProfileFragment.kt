@@ -68,6 +68,17 @@ class ProfileFragment : BaseFragment(), ItemAdapter.Listener {
                 }
             }
         }
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
+                viewModel.getPersonWalletAddress()
+            }
+        }
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
+                viewModel.backgroundProcessMinedTx()
+            }
+        }
+
         binding.fab.apply {
             setOnClickListener {
                 childFragmentManager.let {

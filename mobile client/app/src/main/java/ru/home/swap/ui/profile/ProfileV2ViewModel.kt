@@ -17,13 +17,14 @@ import ru.home.swap.core.di.NetworkModule
 import ru.home.swap.core.extensions.registerIdlingResource
 import ru.home.swap.core.extensions.unregisterIdlingResource
 import ru.home.swap.core.logger.Logger
+import ru.home.swap.core.model.ChainService
 import ru.home.swap.core.model.PersonProfile
 import ru.home.swap.core.model.Service
 import ru.home.swap.providers.PersonProvider
+import ru.home.swap.repository.IPersonRepository
 import ru.home.swap.repository.PersonRepository
 import ru.home.swap.repository.PersonRepository.*
 import ru.home.swap.wallet.contract.Value
-import ru.home.swap.wallet.contract.convertToJson
 import ru.home.swap.wallet.model.ITransaction
 import ru.home.swap.wallet.model.MintTransaction
 import ru.home.swap.wallet.model.RegisterUserTransaction
@@ -35,7 +36,6 @@ import ru.home.swap.wallet.providers.WalletProvider
 import ru.home.swap.wallet.repository.IStorageRepository
 import ru.home.swap.wallet.repository.IWalletRepository
 import ru.home.swap.wallet.storage.TxStatus
-import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
 import javax.inject.Inject
 import javax.inject.Named
@@ -79,8 +79,8 @@ enum class StateFlagV2 {
 
 class ProfileV2ViewModel
 @Inject constructor(
-    private val repository: PersonRepository,
     private val app: Application,
+    private val personRepository: IPersonRepository,
     private val walletRepository: IWalletRepository,
     private val cacheRepository: IStorageRepository,
     @Named(NetworkModule.DISPATCHER_IO) val backgroundDispatcher: CoroutineDispatcher = Dispatchers.IO
@@ -99,33 +99,64 @@ class ProfileV2ViewModel
 
     val proposal: ObservableField<String> = ObservableField<String>("")
 
-    @Deprecated("Work on this method has been frozen")
+    fun getPersonWalletAddress() {
+        viewModelScope.launch {
+            personRepository
+                .getCachedAccount()
+                .flowOn(backgroundDispatcher)
+                .collect { it ->
+                    state.update { state ->
+                        val profile = PersonProfile(state.profile)
+                        profile.userWalletAddress = it.userWalletAddress
+                        state.copy(profile = profile)
+                    }
+                }
+        }
+    }
+
+    @OptIn(FlowPreview::class)
+//    @Deprecated("Work on this method has been frozen")
     fun backgroundProcessMinedTx() {
         viewModelScope.launch {
-            flow<Boolean> {
+            flow<ITransaction> {
                 while (uiState.value.isAllowedToProcess) {
                     val delay = 1120L
+                    // wait for user's wallet address will be obtained from the cache during initialisation
+                    if (state.value.profile.userWalletAddress.isEmpty()) {
+                        delay(delay)
+                        continue
+                    }
                     if (state.value.pendingTx.isEmpty()) { delay(delay) }
                     val item = state.value.pendingTx.poll()
-                    when(item.type) {
-                        MintTransaction::class.java.simpleName -> {
-                            /* token are created only for offer, demands registered just as a db record */
-//                            (item as MintTransaction).
-                            // TODO check documentation regarding how to handle scenario of lack tx receipt
-                            //  from the chain
-                            val newService = Service(title = proposal.get()!!, date = 0L, index = listOf())
-                            repository.addOffer(
-                                contact = uiState.value.profile.contact,
-                                secret = uiState.value.profile.secret,
-                                newService = newService
-                            ).onStart {  }
-                            //  or repository.addDemand()
-                        }
-                        else -> { throw UnsupportedOperationException("Did you forget to add support of ${item.type} class tx?") }
-                    }
+                    if (item != null) { emit(item) }
                     delay(delay)
                 }
             }
+                .flatMapConcat { item ->
+                    when(item.type) {
+                        MintTransaction::class.java.simpleName -> {
+                            /* token are created only for offer, demands registered just as a db record */
+                            val mintItem = (item as MintTransaction).tokenId
+                            val chainService = ChainService(userWalletAddress = state.value.profile.userWalletAddress, tokenId = mintItem)
+                            val newService = Service(title = proposal.get()!!, date = 0L, index = listOf(), chainService = chainService)
+                            personRepository.addOffer(
+                                contact = uiState.value.profile.contact,
+                                secret = uiState.value.profile.secret,
+                                newService = newService
+                            )
+                        }
+                        else -> { throw UnsupportedOperationException("Did you forget to add support of ${item.type} class tx?") }
+                    }
+                }
+                .onStart { state.update { state -> state.copy(isLoading = true) } }
+                .flatMapConcat {
+                    if (it is Response.Data) { personRepository.cacheAccount(it.data) }
+                    flow { emit(it) }
+                }
+                .collect { it ->
+                    Log.d(App.TAG, "[add offer] start collect data in viewmodel")
+                    processServerResponse(it) { addOfferSpecialHandler(it) }
+                }
 
         }
     }
@@ -142,14 +173,14 @@ class ProfileV2ViewModel
     fun addOffer() {
         val newService = Service(title = proposal.get()!!, date = 0L, index = listOf())
         viewModelScope.launch {
-            repository.addOffer(
+            personRepository.addOffer(
                 contact = uiState.value.profile.contact,
                 secret = uiState.value.profile.secret,
                 newService = newService)
                 .onStart { state.update { state -> state.copy(isLoading = true) } }
                 .flatMapConcat { it ->
                     if (it is Response.Data) {
-                        repository.cacheAccountAsFlow(it.data)
+                        personRepository.cacheAccountAsFlow(it.data)
                             .collect { it ->
                                 // no op, just execute the command
                                 Log.d(App.TAG, "account has been cached")
@@ -161,20 +192,20 @@ class ProfileV2ViewModel
                 }
                 .collect { it ->
                     Log.d(App.TAG, "[add offer] start collect data in viewmodel")
-                    processAddOfferResponse(it)
+                    processServerResponse(it) { addOfferSpecialHandler(it) }
                 }
         }
     }
 
     fun removeOffer(item: Service) {
         viewModelScope.launch {
-            repository.removeOffer(
+            personRepository.removeOffer(
                 contact = uiState.value.profile.contact,
                 secret = uiState.value.profile.secret,
                 id = item.id)
                 .flatMapConcat { it ->
                     if (it is Response.Data) {
-                        repository.cacheAccountAsFlow(it.data)
+                        personRepository.cacheAccountAsFlow(it.data)
                             .collect { it ->
                                 // no op, just execute the command
                                 Log.d(App.TAG, "account has been cached")
@@ -184,22 +215,20 @@ class ProfileV2ViewModel
                         emit(it)
                     }
                 }
-                .collect { it ->
-                    processRemoveOfferResponse(it)
-                }
+                .collect { it -> processServerResponse(it) { removeOfferSpecialHandler(it) } }
         }
     }
 
     fun addDemand() {
         val newService = Service(title = proposal.get()!!, date = 0L, index = listOf())
         viewModelScope.launch {
-            repository.addDemand(
+            personRepository.addDemand(
                 contact = uiState.value.profile.contact,
                 secret = uiState.value.profile.secret,
                 newService = newService)
                 .flatMapConcat { it ->
                     if (it is Response.Data) {
-                        repository.cacheAccountAsFlow(it.data)
+                        personRepository.cacheAccountAsFlow(it.data)
                             .collect { it ->
                                 // no op, just execute the command
                                 Log.d(App.TAG, "account has been cached")
@@ -209,21 +238,19 @@ class ProfileV2ViewModel
                         emit(it)
                     }
                 }
-                .collect { it ->
-                    processAddDemandResponse(it)
-                }
+                .collect { it -> processServerResponse(it) { addDemandSpecialHandler(it) } }
         }
     }
 
     fun removeDemand(item: Service) {
         viewModelScope.launch {
-            repository.removeDemand(
+            personRepository.removeDemand(
                 contact = uiState.value.profile.contact,
                 secret = uiState.value.profile.secret,
                 id = item.id)
                 .flatMapConcat { it ->
                     if (it is Response.Data) {
-                        repository.cacheAccountAsFlow(it.data)
+                        personRepository.cacheAccountAsFlow(it.data)
                             .collect { it ->
                                 // no op, just execute the command
                                 Log.d(App.TAG, "account has been cached")
@@ -233,9 +260,7 @@ class ProfileV2ViewModel
                         emit(it)
                     }
                 }
-                .collect { it ->
-                    processRemoveDemandsResponse(it)
-                }
+                .collect { it -> processServerResponse(it) { removeDemandSpecialHandler(it) } }
         }
     }
 
@@ -265,11 +290,11 @@ class ProfileV2ViewModel
         viewModelScope.launch(backgroundDispatcher) {
             try {
                 app.registerIdlingResource()
-                var cachedPersonProfile = repository.cacheAccount(person)
-                var createAccountResponse = repository.createAccount(person)
+                var cachedPersonProfile = this@ProfileV2ViewModel.personRepository.cacheAccount(person)
+                var createAccountResponse = this@ProfileV2ViewModel.personRepository.createAccount(person)
                 when(createAccountResponse) {
                     is Response.Data -> {
-                        repository.cacheAccount(createAccountResponse.data)
+                        this@ProfileV2ViewModel.personRepository.cacheAccount(createAccountResponse.data)
                         val cachedTx = cacheRepository.createChainTx(RegisterUserTransaction(userWalletAddress = person.userWalletAddress))
                         val chainTx = walletRepository.registerUserOnSwapMarket(userWalletAddress = person.userWalletAddress)
                         when(chainTx) {
@@ -333,7 +358,7 @@ class ProfileV2ViewModel
     fun checkAnExistingAccount() {
         viewModelScope.launch {
             Log.d(App.TAG, "[a] Get cached account call")
-            repository.getCachedAccount()
+            personRepository.getCachedAccount()
                 .flatMapConcat { it ->
                     if (it.contact.isEmpty() && it.secret.isEmpty()) {
                         Log.d(App.TAG, "[b1] Get cached account as an empty")
@@ -342,12 +367,12 @@ class ProfileV2ViewModel
                         }.stateIn(viewModelScope)
                     } else {
                         Log.d(App.TAG, "[b2] Get cached account call and request server for an actual one")
-                        repository.getAccount(it)
+                        personRepository.getAccount(it)
                     }
                 }
                 .flatMapConcat { it ->
                     if (it is Response.Data) {
-                        repository.cacheAccountAsFlow(it.data)
+                        personRepository.cacheAccountAsFlow(it.data)
                             .collect { it ->
                                 // no op, just execute the command
                                 Log.d(App.TAG, "account has been cached")
@@ -427,7 +452,7 @@ class ProfileV2ViewModel
                     )
                 }
                 viewModelScope.launch {
-                    repository.cleanCachedAccount()
+                    personRepository.cleanCachedAccount()
                         .collect { it ->
                             /* no op */
                             Log.d(App.TAG, "Receive callback from cache clean")
@@ -486,17 +511,12 @@ class ProfileV2ViewModel
         }
     }
 
-    private fun processAddOfferResponse(response: Response<PersonProfile>) {
+    private fun processServerResponse(
+        response: Response<PersonProfile>,
+        specialHandler: (data: Response.Data<PersonProfile>)  -> Unit) {
         when(response) {
             is Response.Data<PersonProfile> -> {
-                Log.d(App.TAG, "[add offer] positive case")
-                state.value.profile.offers = response.data.offers
-                state.update { state ->
-                    state.copy(
-                        isLoading = false,
-                        profile = state.profile
-                    )
-                }
+                specialHandler(response)
             }
             is Response.Error -> {
                 Log.d(App.TAG, "[add offer] error case")
@@ -510,70 +530,44 @@ class ProfileV2ViewModel
         }
     }
 
-    private fun processAddDemandResponse(response: Response<PersonProfile>) {
-        when(response) {
-            is Response.Data -> {
-                state.value.profile.demands = response.data.demands.toMutableList()
-                state.update { state ->
-                    state.copy(
-                        isLoading = false,
-                        profile = state.profile
-                    )
-                }
-            }
-            is Response.Error -> {
-                state.update { state ->
-                    state.copy(
-                        isLoading = false,
-                        errors = state.errors + getErrorMessage(response)
-                    )
-                }
-            }
+    private fun addOfferSpecialHandler(response: Response.Data<PersonProfile>) {
+        Log.d(App.TAG, "[add offer] positive case")
+        state.value.profile.offers = response.data.offers
+        state.update { state ->
+            state.copy(
+                isLoading = false,
+                profile = state.profile
+            )
         }
     }
 
-    private fun processRemoveOfferResponse(response: Response<PersonProfile>) {
-        when(response) {
-            is Response.Data -> {
-                state.value.profile.offers = response.data.offers.toMutableList()
-                state.update { state ->
-                    state.copy(
-                        profile = state.profile,
-                        isLoading = false
-
-                    )
-                }
-            }
-            is Response.Error -> {
-                state.update { state ->
-                    state.copy(
-                        isLoading = false,
-                        errors = state.errors + getErrorMessage(response)
-                    )
-                }
-            }
+    private fun addDemandSpecialHandler(response: Response.Data<PersonProfile>) {
+        state.value.profile.demands = response.data.demands.toMutableList()
+        state.update { state ->
+            state.copy(
+                isLoading = false,
+                profile = state.profile
+            )
         }
     }
 
-    private fun processRemoveDemandsResponse(response: Response<PersonProfile>) {
-        when(response) {
-            is Response.Data -> {
-                state.value.profile.demands = response.data.demands.toMutableList()
-                state.update { state ->
-                    state.copy(
-                        isLoading = false,
-                        profile = state.profile
-                    )
-                }
-            }
-            is Response.Error -> {
-                state.update { state ->
-                    state.copy(
-                        isLoading = false,
-                        errors = state.errors + getErrorMessage(response)
-                    )
-                }
-            }
+    private fun removeOfferSpecialHandler(response: Response.Data<PersonProfile>) {
+        state.value.profile.offers = response.data.offers.toMutableList()
+        state.update { state ->
+            state.copy(
+                profile = state.profile,
+                isLoading = false
+            )
+        }
+    }
+
+    private fun removeDemandSpecialHandler(response: Response.Data<PersonProfile>) {
+        state.value.profile.demands = response.data.demands.toMutableList()
+        state.update { state ->
+            state.copy(
+                isLoading = false,
+                profile = state.profile
+            )
         }
     }
 
@@ -599,6 +593,8 @@ class ProfileV2ViewModel
         }
     }
 
+    @Deprecated("Migrate this method into the wallet module. It will update cache " +
+            "with the result and observer will do the rest related business logic")
     fun mintToken(to: String, value: Value, uri: String) {
         logger.d("[start] mintToken()")
         viewModelScope.launch {

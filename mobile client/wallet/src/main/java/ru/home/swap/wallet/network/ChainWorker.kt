@@ -14,6 +14,7 @@ import org.web3j.abi.datatypes.Uint
 import org.web3j.abi.datatypes.generated.Uint256
 import ru.home.swap.core.App
 import ru.home.swap.core.di.NetworkModule
+import ru.home.swap.core.logger.Logger
 import ru.home.swap.core.network.Response
 import ru.home.swap.wallet.contract.Value
 import ru.home.swap.wallet.contract.fromJson
@@ -56,8 +57,10 @@ class ChainWorker
         }
     }
 
+    private val logger = Logger.getInstance()
+
     override suspend fun doWork(): Result {
-        Log.d(TAG_CHAIN, "Start work on minting a token")
+        logger.d("[ChainWorker] Start work on minting a token")
         var result = Result.failure()
         setForeground(foregroundIndo)
 
@@ -75,8 +78,6 @@ class ChainWorker
 
         lateinit var newTx: MintTransaction
 
-//        val str = FunctionReturnDecoder.decodeIndexedValue("", object: TypeReference<Uint256>() {})
-
         cacheRepository.createChainTxAsFlow(tx)
             .map {
                 newTx = it as MintTransaction
@@ -93,7 +94,7 @@ class ChainWorker
                 preProcessResponse(it, newTx) }
             .flowOn(backgroundDispatcher)
             .collect { result = processResponse(it) }
-        Log.d(App.TAG, "[ChainWorker] before Result.success()")
+        logger.d("[ChainWorker] end work on minting a token")
         return result
     }
 

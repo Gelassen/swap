@@ -8,4 +8,7 @@ data class Service(
     @SerializedName("title")
     val title: String,
     val date: Long,
-    val index: List<String>)
+    val index: List<String>,
+    @SerializedName("chainService")
+    val chainService: ChainService = ChainService()
+)

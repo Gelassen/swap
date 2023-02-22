@@ -6,6 +6,7 @@ const logger = require('../utils/logger');
 const converter = require('../utils/converter');
 
 const match = require('../models/match');
+const offers = require('../models/offers');
 
 const TIMEOUT = config.dbConfig.timeout;
 const OFFER = 1;
@@ -164,30 +165,7 @@ exports.deleteProfile = function(req, res, credentials) {
 }
 
 exports.addOffer = function(offerAsObj, profileId) {
-    return new Promise((resolve) => {
-        pool.getConnection(function(err, connection) {
-            logger.log(`[add offer] profile id ${profileId}`);
-            if (err) throw err;
-            
-            connection.query(
-                {sql: 'INSERT INTO Service SET title = ?, date = ?, offer = ?, Service.index = ?, profileId = ?;'},
-                [offerAsObj.title, offerAsObj.date, OFFER, offerAsObj.index, profileId],
-                function(error, rows, fields) {
-                    logger.log(`[insert offer] rows ${JSON.stringify(rows)}`)
-                    let response;
-                    if (error != null) {
-                        response = util.getErrorMsg(500, error); 
-                    } else if (rows.affectedRows == 0) {
-                        response = util.getErrorMsg(401, 'No row in db is affected');
-                    } else {
-                        response = {};
-                    }
-                    resolve(response);
-                    connection.release();
-                }
-            )
-        });
-    });
+    return offers.addOffer(offerAsObj, profileId);
 }
 
 exports.addDemand = function(demandAsObj, profileId) {
