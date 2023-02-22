@@ -58,7 +58,9 @@ exports.create = async function(req, res) {
             } else {
                 logger.log(`[account::create] [7] there is no such account - attempt to create`);
                 req.body.secret = credentials[1];
-                result = await profile.create(req);
+                let requestProfile = converter.requestToDomainProfile(req.body);
+                result = await profile.create(requestProfile);
+                logger.log(`[profile::create] result: ${result}`);
                 result = network.noSuchData(result) ? network.getMsg(200, req.body) : result;
             }
         }
@@ -142,7 +144,7 @@ exports.addOffer = async function(req, res) {
             result = network.getErrorMsg(409, `The same offer for this profile already exist ${JSON.stringify(offerFromRequest)}`);
         } else {
             logger.log(`[add ofer] offer to insert ${JSON.stringify(offerFromRequest)}`);
-            // TODO also add record to ChainServices 
+            // TODO verify logic, extend tests and write mobile integration test
             result = await profile.addOffer(offerFromRequest, profileResult.id); 
         }
     }

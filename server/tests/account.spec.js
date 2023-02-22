@@ -40,7 +40,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .expect(204, {});
     });
     it('on GET /api/v1/account receive an existing profile', async() => {
-        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
+        let postPayload = getJamesAccountPayload(); 
         // check there is no such profile in system
         await request(app)
             .get('/api/v1/account')
@@ -74,7 +74,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .expect(204);
     });
     it('on GET /api/v1/account without auth header receives UNAUTHORIZED code', async() => {
-        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
+        let postPayload = getJamesAccountPayload(); 
         // check there is no such profile in system
         await request(app)
             .get('/api/v1/account')
@@ -90,7 +90,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .expect(400, { "payload" : "Did you forget to add auth header?" });
     });
     it('on GET /api/v1/account without Content-Type header receives OK code for existing profile', async() => {
-        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
+        let postPayload = getJamesAccountPayload(); 
         // check there is no such profile in system
         await request(app)
             .get('/api/v1/account')
@@ -119,10 +119,10 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .expect(204);
     });
-    it('on GET /api/v1/account with account with two offers receives account with two offers', async() => {
-        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
-        let testPayload = {"title":"Hacking servers by nights","date": 1746057600,"index":["Hacking servers by nights"]};
-        let anotherTestPayload = {"title":"Writing software by day","date": 1746057600,"index":["Writing software by day"]};
+    it.only('on GET /api/v1/account with account with two offers receives account with two offers', async() => {
+        let postPayload = getJamesAccountPayload(); 
+        let testPayload = getOfferPayload(); 
+        let anotherTestPayload = getAnotherOfferPayload(); 
         // prepare initial database state
         await request(app)
             .get('/api/v1/account')
@@ -163,7 +163,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .expect(204);
     });
     it('on POST /api/v1/account without 1st mandatory field receives BAD_REQUST code', async() => {
-        let postPayload = {"contact":"TestJames@gmail.com","name":"Test James","offers":[],"demands":[]};
+        let postPayload = getJamesAccountPayload(); 
         // check there is no such profile in system
         await request(app)
             .get('/api/v1/account')
@@ -184,7 +184,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .expect(204);
     });
     it('on POST /api/v1/account without 2nd mandatory field receives BAD_REQUST code', async() => {
-        let postPayload = {"secret":"jms123","name":"Test James","offers":[],"demands":[]};
+        let postPayload = getJamesAccountPayload(); 
         // check there is no such profile in system
         await request(app)
             .get('/api/v1/account')
@@ -205,7 +205,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .expect(204);
     });
     it('on POST /api/v1/acount with existing profiles is considered as a login and no double extra profile in system', async() => {
-        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
+        let postPayload = getJamesAccountPayload(); 
         // check there is no such profile in system
         await request(app)
             .get('/api/v1/account')
@@ -246,8 +246,8 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .expect(204);
     });
     it('on POST /api/v1/account with existing contact, but different secret receives CONFLICT code', async() => {
-        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
-        let anotherPostPayload = {"contact":"TestJames@gmail.com","secret":"differentSecret","name":"Test James","offers":[],"demands":[]};
+        let postPayload = getJamesAccountPayload(); 
+        let anotherPostPayload = getJamesAccountPayload("123jms"); 
         // check there is no such profile in system
         await request(app)
             .get('/api/v1/account')
@@ -294,7 +294,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .expect(204);
     });
     it('on POST /api/v1/account with valid non-existing payload receives OK code', async() => {
-        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
+        let postPayload = getJamesAccountPayload(); 
         // check there is no such profile in system
         await request(app)
             .get('/api/v1/account')
@@ -330,7 +330,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .expect(405, { "payload" : "Only POST and DELETE requests are allowed for this resource." });
     });
     it('on POST /api/v1/account/offers without authorization header receives UNAUTHORIZED code', async() => {
-        let testPayload = {"id":"3","title":"Hacking servers by nights","date":"1746057600","index":["Hacking servers by nights"]};
+        let testPayload = getOfferPayload(); 
         await request(app)
             .post('/api/v1/account/offers')
             .set('Content-Type', 'application/json; charset=utf-8')
@@ -338,7 +338,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .expect(401, { "payload" : "Did you forget to add authorization header?" });
     });
     it('on POST /api/v1/account/offers with authorization in wrong format receives BAD FORMAT code', async() => {
-        let testPayload = {"id":"3","title":"Hacking servers by nights","date":"1746057600","index":["Hacking servers by nights"]};
+        let testPayload = getOfferPayload(); 
         await request(app)
             .post('/api/v1/account/offers')
             .set('Authorization', 'VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
@@ -347,7 +347,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .expect(400, { "payload" : "Did you add correct authorization header?"});
     });
     it('on POST /api/v1/account/offers with no authorized account receives UNAUTHORIZED code', async() => {
-        let testPayload = {"id":"3","title":"Hacking servers by nights","date":"1746057600","index":["Hacking servers by nights"]};
+        let testPayload = getOfferPayload(); 
         await request(app)
             .post('/api/v1/account/offers')
             .set('Authorization', 'Basic bm9uLmV4aXN0QGdtYWlsLmNvbTpwd2Q=')
@@ -356,8 +356,8 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .expect(401, { "payload" : "There is no account for this credentials. Are you authorized?" });
     });
     it('on POST /api/v1/account/offers with authorized account receives OK code and full updated profile', async() => {
-        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
-        let testPayload = {"title":"Hacking servers by nights","date": 1746057600,"index":["Hacking servers by nights"]};
+        let postPayload = getJamesAccountPayload(); 
+        let testPayload = getOfferPayload(); 
         // prepare initial database state
         await request(app)
             .get('/api/v1/account')
@@ -401,8 +401,8 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .expect(204);
     });
     it('on POST /api/v1/account/offers with payload profile that already exist in system receives CONFLICT code', async() => {
-        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
-        let testPayload = {"title":"Hacking servers by nights","date": 1746057600,"index":["Hacking servers by nights"]};
+        let postPayload = getJamesAccountPayload(); 
+        let testPayload = getOfferPayload(); 
         // prepare initial database state
         await request(app)
             .get('/api/v1/account')
@@ -455,9 +455,9 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .expect(204);
     })
     it('on POST /api/v1/account/offers with two consecutive requests with different offers receives OK code', async() => {
-        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
-        let testPayload = {"title":"Hacking servers by nights","date": 1746057600,"index":["Hacking servers by nights"]};
-        let anotherTestPayload = {"title":"Writing software by day","date": 1746057600,"index":["Writing software by day"]};
+        let postPayload = getJamesAccountPayload(); 
+        let testPayload = getOfferPayload(); 
+        let anotherTestPayload = getAnotherOfferPayload(); 
         // prepare initial database state
         await request(app)
             .get('/api/v1/account')
@@ -522,7 +522,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .expect(400, { "payload" : "Did you add correct authorization header?"});
     });
     it('on DELETE /api/v1/account/offers no authorized account receives UNAUTHORIZED code', async() => {
-        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
+        let postPayload = getJamesAccountPayload();
         // add account in system
         await request(app)
             .post('/api/v1/account')
@@ -550,7 +550,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .expect(204);
     })
     it('on DELETE /api/v1/account/offers for service which doesn\'t exist receives NOT FOUND code', async() => {
-        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
+        let postPayload = getJamesAccountPayload(); 
         // add account in system
         await request(app)
             .post('/api/v1/account')
@@ -596,8 +596,8 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .expect(401, { "payload" : "There is no account for this credentials. Are you authorized?" } );
     });
     it('on DELETE /api/v1/account/offers with existing profile and correct service id receives NO CONTENT code', async() => {
-        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
-        let testPayload = {"title":"Hacking servers by nights","date": 1746057600,"index":["Hacking servers by nights"]};
+        let postPayload = getJamesAccountPayload(); 
+        let testPayload = getOfferPayload(); 
         // prepare the initial database state
         await request(app)
             .post('/api/v1/account')
@@ -637,9 +637,9 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .expect(204);        
     });
     it('on DELETE /api/v1/account/offers with existing profiles and several existing offers returns NO CONTENT and next request to profile returns profile without offer that has been deleted', async() => {
-        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
-        let testPayload = {"title":"Hacking servers by nights","date": 1746057600,"index":["Hacking servers by nights"]};
-        let anotherTestPayload = {"title":"Writing software by day","date": 1746057600,"index":[]};
+        let postPayload = getJamesAccountPayload(); 
+        let testPayload = getOfferPayload(); 
+        let anotherTestPayload = getAnotherOfferPayload(); 
         await request(app)
             .post('/api/v1/account')
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
@@ -686,7 +686,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
     });
     /* account demands block */
     it('on POST /api/v1/account/demands without authorization header receives UNAUTHORIZED code', async() => {
-        let testPayload = {"id":"3","title":"Hacking servers by nights","date":"1746057600","index":["Hacking servers by nights"]};
+        let testPayload = getOfferPayload(); 
         await request(app)
             .post('/api/v1/account/demands')
             .set('Content-Type', 'application/json; charset=utf-8')
@@ -694,7 +694,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .expect(401, { "payload" : "Did you forget to add authorization header?" });
     })
     it('on POST /api/v1/account/demands with authorization in wrong format receives BAD FORMAT code', async() => {
-        let testPayload = {"id":"3","title":"Hacking servers by nights","date":"1746057600","index":["Hacking servers by nights"]};
+        let testPayload = getOfferPayload(); 
         await request(app)
             .post('/api/v1/account/demands')
             .set('Authorization', 'VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
@@ -703,7 +703,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .expect(400, { "payload" : "Did you add correct authorization header?"});
     });
     it('on POST /api/v1/account/demands with no authorized account receives UNAUTHORIZED code', async() => {
-        let testPayload = {"id":"3","title":"Hacking servers by nights","date":"1746057600","index":["Hacking servers by nights"]};
+        let testPayload = getOfferPayload(); 
         await request(app)
             .post('/api/v1/account/demands')
             .set('Authorization', 'Basic bm9uLmV4aXN0QGdtYWlsLmNvbTpwd2Q=')
@@ -712,8 +712,8 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .expect(401, { "payload" : "There is no account for this credentials. Are you authorized?" });
     });
     it('on POST /api/v1/account/demands with authorized account receives OK code', async() => {
-        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
-        let testPayload = {"title":"Hacking servers by nights","date": 1746057600,"index":["Hacking servers by nights"]};
+        let postPayload = getJamesAccountPayload(); 
+        let testPayload = getOfferPayload(); 
         // prepare initial database state
         await request(app)
             .get('/api/v1/account')
@@ -759,8 +759,8 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .expect(204);
     });
     it('on POST /api/v1/account/demands with payload profile that already exist in system receives CONFLICT code', async() => {
-        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
-        let testPayload = {"title":"Hacking servers by nights","date": 1746057600,"index":["Hacking servers by nights"]};
+        let postPayload = getJamesAccountPayload(); 
+        let testPayload = getOfferPayload(); 
         // prepare initial database state
         await request(app)
             .get('/api/v1/account')
@@ -815,8 +815,8 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
     it('on POST /api/v1/account/demands with valid payload and existing match, get matches returns single value', async() => {
         // prepare initial database state
         // prepare james offer and demand 
-        let jamesPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
-        let jamesOfferPayload = {"title":"Software development","date": 1746057600,"index":["Hacking servers by nights"]};
+        let jamesPayload = getJamesAccountPayload(); 
+        let jamesOfferPayload = getOfferPayload(); 
         await request(app)
             .get('/api/v1/account')
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
@@ -913,7 +913,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .expect(400, { "payload" : "Did you add correct authorization header?"});
     });
     it('on DELETE /api/v1/account/demands no authorized account receives UNAUTHORIZED code', async() => {
-        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
+        let postPayload = getJamesAccountPayload(); 
         // add account in system
         await request(app)
             .post('/api/v1/account')
@@ -941,7 +941,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .expect(204);
     })
     it('on DELETE /api/v1/account/demands for service which doesn\'t exist receives NOT FOUND code', async() => {
-        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
+        let postPayload = getJamesAccountPayload(); 
         // add account in system
         await request(app)
             .post('/api/v1/account')
@@ -987,7 +987,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .expect(401, { "payload" : "There is no account for this credentials. Are you authorized?" } );
     });
     it('on DELETE /api/v1/account/demands with existing profile amd correct service id receives NO CONTENT code', async() => {
-        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
+        let postPayload = getJamesAccountPayload(); 
         let testPayload = {"title":"Hacking servers by nights","date": 1746057600,"index":["Hacking servers by nights"]};
         // prepare the initial database state
         await request(app)
@@ -1027,4 +1027,78 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .expect(204);        
     });
+
+    function getJamesAccountPayload(secret = "jms123") {
+        return {
+            "contact":"TestJames@gmail.com",
+            "secret":secret,
+            "name":"Test James", 
+            "userWalletAddress":"0xB54e15454E0711b1917f88E656C2fc3E9dF4117d", 
+            "offers":[],
+            "demands":[]
+        };
+    }
+
+    function getOfferPayload() {
+        return {
+            "title":"Hacking servers by nights",
+            "date": 1746057600,
+            "index":["Hacking servers by nights"],
+            "chainService" : {
+                "userWalletAddress" : "0xB54e15454E0711b1917f88E656C2fc3E9dF4117d",
+                "tokenId" : "1",
+                /* "serverServiceId" : 0 -- it will be added on the backend */
+            }
+        };
+    }
+
+    function getAnotherOfferPayload() {
+        return {
+            "title":"Writing software by day",
+            "date": 1746057600,
+            "index":["Writing software by day"],
+            "chainService" : {
+                "userWalletAddress" : "0xB54e15454E0711b1917f88E656C2fc3E9dF4117d",
+                "tokenId" : "2",
+                /* "serverServiceId" : 0 -- it will be added on the backend */
+            }
+        };
+    }
+
+    function getJaneAccountPayload() {
+        return {
+            "contact":"TestJane@gmail.com",
+            "secret":"jne123",
+            "name":"Test Jane",
+            "userWalletAddress":"0xB54e15454E0711b1917f88E656C2fc3E9dF40000",
+            "offers":[],
+            "demands":[]
+        };
+    }
+
+    function getJaneOfferPayload() {
+        return {
+            "title":"Product management",
+            "date": 1746057600,
+            "index":["Product management"],
+            "chainService" : {
+                "userWalletAddress" : "0xB54e15454E0711b1917f88E656C2fc3E9dF40000",
+                "tokenId" : "11",
+                /* "serverServiceId" : 0 -- it will be added on the backend */
+            }
+        };
+    }
+
+    function getJaneAnotherOfferPayload() {
+        return {
+            "title":"Software development",
+            "date": 1746057600,
+            "index":["Software development"],
+            "chainService" : {
+                "userWalletAddress" : "0xB54e15454E0711b1917f88E656C2fc3E9dF40000",
+                "tokenId" : "12",
+                /* "serverServiceId" : 0 -- it will be added on the backend */
+            }
+        };
+    }
 });

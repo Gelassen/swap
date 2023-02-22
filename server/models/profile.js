@@ -12,30 +12,33 @@ const TIMEOUT = config.dbConfig.timeout;
 const OFFER = 1;
 const DEMAND = 0;
 
-exports.create = function(req) {
+// FIXME refactor input params, ref: https://github.com/Gelassen/swap/issues/24
+
+exports.create = function(requestProfile) {
     return new Promise((resolve) => {
         pool.getConnection(function(err, connection) {
-            logger.log(`[create] ${JSON.stringify(req.body)}`)
+            logger.log(`[create] ${JSON.stringify(requestProfile)}`)
             if (err) throw err;
             
-            var body = req.body;
+            // var body = req.body;
             connection.query(
                 {sql : 'INSERT INTO Profile SET name = ?, contact = ?, secret = ?, userWalletAddress = ?', timeout: TIMEOUT},
-                [body.name, body.contact, body.secret, body.userWalletAddress], 
+                [requestProfile.name, requestProfile.contact, requestProfile.secret, requestProfile.userWalletAddress], 
                 function(error, rows, fields) {
                     logger.log(`[account::create (model)] [1] rows: ${JSON.stringify(rows)}`);
+                    let response;
                     if (error != null) {
                         logger.log(`[account::create (model)] [2] there is an error in result of SQL exec`);
                         logger.log(JSON.stringify(error));
-                        let response = util.getErrorMsg(500, error);
+                        response = util.getErrorMsg(500, error);
                     } else if (rows.affectedRows == 0) {
                         logger.log(`[account::create (model)] [3] no affected rows`);
-                        resolve(util.getErrorMsg(401, 'No row in db is affected'));
+                        response = util.getErrorMsg(401, 'No row in db is affected');
                     } else {
                         logger.log(`[account::create (model)] [4] success`);
-                        let response = {};
-                        resolve(response);
+                        response = {};
                     }
+                    resolve(response);
                     connection.release();
                 }
             );

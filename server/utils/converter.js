@@ -1,4 +1,15 @@
 
+exports.requestToDomainProfile = function(request) {
+    let profile = {};
+    profile.contact = request.contact;
+    profile.secret = request.secret;
+    profile.name = request.name;
+    profile.userWalletAddress = request.userWalletAddress;
+    profile.offers = request.offers;
+    profile.demands = request.demands;
+    return profile;
+}
+
 exports.dbToDomainProfile = function(rows) {
     if (rows.length == 0) return {};
     let result = [];
@@ -183,6 +194,7 @@ function prepareIndex(row) {
 }
 
 function requestToDomainChainService(reqBody) {
+    console.log(`[coverter:chainService] ${JSON.stringify(reqBody)}`)
     return {
         "userWalletAddress" : reqBody.chainService.userWalletAddress,
         "tokenId" : reqBody.chainService.tokenId,
