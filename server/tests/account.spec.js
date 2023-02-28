@@ -715,7 +715,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
     });
     it('on POST /api/v1/account/demands with authorized account receives OK code', async() => {
         let postPayload = getJamesAccountPayload(); 
-        let testPayload = getOfferPayload(); 
+        let testPayload = getJamesDemandPayload(); 
         // prepare initial database state
         await request(app)
             .get('/api/v1/account')
@@ -762,7 +762,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
     });
     it('on POST /api/v1/account/demands with payload profile that already exist in system receives CONFLICT code', async() => {
         let postPayload = getJamesAccountPayload(); 
-        let testPayload = getOfferPayload(); 
+        let testPayload = getJamesDemandPayload(); 
         // prepare initial database state
         await request(app)
             .get('/api/v1/account')
@@ -814,7 +814,8 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .expect(204);
     });
-    it.only('on POST /api/v1/account/demands with valid payload and existing match, get matches returns single value', async() => {
+    // ethereum chain is not mocked, therefore there should be a full integration test
+    it.skip('on POST /api/v1/account/demands with valid payload and existing match, get matches returns single value', async() => {
         // prepare initial database state
         // prepare james offer and demand 
         let jamesPayload = getJamesAccountPayload(); 
@@ -1048,7 +1049,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             "index":[title],
             "chainService" : {
                 "userWalletAddress" : "0xB54e15454E0711b1917f88E656C2fc3E9dF4117d",
-                "tokenId" : "1",
+                "tokenId" : 1,
                 /* "serverServiceId" : 0 -- it will be added on the backend */
             }
         };
@@ -1061,7 +1062,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             "index":[title],
             "chainService" : {
                 "userWalletAddress" : "0xB54e15454E0711b1917f88E656C2fc3E9dF4117d",
-                "tokenId" : "2",
+                "tokenId" : 2,
                 /* "serverServiceId" : 0 -- it will be added on the backend */
             }
         };
@@ -1089,7 +1090,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             "index":["Product management"],
             "chainService" : {
                 "userWalletAddress" : "0xB54e15454E0711b1917f88E656C2fc3E9dF40000",
-                "tokenId" : "11",
+                "tokenId" : 11,
                 /* "serverServiceId" : 0 -- it will be added on the backend */
             }
         };
@@ -1102,7 +1103,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             "index":["Project management"],
             "chainService" : {
                 "userWalletAddress" : "0xB54e15454E0711b1917f88E656C2fc3E9dF40000",
-                "tokenId" : "12",
+                "tokenId" : 12,
                 /* "serverServiceId" : 0 -- it will be added on the backend */
             }
         };

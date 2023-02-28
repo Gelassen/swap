@@ -3,24 +3,24 @@ const logger = require('./logger');
 exports.validateProfilePayload = function(reqBody) {
     logger.log(reqBody.contact)
     logger.log(reqBody.secret)
-    return this.validateString(reqBody.contact) 
-        && this.validateString(reqBody.secret) 
+    return this.validateStringIsNotEmpty(reqBody.contact) 
+        && this.validateStringIsNotEmpty(reqBody.secret) 
 }
 
-exports.validateString = function(str) {
+exports.validateStringIsNotEmpty = function(str) {
     return str !== '' && str !== null && str !== undefined
 }
 
 exports.validateService = function(offer, isSkipChainService = false) {
-    let isMainPartValid = this.validateString(offer.index)
-        && this.validateString(offer.date)
-        && this.validateString(offer.title)
+    let isMainPartValid = this.validateStringIsNotEmpty(offer.index)
+        && this.validateStringIsNotEmpty(offer.date)
+        && this.validateStringIsNotEmpty(offer.title)
         && offer.index.length != 0;
     let isOptionalPartValid = false;
     if (isSkipChainService) {
         isOptionalPartValid = true;
     } else {
-        isOptionalPartValid = this.validateString(offer.chainService.userWalletAddress)
+        isOptionalPartValid = this.validateStringIsNotEmpty(offer.chainService.userWalletAddress)
             && this.isInt(offer.chainService.tokenId);
     }
     return isMainPartValid && isOptionalPartValid;
@@ -28,8 +28,8 @@ exports.validateService = function(offer, isSkipChainService = false) {
 }
 
 exports.validateMatch = function(matchSubj) {
-    return this.validateString(matchSubj.userFirst)
-        && this.validateString(matchSubj.userSecond)
+    return this.validateStringIsNotEmpty(matchSubj.userFirst)
+        && this.validateStringIsNotEmpty(matchSubj.userSecond)
         && this.isInt(matchSubj.valueOfFirstUser)
         && this.isInt(matchSubj.valueOfSecondUser)
         && this.isBool(matchSubj.approvedByFirstUser)

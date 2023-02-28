@@ -5,6 +5,7 @@ const util = require('../utils/network');
 const logger = require('../utils/logger');
 const converter = require('../utils/converter');
 
+const schema = require('../models/tables/schema');
 const match = require('../models/match');
 const offers = require('../models/offers');
 
@@ -14,7 +15,7 @@ const DEMAND = 0;
 
 // FIXME refactor input params, ref: https://github.com/Gelassen/swap/issues/24
 
-exports.create = function(requestProfile) {
+exports.create = function(requestProfile) { 
     return new Promise((resolve) => {
         pool.getConnection(function(err, connection) {
             logger.log(`[create] ${JSON.stringify(requestProfile)}`)
@@ -122,8 +123,17 @@ exports.getFullProfile = function(credentials) {
         pool.getConnection(function(err, connection) {
             if (err) throw err;
             
+            const sql = `select profile.id as profileId, profile.name as profileName, profile.contact as profileContact, profile.secret as profileSecret, profile.userWalletAddress as profileUserWalletAddress, 
+                service.id as serviceId, service.title as serviceTitle, service.date as serviceDate, service.offer as serviceOffer, service.index as serviceIndex, service.profileId as serviceProfileId,
+                chainService.idChainService, chainService.userWalletAddress, chainService.tokenId 
+                FROM Profile as profile  
+                LEFT OUTER JOIN Service as service  
+                ON profile.id = service.profileId  
+                LEFT OUTER JOIN ${schema.ChainServicesTable.TABLE_NAME} as chainService  
+                ON service.id = chainService.${schema.ChainServicesTable.SERVER_SERVICE_ID}  
+                WHERE profile.contact = ? AND profile.secret = ?`;
             connection.query(
-                {sql: 'select profile.id as profileId, profile.name as profileName, profile.contact as profileContact, profile.secret as profileSecret, profile.userWalletAddress as profileUserWalletAddress, service.id as serviceId, service.title as serviceTitle, service.date as serviceDate, service.offer as serviceOffer, service.index as serviceIndex, service.profileId as serviceProfileId FROM Profile as profile  LEFT OUTER JOIN Service as service  ON profile.id = service.profileId  WHERE profile.contact = ? AND profile.secret = ?', timeout: TIMEOUT},
+                {sql: sql, timeout: TIMEOUT},
                 [credentials[0], credentials[1]],
                 function(error, rows, fields) {
                     if (error != null) {

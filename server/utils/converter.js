@@ -1,3 +1,4 @@
+const validator = require('../utils/validator'); 
 
 exports.requestToDomainProfile = function(request) {
     let profile = {};
@@ -36,6 +37,15 @@ exports.dbToDomainFullProfile = function(rows) {
         service.title = rows[id].serviceTitle;
         service.date = rows[id].serviceDate;
         service.index = prepareIndex(rows[id]);
+        
+        let chainService = {};
+        // chainService.idChainService = rows[id].idChainService;
+        chainService.userWalletAddress = rows[id].userWalletAddress;
+        chainService.tokenId = rows[id].tokenId;
+        // if single field is empty then a whole chainService is empty too, skip this field        
+        if (validator.validateStringIsNotEmpty(chainService.userWalletAddress)) {
+            service.chainService = chainService;
+        }
         if (rows[id].serviceOffer == 1) {
             offers.push(service);
         } else {
@@ -102,12 +112,11 @@ exports.dbToDomainService = function(rows) {
 
 exports.requestToDomainService = function(reqBody, isSkipChainService = false) {
      // TODO check will be auto increment work if zero is passed as an id? 
-    let result = {
-        "title" : reqBody.title,
-        "date" : reqBody.date,
-        "index" : reqBody.index,
-        "chainService" : ""
-    }
+    let result = {};
+    result.title = reqBody.title;
+    result.date = reqBody.date;
+    result.index = reqBody.index;
+    // result.chainService = ""
     if (!isSkipChainService) {
         result.chainService = requestToDomainChainService(reqBody) 
     }
@@ -232,9 +241,9 @@ function prepareIndex(row) {
 
 function requestToDomainChainService(reqBody) {
     console.log(`[coverter:chainService] ${JSON.stringify(reqBody)}`)
-    return {
-        "userWalletAddress" : reqBody.chainService.userWalletAddress,
-        "tokenId" : reqBody.chainService.tokenId,
-        "serverServiceId" : reqBody.chainService.serverServiceId
-    }
+    result = {};
+    result.userWalletAddress = reqBody.chainService.userWalletAddress;
+    result.tokenId = reqBody.chainService.tokenId;
+    result.serverServiceId = reqBody.chainService.serverServiceId;   
+    return result;
 }

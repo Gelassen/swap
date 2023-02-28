@@ -26,7 +26,7 @@ DROP TABLE IF EXISTS `ChainServices`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `ChainServices` (
   `idChainService` int NOT NULL AUTO_INCREMENT,
-  `userAddress` varchar(80) NOT NULL,
+  `userWalletAddress` varchar(80) NOT NULL,
   `tokenId` int NOT NULL,
   `serverServiceId` int NOT NULL,
   PRIMARY KEY (`idChainService`,`serverServiceId`),

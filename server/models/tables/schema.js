@@ -17,7 +17,7 @@ class MatchTable {
 class ChainServicesTable {
     static TABLE_NAME = "ChainServices"
     static ID = "id"
-    static USER_ADDRESS = "userAddress"
+    static USER_ADDRESS = "userWalletAddress"
     static TOKEN_ID = "tokenId"
     static SERVER_SERVICE_ID = "serverServiceId"
 
