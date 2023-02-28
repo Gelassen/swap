@@ -22,7 +22,8 @@ class DebugProfiles {
             PersonProfile(
                 contact = "+79101000108",
                 name = "Jane",
-                secret = "catchme"
+                secret = "catchme",
+                userWalletAddress = "0x52E7400Ba1B956B11394a5045F8BC3682792E1AC"
             )
         )
         profiles.add(
@@ -44,7 +45,8 @@ class DebugProfiles {
 
     fun next(index: Int) : PersonProfile {
         if (index >= profiles.size) {
-            throw IllegalArgumentException("There is no such data. Did you pass correct index?")
+            next = 0 // start from the beginning
+            //throw IllegalArgumentException("There is no such data. Did you pass correct index?")
         }
         return profiles.elementAt(index)
     }

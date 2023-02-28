@@ -68,10 +68,10 @@ class SignInFragment: BaseFragment() {
         binding.progressIndicator.visibility = View.GONE
 
         if (BuildConfig.DEBUG) {
+            val profiles = DebugProfiles()
             binding.debugBadge.visibility = View.VISIBLE
             binding.debugBadge.setOnClickListener {
-                val profiles = DebugProfiles()
-                val profile = profiles.next(0)
+                val profile = profiles.next()
                 binding.name.setText(profile.name)
                 binding.contactPhone.setText(profile.contact)
                 binding.secret.setText(profile.secret)

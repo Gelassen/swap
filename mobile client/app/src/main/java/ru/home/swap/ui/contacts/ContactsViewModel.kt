@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.*
 import ru.home.swap.core.model.PersonProfile
 import ru.home.swap.repository.Cache
+import ru.home.swap.repository.IPersonRepository
 import ru.home.swap.repository.PersonRepository
 import javax.inject.Inject
 
@@ -17,7 +18,7 @@ data class Model(
 
 class ContactsViewModel
     @Inject constructor(
-        private val repository: PersonRepository,
+        private val repository: IPersonRepository,
         private val cache: Cache
     ): ViewModel() {
 

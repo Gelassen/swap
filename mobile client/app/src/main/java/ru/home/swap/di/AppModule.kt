@@ -10,6 +10,7 @@ import ru.home.swap.core.di.NetworkModule
 import ru.home.swap.core.network.IApi
 import ru.home.swap.network.MyWorkerFactory
 import ru.home.swap.repository.Cache
+import ru.home.swap.repository.IPersonRepository
 import ru.home.swap.repository.PersonRepository
 import ru.home.swap.repository.pagination.DemandsPagingSource
 import ru.home.swap.repository.pagination.OffersPagingSource
@@ -43,7 +44,7 @@ class AppModule(val application: Application) {
 
     @AppMainScope
     @Provides
-    fun providePersonRepository(api: IApi, cache: Cache, context: Context): PersonRepository {
+    fun providePersonRepository(api: IApi, cache: Cache, context: Context): IPersonRepository {
         return PersonRepository(api, cache, context)
     }
 

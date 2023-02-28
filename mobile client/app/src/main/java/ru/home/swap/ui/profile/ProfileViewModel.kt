@@ -12,6 +12,7 @@ import ru.home.swap.R
 import ru.home.swap.core.model.PersonProfile
 import ru.home.swap.core.model.Service
 import ru.home.swap.providers.PersonProvider
+import ru.home.swap.repository.IPersonRepository
 import ru.home.swap.repository.PersonRepository
 import ru.home.swap.repository.PersonRepository.*
 import javax.inject.Inject
@@ -57,7 +58,7 @@ enum class StateFlag {
 @Deprecated("Use ProfileV2ViewModel instead. It supports on-chain operations.")
 class ProfileViewModel
 @Inject constructor(
-    private val repository: PersonRepository,
+    private val repository: IPersonRepository,
     private val app: Application/*,
     val walletRepository: IWalletRepository,
     val cacheRepository: IStorageRepository,
