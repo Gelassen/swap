@@ -147,6 +147,7 @@ exports.syntheticDbToDomainServerMatch = function(rows) {
     return result;
 }
 
+// TODO this function looks as a redundant in the favour of dbToNewDomainServerMatch, remove after migration would be completed  
 exports.dbToDomainServerMatch = function(rows) {
     let result = [];
     if (rows.length == 0) return result;
@@ -160,6 +161,37 @@ exports.dbToDomainServerMatch = function(rows) {
         serverMatch.userSecondServiceId = rows[id].userSecondServiceId;
         serverMatch.approvedByFirstUser = rows[id].approvedByFirstUser === 1; // 0 is false, 1 is true
         serverMatch.approvedBySecondUser = rows[id].approvedBySecondUser === 1; // 0 is false, 1 is true
+
+        result.push(serverMatch);
+    }
+    return result;
+}
+
+exports.dbToNewDomainServerMatch = function(rows) {
+    let result = [];
+    if (rows.length == 0) return result;
+
+    for (id = 0; id < rows.length; id++) {
+        let serverMatch = {}
+        serverMatch.id = rows[id].id;
+        serverMatch.userFirstProfileId = rows[id].userFirstProfileId;
+        serverMatch.userSecondProfileId = rows[id].userSecondProfileId;
+        serverMatch.userFirstServiceId = rows[id].userFirstServiceId;
+        serverMatch.userSecondServiceId = rows[id].userSecondServiceId;
+        serverMatch.approvedByFirstUser = rows[id].approvedByFirstUser === 1; // 0 is false, 1 is true
+        serverMatch.approvedBySecondUser = rows[id].approvedBySecondUser === 1; // 0 is false, 1 is true
+
+        let firstChainService = {}
+        firstChainService.idChainService = rows[id].idChainServiceFirst;
+        firstChainService.userAddress = rows[id].userAddressFirst;
+        firstChainService.tokenId = rows[id].tokenIdFirst;
+        let secondChainService = {}
+        secondChainService.idChainService = rows[id].idChainServiceSecond;
+        secondChainService.userAddress = rows[id].userAddressSecond;
+        secondChainService.tokenId = rows[id].tokenIdSecond;
+
+        serverMatch.userFirstService = firstChainService;
+        serverMatch.userSecondServiceId = secondChainService;
 
         result.push(serverMatch);
     }

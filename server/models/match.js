@@ -111,10 +111,15 @@ exports.getByProfileId = function(profileId, req, res) {
         pool.getConnection(function(err, connection) {
             if (err) throw err;
             // make sure you prevent sql injection by validating first ${profileId}
-            const sql = `SELECT * 
+            const sql = `SELECT 
+                id, userFirstProfileId, userSecondProfileId, userFirstServiceId, userSecondServiceId, approvedByFirstUser, approvedBySecondUser, 
+                chainServicesFirst.idChainService as idChainServiceFirst, chainServicesFirst.userAddress as userAddressFirst, chainServicesFirst.tokenId as tokendIdFirst,
+                chainServicesSecond.idChainService as idChainServiceFirst, chainServicesSecond.userAddress as userAddressSecond, chainServicesSecond.tokenId as tokenIdSecond
                 FROM ${MatchTable.TABLE_NAME} 
-                INNER JOIN ${ChainServicesTable.TABLE_NAME} as chainServices
-                ON ${MatchTable.ID} = chainServices.${ChainServicesTable.SERVER_SERVICE_ID} 
+                INNER JOIN ${ChainServicesTable.TABLE_NAME} as chainServicesFirst
+                ON ${MatchTable.USER_FIRST_SERVICE_ID} = chainServicesFirst.${ChainServicesTable.SERVER_SERVICE_ID}
+                INNER JOIN ${ChainServicesTable.TABLE_NAME} as chainServicesSecond 
+                ON ${MatchTable.USER_SECOND_SERVICE_ID} = chainServicesSecond.${ChainServicesTable.SERVER_SERVICE_ID}
                 WHERE 
                     ${MatchTable.USER_FIRST_PROFILE_ID} = ${profileId}
                      OR  
@@ -131,7 +136,7 @@ exports.getByProfileId = function(profileId, req, res) {
                         let response = util.getErrorMsg(500, error);
                         resolve(response);
                     } else {
-                        let data = converter.dbToDomainServerMatch(rows);
+                        let data = converter.dbToNewDomainServerMatch(rows);
                         resolve(data);
                     }
                     connection.release();
@@ -140,6 +145,7 @@ exports.getByProfileId = function(profileId, req, res) {
         })
     })
 }
+
 
 exports.makePotentialMatch = function(profileId, userDemand, req, res) {
     return new Promise((resolve) => {
