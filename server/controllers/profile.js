@@ -308,15 +308,14 @@ exports.getMatchesByProfile = async function(req, res) {
             result = network.getMsg(204, profileResult);
         } else {
             // TODO draft, has not been tested yet. 
-            // TODO firstly return back chain's service ids in response, after that add request to chain for aggregated response
             let model = await match.getByProfileId(profileResult.id);
+            logger.log(`[model] model ${JSON.stringify(model)}`);
             let aggregatedModel = [];
             await Promise.all(model.map(async (matchItem) => {
-                // TODO passing ids instead of addresses - double check the logic 
                 let matchOnChain = await chain.getSwapChainContractInstance()
                                             .getMatches(
-                                                matchItem.userFirstServiceId,
-                                                matchItem.userSecondServiceId
+                                                matchItem.userFirstService.userAddress,
+                                                matchItem.userFirstService.userAddress
                                             );
                 matchItem.chainObject = matchOnChain;
                 aggregatedModel.add(matchItem);

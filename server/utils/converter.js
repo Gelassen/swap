@@ -191,7 +191,7 @@ exports.dbToNewDomainServerMatch = function(rows) {
         secondChainService.tokenId = rows[id].tokenIdSecond;
 
         serverMatch.userFirstService = firstChainService;
-        serverMatch.userSecondServiceId = secondChainService;
+        serverMatch.userSecondService = secondChainService;
 
         result.push(serverMatch);
     }
