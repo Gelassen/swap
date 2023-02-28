@@ -59,10 +59,28 @@ class SwapChainV2 extends Contract {
     }
 }
 
-/**
- * FIXME: by some reason I can not import it and use in the usual way 
- */
-exports.getSwapChainContractInstance = function() {
+// class Chain {
+
+//     getSwapChainContractInstance() {
+//         let nodeUrl = `http://${config.get("chain").host}:${config.get("chain").port}`;
+//         let privateKey = config.get("chain").privateKey;
+//         let swapChainAddress = config.get("chain").swapChainV2Address;
+
+//         return new SwapChainV2(privateKey, nodeUrl, swapChainAddress);
+//     }
+
+//     getSwapValueContractInstance() {
+//         let nodeUrl = `http://${config.get("chain").host}:${config.get("chain").port}`;
+//         let privateKey = config.get("chain").privateKey;
+//         let swapTokenAddress = config.get("chain").swapTokenAddress;
+
+//         return new SwapToken(privateKey, nodeUrl, swapTokenAddress);
+//     }
+// }
+
+let chain = {}
+
+chain.getSwapChainContractInstance = function() {
     let nodeUrl = `http://${config.get("chain").host}:${config.get("chain").port}`;
     let privateKey = config.get("chain").privateKey;
     let swapChainAddress = config.get("chain").swapChainV2Address;
@@ -70,10 +88,7 @@ exports.getSwapChainContractInstance = function() {
     return new SwapChainV2(privateKey, nodeUrl, swapChainAddress);
 }
 
-/**
- * FIXME: by some reason I can not import it and use in the usual way 
- */
-exports.getSwapValueContractInstance = function() {
+chain.getSwapValueContractInstance = function() {
     let nodeUrl = `http://${config.get("chain").host}:${config.get("chain").port}`;
     let privateKey = config.get("chain").privateKey;
     let swapTokenAddress = config.get("chain").swapTokenAddress;
@@ -81,4 +96,4 @@ exports.getSwapValueContractInstance = function() {
     return new SwapToken(privateKey, nodeUrl, swapTokenAddress);
 }
 
-module.exports = { SwapToken, SwapChainV2 }
+module.exports = { SwapToken, SwapChainV2, chain }

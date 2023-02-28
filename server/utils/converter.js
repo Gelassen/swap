@@ -100,13 +100,18 @@ exports.dbToDomainService = function(rows) {
     return result;
 }
 
-exports.requestToDomainService = function(reqBody) {
-    return { // TODO check will be auto increment work if zero is passed as an id? 
+exports.requestToDomainService = function(reqBody, isSkipChainService = false) {
+     // TODO check will be auto increment work if zero is passed as an id? 
+    let result = {
         "title" : reqBody.title,
         "date" : reqBody.date,
         "index" : reqBody.index,
-        "chainService" : requestToDomainChainService(reqBody)
+        "chainService" : ""
     }
+    if (!isSkipChainService) {
+        result.chainService = requestToDomainChainService(reqBody) 
+    }
+    return result 
 }
 
 exports.requestToDomainChainMatch = function(reqBody) {

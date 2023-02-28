@@ -11,13 +11,20 @@ exports.validateString = function(str) {
     return str !== '' && str !== null && str !== undefined
 }
 
-exports.validateService = function(offer) {
-    return this.validateString(offer.index)
+exports.validateService = function(offer, isSkipChainService = false) {
+    let isMainPartValid = this.validateString(offer.index)
         && this.validateString(offer.date)
         && this.validateString(offer.title)
-        && this.validateString(offer.chainService.userWalletAddress)
-        && this.isInt(offer.chainService.tokenId)
         && offer.index.length != 0;
+    let isOptionalPartValid = false;
+    if (isSkipChainService) {
+        isOptionalPartValid = true;
+    } else {
+        isOptionalPartValid = this.validateString(offer.chainService.userWalletAddress)
+            && this.isInt(offer.chainService.tokenId);
+    }
+    return isMainPartValid && isOptionalPartValid;
+
 }
 
 exports.validateMatch = function(matchSubj) {

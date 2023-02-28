@@ -113,6 +113,8 @@ exports.getByProfileId = function(profileId, req, res) {
             // make sure you prevent sql injection by validating first ${profileId}
             const sql = `SELECT * 
                 FROM ${MatchTable.TABLE_NAME} 
+                INNER JOIN ${ChainServicesTable.TABLE_NAME} as chainServices
+                ON ${MatchTable.ID} = chainServices.${ChainServicesTable.SERVER_SERVICE_ID} 
                 WHERE 
                     ${MatchTable.USER_FIRST_PROFILE_ID} = ${profileId}
                      OR  
@@ -224,22 +226,26 @@ exports.makePotentialMatch = function(profileId, userDemand, req, res) {
                                     logger.log(`[sqlBulkInsert] Rows for insert: ${JSON.stringify(rows)}`);
                                     logger.log(`[sqlBulkInsert] errors: ${JSON.stringify(error)}`);
                                     if (error != null) {
+                                        logger.log(`[sqlBulkInsert] error case, rollback`);
                                         return connection.rollback(function() {
                                             connection.release();
                                             throw error;
                                         });
+                                    } else {
+                                        logger.log(`[sqlBulkInsert] success case, try to commit`);
+                                        connection.commit(function(error) {
+                                            logger.log(`[sqlBulkInsert] has been committed, return response`);
+                                            if (error != null) {
+                                                return connection.rollback(function() {
+                                                    connection.release();
+                                                    throw error;
+                                                });
+                                            }
+                                            var response = {};
+                                            connection.release();
+                                            resolve(response);
+                                        })   
                                     }
-                                    connection.commit(function(error) {
-                                        if (error != null) {
-                                            return connection.rollback(function() {
-                                                connection.release();
-                                                throw error;
-                                            });
-                                        }
-                                        var response = {};
-                                        connection.release()
-                                        resolve(response)
-                                    })                                
                                 });
                         }
                         
@@ -333,22 +339,28 @@ exports.makePotentialMatchSync = function(profileId, userDemand, callback) {
                             logger.log(`[sqlBulkInsert] Rows for insert: ${JSON.stringify(rows)}`);
                             logger.log(`[sqlBulkInsert] errors: ${JSON.stringify(error)}`);
                             if (error != null) {
+                                logger.log(`[sqlBulkInsert] error branch ${JSON.stringify(error)}`);
                                 return connection.rollback(function() {
                                     connection.release();
                                     throw error;
                                 });
+                            } else {
+                                logger.log(`[sqlBulkInsert] commiting positive tx scenario`);
+                                connection.commit(function(error) {
+                                    logger.log(`[sqlBulkInsert] commit positive result branch ${JSON.stringify(error)}`);
+                                    if (error != null) {
+                                        logger.log(`[sqlBulkInsert] error within commit positive result branch ${JSON.stringify(error)}`);
+                                        return connection.rollback(function() {
+                                            connection.release();
+                                            throw error;
+                                        });
+                                    }
+                                    logger.log(`[sqlBulkInsert] successfully commit the result`);
+                                    var response = {}
+                                    connection.release()
+                                    callback(response)
+                                })   
                             }
-                            connection.commit(function(error) {
-                                if (error != null) {
-                                    return connection.rollback(function() {
-                                        connection.release();
-                                        throw error;
-                                    });
-                                }
-                                var response = {}
-                                connection.release()
-                                callback(response)
-                            })                                
                         });
                 }
             )

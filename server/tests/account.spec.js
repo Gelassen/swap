@@ -119,7 +119,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .expect(204);
     });
-    it.only('on GET /api/v1/account with account with two offers receives account with two offers', async() => {
+    it('on GET /api/v1/account with account with two offers receives account with two offers', async() => {
         let postPayload = getJamesAccountPayload(); 
         let testPayload = getOfferPayload(); 
         let anotherTestPayload = getAnotherOfferPayload(); 
@@ -163,7 +163,8 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .expect(204);
     });
     it('on POST /api/v1/account without 1st mandatory field receives BAD_REQUST code', async() => {
-        let postPayload = getJamesAccountPayload(); 
+        // do not move in the general class -- it is malformed request
+        let postPayload = { "contact":"", "secret":"jms123", "name":"Test James", "userWalletAddress":"0xB54e15454E0711b1917f88E656C2fc3E9dF4117d", "offers":[], "demands":[]};
         // check there is no such profile in system
         await request(app)
             .get('/api/v1/account')
@@ -184,7 +185,8 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .expect(204);
     });
     it('on POST /api/v1/account without 2nd mandatory field receives BAD_REQUST code', async() => {
-        let postPayload = getJamesAccountPayload(); 
+        // do not move in the general class -- it is malformed request
+        let postPayload = { "contact":"TestJames@gmail.com", "secret":"", "name":"Test James", "userWalletAddress":"0xB54e15454E0711b1917f88E656C2fc3E9dF4117d", "offers":[], "demands":[]};
         // check there is no such profile in system
         await request(app)
             .get('/api/v1/account')
@@ -812,11 +814,11 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .expect(204);
     });
-    it('on POST /api/v1/account/demands with valid payload and existing match, get matches returns single value', async() => {
+    it.only('on POST /api/v1/account/demands with valid payload and existing match, get matches returns single value', async() => {
         // prepare initial database state
         // prepare james offer and demand 
         let jamesPayload = getJamesAccountPayload(); 
-        let jamesOfferPayload = getOfferPayload(); 
+        let jamesOfferPayload = getOfferPayload("Software development"); 
         await request(app)
             .get('/api/v1/account')
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
@@ -840,7 +842,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .set('Content-Type', 'application/json; charset=utf-8')
             .send(jamesOfferPayload)
             .expect(200);
-        let jamesDemandResponse = {"title":"Product management","date": 1746057600,"index":["Product management"]};
+        let jamesDemandResponse = getJamesDemandPayload(); 
         await request(app)
             .post('/api/v1/account/demands')    
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
@@ -848,9 +850,9 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .send(jamesDemandResponse)
             .expect(200);
         // prepare jane demand 
-        let janePayload = {"contact":"TestJane@gmail.com","secret":"jne123","name":"Test Jane","offers":[],"demands":[]};
-        let janeOfferPayload = {"title":"Product management","date": 1746057600,"index":["Product management"]};
-        let janeDemandPayload = {"title":"Software development","date": 1746057600,"index":["Software development"]};
+        let janePayload = getJaneAccountPayload() 
+        let janeOfferPayload = getJaneOfferPayload() 
+        let janeDemandPayload = getJaneDemandPayload();
         await request(app)
             .get('/api/v1/account')
             .set('Authorization', 'Basic VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==')
@@ -988,7 +990,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
     });
     it('on DELETE /api/v1/account/demands with existing profile amd correct service id receives NO CONTENT code', async() => {
         let postPayload = getJamesAccountPayload(); 
-        let testPayload = {"title":"Hacking servers by nights","date": 1746057600,"index":["Hacking servers by nights"]};
+        let testPayload = getOfferPayload();
         // prepare the initial database state
         await request(app)
             .post('/api/v1/account')
@@ -1039,11 +1041,11 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
         };
     }
 
-    function getOfferPayload() {
+    function getOfferPayload(title = "Hacking servers by nights") {
         return {
-            "title":"Hacking servers by nights",
+            "title":title,
             "date": 1746057600,
-            "index":["Hacking servers by nights"],
+            "index":[title],
             "chainService" : {
                 "userWalletAddress" : "0xB54e15454E0711b1917f88E656C2fc3E9dF4117d",
                 "tokenId" : "1",
@@ -1052,17 +1054,21 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
         };
     }
 
-    function getAnotherOfferPayload() {
+    function getAnotherOfferPayload(title = "Writing software by day") {
         return {
-            "title":"Writing software by day",
+            "title": title,
             "date": 1746057600,
-            "index":["Writing software by day"],
+            "index":[title],
             "chainService" : {
                 "userWalletAddress" : "0xB54e15454E0711b1917f88E656C2fc3E9dF4117d",
                 "tokenId" : "2",
                 /* "serverServiceId" : 0 -- it will be added on the backend */
             }
         };
+    }
+
+    function getJamesDemandPayload() {
+        return {"title":"Product management","date": 1746057600,"index":["Product management"]};
     }
 
     function getJaneAccountPayload() {
@@ -1091,14 +1097,22 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
 
     function getJaneAnotherOfferPayload() {
         return {
-            "title":"Software development",
+            "title":"Project management",
             "date": 1746057600,
-            "index":["Software development"],
+            "index":["Project management"],
             "chainService" : {
                 "userWalletAddress" : "0xB54e15454E0711b1917f88E656C2fc3E9dF40000",
                 "tokenId" : "12",
                 /* "serverServiceId" : 0 -- it will be added on the backend */
             }
+        };
+    }
+
+    function getJaneDemandPayload() {
+        return {
+            "title":"Software development",
+            "date": 1746057600,
+            "index":["Software development"]
         };
     }
 });

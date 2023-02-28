@@ -10,8 +10,8 @@ let converter = require('../utils/converter')
 
 const config = require('config');
 
-const chain = require('../models/chain/chain');
-const { SwapToken, SwapChainV2 } = require('../models/chain/chain');
+// const chain = require('../models/chain/chain');
+const { SwapToken, SwapChainV2, chain } = require('../models/chain/chain');
 
 /*
     This method covers both cases - sign in and register a new account. It is left 
@@ -155,14 +155,14 @@ exports.addOffer = async function(req, res) {
 exports.addDemand = async function(req, res) {
     logger.log("[add demand] start");
     let result = network.getMsg(200, "Not defined");
-    let demandFromRequest = converter.requestToDomainService(req.body);
+    let demandFromRequest = converter.requestToDomainService(req.body, true);
     demandFromRequest.index = profileProvider.prepareIndex(demandFromRequest.title);
     if (req.get(global.authHeader) === undefined) {
         result = network.getErrorMsg(401, "Did you forget to add authorization header?");
     } else if (network.getAuthHeaderAsTokens(req).error) {
         result = network.getErrorMsg(400, "Did you add correct authorization header?");
-    } else if (!validator.validateService(demandFromRequest)) {
-        logger.log(`[add demand] demand payload ${demandFromRequest} check - failed`);
+    } else if (!validator.validateService(demandFromRequest, true)) {
+        logger.log(`[add demand] demand payload ${JSON.stringify(demandFromRequest)} check - failed`);
         result = network.getErrorMsg(400, "Did you forget to add a valid profile as a payload?");
     } else {
         let credentials = network.getAuthNameSecretPair(
@@ -308,14 +308,15 @@ exports.getMatchesByProfile = async function(req, res) {
             result = network.getMsg(204, profileResult);
         } else {
             // TODO draft, has not been tested yet. 
-            // TODO first return back chain serivce ids in response, after that add request to chain for aggregated response
+            // TODO firstly return back chain's service ids in response, after that add request to chain for aggregated response
             let model = await match.getByProfileId(profileResult.id);
             let aggregatedModel = [];
             await Promise.all(model.map(async (matchItem) => {
+                // TODO passing ids instead of addresses - double check the logic 
                 let matchOnChain = await chain.getSwapChainContractInstance()
                                             .getMatches(
                                                 matchItem.userFirstServiceId,
-                                                userFirstServiceId.userSecondServiceId
+                                                matchItem.userSecondServiceId
                                             );
                 matchItem.chainObject = matchOnChain;
                 aggregatedModel.add(matchItem);
