@@ -80,16 +80,7 @@ class SignInFragment: BaseFragment() {
 
             binding.debugClickMe.visibility = View.VISIBLE
             binding.debugClickMe.setOnClickListener {
-                val to = TestWalletActivity.SECOND_USER/*getString(R.string.my_account)*/
-                val value = Value(
-                    TestWalletActivity.SECOND_USER_OFFER,
-                    BigInteger.valueOf(1665158348220),
-                    BigInteger.valueOf(1669758348220),
-                    false,
-                    BigInteger.valueOf(0)
-                )
-                val uri = "https://gelassen.github.io/blog/"
-                viewModel.mintToken(to, value, uri)
+                /* no op */
             }
         }
 

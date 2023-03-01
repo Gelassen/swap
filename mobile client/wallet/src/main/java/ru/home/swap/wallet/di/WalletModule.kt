@@ -14,6 +14,7 @@ import ru.home.swap.core.di.NetworkModule
 import ru.home.swap.core.network.interceptors.DefaultInterceptor
 import ru.home.swap.wallet.repository.*
 import ru.home.swap.wallet.storage.ChainTransactionDao
+import ru.home.swap.wallet.storage.Schema
 import javax.inject.Named
 
 @Module
@@ -60,7 +61,7 @@ class WalletModule(val context: Application) {
     @WalletMainScope
     @Provides
     fun providesTxDataSource(dao: ChainTransactionDao): TxDataSource {
-        return TxDataSource(context, dao, ChainTransactionDao.Const.DEFAULT_PAGE_SIZE)
+        return TxDataSource(context, dao, Schema.ChainTransaction.DEFAULT_PAGE_SIZE)
     }
 
     @WalletMainScope

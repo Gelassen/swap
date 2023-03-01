@@ -11,7 +11,7 @@ import ru.home.swap.wallet.model.*
 import java.lang.IllegalArgumentException
 import java.lang.reflect.Type
 
-@Entity(tableName = ChainTransactionDao.Const.TABLE_NAME)
+@Entity(tableName = Schema.ChainTransaction.TABLE_NAME)
 data class ChainTransactionEntity (
     @PrimaryKey(autoGenerate = true) val uid: Long,
     @ColumnInfo(name = "txType") val txType: String,

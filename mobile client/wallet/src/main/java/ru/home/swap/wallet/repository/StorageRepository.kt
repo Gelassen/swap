@@ -8,13 +8,9 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import ru.home.swap.core.extensions.attachIdlingResource
 import ru.home.swap.wallet.model.ITransaction
-import ru.home.swap.wallet.model.MintTransaction
-import ru.home.swap.wallet.model.RegisterUserTransaction
 import ru.home.swap.wallet.storage.ChainTransactionDao
-import ru.home.swap.wallet.storage.ChainTransactionDao.Const.DEFAULT_PAGE_SIZE
-import ru.home.swap.wallet.storage.TxType
+import ru.home.swap.wallet.storage.Schema.ChainTransaction.DEFAULT_PAGE_SIZE
 import ru.home.swap.wallet.storage.toDomain
-import java.lang.IllegalArgumentException
 
 class StorageRepository(
     val chainTransactionDao: ChainTransactionDao,

@@ -4,11 +4,9 @@ import android.app.Application
 import android.util.Log
 import androidx.databinding.ObservableField
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import androidx.work.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import ru.home.swap.App
@@ -171,7 +169,15 @@ class ProfileV2ViewModel
     }
 
     fun addOffer() {
-        val newService = Service(title = proposal.get()!!, date = 0L, index = listOf())
+        // TODO complete me:
+        //  despite on all chain work is encapsulated in the separate module
+        //  it would be right to have several ViewModels for this case, it
+        //  would be better to operate with chain from each screen's ViewModel
+        //  over high level classes;
+        //  also in current split between work manager operations and network
+        //  operations based on the feedback from the storage, extra (server
+        //  side) data also should be cached
+/*        val newService = Service(title = proposal.get()!!, date = 0L, index = listOf())
         viewModelScope.launch {
             personRepository.addOffer(
                 contact = uiState.value.profile.contact,
@@ -194,7 +200,7 @@ class ProfileV2ViewModel
                     Log.d(App.TAG, "[add offer] start collect data in viewmodel")
                     processServerResponse(it) { addOfferSpecialHandler(it) }
                 }
-        }
+        }*/
     }
 
     fun removeOffer(item: Service) {
@@ -592,30 +598,4 @@ class ProfileV2ViewModel
             }
         }
     }
-
-    @Deprecated("Migrate this method into the wallet module. It will update cache " +
-            "with the result and observer will do the rest related business logic")
-    fun mintToken(to: String, value: Value, uri: String) {
-        logger.d("[start] mintToken()")
-        viewModelScope.launch {
-            val workManager = WorkManager.getInstance(app)
-            val work = workManager.getWorkRequest<ChainWorker>(ChainWorker.Builder.build(to, WalletProvider().getValueAsJson(value), uri))
-            workManager.enqueue(work)
-            workManager
-                .getWorkInfoByIdLiveData(work.id)
-                .asFlow()
-                .collect { it ->
-                    when(it.state) {
-                        WorkInfo.State.SUCCEEDED -> { logger.d("[mint token] succeeded status with result: ${it.toString()}")}
-                        WorkInfo.State.FAILED -> {
-                            logger.d("[mint token] failed status with result: ${it.toString()}")
-                            state.update { state -> state.copy(isLoading = false, errors = state.errors.plus(it.outputData.keyValueMap.get(KEY_ERROR_MSG) as String)) }
-                        }
-                        else -> { logger.d("[mint token] unexpected state with result: ${it.toString()}") }
-                    }
-                }
-        }
-        logger.d("[end] mintToken()")
-    }
-
 }

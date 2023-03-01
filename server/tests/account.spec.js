@@ -902,6 +902,12 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .expect(204); 
         // TODO clean associated tables like service and matches (CASCADE trigger) 
     });
+    /* 
+        it is better to omit integration test as it would require implementation of extra methods,
+        test this scenario manually from two emulators
+    it('on POST /api/v1/account/demands integration test with valid payload and existing match, get matches returns single value', async() => {
+        
+    }) */
     it('on DELETE /api/v1/account/demands without authorization header receives UNAUTHORIZED code', async() => {
         await request(app)
             .delete('/api/v1/account/demands/101')
