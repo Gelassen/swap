@@ -1,7 +1,6 @@
 package ru.home.swap.wallet.network
 
 import android.content.Context
-import android.util.Log
 import androidx.work.*
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -10,12 +9,11 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import org.web3j.abi.FunctionReturnDecoder
 import org.web3j.abi.TypeReference
-import org.web3j.abi.datatypes.Uint
 import org.web3j.abi.datatypes.generated.Uint256
-import ru.home.swap.core.App
 import ru.home.swap.core.di.NetworkModule
 import ru.home.swap.core.logger.Logger
 import ru.home.swap.core.model.Service
+import ru.home.swap.core.model.fromJson
 import ru.home.swap.core.network.Response
 import ru.home.swap.wallet.contract.Value
 import ru.home.swap.wallet.contract.fromJson
@@ -24,7 +22,6 @@ import ru.home.swap.wallet.model.MintTransaction
 import ru.home.swap.wallet.model.TransactionReceiptDomain
 import ru.home.swap.wallet.repository.IStorageRepository
 import ru.home.swap.wallet.repository.IWalletRepository
-import ru.home.swap.wallet.storage.ServerTransactionMetadataEntity
 import ru.home.swap.wallet.storage.TxStatus
 import javax.inject.Inject
 import javax.inject.Named
@@ -44,7 +41,7 @@ class ChainWorker
         private const val KEY_TO = "KEY_TO"
         private const val KEY_VALUE_JSON = "KEY_VALUE_JSON"
         private const val KEY_URI = "KEY_URI"
-        private const val KEY_METADATA = "KEY_METADATA"
+        private const val KEY_METADATA_JSON = "KEY_METADATA"
         // output keys
         public const val KEY_ERROR = "KEY_ERROR"
         public const val KEY_ERROR_MSG = "KEY_ERROR_MSG"
@@ -56,7 +53,7 @@ class ChainWorker
                 Pair(KEY_TO, to),
                 Pair(KEY_VALUE_JSON, valueAsJson),
                 Pair(KEY_URI, uri),
-                Pair(KEY_METADATA, serverMetadataAsJson)
+                Pair(KEY_METADATA_JSON, serverMetadataAsJson)
             )
         }
     }
@@ -68,13 +65,14 @@ class ChainWorker
         var result = Result.failure()
         setForeground(foregroundIndo)
 
-        val (tx, to, value, uri) = prepareMintTransaction()
+        val (tx, to, value, uri, service) = prepareMintTransaction()
         lateinit var newTx: MintTransaction
 
         cacheRepository.createChainTxAsFlow(tx as ITransaction)
-/*            .map {
-                cacheRepository.
-            }*/
+            .map {
+                (service as Service).chainService.id = it.uid
+                cacheRepository.createServerTx(service, it.uid)
+            }
             .map {
                 newTx = it as MintTransaction
                 repository.mintToken(to as String, value as Value, uri as String)
@@ -87,7 +85,8 @@ class ChainWorker
                     ) as Uint256
                     newTx.tokenId = tokenId.value.toInt()
                 }
-                preProcessResponse(it, newTx) }
+                preProcessResponse(it, newTx)
+            }
             .flowOn(backgroundDispatcher)
             .collect { result = processResponse(it) }
         logger.d("[ChainWorker] end work on minting a token")
@@ -106,7 +105,8 @@ class ChainWorker
             value = value,
             uri = uri
         )
-        return listOf(tx, to, value, uri)
+        val service = Service().fromJson(inputData.getString(KEY_METADATA_JSON)!!)
+        return listOf(tx, to, value, uri, service)
     }
 
     private fun processResponse(it: Response<TransactionReceiptDomain>): Result {

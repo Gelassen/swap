@@ -32,18 +32,16 @@ class StorageRepository(
         }
     }
 
-    override fun createServerTxAsFlow(service: Service, txChainId: Long): Flow<Service> {
-        return flow {
-            val rowId = serverDao.insert(service.fromDomain(txChainId))
-            val cachedTx = serverDao.getById(rowId)
-            emit(cachedTx.toDomainObject())
-        }
-    }
-
     override suspend fun createChainTx(tx: ITransaction): ITransaction {
         val rowId = chainTransactionDao.insert(tx.fromDomain())
         val cachedTx = chainTransactionDao.getById(rowId)
         return cachedTx.toDomain()
+    }
+
+    override suspend fun createServerTx(service: Service, txChainId: Long): Service {
+        val rowId = serverDao.insert(service.fromDomain(txChainId))
+        val cachedTx = serverDao.getById(rowId)
+        return cachedTx.toDomainObject()
     }
 
     override fun getAllChainTransactions(): Flow<List<ITransaction>> {

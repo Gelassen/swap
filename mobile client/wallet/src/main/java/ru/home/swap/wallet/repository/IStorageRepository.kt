@@ -10,9 +10,9 @@ interface IStorageRepository {
 
     fun createChainTxAsFlow(tx: ITransaction): Flow<ITransaction>
 
-    fun createServerTxAsFlow(service: Service, txChainId: Long): Flow<Service>
-
     suspend fun createChainTx(tx: ITransaction): ITransaction
+
+    suspend fun createServerTx(service: Service, txChainId: Long): Service
 
     fun getAllChainTransactions(): Flow<List<ITransaction>>
 

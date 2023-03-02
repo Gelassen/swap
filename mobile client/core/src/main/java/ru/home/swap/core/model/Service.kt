@@ -7,13 +7,17 @@ data class Service(
     @SerializedName("id")
     val id: Long = 0L,
     @SerializedName("title")
-    val title: String,
-    val date: Long,
-    val index: List<String>,
+    val title: String = "",
+    val date: Long = 0L,
+    val index: List<String> = emptyList(),
     @SerializedName("chainService")
     val chainService: ChainService = ChainService()
 )
 
 fun Service.toJson(): String {
     return Gson().toJson(this)
+}
+
+fun Service.fromJson(json: String): Service {
+    return Gson().fromJson(json, Service::class.java)
 }
