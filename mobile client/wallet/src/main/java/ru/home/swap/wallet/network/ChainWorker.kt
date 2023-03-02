@@ -15,6 +15,7 @@ import org.web3j.abi.datatypes.generated.Uint256
 import ru.home.swap.core.App
 import ru.home.swap.core.di.NetworkModule
 import ru.home.swap.core.logger.Logger
+import ru.home.swap.core.model.Service
 import ru.home.swap.core.network.Response
 import ru.home.swap.wallet.contract.Value
 import ru.home.swap.wallet.contract.fromJson
@@ -23,6 +24,7 @@ import ru.home.swap.wallet.model.MintTransaction
 import ru.home.swap.wallet.model.TransactionReceiptDomain
 import ru.home.swap.wallet.repository.IStorageRepository
 import ru.home.swap.wallet.repository.IWalletRepository
+import ru.home.swap.wallet.storage.ServerTransactionMetadataEntity
 import ru.home.swap.wallet.storage.TxStatus
 import javax.inject.Inject
 import javax.inject.Named
@@ -42,17 +44,19 @@ class ChainWorker
         private const val KEY_TO = "KEY_TO"
         private const val KEY_VALUE_JSON = "KEY_VALUE_JSON"
         private const val KEY_URI = "KEY_URI"
+        private const val KEY_METADATA = "KEY_METADATA"
         // output keys
         public const val KEY_ERROR = "KEY_ERROR"
         public const val KEY_ERROR_MSG = "KEY_ERROR_MSG"
     }
 
     object Builder {
-        fun build(to: String, valueAsJson: String, uri: String): Data {
+        fun build(to: String, valueAsJson: String, uri: String, serverMetadataAsJson: String): Data {
             return workDataOf(
                 Pair(KEY_TO, to),
                 Pair(KEY_VALUE_JSON, valueAsJson),
-                Pair(KEY_URI, uri)
+                Pair(KEY_URI, uri),
+                Pair(KEY_METADATA, serverMetadataAsJson)
             )
         }
     }
@@ -64,24 +68,16 @@ class ChainWorker
         var result = Result.failure()
         setForeground(foregroundIndo)
 
-        val inputData: Data = inputData
-        val to = inputData.getString(KEY_TO)!!
-        val value = Value().fromJson(inputData.getString(KEY_VALUE_JSON)!!)
-        val uri = inputData.getString(KEY_URI)!!
-        val tx = MintTransaction(
-            uid = 0,
-            status = TxStatus.TX_PENDING,
-            to = to,
-            value = value,
-            uri = uri
-        )
-
+        val (tx, to, value, uri) = prepareMintTransaction()
         lateinit var newTx: MintTransaction
 
-        cacheRepository.createChainTxAsFlow(tx)
+        cacheRepository.createChainTxAsFlow(tx as ITransaction)
+/*            .map {
+                cacheRepository.
+            }*/
             .map {
                 newTx = it as MintTransaction
-                repository.mintToken(to, value, uri)
+                repository.mintToken(to as String, value as Value, uri as String)
             }
             .onEach {
                 if (it is Response.Data) {
@@ -96,6 +92,21 @@ class ChainWorker
             .collect { result = processResponse(it) }
         logger.d("[ChainWorker] end work on minting a token")
         return result
+    }
+
+    private fun prepareMintTransaction(): List<Any> {
+        val inputData: Data = inputData
+        val to = inputData.getString(KEY_TO)!!
+        val value = Value().fromJson(inputData.getString(KEY_VALUE_JSON)!!)
+        val uri = inputData.getString(KEY_URI)!!
+        val tx = MintTransaction(
+            uid = 0,
+            status = TxStatus.TX_PENDING,
+            to = to,
+            value = value,
+            uri = uri
+        )
+        return listOf(tx, to, value, uri)
     }
 
     private fun processResponse(it: Response<TransactionReceiptDomain>): Result {

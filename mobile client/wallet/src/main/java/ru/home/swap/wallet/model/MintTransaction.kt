@@ -1,6 +1,5 @@
 package ru.home.swap.wallet.model
 
-import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import ru.home.swap.wallet.contract.Value
 import ru.home.swap.wallet.converters.ValueTypeAdapter

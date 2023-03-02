@@ -15,6 +15,7 @@ import ru.home.swap.core.network.interceptors.DefaultInterceptor
 import ru.home.swap.wallet.repository.*
 import ru.home.swap.wallet.storage.ChainTransactionDao
 import ru.home.swap.wallet.storage.Schema
+import ru.home.swap.wallet.storage.ServerTransactionDao
 import javax.inject.Named
 
 @Module
@@ -66,8 +67,14 @@ class WalletModule(val context: Application) {
 
     @WalletMainScope
     @Provides
-    fun providesStorageRepository(dao: ChainTransactionDao, pagedDataSource: TxDataSource): IStorageRepository {
-        return StorageRepository(dao, pagedDataSource)
+    fun providesStorageRepository(dao: ChainTransactionDao, serverDao: ServerTransactionDao, pagedDataSource: TxDataSource): IStorageRepository {
+        return StorageRepository(dao, serverDao, pagedDataSource)
+    }
+
+    @WalletMainScope
+    @Provides
+    fun providesServerTransactionDao(database: AppDatabase): ServerTransactionDao {
+        return database.serverTransactionDao()
     }
 
 }

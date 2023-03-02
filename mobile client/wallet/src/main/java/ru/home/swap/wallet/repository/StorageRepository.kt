@@ -7,13 +7,15 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import ru.home.swap.core.extensions.attachIdlingResource
+import ru.home.swap.core.model.Service
+import ru.home.swap.core.model.toJson
 import ru.home.swap.wallet.model.ITransaction
-import ru.home.swap.wallet.storage.ChainTransactionDao
+import ru.home.swap.wallet.storage.*
 import ru.home.swap.wallet.storage.Schema.ChainTransaction.DEFAULT_PAGE_SIZE
-import ru.home.swap.wallet.storage.toDomain
 
 class StorageRepository(
     val chainTransactionDao: ChainTransactionDao,
+    val serverDao: ServerTransactionDao,
     val pagedDataSource: TxDataSource)
     : IStorageRepository {
 
@@ -27,6 +29,14 @@ class StorageRepository(
             val rowId = chainTransactionDao.insert(tx.fromDomain())
             val cachedTx = chainTransactionDao.getById(rowId)
             emit(cachedTx.toDomain())
+        }
+    }
+
+    override fun createServerTxAsFlow(service: Service, txChainId: Long): Flow<Service> {
+        return flow {
+            val rowId = serverDao.insert(service.fromDomain(txChainId))
+            val cachedTx = serverDao.getById(rowId)
+            emit(cachedTx.toDomainObject())
         }
     }
 

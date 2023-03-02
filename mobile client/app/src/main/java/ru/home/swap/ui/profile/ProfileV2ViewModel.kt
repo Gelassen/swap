@@ -4,9 +4,12 @@ import android.app.Application
 import android.util.Log
 import androidx.databinding.ObservableField
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import ru.home.swap.App
@@ -18,6 +21,7 @@ import ru.home.swap.core.logger.Logger
 import ru.home.swap.core.model.ChainService
 import ru.home.swap.core.model.PersonProfile
 import ru.home.swap.core.model.Service
+import ru.home.swap.core.model.toJson
 import ru.home.swap.providers.PersonProvider
 import ru.home.swap.repository.IPersonRepository
 import ru.home.swap.repository.PersonRepository
@@ -28,7 +32,6 @@ import ru.home.swap.wallet.model.MintTransaction
 import ru.home.swap.wallet.model.RegisterUserTransaction
 import ru.home.swap.wallet.model.TransactionReceiptDomain
 import ru.home.swap.wallet.network.ChainWorker
-import ru.home.swap.wallet.network.ChainWorker.Companion.KEY_ERROR_MSG
 import ru.home.swap.wallet.network.getWorkRequest
 import ru.home.swap.wallet.providers.WalletProvider
 import ru.home.swap.wallet.repository.IStorageRepository
@@ -89,6 +92,8 @@ class ProfileV2ViewModel
     }
 
     private val logger = Logger.getInstance()
+
+    private val assignedUri = "uri is turned off in current version"
 
     /*private*/ val state: MutableStateFlow<ModelV2> = MutableStateFlow(ModelV2())
     val uiState: StateFlow<ModelV2> = state
@@ -177,6 +182,41 @@ class ProfileV2ViewModel
         //  also in current split between work manager operations and network
         //  operations based on the feedback from the storage, extra (server
         //  side) data also should be cached
+        logger.d("[start] mintToken()")
+        viewModelScope.launch {
+            // TODO define entity to domain object converters for server side metadata
+            // TODO pass this data within worker object
+            // TODO extend worker to save this server side metadata in cache too
+            // TODO extend dao to support tx entity with server side metadata
+            // TODO listen changes in storage to run request to the backend
+
+            val workManager = WorkManager.getInstance(app)
+
+            val requestBuilder = RequestBuilder()
+            val work = ChainWorker.Builder.build(
+                requestBuilder.prepareToAddress(),
+                requestBuilder.prepareValueParam(),
+                assignedUri,
+                requestBuilder.prepareServiceParam()
+            )
+            val workRequest = workManager.getWorkRequest<ChainWorker>(work)
+            workManager.enqueue(workRequest)
+            workManager
+                .getWorkInfoByIdLiveData(workRequest.id)
+                .asFlow()
+                .collect { it ->
+                    when(it.state) {
+                        WorkInfo.State.SUCCEEDED -> { logger.d("[mint token] succeeded status with result: ${it.toString()}")}
+                        WorkInfo.State.FAILED -> {
+                            logger.d("[mint token] failed status with result: ${it.toString()}")
+                            val error = it.outputData.keyValueMap.get(ChainWorker.KEY_ERROR_MSG) as String
+                            state.update { state -> state.copy(isLoading = false, errors = state.errors.plus(error)) }
+                        }
+                        else -> { logger.d("[mint token] unexpected state with result: ${it.toString()}") }
+                    }
+                }
+        }
+        logger.d("[end] mintToken()")
 /*        val newService = Service(title = proposal.get()!!, date = 0L, index = listOf())
         viewModelScope.launch {
             personRepository.addOffer(
@@ -596,6 +636,35 @@ class ProfileV2ViewModel
                 newTx.status = TxStatus.TX_EXCEPTION
                 cacheRepository.createChainTxAsFlow(newTx)
             }
+        }
+    }
+
+    inner class RequestBuilder {
+
+        fun prepareToAddress(): String {
+            return uiState.value.profile.userWalletAddress
+        }
+
+        fun prepareValueParam(): String {
+            val walletProvider = WalletProvider()
+            val valueAsJson = walletProvider.getValueAsJson(
+                Value(
+                    offer = proposal.get()!!,
+                    availableSince = walletProvider.getAYearAfter()
+                )
+            )
+            return valueAsJson
+        }
+
+        fun prepareServiceParam(): String {
+            return Service(
+                title = proposal.get()!!,
+                date = System.currentTimeMillis(),
+                index = emptyList(),
+                chainService = ChainService(
+                    userWalletAddress = uiState.value.profile.userWalletAddress
+                )
+            ).toJson()
         }
     }
 }

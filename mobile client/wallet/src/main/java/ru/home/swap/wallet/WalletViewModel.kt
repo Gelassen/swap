@@ -94,7 +94,7 @@ class WalletViewModel
         logger.d("[start] mintToken()")
         viewModelScope.launch {
             val workManager = WorkManager.getInstance(app)
-            val work = workManager.getWorkRequest<ChainWorker>(ChainWorker.Builder.build(to, value.convertToJson(), uri))
+            val work = workManager.getWorkRequest<ChainWorker>(ChainWorker.Builder.build(to, value.convertToJson(), uri, "stub"))
             workManager.enqueue(work)
             workManager
                 .getWorkInfoByIdLiveData(work.id)

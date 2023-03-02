@@ -7,4 +7,5 @@ data class ChainService(
     val id: Long = 0L,
     val userWalletAddress: String = "",
     val tokenId: Int = -1,
-    val serverServiceId: Int = -1)
+    val serverServiceId: Int = -1
+)
