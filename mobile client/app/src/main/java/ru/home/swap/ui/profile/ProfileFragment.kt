@@ -78,6 +78,11 @@ class ProfileFragment : BaseFragment(), ItemAdapter.Listener {
                 viewModel.backgroundProcessMinedTx()
             }
         }
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
+                viewModel.loadAllFromCache()
+            }
+        }
 
         binding.fab.apply {
             setOnClickListener {

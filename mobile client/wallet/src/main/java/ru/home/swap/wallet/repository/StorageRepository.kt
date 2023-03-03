@@ -44,10 +44,10 @@ class StorageRepository(
         return cachedTx.toDomainObject()
     }
 
-    override fun getAllChainTransactions(): Flow<List<ITransaction>> {
+    override fun getAllChainTransactions(): Flow<List<Pair<ITransaction,Service>>> {
         return chainTransactionDao.getAll()
             .map {
-                val result = mutableListOf<ITransaction>()
+                val result = mutableListOf<Pair<ITransaction,Service>>()
                 for (item in it) {
                     result.add(item.toDomain())
                 }

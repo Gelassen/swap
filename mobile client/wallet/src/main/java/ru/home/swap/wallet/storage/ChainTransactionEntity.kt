@@ -13,7 +13,9 @@ import java.lang.reflect.Type
 
 @Entity(tableName = Schema.ChainTransaction.TABLE_NAME)
 data class ChainTransactionEntity (
-    @PrimaryKey(autoGenerate = true) val uid: Long,
+    @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = Schema.ChainTransaction.UID)
+    val uid: Long,
     @ColumnInfo(name = "txType") val txType: String,
     @ColumnInfo(name = "payloadAsJsonString") val payloadAsJson: String,
     @ColumnInfo(name = "status") val status: String = ""

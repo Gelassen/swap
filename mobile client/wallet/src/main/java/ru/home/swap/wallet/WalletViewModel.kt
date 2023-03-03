@@ -277,6 +277,7 @@ class WalletViewModel
             .build()
     }
 
+    @Deprecated("App has been migrated from List<ITransaction> to List<ITransaction, Service>")
     private fun getTxFromCache() {
         logger.d("[start] getTxFromCache()")
         viewModelScope.launch {
@@ -286,7 +287,7 @@ class WalletViewModel
                     logger.d("Collect result of getTxFromCache() call")
                     state.update { state ->
                         state.copy(
-                            pendingTx = it
+                            pendingTx = it.map { it -> it.first }
                         )
                     }
                 }

@@ -6,8 +6,12 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface ChainTransactionDao {
 
-    @Query("SELECT * FROM ${Schema.ChainTransaction.TABLE_NAME}")
-    fun getAll(): Flow<List<ChainTransactionEntity>>
+    @Query("" +
+            "SELECT * FROM ${Schema.ChainTransaction.TABLE_NAME} " +
+            "INNER JOIN ${Schema.ServerMetadata.TABLE_NAME} " +
+            "ON ${Schema.ChainTransaction.TABLE_NAME}.${Schema.ChainTransaction.UID} " +
+            "   = ${Schema.ServerMetadata.TABLE_NAME}.${Schema.ServerMetadata.TX_CHAIN_ID};")
+    fun getAll(): Flow<List<TxWithMetadata>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(vararg transactions: ChainTransactionEntity)

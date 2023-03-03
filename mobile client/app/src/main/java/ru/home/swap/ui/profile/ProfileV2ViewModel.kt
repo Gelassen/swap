@@ -43,9 +43,9 @@ import javax.inject.Named
 
 data class ModelV2(
     var profile: PersonProfile = PersonProfile(),
-    var pendingTx: ConcurrentLinkedQueue<ITransaction> = ConcurrentLinkedQueue(),
+    var pendingTx: ConcurrentLinkedQueue<Pair<ITransaction, Service>> = ConcurrentLinkedQueue(),
     val isLoading: Boolean = false,
-    val isAllowedToProcess: Boolean = false,
+    val isAllowedToProcess: Boolean = true,
     val errors: List<String> = emptyList(),
     val status: StateFlagV2 = StateFlagV2.NONE
 ) {
@@ -78,6 +78,11 @@ enum class StateFlagV2 {
     NONE
 }
 
+/**
+ * In the current split between work manager operations and network operations
+ * based on the feedback from the storage, extra (server side) data also
+ * should be cached.
+ * */
 class ProfileV2ViewModel
 @Inject constructor(
     private val app: Application,
@@ -89,6 +94,7 @@ class ProfileV2ViewModel
 
     init {
         Log.d(App.TAG, "ProfileViewModel::init call")
+        loadAllFromCache()
     }
 
     private val logger = Logger.getInstance()
@@ -121,34 +127,45 @@ class ProfileV2ViewModel
 //    @Deprecated("Work on this method has been frozen")
     fun backgroundProcessMinedTx() {
         viewModelScope.launch {
-            flow<ITransaction> {
+            flow<Pair<ITransaction, Service>> {
                 while (uiState.value.isAllowedToProcess) {
                     val delay = 1120L
                     // wait for user's wallet address will be obtained from the cache during initialisation
                     if (state.value.profile.userWalletAddress.isEmpty()) {
+                        logger.d("[queue polling] delay() call")
                         delay(delay)
                         continue
                     }
-                    if (state.value.pendingTx.isEmpty()) { delay(delay) }
+                    if (state.value.pendingTx.isEmpty()) {
+                        logger.d("[queue polling] delay() call")
+                        delay(delay)
+                    }
                     val item = state.value.pendingTx.poll()
-                    if (item != null) { emit(item) }
+                    if (item != null) {
+                        logger.d("[queue polling] emit item from queue ${item.toString()}")
+                        emit(item) }
+                    logger.d("[queue polling] delay() call")
                     delay(delay)
                 }
             }
                 .flatMapConcat { item ->
-                    when(item.type) {
+                    // TODO consider to move each branch case into the separate class function
+                    when(item.first.type) {
                         MintTransaction::class.java.simpleName -> {
                             /* token are created only for offer, demands registered just as a db record */
-                            val mintItem = (item as MintTransaction).tokenId
-                            val chainService = ChainService(userWalletAddress = state.value.profile.userWalletAddress, tokenId = mintItem)
-                            val newService = Service(title = proposal.get()!!, date = 0L, index = listOf(), chainService = chainService)
+//                            val mintItem = (item.first as MintTransaction).tokenId
+                            logger.d("[queue polling] process MintTransaction item")
+                            item.second.chainService.tokenId = (item.first as MintTransaction).tokenId
+                            // val chainService = item.second//ChainService(userWalletAddress = state.value.profile.userWalletAddress, tokenId = mintItem)
+                            val newService = item.second//Service(title = proposal.get()!!, date = 0L, index = listOf(), chainService = chainService)
+                            logger.d("[addOffer::server] ${item.first} \n and \n ${item.second}")
                             personRepository.addOffer(
                                 contact = uiState.value.profile.contact,
                                 secret = uiState.value.profile.secret,
                                 newService = newService
                             )
                         }
-                        else -> { throw UnsupportedOperationException("Did you forget to add support of ${item.type} class tx?") }
+                        else -> { throw UnsupportedOperationException("Did you forget to add support of ${item.first.type} class tx?") }
                     }
                 }
                 .onStart { state.update { state -> state.copy(isLoading = true) } }
@@ -173,21 +190,17 @@ class ProfileV2ViewModel
         }
     }
 
+    // TODO test me, nexus 7 doesn't support java 8 streams API - migrate to a new device?
     fun addOffer() {
-        // TODO complete me:
-        //  despite on all chain work is encapsulated in the separate module
-        //  it would be right to have several ViewModels for this case, it
-        //  would be better to operate with chain from each screen's ViewModel
-        //  over high level classes;
-        //  also in current split between work manager operations and network
-        //  operations based on the feedback from the storage, extra (server
-        //  side) data also should be cached
         logger.d("[start] mintToken()")
         viewModelScope.launch {
             // TODO define entity to domain object converters for server side metadata
             // TODO pass this data within worker object
             // TODO extend worker to save this server side metadata in cache too
             // TODO extend dao to support tx entity with server side metadata
+
+            // TODO finish migration to TxWithMetadata - the idea to check concept
+            //  on a single instance and expand it later to overall tx support
             // TODO listen changes in storage to run request to the backend
 
             val workManager = WorkManager.getInstance(app)
@@ -209,7 +222,12 @@ class ProfileV2ViewModel
                         WorkInfo.State.SUCCEEDED -> { logger.d("[mint token] succeeded status with result: ${it.toString()}")}
                         WorkInfo.State.FAILED -> {
                             logger.d("[mint token] failed status with result: ${it.toString()}")
-                            val error = it.outputData.keyValueMap.get(ChainWorker.KEY_ERROR_MSG) as String
+                            var error = ""
+                            if (it.outputData.keyValueMap.containsKey(ChainWorker.KEY_ERROR_MSG)) {
+                                error = it.outputData.keyValueMap.get(ChainWorker.KEY_ERROR_MSG) as String
+                            } else {
+                                error = "Something went during minting the token"
+                            }
                             state.update { state -> state.copy(isLoading = false, errors = state.errors.plus(error)) }
                         }
                         else -> { logger.d("[mint token] unexpected state with result: ${it.toString()}") }
@@ -462,7 +480,7 @@ class ProfileV2ViewModel
         viewModelScope.launch {
             cacheRepository
                 .getAllChainTransactions()
-                .map { it -> it.filter { it.status == TxStatus.TX_MINED } }
+                .map { it -> it.filter { it.first.status == TxStatus.TX_MINED } }
                 .flowOn(backgroundDispatcher)
                 .collect {
                     logger.d("[loadAllFromCache] Collect result ${it.toString()}")

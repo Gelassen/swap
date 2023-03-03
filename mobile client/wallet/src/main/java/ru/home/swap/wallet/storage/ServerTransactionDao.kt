@@ -1,22 +1,21 @@
 package ru.home.swap.wallet.storage
 
 import androidx.room.*
-import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ServerTransactionDao {
 
 /*    @Query("SELECT * FROM ${Schema.ServerMetadata.TABLE_NAME}")
-    fun getAll(): Flow<List<ChainTransactionEntity>>*/
+    fun getAll(): Flow<List<TxWithMetadata>>*/
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(vararg transactions: ServerTransactionMetadataEntity)
+    suspend fun insertAll(vararg transactions: ServerRequestTransactionEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(transactions: ServerTransactionMetadataEntity): Long
+    suspend fun insert(transactions: ServerRequestTransactionEntity): Long
 
     @Query("SELECT * FROM ${Schema.ServerMetadata.TABLE_NAME} WHERE uid = :uid")
-    suspend fun getById(uid: Long): ServerTransactionMetadataEntity
+    suspend fun getById(uid: Long): ServerRequestTransactionEntity
 /*
     @Query("SELECT * FROM ${Schema.ChainTransaction.TABLE_NAME} WHERE uid = :uid")
     suspend fun getById(uid: Long): ChainTransactionEntity

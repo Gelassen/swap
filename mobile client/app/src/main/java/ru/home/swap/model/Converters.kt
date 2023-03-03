@@ -2,12 +2,12 @@ package ru.home.swap.model
 
 import com.google.gson.Gson
 import ru.home.swap.core.model.Service
-import ru.home.swap.wallet.storage.ServerTransactionMetadataEntity
+import ru.home.swap.wallet.storage.ServerRequestTransactionEntity
 
-fun Service.fromDomain(chainServiceId: Long): ServerTransactionMetadataEntity {
-    return ServerTransactionMetadataEntity(
+fun Service.fromDomain(chainServiceId: Long): ServerRequestTransactionEntity {
+    return ServerRequestTransactionEntity(
         uid = this.id,
-        txType = "Just a stub",
+        requestType = "Just a stub",
         payloadAsJson = Gson().toJson(this),
         txChainId = chainServiceId
     )

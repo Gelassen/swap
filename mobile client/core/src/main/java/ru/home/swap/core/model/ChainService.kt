@@ -6,7 +6,7 @@ data class ChainService(
     @SerializedName("id")
     var id: Long = 0L,
     val userWalletAddress: String = "",
-    val tokenId: Int = -1,
+    var tokenId: Int = -1,
     var serverServiceId: Int = -1
 )
 

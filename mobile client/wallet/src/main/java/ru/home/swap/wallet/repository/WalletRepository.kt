@@ -47,7 +47,7 @@ class WalletRepository(
         web3 = Web3j.build(httpService)
         runBlocking {
             launch(Dispatchers.IO) {
-                loadContract(R.string.test_account_2_private_key)
+                loadContract(R.string.test_account_private_key)
             }
         }
     }

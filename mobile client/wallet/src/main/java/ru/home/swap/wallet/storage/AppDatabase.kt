@@ -8,8 +8,8 @@ import androidx.room.TypeConverters
 import androidx.sqlite.db.SupportSQLiteDatabase
 import ru.home.swap.core.App
 
-@Database(entities = [ChainTransactionEntity::class, ServerTransactionMetadataEntity::class],
-    version = 6, exportSchema = false
+@Database(entities = [ChainTransactionEntity::class, ServerRequestTransactionEntity::class],
+    version = 7, exportSchema = false
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase: RoomDatabase() {
@@ -41,6 +41,7 @@ abstract class AppDatabase: RoomDatabase() {
                         }
                     }
                 )
+                .fallbackToDestructiveMigration()
                 .build()
         }
     }

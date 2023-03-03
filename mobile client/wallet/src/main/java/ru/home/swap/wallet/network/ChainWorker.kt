@@ -4,9 +4,7 @@ import android.content.Context
 import androidx.work.*
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.*
 import org.web3j.abi.FunctionReturnDecoder
 import org.web3j.abi.TypeReference
 import org.web3j.abi.datatypes.generated.Uint256
@@ -72,6 +70,8 @@ class ChainWorker
             .map {
                 (service as Service).chainService.id = it.uid
                 cacheRepository.createServerTx(service, it.uid)
+//                flow { emit(it) }
+                return@map it
             }
             .map {
                 newTx = it as MintTransaction
@@ -87,6 +87,7 @@ class ChainWorker
                 }
                 preProcessResponse(it, newTx)
             }
+            .catch { logger.e("Failed ChainWorker", it) }
             .flowOn(backgroundDispatcher)
             .collect { result = processResponse(it) }
         logger.d("[ChainWorker] end work on minting a token")

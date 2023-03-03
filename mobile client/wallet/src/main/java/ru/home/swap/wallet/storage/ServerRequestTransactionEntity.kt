@@ -12,16 +12,16 @@ import ru.home.swap.wallet.converters.ValueTypeAdapter
 import java.lang.reflect.Type
 
 @Entity(tableName = Schema.ServerMetadata.TABLE_NAME)
-data class ServerTransactionMetadataEntity(
+data class ServerRequestTransactionEntity(
     @PrimaryKey(autoGenerate = true) val uid: Long,
-    @ColumnInfo(name = "txType") val txType: String = "",
+    @ColumnInfo(name = "requestType") val requestType: String = "",
     @ColumnInfo(name = "payloadAsJsonString") val payloadAsJson: String,
-    @ColumnInfo(name = "txChainId") val txChainId: Long
+    @ColumnInfo(name = Schema.ServerMetadata.TX_CHAIN_ID) val txChainId: Long
 /*    @Deprecated("Not used in V2 concept, but left as a possible improvement for the future")
     @ColumnInfo(name = "status") val status: String = ""*/
 )
-
-fun ServerTransactionMetadataEntity.toDomainObject(): Service {
+// TODO extend this class to support others request types besides 'offers'
+fun ServerRequestTransactionEntity.toDomainObject(): Service {
     val gson = GsonBuilder()
         .registerTypeAdapter(Value::class.java, ValueTypeAdapter())
         .create()
@@ -30,10 +30,10 @@ fun ServerTransactionMetadataEntity.toDomainObject(): Service {
     return result
 }
 
-fun Service.fromDomain(chainServiceId: Long): ServerTransactionMetadataEntity {
-    return ServerTransactionMetadataEntity(
+fun Service.fromDomain(chainServiceId: Long): ServerRequestTransactionEntity {
+    return ServerRequestTransactionEntity(
         uid = this.id,
-        txType = "Just a stub",
+        requestType = "Just a stub",
         payloadAsJson = Gson().toJson(this),
         txChainId = chainServiceId
     )

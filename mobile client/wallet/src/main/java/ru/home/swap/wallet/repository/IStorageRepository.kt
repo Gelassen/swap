@@ -4,7 +4,6 @@ import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
 import ru.home.swap.core.model.Service
 import ru.home.swap.wallet.model.ITransaction
-import ru.home.swap.wallet.model.MintTransaction
 
 interface IStorageRepository {
 
@@ -14,7 +13,7 @@ interface IStorageRepository {
 
     suspend fun createServerTx(service: Service, txChainId: Long): Service
 
-    fun getAllChainTransactions(): Flow<List<ITransaction>>
+    fun getAllChainTransactions(): Flow<List<Pair<ITransaction,Service>>>
 
     fun getChainTransactionsByPage(): Flow<PagingData<ITransaction>>
 
