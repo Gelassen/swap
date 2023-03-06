@@ -67,6 +67,7 @@ dependencies {
     implementation("org.web3j:core:4.9.4")
     implementation("androidx.work:work-runtime:2.8.0")
     implementation("androidx.work:work-runtime-ktx:2.8.0")
+    implementation("androidx.test:monitor:1.6.1")
 
 //    annotationProcessor("androidx.room:room-compiler:2.5.0")
 

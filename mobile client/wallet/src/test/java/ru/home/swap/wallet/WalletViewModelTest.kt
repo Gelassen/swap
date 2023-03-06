@@ -1,5 +1,6 @@
 package ru.home.swap.wallet
 
+import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -7,6 +8,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.*
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.*
+import org.mockito.Mockito
+import ru.home.swap.core.model.Service
 import ru.home.swap.wallet.WalletViewModelTest.Const.FIRST_USER
 import ru.home.swap.wallet.WalletViewModelTest.Const.FIRST_USER_OFFER
 import ru.home.swap.wallet.WalletViewModelTest.Const.SECOND_USER
@@ -15,7 +18,6 @@ import ru.home.swap.wallet.contract.Value
 import ru.home.swap.wallet.fakes.FakeStorageRepository
 import ru.home.swap.wallet.fakes.FakeWalletRepository
 import ru.home.swap.wallet.model.ITransaction
-import ru.home.swap.wallet.model.MintTransaction
 import ru.home.swap.wallet.rules.MainCoroutineRule
 import ru.home.swap.wallet.storage.TxStatus
 import java.math.BigInteger
@@ -46,7 +48,10 @@ internal class WalletViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(StandardTestDispatcher())
+//        InstrumentationRegistry.getInstrumentation().targetContext.applicationContext
+        val mockedApp = Mockito.mock(Application::class.java)
         subj = WalletViewModel(
+            mockedApp,
             fakeWalletRepository,
             fakeStorageRepository,
             StandardTestDispatcher()
@@ -77,7 +82,7 @@ internal class WalletViewModelTest {
     fun `on mintToken() with valid data the first time, pending tx state is increased and cache has new record`() = runTest {
         assertThat("Model has some pending tx", subj.uiState.value.pendingTx.isEmpty())
         assertThat("Model has some errors", subj.uiState.value.errors.isEmpty())
-        var cacheInitialStatus = emptyList<ITransaction>()
+        var cacheInitialStatus = emptyList<Pair<ITransaction, Service>>()
         val jobCacheInitialStatus = launch(UnconfinedTestDispatcher(mainCoroutineRule.dispatcher.scheduler)) {
             fakeStorageRepository.getAllChainTransactions()
                 .collect { it ->
@@ -100,7 +105,7 @@ internal class WalletViewModelTest {
         subj.mintToken(to, value, uri)
         advanceUntilIdle()
 
-        var cacheFinalState = emptyList<ITransaction>()
+        var cacheFinalState = emptyList<Pair<ITransaction, Service>>()
         fakeStorageRepository.getAllChainTransactions()
             .collect {
                 cacheFinalState = it
@@ -121,7 +126,7 @@ internal class WalletViewModelTest {
     fun `on mintToken() with negative response from server, pending tx state is increased and cache has new record with both negative state`() = runTest {
         assertThat("Model has some pending tx", subj.uiState.value.pendingTx.isEmpty())
         assertThat("Model has some errors", subj.uiState.value.errors.isEmpty())
-        var cacheInitialStatus = emptyList<ITransaction>()
+        var cacheInitialStatus = emptyList<Pair<ITransaction, Service>>()
         val jobCacheInitialStatus = launch(UnconfinedTestDispatcher(mainCoroutineRule.dispatcher.scheduler)) {
             fakeStorageRepository.getAllChainTransactions()
                 .collect { it ->
@@ -144,7 +149,7 @@ internal class WalletViewModelTest {
         subj.mintToken(to, value, uri)
         advanceUntilIdle()
 
-        var cacheFinalState = emptyList<ITransaction>()
+        var cacheFinalState = emptyList<Pair<ITransaction, Service>>()
         fakeStorageRepository.getAllChainTransactions()
             .collect {
                 cacheFinalState = it
@@ -158,8 +163,8 @@ internal class WalletViewModelTest {
         assertThat("Model should have a single error, but it has ${subj.uiState.value.errors.count()}", subj.uiState.value.errors.count() == 1)
         assertThat("Cache should have a single record ${cacheFinalState.count()}", cacheFinalState.count() == 1)
         assertThat(
-            "Cache should have record with 'reverted' status, but has ${cacheFinalState.get(0).status}",
-            cacheFinalState.get(0).status.equals("reverted")
+            "Cache should have record with 'reverted' status, but has ${cacheFinalState.get(0).first.status}",
+            cacheFinalState.get(0).first.status.equals("reverted")
         )
         /*
         * Known issue with Flow in init {} block is not triggered from the test on the table changes
@@ -180,7 +185,7 @@ internal class WalletViewModelTest {
     fun `on mintToken() with exception, pending tx state is increased and cache has new record with both negative state`() = runTest {
         assertThat("Model has some pending tx", subj.uiState.value.pendingTx.isEmpty())
         assertThat("Model has some errors", subj.uiState.value.errors.isEmpty())
-        var cacheInitialStatus = emptyList<ITransaction>()
+        var cacheInitialStatus = emptyList<Pair<ITransaction, Service>>()
         val jobCacheInitialStatus = launch(UnconfinedTestDispatcher(mainCoroutineRule.dispatcher.scheduler)) {
             fakeStorageRepository.getAllChainTransactions()
                 .collect { it ->
@@ -204,7 +209,7 @@ internal class WalletViewModelTest {
         subj.mintToken(to, value, uri)
         advanceUntilIdle()
 
-        var cacheFinalState = emptyList<ITransaction>()
+        var cacheFinalState = emptyList<Pair<ITransaction, Service>>()
         fakeStorageRepository.getAllChainTransactions()
             .collect {
                 cacheFinalState = it
@@ -218,8 +223,8 @@ internal class WalletViewModelTest {
         assertThat("Model should have a single error", subj.uiState.value.errors.count() == 1)
         assertThat("Cache should have a single record ${cacheFinalState.count()}", cacheFinalState.count() == 1)
         assertThat(
-            "Cache should have record with 'exception' status, but has ${cacheFinalState.get(0).status}",
-            cacheFinalState.get(0).status.equals("exception")
+            "Cache should have record with 'exception' status, but has ${cacheFinalState.get(0).first.status}",
+            cacheFinalState.get(0).first.status.equals("exception")
         )
         /*
         * Known issue with Flow in init {} block is not triggered from the test on the table changes
@@ -240,7 +245,7 @@ internal class WalletViewModelTest {
     fun `on mintToken() with error message, pending tx state is increased and cache has new record with both negative state`() = runTest {
         assertThat("Model has some pending tx", subj.uiState.value.pendingTx.isEmpty())
         assertThat("Model has some errors", subj.uiState.value.errors.isEmpty())
-        var cacheInitialStatus = emptyList<ITransaction>()
+        var cacheInitialStatus = emptyList<Pair<ITransaction, Service>>()
         val jobCacheInitialStatus = launch(UnconfinedTestDispatcher(mainCoroutineRule.dispatcher.scheduler)) {
             fakeStorageRepository.getAllChainTransactions()
                 .collect { it ->
@@ -264,7 +269,7 @@ internal class WalletViewModelTest {
         subj.mintToken(to, value, uri)
         advanceUntilIdle()
 
-        var cacheFinalState = emptyList<ITransaction>()
+        var cacheFinalState = emptyList<Pair<ITransaction, Service>>()
         fakeStorageRepository.getAllChainTransactions()
             .collect {
                 cacheFinalState = it
@@ -278,8 +283,8 @@ internal class WalletViewModelTest {
         assertThat("Model should have a single error", subj.uiState.value.errors.count() == 1)
         assertThat("Cache should have a single record ${cacheFinalState.count()}", cacheFinalState.count() == 1)
         assertThat(
-            "Cache should have record with 'exception' status, but has ${cacheFinalState.get(0).status}",
-            cacheFinalState.get(0).status.equals("exception")
+            "Cache should have record with 'exception' status, but has ${cacheFinalState.get(0).first.status}",
+            cacheFinalState.get(0).first.status.equals("exception")
         )
         /*
         * Known issue with Flow in init {} block is not triggered from the test on the table changes
@@ -300,7 +305,7 @@ internal class WalletViewModelTest {
     fun `On registerUserOnSwapMarket() with valid data first time, pending tx state is increased and cache has a new record`() = runTest {
         assertThat("Model has some pending tx", subj.uiState.value.pendingTx.isEmpty())
         assertThat("Model has some errors", subj.uiState.value.errors.isEmpty())
-        var cacheInitialStatus = emptyList<ITransaction>()
+        var cacheInitialStatus = emptyList<Pair<ITransaction, Service>>()
         fakeStorageRepository.getAllChainTransactions()
             .collect { it ->
                 cacheInitialStatus = it
@@ -313,7 +318,7 @@ internal class WalletViewModelTest {
         subj.registerUserOnSwapMarket(user)
         advanceUntilIdle()
 
-        var cacheFinalState = emptyList<ITransaction>()
+        var cacheFinalState = emptyList<Pair<ITransaction, Service>>()
         fakeStorageRepository.getAllChainTransactions()
             .collect {
                 cacheFinalState = it
@@ -321,14 +326,14 @@ internal class WalletViewModelTest {
         advanceUntilIdle()
         assertThat("Model should not have errors, but it has ${subj.uiState.value.errors.count()}", subj.uiState.value.errors.isEmpty())
         assertThat("Cache should have a single record, but it has ${cacheFinalState.count()}", cacheFinalState.count() == 1)
-        assertThat("Cache should have a record with `mined` status, but it has ${cacheFinalState.get(0).status}", cacheFinalState.get(0).status == TxStatus.TX_MINED)
+        assertThat("Cache should have a record with `mined` status, but it has ${cacheFinalState.get(0).first.status}", cacheFinalState.get(0).first.status == TxStatus.TX_MINED)
     }
 
     @Test
     fun `On registerUserOnSwapMarket() with valid data second time, pending tx state is increased and cache has a new record, but has exception status and error list has a single record`() = runTest {
         assertThat("Model has some pending tx", subj.uiState.value.pendingTx.isEmpty())
         assertThat("Model has some errors", subj.uiState.value.errors.isEmpty())
-        var cacheInitialStatus = emptyList<ITransaction>()
+        var cacheInitialStatus = emptyList<Pair<ITransaction, Service>>()
         fakeStorageRepository.getAllChainTransactions()
             .collect { it ->
                 cacheInitialStatus = it
@@ -344,7 +349,7 @@ internal class WalletViewModelTest {
         subj.registerUserOnSwapMarket(user)
         advanceUntilIdle()
 
-        var cacheFinalState = emptyList<ITransaction>()
+        var cacheFinalState = emptyList<Pair<ITransaction, Service>>()
         fakeStorageRepository.getAllChainTransactions()
             .collect {
                 cacheFinalState = it
@@ -353,18 +358,21 @@ internal class WalletViewModelTest {
         assertThat("Model should have a single error, but it has ${subj.uiState.value.errors.count()}", subj.uiState.value.errors.count() == 1)
         assertThat("Cache should have two records, but it has ${cacheFinalState.count()}", cacheFinalState.count() == 2)
         assertThat("Cache should have a record with `mined` status and record with `exception` status, " +
-                "but it has ${cacheFinalState.get(0).status} and ${cacheFinalState.get(1).status}",
-            cacheFinalState.get(0).status == TxStatus.TX_MINED
-                        && cacheFinalState.get(1).status.equals(TxStatus.TX_EXCEPTION)
+                "but it has ${cacheFinalState.get(0).first.status} and ${cacheFinalState.get(1).first.status}",
+            cacheFinalState.get(0).first.status == TxStatus.TX_MINED
+                        && cacheFinalState.get(1).first.status.equals(TxStatus.TX_EXCEPTION)
         )
-        assertThat("Error should have defined message, but has ${subj.uiState.value.errors.get(0)}", subj.uiState.value.errors.get(0).equals("Exception: Transaction 0xe48d2704a0c3ec9d86288736709fb2cf0d3fcc4b1a0797f136ad59ebc83445b9 has failed with status: 0x0. Gas used: 33112. Revert reason: 'execution reverted: User already registered.'."))
+        assertThat(
+            "Error should have defined message, but has ${subj.uiState.value.errors.get(0)}",
+            subj.uiState.value.errors.get(0).equals("Exception: Transaction 0xe48d2704a0c3ec9d86288736709fb2cf0d3fcc4b1a0797f136ad59ebc83445b9 has failed with status: 0x0. Gas used: 33112. Revert reason: 'execution reverted: User already registered.'.")
+        )
     }
 
     @Test
     fun `On registerUserOnMarket() with negative response, pending tx state is increased and cache has a new record, but has reverted status and error list has a single record`() = runTest {
         assertThat("Model has some pending tx", subj.uiState.value.pendingTx.isEmpty())
         assertThat("Model has some errors", subj.uiState.value.errors.isEmpty())
-        var cacheInitialStatus = emptyList<ITransaction>()
+        var cacheInitialStatus = emptyList<Pair<ITransaction, Service>>()
         fakeStorageRepository.getAllChainTransactions()
             .collect { it ->
                 cacheInitialStatus = it
@@ -377,7 +385,7 @@ internal class WalletViewModelTest {
         subj.registerUserOnSwapMarket(user)
         advanceUntilIdle()
 
-        var cacheFinalState = emptyList<ITransaction>()
+        var cacheFinalState = emptyList<Pair<ITransaction, Service>>()
         fakeStorageRepository.getAllChainTransactions()
             .collect {
                 cacheFinalState = it
@@ -385,7 +393,7 @@ internal class WalletViewModelTest {
         advanceUntilIdle()
         assertThat("Model should have a single error, but it has ${subj.uiState.value.errors.count()}", subj.uiState.value.errors.count() == 1)
         assertThat("Cache should have a single record, but it has ${cacheFinalState.count()}", cacheFinalState.count() == 1)
-        assertThat("Cache should have a record with `reverted` status, but it has ${cacheFinalState.get(0).status}", cacheFinalState.get(0).status == TxStatus.TX_REVERTED)
+        assertThat("Cache should have a record with `reverted` status, but it has ${cacheFinalState.get(0).first.status}", cacheFinalState.get(0).first.status == TxStatus.TX_REVERTED)
         assertThat("Error should have defined message, but has ${subj.uiState.value.errors.get(0)}", subj.uiState.value.errors.get(0).equals("Reverted cause: Artificially made negative response"))
     }
 
@@ -393,7 +401,7 @@ internal class WalletViewModelTest {
     fun `On registerUserOnMarket() with error response, pending tx state is increased and cache has a single record, both has exception status and errors has a single item`() = runTest {
         assertThat("Model has some pending tx", subj.uiState.value.pendingTx.isEmpty())
         assertThat("Model has some errors", subj.uiState.value.errors.isEmpty())
-        var cacheInitialStatus = emptyList<ITransaction>()
+        var cacheInitialStatus = emptyList<Pair<ITransaction, Service>>()
         fakeStorageRepository.getAllChainTransactions()
             .collect { it ->
                 cacheInitialStatus = it
@@ -406,7 +414,7 @@ internal class WalletViewModelTest {
         subj.registerUserOnSwapMarket(user)
         advanceUntilIdle()
 
-        var cacheFinalState = emptyList<ITransaction>()
+        var cacheFinalState = emptyList<Pair<ITransaction, Service>>()
         fakeStorageRepository.getAllChainTransactions()
             .collect {
                 cacheFinalState = it
@@ -414,7 +422,7 @@ internal class WalletViewModelTest {
         advanceUntilIdle()
         assertThat("Model should have a single error, but it has ${subj.uiState.value.errors.count()}", subj.uiState.value.errors.count() == 1)
         assertThat("Cache should have a single record, but it has ${cacheFinalState.count()}", cacheFinalState.count() == 1)
-        assertThat("Cache should have a record with `exception` status, but it has ${cacheFinalState.get(0).status}", cacheFinalState.get(0).status == TxStatus.TX_EXCEPTION)
+        assertThat("Cache should have a record with `exception` status, but it has ${cacheFinalState.get(0).first.status}", cacheFinalState.get(0).first.status == TxStatus.TX_EXCEPTION)
         assertThat("Error should have defined message, but has ${subj.uiState.value.errors.get(0)}", subj.uiState.value.errors.get(0).equals("Exception: Artificially made negative response"))
     }
 
@@ -422,7 +430,7 @@ internal class WalletViewModelTest {
     fun `On approveTokenManger() with valid params, pending tx state is increased, cache has a new record, both has mined tx status, errors list is empty`() = runTest {
         assertThat("Model has some pending tx", subj.uiState.value.pendingTx.isEmpty())
         assertThat("Model has some errors", subj.uiState.value.errors.isEmpty())
-        var cacheInitialStatus = emptyList<ITransaction>()
+        var cacheInitialStatus = emptyList<Pair<ITransaction, Service>>()
         fakeStorageRepository.getAllChainTransactions()
             .collect { it ->
                 cacheInitialStatus = it
@@ -435,7 +443,7 @@ internal class WalletViewModelTest {
         subj.registerUserOnSwapMarket(swapMarket)
         advanceUntilIdle()
 
-        var cacheFinalState = emptyList<ITransaction>()
+        var cacheFinalState = emptyList<Pair<ITransaction, Service>>()
         fakeStorageRepository.getAllChainTransactions()
             .collect {
                 cacheFinalState = it
@@ -443,14 +451,14 @@ internal class WalletViewModelTest {
         advanceUntilIdle()
         assertThat("Model should not have errors, but it has ${subj.uiState.value.errors.count()}", subj.uiState.value.errors.isEmpty())
         assertThat("Cache should have a single record, but it has ${cacheFinalState.count()}", cacheFinalState.count() == 1)
-        assertThat("Cache should have a record with `mined` status, but it has ${cacheFinalState.get(0).status}", cacheFinalState.get(0).status == TxStatus.TX_MINED)
+        assertThat("Cache should have a record with `mined` status, but it has ${cacheFinalState.get(0).first.status}", cacheFinalState.get(0).first.status == TxStatus.TX_MINED)
     }
 
     @Test
     fun `On approveTokenManger() with non-owner sender, pending tx state is increased, cache has a new record, both has exception tx status, errors list has a single item`() = runTest {
         assertThat("Model has some pending tx", subj.uiState.value.pendingTx.isEmpty())
         assertThat("Model has some errors", subj.uiState.value.errors.isEmpty())
-        var cacheInitialStatus = emptyList<ITransaction>()
+        var cacheInitialStatus = emptyList<Pair<ITransaction, Service>>()
         fakeStorageRepository.getAllChainTransactions()
             .collect { it ->
                 cacheInitialStatus = it
@@ -463,7 +471,7 @@ internal class WalletViewModelTest {
         subj.registerUserOnSwapMarket(swapMarket)
         advanceUntilIdle()
 
-        var cacheFinalState = emptyList<ITransaction>()
+        var cacheFinalState = emptyList<Pair<ITransaction, Service>>()
         fakeStorageRepository.getAllChainTransactions()
             .collect {
                 cacheFinalState = it
@@ -471,14 +479,14 @@ internal class WalletViewModelTest {
         advanceUntilIdle()
         assertThat("Model should have single error, but it has ${subj.uiState.value.errors.count()}", subj.uiState.value.errors.count() == 1)
         assertThat("Cache should have a single record, but it has ${cacheFinalState.count()}", cacheFinalState.count() == 1)
-        assertThat("Cache should have a record with `exception` status, but it has ${cacheFinalState.get(0).status}", cacheFinalState.get(0).status == TxStatus.TX_EXCEPTION)
+        assertThat("Cache should have a record with `exception` status, but it has ${cacheFinalState.get(0).first.status}", cacheFinalState.get(0).first.status == TxStatus.TX_EXCEPTION)
     }
 
     @Test
     fun `On approveTokenManger() with error response, pending tx state is increased, cache has a new record, both has exception tx status, errors list has a single item`() = runTest {
         assertThat("Model has some pending tx", subj.uiState.value.pendingTx.isEmpty())
         assertThat("Model has some errors", subj.uiState.value.errors.isEmpty())
-        var cacheInitialStatus = emptyList<ITransaction>()
+        var cacheInitialStatus = emptyList<Pair<ITransaction, Service>>()
         fakeStorageRepository.getAllChainTransactions()
             .collect { it ->
                 cacheInitialStatus = it
@@ -491,7 +499,7 @@ internal class WalletViewModelTest {
         subj.registerUserOnSwapMarket(swapMarket)
         advanceUntilIdle()
 
-        var cacheFinalState = emptyList<ITransaction>()
+        var cacheFinalState = emptyList<Pair<ITransaction, Service>>()
         fakeStorageRepository.getAllChainTransactions()
             .collect {
                 cacheFinalState = it
@@ -499,14 +507,14 @@ internal class WalletViewModelTest {
         advanceUntilIdle()
         assertThat("Model should have single error, but it has ${subj.uiState.value.errors.count()}", subj.uiState.value.errors.count() == 1)
         assertThat("Cache should have a single record, but it has ${cacheFinalState.count()}", cacheFinalState.count() == 1)
-        assertThat("Cache should have a record with `exception` status, but it has ${cacheFinalState.get(0).status}", cacheFinalState.get(0).status == TxStatus.TX_EXCEPTION)
+        assertThat("Cache should have a record with `exception` status, but it has ${cacheFinalState.get(0).first.status}", cacheFinalState.get(0).first.status == TxStatus.TX_EXCEPTION)
     }
 
     @Test
     fun `On approveTokenManger() with negative response, pending tx state is increased, cache has a new record, both has reverted tx status, errors list has a single item`() = runTest {
         assertThat("Model has some pending tx", subj.uiState.value.pendingTx.isEmpty())
         assertThat("Model has some errors", subj.uiState.value.errors.isEmpty())
-        var cacheInitialStatus = emptyList<ITransaction>()
+        var cacheInitialStatus = emptyList<Pair<ITransaction, Service>>()
         fakeStorageRepository.getAllChainTransactions()
             .collect { it ->
                 cacheInitialStatus = it
@@ -519,7 +527,7 @@ internal class WalletViewModelTest {
         subj.registerUserOnSwapMarket(swapMarket)
         advanceUntilIdle()
 
-        var cacheFinalState = emptyList<ITransaction>()
+        var cacheFinalState = emptyList<Pair<ITransaction, Service>>()
         fakeStorageRepository.getAllChainTransactions()
             .collect {
                 cacheFinalState = it
@@ -527,14 +535,14 @@ internal class WalletViewModelTest {
         advanceUntilIdle()
         assertThat("Model should have single error, but it has ${subj.uiState.value.errors.count()}", subj.uiState.value.errors.count() == 1)
         assertThat("Cache should have a single record, but it has ${cacheFinalState.count()}", cacheFinalState.count() == 1)
-        assertThat("Cache should have a record with `reverted` status, but it has ${cacheFinalState.get(0).status}", cacheFinalState.get(0).status == TxStatus.TX_REVERTED)
+        assertThat("Cache should have a record with `reverted` status, but it has ${cacheFinalState.get(0).first.status}", cacheFinalState.get(0).first.status == TxStatus.TX_REVERTED)
     }
 
     @Test
     fun `on approveSwap() with valid params, pending tx state is increased, cache has a new record, both has 'mined' tx status, errors list is empty`() = runTest {
         assertThat("Model has some pending tx", subj.uiState.value.pendingTx.isEmpty())
         assertThat("Model has some errors", subj.uiState.value.errors.isEmpty())
-        var cacheInitialStatus = emptyList<ITransaction>()
+        var cacheInitialStatus = emptyList<Pair<ITransaction, Service>>()
         fakeStorageRepository.getAllChainTransactions()
             .collect { it ->
                 cacheInitialStatus = it
@@ -546,7 +554,7 @@ internal class WalletViewModelTest {
         val obj = getMatchObj()
         subj.approveSwap(obj)
         advanceUntilIdle()
-        var cacheFinalState = emptyList<ITransaction>()
+        var cacheFinalState = emptyList<Pair<ITransaction, Service>>()
         fakeStorageRepository.getAllChainTransactions()
             .collect {
                 cacheFinalState = it
@@ -554,7 +562,7 @@ internal class WalletViewModelTest {
         advanceUntilIdle()
         assertThat("Model should not have errors, but it has ${subj.uiState.value.errors.count()}", subj.uiState.value.errors.isEmpty())
         assertThat("Cache should have a single record, but it has ${cacheFinalState.count()}", cacheFinalState.count() == 1)
-        assertThat("Cache should have a record with `mined` status, but it has ${cacheFinalState.get(0).status}", cacheFinalState.get(0).status == TxStatus.TX_MINED)
+        assertThat("Cache should have a record with `mined` status, but it has ${cacheFinalState.get(0).first.status}", cacheFinalState.get(0).first.status == TxStatus.TX_MINED)
 
     }
 
@@ -562,7 +570,7 @@ internal class WalletViewModelTest {
     fun `on approveSwap() with negative response, pending tx state is increased, cache has a new record, both has 'reverted' tx status, errors list has single error`() = runTest {
         assertThat("Model has some pending tx", subj.uiState.value.pendingTx.isEmpty())
         assertThat("Model has some errors", subj.uiState.value.errors.isEmpty())
-        var cacheInitialStatus = emptyList<ITransaction>()
+        var cacheInitialStatus = emptyList<Pair<ITransaction, Service>>()
         fakeStorageRepository.getAllChainTransactions()
             .collect { it ->
                 cacheInitialStatus = it
@@ -575,7 +583,7 @@ internal class WalletViewModelTest {
         subj.approveSwap(obj)
         advanceUntilIdle()
 
-        var cacheFinalState = emptyList<ITransaction>()
+        var cacheFinalState = emptyList<Pair<ITransaction, Service>>()
         fakeStorageRepository.getAllChainTransactions()
             .collect {
                 cacheFinalState = it
@@ -583,14 +591,14 @@ internal class WalletViewModelTest {
         advanceUntilIdle()
         assertThat("Model should have single error, but it has ${subj.uiState.value.errors.count()}", subj.uiState.value.errors.count() == 1)
         assertThat("Cache should have a single record, but it has ${cacheFinalState.count()}", cacheFinalState.count() == 1)
-        assertThat("Cache should have a record with `reverted` status, but it has ${cacheFinalState.get(0).status}", cacheFinalState.get(0).status == TxStatus.TX_REVERTED)
+        assertThat("Cache should have a record with `reverted` status, but it has ${cacheFinalState.get(0).first.status}", cacheFinalState.get(0).first.status == TxStatus.TX_REVERTED)
     }
 
     @Test
     fun `on approveSwap() with error response, pending tx state is increased, cache has a new record, both has 'exception' tx status, errors list has single error`() = runTest {
         assertThat("Model has some pending tx", subj.uiState.value.pendingTx.isEmpty())
         assertThat("Model has some errors", subj.uiState.value.errors.isEmpty())
-        var cacheInitialStatus = emptyList<ITransaction>()
+        var cacheInitialStatus = emptyList<Pair<ITransaction, Service>>()
         fakeStorageRepository.getAllChainTransactions()
             .collect { it ->
                 cacheInitialStatus = it
@@ -602,7 +610,7 @@ internal class WalletViewModelTest {
         subj.approveSwap(getMatchObj())
         advanceUntilIdle()
 
-        var cacheFinalState = emptyList<ITransaction>()
+        var cacheFinalState = emptyList<Pair<ITransaction, Service>>()
         fakeStorageRepository.getAllChainTransactions()
             .collect {
                 cacheFinalState = it
@@ -610,14 +618,14 @@ internal class WalletViewModelTest {
         advanceUntilIdle()
         assertThat("Model should have single error, but it has ${subj.uiState.value.errors.count()}", subj.uiState.value.errors.count() == 1)
         assertThat("Cache should have a single record, but it has ${cacheFinalState.count()}", cacheFinalState.count() == 1)
-        assertThat("Cache should have a record with `exception` status, but it has ${cacheFinalState.get(0).status}", cacheFinalState.get(0).status == TxStatus.TX_EXCEPTION)
+        assertThat("Cache should have a record with `exception` status, but it has ${cacheFinalState.get(0).first.status}", cacheFinalState.get(0).first.status == TxStatus.TX_EXCEPTION)
     }
 
     @Test
     fun `on approveSwap() with exception response, pending tx state is increased, cache has a new record, both has 'exception' tx status, errors list has single error`() = runTest {
         assertThat("Model has some pending tx", subj.uiState.value.pendingTx.isEmpty())
         assertThat("Model has some errors", subj.uiState.value.errors.isEmpty())
-        var cacheInitialStatus = emptyList<ITransaction>()
+        var cacheInitialStatus = emptyList<Pair<ITransaction, Service>>()
         fakeStorageRepository.getAllChainTransactions()
             .collect { it ->
                 cacheInitialStatus = it
@@ -629,7 +637,7 @@ internal class WalletViewModelTest {
         subj.approveSwap(getMatchObj())
         advanceUntilIdle()
 
-        var cacheFinalState = emptyList<ITransaction>()
+        var cacheFinalState = emptyList<Pair<ITransaction, Service>>()
         fakeStorageRepository.getAllChainTransactions()
             .collect {
                 cacheFinalState = it
@@ -637,7 +645,7 @@ internal class WalletViewModelTest {
         advanceUntilIdle()
         assertThat("Model should have single error, but it has ${subj.uiState.value.errors.count()}", subj.uiState.value.errors.count() == 1)
         assertThat("Cache should have a single record, but it has ${cacheFinalState.count()}", cacheFinalState.count() == 1)
-        assertThat("Cache should have a record with `exception` status, but it has ${cacheFinalState.get(0).status}", cacheFinalState.get(0).status == TxStatus.TX_EXCEPTION)
+        assertThat("Cache should have a record with `exception` status, but it has ${cacheFinalState.get(0).first.status}", cacheFinalState.get(0).first.status == TxStatus.TX_EXCEPTION)
         assertThat("Model should have a single error with defined message, but it has ${subj.uiState.value.errors.get(0)}", subj.uiState.value.errors.get(0) == "Exception: Match item is not found. Did you pass correct match object?")
     }
 
@@ -646,7 +654,7 @@ internal class WalletViewModelTest {
     fun `On registerDemand() with valid params, pending tx state is increased, cache has a new record, both has a 'mined' tx status, errors list is empty`() = runTest {
         assertThat("Model should not have pending tx", subj.uiState.value.pendingTx.isEmpty())
         assertThat("Model should not have errors", subj.uiState.value.errors.isEmpty())
-        var cacheInitialStatus = emptyList<ITransaction>()
+        var cacheInitialStatus = emptyList<Pair<ITransaction, Service>>()
         fakeStorageRepository.getAllChainTransactions()
             .collect { it ->
                 cacheInitialStatus = it
@@ -660,7 +668,7 @@ internal class WalletViewModelTest {
     fun `On swap() with valid param, pending tx state is increased, cache has a new record, both has a 'mined' status, errors list is empty`() = runTest {
         assertThat("Model has some pending tx", subj.uiState.value.pendingTx.isEmpty())
         assertThat("Model has some errors", subj.uiState.value.errors.isEmpty())
-        var cacheInitialStatus = emptyList<ITransaction>()
+        var cacheInitialStatus = emptyList<Pair<ITransaction, Service>>()
         fakeStorageRepository.getAllChainTransactions()
             .collect { it ->
                 cacheInitialStatus = it
@@ -672,7 +680,7 @@ internal class WalletViewModelTest {
         subj.swap(getMatchObj())
         advanceUntilIdle()
 
-        var cacheFinalState = emptyList<ITransaction>()
+        var cacheFinalState = emptyList<Pair<ITransaction, Service>>()
         fakeStorageRepository.getAllChainTransactions()
             .collect {
                 cacheFinalState = it
@@ -680,14 +688,14 @@ internal class WalletViewModelTest {
         advanceUntilIdle()
         assertThat("Model should not have errors, but it has ${subj.uiState.value.errors.count()}", subj.uiState.value.errors.isEmpty())
         assertThat("Cache should have a single record, but it has ${cacheFinalState.count()}", cacheFinalState.count() == 1)
-        assertThat("Cache should have a record with `mined` status, but it has ${cacheFinalState.get(0).status}", cacheFinalState.get(0).status == TxStatus.TX_MINED)
+        assertThat("Cache should have a record with `mined` status, but it has ${cacheFinalState.get(0).first.status}", cacheFinalState.get(0).first.status == TxStatus.TX_MINED)
     }
 
     @Test
     fun `On swap() with negative response, pending tx state is increased, cache has a new record, both has a 'reverted' status, errors list has an error`() = runTest {
         assertThat("Model has some pending tx", subj.uiState.value.pendingTx.isEmpty())
         assertThat("Model has some errors", subj.uiState.value.errors.isEmpty())
-        var cacheInitialStatus = emptyList<ITransaction>()
+        var cacheInitialStatus = emptyList<Pair<ITransaction, Service>>()
         fakeStorageRepository.getAllChainTransactions()
             .collect { it ->
                 cacheInitialStatus = it
@@ -699,7 +707,7 @@ internal class WalletViewModelTest {
         subj.swap(getMatchObj())
         advanceUntilIdle()
 
-        var cacheFinalState = emptyList<ITransaction>()
+        var cacheFinalState = emptyList<Pair<ITransaction, Service>>()
         fakeStorageRepository.getAllChainTransactions()
             .collect {
                 cacheFinalState = it
@@ -707,7 +715,7 @@ internal class WalletViewModelTest {
         advanceUntilIdle()
         assertThat("Model should have a single error, but it has ${subj.uiState.value.errors.count()}", subj.uiState.value.errors.count() == 1)
         assertThat("Cache should have a single record, but it has ${cacheFinalState.count()}", cacheFinalState.count() == 1)
-        assertThat("Cache should have a record with `reverted` status, but it has ${cacheFinalState.get(0).status}", cacheFinalState.get(0).status == TxStatus.TX_REVERTED)
+        assertThat("Cache should have a record with `reverted` status, but it has ${cacheFinalState.get(0).first.status}", cacheFinalState.get(0).first.status == TxStatus.TX_REVERTED)
         assertThat("Cache should have a single error with defined message, but it has ${subj.uiState.value.errors.get(0)}", subj.uiState.value.errors.get(0) == "Reverted cause: Artificially made negative response")
     }
 
@@ -715,7 +723,7 @@ internal class WalletViewModelTest {
     fun `On swap() with error response, pending tx state is increased, cache has a new record, both has an 'exception' status, errors list has an error`() = runTest {
         assertThat("Model has some pending tx", subj.uiState.value.pendingTx.isEmpty())
         assertThat("Model has some errors", subj.uiState.value.errors.isEmpty())
-        var cacheInitialStatus = emptyList<ITransaction>()
+        var cacheInitialStatus = emptyList<Pair<ITransaction, Service>>()
         fakeStorageRepository.getAllChainTransactions()
             .collect { it ->
                 cacheInitialStatus = it
@@ -727,7 +735,7 @@ internal class WalletViewModelTest {
         subj.swap(getMatchObj())
         advanceUntilIdle()
 
-        var cacheFinalState = emptyList<ITransaction>()
+        var cacheFinalState = emptyList<Pair<ITransaction, Service>>()
         fakeStorageRepository.getAllChainTransactions()
             .collect {
                 cacheFinalState = it
@@ -735,7 +743,7 @@ internal class WalletViewModelTest {
         advanceUntilIdle()
         assertThat("Model should have single error, but it has ${subj.uiState.value.errors.count()}", subj.uiState.value.errors.count() == 1)
         assertThat("Cache should have a single record, but it has ${cacheFinalState.count()}", cacheFinalState.count() == 1)
-        assertThat("Cache should have a record with `exception` status, but it has ${cacheFinalState.get(0).status}", cacheFinalState.get(0).status == TxStatus.TX_EXCEPTION)
+        assertThat("Cache should have a record with `exception` status, but it has ${cacheFinalState.get(0).first.status}", cacheFinalState.get(0).first.status == TxStatus.TX_EXCEPTION)
         assertThat("Model should have a single error with defined message, but it has ${subj.uiState.value.errors.get(0)}", subj.uiState.value.errors.get(0) == "Exception: Artificially made negative response")
     }
 
@@ -743,7 +751,7 @@ internal class WalletViewModelTest {
     fun `On swap() with exception response, pending tx state is increased, cache has a new record, both has an 'exception' status, errors list has an error`() = runTest {
         assertThat("Model has some pending tx", subj.uiState.value.pendingTx.isEmpty())
         assertThat("Model has some errors", subj.uiState.value.errors.isEmpty())
-        var cacheInitialStatus = emptyList<ITransaction>()
+        var cacheInitialStatus = emptyList<Pair<ITransaction, Service>>()
         fakeStorageRepository.getAllChainTransactions()
             .collect { it ->
                 cacheInitialStatus = it
@@ -755,7 +763,7 @@ internal class WalletViewModelTest {
         subj.swap(getMatchObj())
         advanceUntilIdle()
 
-        var cacheFinalState = emptyList<ITransaction>()
+        var cacheFinalState = emptyList<Pair<ITransaction, Service>>()
         fakeStorageRepository.getAllChainTransactions()
             .collect {
                 cacheFinalState = it
@@ -763,7 +771,7 @@ internal class WalletViewModelTest {
         advanceUntilIdle()
         assertThat("Model should have a single error, but it has ${subj.uiState.value.errors.count()}", subj.uiState.value.errors.count() == 1)
         assertThat("Cache should have a single record, but it has ${cacheFinalState.count()}", cacheFinalState.count() == 1)
-        assertThat("Cache should have a record with `exception` status, but it has ${cacheFinalState.get(0).status}", cacheFinalState.get(0).status == TxStatus.TX_EXCEPTION)
+        assertThat("Cache should have a record with `exception` status, but it has ${cacheFinalState.get(0).first.status}", cacheFinalState.get(0).first.status == TxStatus.TX_EXCEPTION)
         assertThat("Model should have a single error with defined message, but it has ${subj.uiState.value.errors.get(0)}", subj.uiState.value.errors.get(0) == "Exception: Transaction 0x3292880f1157ff54c168cfa3b0485c1933c41263d76c90e9ba9fac26948f832a has failed with status: 0x0. Gas used: 48124. Revert reason: 'execution reverted: Tokens should not be already consumed.'.")
     }
 /*    @Test
