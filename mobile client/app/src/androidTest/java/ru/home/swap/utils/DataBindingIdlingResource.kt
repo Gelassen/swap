@@ -1,7 +1,6 @@
-package ru.home.swap
+package ru.home.swap.utils
 
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.FragmentActivity

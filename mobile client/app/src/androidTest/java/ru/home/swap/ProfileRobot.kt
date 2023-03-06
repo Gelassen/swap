@@ -1,15 +1,16 @@
 package ru.home.swap
 
 import android.view.KeyEvent
-import android.widget.EditText
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions
+import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.RootMatchers.isDialog
 import androidx.test.espresso.matcher.ViewMatchers
-import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.espresso.matcher.ViewMatchers.withText
+import androidx.test.espresso.matcher.ViewMatchers.*
 import org.hamcrest.CoreMatchers.containsString
+import org.hamcrest.core.StringContains
+import ru.home.swap.utils.Utils.atPositionByTitle
 
 class ProfileRobot {
 
@@ -66,6 +67,25 @@ class ProfileRobot {
         return this
     }
 
+    // Profile screen
+
+    fun seesAddNewItemDialog(): ProfileRobot {
+        onView(withId(R.id.offer_option))
+            .check(matches(isDisplayed()))
+        onView(withId(R.id.demand_option))
+            .check(matches(isDisplayed()))
+        onView(withId(R.id.save))
+            .check(matches(isDisplayed()))
+        return this
+    }
+
+    fun seesNewOffer(order: Int, newOfferText: String) {
+        onView(withId(R.id.offers_list))
+            .check(matches(isDisplayed()))
+        onView(withId(R.id.offers_list))
+            .check(matches(atPositionByTitle(order, withText(StringContains.containsString(newOfferText)))))
+    }
+
     // Actions
 
     fun clickDebugButton() {
@@ -76,6 +96,23 @@ class ProfileRobot {
     fun clickSubmitButton() {
         onView(withId(R.id.confirm))
             .perform(ViewActions.click())
+    }
+
+    fun clickAddItemButton() {
+        onView(withId(R.id.fab))
+            .perform(ViewActions.click())
+    }
+
+    fun enterNewOffer(query: String) {
+        onView(withId(R.id.editText))
+            .perform(ViewActions.replaceText(query))
+            .perform(ViewActions.pressKey(KeyEvent.KEYCODE_ENTER))
+        /*.perform(typeText(query), pressKey(KeyEvent.KEYCODE_ENTER)) // Unicode chars is not supported here */
+    }
+
+    fun clickSaveNewItemButton() {
+        onView(withId(R.id.save))
+            .perform(click())
     }
 
     fun enterCustomDebugData(name: String, phone: String, secret: String, wallet: String) {
