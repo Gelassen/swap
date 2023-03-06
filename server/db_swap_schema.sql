@@ -52,7 +52,9 @@ CREATE TABLE `PotentialMatches` (
   `approvedByFirstUser` tinyint NOT NULL,
   `approvedBySecondUser` tinyint NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `id_UNIQUE` (`id`)
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  CONSTRAINT `fk_first_service_id` FOREIGN KEY (`userFirstServiceId`) REFERENCES `Service` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_second_service_id` FOREIGN KEY (`userSecondServiceId`) REFERENCES `Service` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=138 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 

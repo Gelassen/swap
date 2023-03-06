@@ -123,8 +123,9 @@ class ProfileV2ViewModel
         }
     }
 
+    // TODO consider to move parts of the flow into separate class and methods
+    //  to make it more clear and neat
     @OptIn(FlowPreview::class)
-//    @Deprecated("Work on this method has been frozen")
     fun backgroundProcessMinedTx() {
         viewModelScope.launch {
             flow<Pair<ITransaction, Service>> {
@@ -194,15 +195,6 @@ class ProfileV2ViewModel
     fun addOffer() {
         logger.d("[start] mintToken()")
         viewModelScope.launch {
-            // TODO define entity to domain object converters for server side metadata
-            // TODO pass this data within worker object
-            // TODO extend worker to save this server side metadata in cache too
-            // TODO extend dao to support tx entity with server side metadata
-
-            // TODO finish migration to TxWithMetadata - the idea to check concept
-            //  on a single instance and expand it later to overall tx support
-            // TODO listen changes in storage to run request to the backend
-
             val workManager = WorkManager.getInstance(app)
 
             val requestBuilder = RequestBuilder()
@@ -232,33 +224,10 @@ class ProfileV2ViewModel
                         }
                         else -> { logger.d("[mint token] unexpected state with result: ${it.toString()}") }
                     }
+                    state.update { state -> state.copy(isLoading = false) }
                 }
         }
         logger.d("[end] mintToken()")
-/*        val newService = Service(title = proposal.get()!!, date = 0L, index = listOf())
-        viewModelScope.launch {
-            personRepository.addOffer(
-                contact = uiState.value.profile.contact,
-                secret = uiState.value.profile.secret,
-                newService = newService)
-                .onStart { state.update { state -> state.copy(isLoading = true) } }
-                .flatMapConcat { it ->
-                    if (it is Response.Data) {
-                        personRepository.cacheAccountAsFlow(it.data)
-                            .collect { it ->
-                                // no op, just execute the command
-                                Log.d(App.TAG, "account has been cached")
-                            }
-                    }
-                    flow {
-                        emit(it)
-                    }
-                }
-                .collect { it ->
-                    Log.d(App.TAG, "[add offer] start collect data in viewmodel")
-                    processServerResponse(it) { addOfferSpecialHandler(it) }
-                }
-        }*/
     }
 
     fun removeOffer(item: Service) {
