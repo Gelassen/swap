@@ -1,4 +1,4 @@
-package ru.home.swap
+package ru.home.swap.robots
 
 import android.view.KeyEvent
 import androidx.test.espresso.Espresso.onView
@@ -10,6 +10,7 @@ import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.*
 import org.hamcrest.CoreMatchers.containsString
 import org.hamcrest.core.StringContains
+import ru.home.swap.R
 import ru.home.swap.utils.Utils.atPositionByTitle
 
 class ProfileRobot {
