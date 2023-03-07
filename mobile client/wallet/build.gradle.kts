@@ -47,9 +47,9 @@ android {
 dependencies {
 
     implementation("androidx.core:core-ktx:1.9.0")
-    implementation("androidx.appcompat:appcompat:1.5.1")
+    implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1")
-    implementation("androidx.activity:activity-ktx:1.6.0")
+    implementation("androidx.activity:activity-ktx:1.6.1")
     implementation("androidx.room:room-runtime:2.5.0")
     implementation("androidx.room:room-ktx:2.5.0")
     implementation("androidx.paging:paging-runtime:3.1.1")
@@ -67,7 +67,7 @@ dependencies {
     implementation("org.web3j:core:4.9.4")
     implementation("androidx.work:work-runtime:2.8.0")
     implementation("androidx.work:work-runtime-ktx:2.8.0")
-    implementation("androidx.test:monitor:1.6.1")
+//    implementation("androidx.test:monitor:1.6.1") -- cause android tests issues in 'app' main module
 
 //    annotationProcessor("androidx.room:room-compiler:2.5.0")
 
