@@ -1,5 +1,6 @@
 package ru.home.swap.wallet.network
 
+import android.app.Application
 import android.content.Context
 import androidx.work.*
 import kotlinx.coroutines.CoroutineDispatcher
@@ -9,6 +10,7 @@ import org.web3j.abi.FunctionReturnDecoder
 import org.web3j.abi.TypeReference
 import org.web3j.abi.datatypes.generated.Uint256
 import ru.home.swap.core.di.NetworkModule
+import ru.home.swap.core.extensions.attachIdlingResource
 import ru.home.swap.core.logger.Logger
 import ru.home.swap.core.model.Service
 import ru.home.swap.core.model.fromJson
@@ -87,6 +89,7 @@ class ChainWorker
                 }
                 preProcessResponse(it, newTx)
             }
+            .attachIdlingResource()
             .catch { logger.e("Failed ChainWorker", it) }
             .flowOn(backgroundDispatcher)
             .collect { result = processResponse(it) }

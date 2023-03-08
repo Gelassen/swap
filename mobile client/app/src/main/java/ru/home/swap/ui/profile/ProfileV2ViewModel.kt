@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.*
 import ru.home.swap.App
 import ru.home.swap.R
 import ru.home.swap.core.di.NetworkModule
+import ru.home.swap.core.extensions.attachIdlingResource
 import ru.home.swap.core.extensions.registerIdlingResource
 import ru.home.swap.core.extensions.unregisterIdlingResource
 import ru.home.swap.core.logger.Logger
@@ -130,23 +131,29 @@ class ProfileV2ViewModel
         viewModelScope.launch {
             flow<Pair<ITransaction, Service>> {
                 while (uiState.value.isAllowedToProcess) {
+                    getApplication<Application>().registerIdlingResource()
                     val delay = 1120L
                     // wait for user's wallet address will be obtained from the cache during initialisation
                     if (state.value.profile.userWalletAddress.isEmpty()) {
                         logger.d("[queue polling] delay() call")
+                        getApplication<Application>().unregisterIdlingResource()
                         delay(delay)
                         continue
                     }
                     if (state.value.pendingTx.isEmpty()) {
                         logger.d("[queue polling] delay() call")
+                        getApplication<Application>().unregisterIdlingResource()
+                        delay(delay)
+                    } else {
+                        val item = state.value.pendingTx.poll()
+                        if (item != null) {
+                            logger.d("[queue polling] emit item from queue ${item.toString()}")
+                            emit(item)
+                        }
+                        logger.d("[queue polling] delay() call")
+                        getApplication<Application>().unregisterIdlingResource()
                         delay(delay)
                     }
-                    val item = state.value.pendingTx.poll()
-                    if (item != null) {
-                        logger.d("[queue polling] emit item from queue ${item.toString()}")
-                        emit(item) }
-                    logger.d("[queue polling] delay() call")
-                    delay(delay)
                 }
             }
                 .flatMapConcat { item ->

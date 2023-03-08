@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.flow
 import ru.home.swap.App
 import ru.home.swap.R
 import ru.home.swap.core.converters.ApiResponseConverter
+import ru.home.swap.core.extensions.attachIdlingResource
 import ru.home.swap.core.model.PersonProfile
 import ru.home.swap.core.model.Service
 import ru.home.swap.core.network.IApi
@@ -132,6 +133,7 @@ class PersonRepository(val api: IApi, val cache: Cache, val context: Context): I
             }
             Log.d(App.TAG, "[add offer] end")
         }
+            .attachIdlingResource()
             .catch { ex ->
                 Log.e(App.TAG, "Exception on addOffer() call", ex)
                 emit(Response.Error.Exception(ex))
