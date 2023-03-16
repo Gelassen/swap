@@ -126,41 +126,12 @@ class ProfileV2ViewModel
         }
     }
 
-    // TODO possibly change on background queue introduced a bug with no popping up a new item
-    // TODO filtration by processed status has been added, record in cache is updated successfully
-    //  seems there is an extra record for the same mint tx -- verify!
-
-    // TODO consider to move parts of the flow into separate class and methods
-    //  to make it more clear and neat
     @OptIn(FlowPreview::class)
     fun backgroundProcessMinedTx() {
         val useCase = BackgroundFlowUseCase()
         viewModelScope.launch {
-            flow<Pair<ITransaction, Service>> {
-                while(state.value.isAllowedToProcess) {
-                    getApplication<Application>().registerIdlingResource()
-                    val delay = 3120L
-                    // wait for user's wallet address will be obtained from the cache during initialisation
-                    if (state.value.profile.userWalletAddress.isEmpty()
-                        || state.value.pendingTx.isEmpty()) {
-                        logger.d("[queue polling] delay() call")
-                        getApplication<Application>().unregisterIdlingResource()
-                        delay(delay)
-                    }  else {
-                        val item = state.value.pendingTx.poll()
-                        if (item != null) {
-                            logger.d("[queue polling] emit item from queue ${item.toString()}")
-                            emit(item)
-                        }
-                        logger.d("[queue polling] delay() call")
-                        getApplication<Application>().unregisterIdlingResource()
-
-                        delay(delay)
-                    }
-                }
-            }
+            useCase.waitUntilGetAnItem()
                 .flatMapConcat { item ->
-                    // TODO consider to move each branch case into the separate class function
                     when(item.first.type) {
                         /* token are created only for offer, demands registered just as a db record */
                         MintTransaction::class.java.simpleName -> { useCase.processMintTx(item) }
@@ -169,7 +140,6 @@ class ProfileV2ViewModel
                 }
                 .onStart { state.update { state -> state.copy(isLoading = true) } }
                 .flatMapConcat {
-//                    if (it is Response.Data) { personRepository.cacheAccount(it.data) }
                     if (it is Response.Data) { useCase.updateCacheForMintTx(it)}
                     flow { emit(it) }
                 }
@@ -177,7 +147,6 @@ class ProfileV2ViewModel
                     Log.d(App.TAG, "[add offer] start collect data in viewmodel")
                     processServerResponse(it) { addOfferSpecialHandler(it) }
                 }
-
         }
     }
 
@@ -665,33 +634,27 @@ class ProfileV2ViewModel
 
         var currentTxPair: Pair<ITransaction, Service>? = null
 
-        @Deprecated("I have not solved yet issue by forwarding emit and delay calls back to flow context")
-        fun waitUntilGetAnItem(/*runInFlow:  (Pair<ITransaction, Service>) -> Unit,
-                               runDelay: suspend () -> Unit*/
-            emitCall: (Pair<ITransaction, Service>) -> Unit,
-            delayCall: /*suspend*/ () -> Unit
-        ) {
-            while (uiState.value.isAllowedToProcess) {
-                getApplication<Application>().registerIdlingResource()
-                val delay = 1120L
-                // wait for user's wallet address will be obtained from the cache during initialisation
-                if (state.value.profile.userWalletAddress.isEmpty()
-                    || state.value.pendingTx.isEmpty()) {
-                    logger.d("[queue polling] delay() call")
-                    getApplication<Application>().unregisterIdlingResource()
-//                    delay(delay)
-                    delayCall.invoke()
-                }  else {
-                    val item = state.value.pendingTx.poll()
-                    if (item != null) {
-                        logger.d("[queue polling] emit item from queue ${item.toString()}")
-//                        runInFlow(item)
-                        emitCall.invoke(item)
+        fun waitUntilGetAnItem(): Flow< Pair<ITransaction, Service>> {
+            return flow {
+                while(state.value.isAllowedToProcess) {
+                    getApplication<Application>().registerIdlingResource()
+                    val delay = 3120L
+                    // wait for user's wallet address will be obtained from the cache during initialisation
+                    if (state.value.profile.userWalletAddress.isEmpty()
+                        || state.value.pendingTx.isEmpty()) {
+                        logger.d("[queue polling] delay() call")
+                        getApplication<Application>().unregisterIdlingResource()
+                        delay(delay)
+                    }  else {
+                        val item = state.value.pendingTx.poll()
+                        if (item != null) {
+                            logger.d("[queue polling] emit item from queue ${item.toString()}")
+                            emit(item)
+                        }
+                        logger.d("[queue polling] delay() call")
+                        getApplication<Application>().unregisterIdlingResource()
+                        delay(delay)
                     }
-                    logger.d("[queue polling] delay() call")
-                    getApplication<Application>().unregisterIdlingResource()
-//                    delay(delay)
-                    delayCall.invoke()
                 }
             }
         }
@@ -700,8 +663,7 @@ class ProfileV2ViewModel
             logger.d("[queue polling] process MintTransaction item")
             currentTxPair = item
             item.second.chainService.tokenId = (item.first as MintTransaction).tokenId
-            // val chainService = item.second//ChainService(userWalletAddress = state.value.profile.userWalletAddress, tokenId = mintItem)
-            val newService = item.second//Service(title = proposal.get()!!, date = 0L, index = listOf(), chainService = chainService)
+            val newService = item.second
             logger.d("[addOffer::server] ${item.first} \n and \n ${item.second}")
             return personRepository.addOffer(
                 contact = uiState.value.profile.contact,
