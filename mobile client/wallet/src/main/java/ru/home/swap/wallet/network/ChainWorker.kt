@@ -77,7 +77,6 @@ class ChainWorker
             .map {
                 (service as Service).chainService.id = it.uid
                 cacheRepository.createServerTx(service, it.uid, false)
-//                flow { emit(it) }
                 return@map it
             }
             .map {

@@ -405,6 +405,14 @@ class ProfileV2ViewModel
         }
     }
 
+    fun removeShownError() {
+        state.update { it ->
+            it.copy(
+                errors = it.errors.filter { str -> !str.equals(it.errors.first()) }
+            )
+        }
+    }
+
     private fun updateStateProfile(it: Response<PersonProfile>) {
         when (it) {
             is Response.Data -> {
@@ -477,14 +485,6 @@ class ProfileV2ViewModel
         return errorMessage
     }
 
-    fun removeShownError() {
-        state.update { it ->
-            it.copy(
-                errors = it.errors.filter { str -> !str.equals(it.errors.first()) }
-            )
-        }
-    }
-
     private fun processServerResponse(
         response: Response<PersonProfile>,
         specialHandler: (data: Response.Data<PersonProfile>)  -> Unit) {
@@ -542,28 +542,6 @@ class ProfileV2ViewModel
                 isLoading = false,
                 profile = state.profile
             )
-        }
-    }
-
-    private fun preProcessResponse(it: ru.home.swap.core.network.Response<TransactionReceiptDomain>, newTx: ITransaction) {
-        when(it) {
-            is ru.home.swap.core.network.Response.Data -> {
-                if (it.data.isStatusOK()) {
-                    newTx.status = TxStatus.TX_MINED
-                    cacheRepository.createChainTxAsFlow(newTx)
-                } else {
-                    newTx.status = TxStatus.TX_REVERTED
-                    cacheRepository.createChainTxAsFlow(newTx)
-                }
-            }
-            is ru.home.swap.core.network.Response.Error.Message -> {
-                newTx.status = TxStatus.TX_EXCEPTION
-                cacheRepository.createChainTxAsFlow(newTx)
-            }
-            is ru.home.swap.core.network.Response.Error.Exception -> {
-                newTx.status = TxStatus.TX_EXCEPTION
-                cacheRepository.createChainTxAsFlow(newTx)
-            }
         }
     }
 
@@ -656,20 +634,22 @@ class ProfileV2ViewModel
     }
 
     inner class CheckExistingAccountFlowUseCase {
-
-        fun checkAccount(personProfile: PersonProfile) = flow<PersonRepository.Response<PersonProfile>> {
+        fun checkAccount(personProfile: PersonProfile) : Flow<Response<PersonProfile>> {
+            lateinit var flow: Flow<Response<PersonProfile>>
             if (personProfile.contact.isEmpty() && personProfile.secret.isEmpty()) {
                 Log.d(App.TAG, "[b1] Get cached account as an empty")
-                flow<Response<PersonProfile>> {
+                flow = flow {
                     emit(Response.Data(personProfile))
-                }.stateIn(viewModelScope)
+                }
             } else {
                 Log.d(App.TAG, "[b2] Get cached account call and request server for an actual one")
-                personRepository.getAccount(personProfile)
+                flow = personRepository.getAccount(personProfile)
             }
+            return flow
         }
 
-        fun cacheAccount(response: Response<PersonProfile>) = flow {
+        fun cacheAccount(response: Response<PersonProfile>) = flow<Response<PersonProfile>> {
+            logger.d("[c] cache account")
             if (response is Response.Data) {
                 personRepository.cacheAccount(response.data)
             }
