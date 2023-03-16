@@ -270,11 +270,12 @@ class ProfileV2ViewModel
         val profile = uiState.value.profile
         if (validator.isAnyOfCredentialsEmpty(profile.contact, profile.secret)
                 || !validator.inputIsEthereumAddress(profile.userWalletAddress)) {
-            val errorMsg = if (!validator.inputIsEthereumAddress(profile.userWalletAddress)) {
-                app.getString(R.string.bad_eth_address_error)
+            val errorStr = if (!validator.inputIsEthereumAddress(profile.userWalletAddress)) {
+                R.string.bad_eth_address_error
             } else {
-                app.getString(R.string.empty_credentials_error)
+                R.string.empty_credentials_error
             }
+            val errorMsg = app.getString(errorStr)
             state.update { state ->
                 state.copy(
                     errors = state.errors + errorMsg
