@@ -29,7 +29,8 @@ android {
     }
     buildTypes {
         getByName("release") {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
@@ -61,6 +62,9 @@ android {
         unitTests {
             isReturnDefaultValues = true
         }
+    }
+    lint {
+        baseline = file("lint-baseline.xml")
     }
 }
 

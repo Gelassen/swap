@@ -14,7 +14,7 @@ import ru.home.swap.network.MyWorkerFactory
 import ru.home.swap.wallet.WalletApplication
 import javax.inject.Inject
 
-class AppApplication: WalletApplication(), Configuration.Provider, HasAndroidInjector {
+class AppApplication(): WalletApplication(), Configuration.Provider, HasAndroidInjector {
 
     @Inject
     lateinit var androidInjector : DispatchingAndroidInjector<Any>

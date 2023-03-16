@@ -5,7 +5,7 @@ import ru.home.swap.wallet.di.DaggerWalletComponent
 import ru.home.swap.wallet.di.WalletComponent
 import ru.home.swap.wallet.di.WalletModule
 
-open class WalletApplication: CoreApplication() {
+open class WalletApplication(): CoreApplication() {
 
     protected lateinit var walletComponent: WalletComponent
 

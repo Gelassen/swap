@@ -6,7 +6,7 @@ import ru.home.swap.core.di.CoreModule
 import ru.home.swap.core.di.DaggerCoreComponent
 import ru.home.swap.core.di.NetworkModule
 
-open class CoreApplication: Application() {
+open class CoreApplication(): Application() {
 
     protected lateinit var coreComponent: CoreComponent
 
