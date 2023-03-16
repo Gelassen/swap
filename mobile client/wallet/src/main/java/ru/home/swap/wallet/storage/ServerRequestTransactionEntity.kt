@@ -16,7 +16,8 @@ data class ServerRequestTransactionEntity(
     @PrimaryKey(autoGenerate = true) val uid: Long,
     @ColumnInfo(name = "requestType") val requestType: String = "",
     @ColumnInfo(name = "payloadAsJsonString") val payloadAsJson: String,
-    @ColumnInfo(name = Schema.ServerMetadata.TX_CHAIN_ID) val txChainId: Long
+    @ColumnInfo(name = Schema.ServerMetadata.TX_CHAIN_ID) val txChainId: Long,
+    @ColumnInfo(name = Schema.ServerMetadata.STATUS) val status: String
 /*    @Deprecated("Not used in V2 concept, but left as a possible improvement for the future")
     @ColumnInfo(name = "status") val status: String = ""*/
 )
@@ -27,14 +28,22 @@ fun ServerRequestTransactionEntity.toDomainObject(): Service {
         .create()
     val fooType: Type = object : TypeToken<Service>() {}.getType()
     val result = gson.fromJson<Service>(this.payloadAsJson, fooType)
+    result.status = this.status
+    result.id = this.uid
     return result
 }
 
-fun Service.fromDomain(chainServiceId: Long): ServerRequestTransactionEntity {
+fun Service.fromDomain(chainServiceId: Long, isProcessed: Boolean = false): ServerRequestTransactionEntity {
     return ServerRequestTransactionEntity(
         uid = this.id,
         requestType = "Just a stub",
         payloadAsJson = Gson().toJson(this),
-        txChainId = chainServiceId
+        txChainId = chainServiceId,
+        status = if (isProcessed) RequestStatus.PROCESSED else RequestStatus.WAITING
     )
+}
+
+object RequestStatus {
+    const val PROCESSED = "processed"
+    const val WAITING = "waiting"
 }

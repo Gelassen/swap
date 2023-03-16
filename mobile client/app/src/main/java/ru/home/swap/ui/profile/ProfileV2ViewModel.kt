@@ -38,7 +38,9 @@ import ru.home.swap.wallet.providers.WalletProvider
 import ru.home.swap.wallet.repository.IStorageRepository
 import ru.home.swap.wallet.repository.IWalletRepository
 import ru.home.swap.wallet.storage.TxStatus
+import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.ThreadLocalRandom
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -124,27 +126,27 @@ class ProfileV2ViewModel
         }
     }
 
+    // TODO possibly change on background queue introduced a bug with no popping up a new item
+    // TODO filtration by processed status has been added, record in cache is updated successfully
+    //  seems there is an extra record for the same mint tx -- verify!
+
     // TODO consider to move parts of the flow into separate class and methods
     //  to make it more clear and neat
     @OptIn(FlowPreview::class)
     fun backgroundProcessMinedTx() {
+        val useCase = BackgroundFlowUseCase()
         viewModelScope.launch {
             flow<Pair<ITransaction, Service>> {
-                while (uiState.value.isAllowedToProcess) {
+                while(state.value.isAllowedToProcess) {
                     getApplication<Application>().registerIdlingResource()
-                    val delay = 1120L
+                    val delay = 3120L
                     // wait for user's wallet address will be obtained from the cache during initialisation
-                    if (state.value.profile.userWalletAddress.isEmpty()) {
+                    if (state.value.profile.userWalletAddress.isEmpty()
+                        || state.value.pendingTx.isEmpty()) {
                         logger.d("[queue polling] delay() call")
                         getApplication<Application>().unregisterIdlingResource()
                         delay(delay)
-                        continue
-                    }
-                    if (state.value.pendingTx.isEmpty()) {
-                        logger.d("[queue polling] delay() call")
-                        getApplication<Application>().unregisterIdlingResource()
-                        delay(delay)
-                    } else {
+                    }  else {
                         val item = state.value.pendingTx.poll()
                         if (item != null) {
                             logger.d("[queue polling] emit item from queue ${item.toString()}")
@@ -152,6 +154,7 @@ class ProfileV2ViewModel
                         }
                         logger.d("[queue polling] delay() call")
                         getApplication<Application>().unregisterIdlingResource()
+
                         delay(delay)
                     }
                 }
@@ -159,26 +162,15 @@ class ProfileV2ViewModel
                 .flatMapConcat { item ->
                     // TODO consider to move each branch case into the separate class function
                     when(item.first.type) {
-                        MintTransaction::class.java.simpleName -> {
-                            /* token are created only for offer, demands registered just as a db record */
-//                            val mintItem = (item.first as MintTransaction).tokenId
-                            logger.d("[queue polling] process MintTransaction item")
-                            item.second.chainService.tokenId = (item.first as MintTransaction).tokenId
-                            // val chainService = item.second//ChainService(userWalletAddress = state.value.profile.userWalletAddress, tokenId = mintItem)
-                            val newService = item.second//Service(title = proposal.get()!!, date = 0L, index = listOf(), chainService = chainService)
-                            logger.d("[addOffer::server] ${item.first} \n and \n ${item.second}")
-                            personRepository.addOffer(
-                                contact = uiState.value.profile.contact,
-                                secret = uiState.value.profile.secret,
-                                newService = newService
-                            )
-                        }
+                        /* token are created only for offer, demands registered just as a db record */
+                        MintTransaction::class.java.simpleName -> { useCase.processMintTx(item) }
                         else -> { throw UnsupportedOperationException("Did you forget to add support of ${item.first.type} class tx?") }
                     }
                 }
                 .onStart { state.update { state -> state.copy(isLoading = true) } }
                 .flatMapConcat {
-                    if (it is Response.Data) { personRepository.cacheAccount(it.data) }
+//                    if (it is Response.Data) { personRepository.cacheAccount(it.data) }
+                    if (it is Response.Data) { useCase.updateCacheForMintTx(it)}
                     flow { emit(it) }
                 }
                 .collect { it ->
@@ -660,5 +652,72 @@ class ProfileV2ViewModel
                 )
             ).toJson()
         }
+
+        /*
+        * Should be called to clean dialog screen from previously entered data
+        * */
+        fun clearProposal() {
+            proposal.set("")
+        }
     }
+
+    inner class BackgroundFlowUseCase {
+
+        var currentTxPair: Pair<ITransaction, Service>? = null
+
+        @Deprecated("I have not solved yet issue by forwarding emit and delay calls back to flow context")
+        fun waitUntilGetAnItem(/*runInFlow:  (Pair<ITransaction, Service>) -> Unit,
+                               runDelay: suspend () -> Unit*/
+            emitCall: (Pair<ITransaction, Service>) -> Unit,
+            delayCall: /*suspend*/ () -> Unit
+        ) {
+            while (uiState.value.isAllowedToProcess) {
+                getApplication<Application>().registerIdlingResource()
+                val delay = 1120L
+                // wait for user's wallet address will be obtained from the cache during initialisation
+                if (state.value.profile.userWalletAddress.isEmpty()
+                    || state.value.pendingTx.isEmpty()) {
+                    logger.d("[queue polling] delay() call")
+                    getApplication<Application>().unregisterIdlingResource()
+//                    delay(delay)
+                    delayCall.invoke()
+                }  else {
+                    val item = state.value.pendingTx.poll()
+                    if (item != null) {
+                        logger.d("[queue polling] emit item from queue ${item.toString()}")
+//                        runInFlow(item)
+                        emitCall.invoke(item)
+                    }
+                    logger.d("[queue polling] delay() call")
+                    getApplication<Application>().unregisterIdlingResource()
+//                    delay(delay)
+                    delayCall.invoke()
+                }
+            }
+        }
+
+        fun processMintTx(item: Pair<ITransaction, Service>): Flow<Response<PersonProfile>> {
+            logger.d("[queue polling] process MintTransaction item")
+            currentTxPair = item
+            item.second.chainService.tokenId = (item.first as MintTransaction).tokenId
+            // val chainService = item.second//ChainService(userWalletAddress = state.value.profile.userWalletAddress, tokenId = mintItem)
+            val newService = item.second//Service(title = proposal.get()!!, date = 0L, index = listOf(), chainService = chainService)
+            logger.d("[addOffer::server] ${item.first} \n and \n ${item.second}")
+            return personRepository.addOffer(
+                contact = uiState.value.profile.contact,
+                secret = uiState.value.profile.secret,
+                newService = newService
+            )
+        }
+
+        suspend fun updateCacheForMintTx(it: Response.Data<PersonProfile>) {
+            personRepository.cacheAccount(it.data)
+            cacheRepository.createServerTx(
+                service = currentTxPair!!.second,
+                txChainId = (currentTxPair!!.first as MintTransaction).tokenId.toLong(),
+                isProcessed = true
+            )
+        }
+    }
+
 }

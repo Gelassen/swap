@@ -44,4 +44,5 @@ abstract class InjectorModule {
 
     @ContributesAndroidInjector
     abstract fun provideChainsFragment(): ChainsFragment
+
 }

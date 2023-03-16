@@ -5,13 +5,15 @@ import com.google.gson.annotations.SerializedName
 
 data class Service(
     @SerializedName("id")
-    val id: Long = 0L,
+    var id: Long = 0L,
     @SerializedName("title")
     val title: String = "",
     val date: Long = 0L,
     val index: List<String> = emptyList(),
     @SerializedName("chainService")
-    val chainService: ChainService = ChainService()
+    val chainService: ChainService = ChainService(),
+    @Transient
+    var status: String = ""
 )
 
 fun Service.toJson(): String {

@@ -9,7 +9,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import ru.home.swap.core.App
 
 @Database(entities = [ChainTransactionEntity::class, ServerRequestTransactionEntity::class],
-    version = 7, exportSchema = false
+    version = 9, exportSchema = false
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase: RoomDatabase() {

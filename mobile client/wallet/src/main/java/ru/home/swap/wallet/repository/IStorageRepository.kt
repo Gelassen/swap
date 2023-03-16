@@ -11,9 +11,11 @@ interface IStorageRepository {
 
     suspend fun createChainTx(tx: ITransaction): ITransaction
 
-    suspend fun createServerTx(service: Service, txChainId: Long): Service
+    suspend fun createServerTx(service: Service, txChainId: Long, isProcessed: Boolean): Service
 
     fun getAllChainTransactions(): Flow<List<Pair<ITransaction,Service>>>
+
+    fun getAllChainTx(): Flow<List<Pair<ITransaction,Service>>>
 
     fun getChainTransactionsByPage(): Flow<PagingData<ITransaction>>
 

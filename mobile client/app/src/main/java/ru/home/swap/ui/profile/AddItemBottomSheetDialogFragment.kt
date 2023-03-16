@@ -49,13 +49,11 @@ class AddItemBottomSheetDialogFragment: BottomSheetDialogFragment() {
         view.findViewById<TextView>(R.id.offer_option)
             .setOnClickListener {
                 binding.groupChoice.onOfferClick()
-//                binding.group_choice.onOfferClick()
             }
 
         view.findViewById<TextView>(R.id.demand_option)
             .setOnClickListener {
                 binding.groupChoice.onDemandClick()
-//                group_choice.onDemandClick()
             }
 
         binding.save.setOnClickListener {

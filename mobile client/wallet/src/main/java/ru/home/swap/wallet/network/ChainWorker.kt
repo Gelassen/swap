@@ -71,7 +71,7 @@ class ChainWorker
         cacheRepository.createChainTxAsFlow(tx as ITransaction)
             .map {
                 (service as Service).chainService.id = it.uid
-                cacheRepository.createServerTx(service, it.uid)
+                cacheRepository.createServerTx(service, it.uid, false)
 //                flow { emit(it) }
                 return@map it
             }

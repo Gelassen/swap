@@ -10,7 +10,15 @@ interface ChainTransactionDao {
             "SELECT * FROM ${Schema.ChainTransaction.TABLE_NAME} " +
             "INNER JOIN ${Schema.ServerMetadata.TABLE_NAME} " +
             "ON ${Schema.ChainTransaction.TABLE_NAME}.${Schema.ChainTransaction.UID} " +
-            "   = ${Schema.ServerMetadata.TABLE_NAME}.${Schema.ServerMetadata.TX_CHAIN_ID};")
+            "   = ${Schema.ServerMetadata.TABLE_NAME}.${Schema.ServerMetadata.TX_CHAIN_ID} " +
+            "WHERE ${Schema.ServerMetadata.TABLE_NAME}.${Schema.ServerMetadata.STATUS} = :status;")
+    fun getAll(status: String): Flow<List<TxWithMetadata>>
+
+    @Query("" +
+            "SELECT * FROM ${Schema.ChainTransaction.TABLE_NAME} " +
+            "INNER JOIN ${Schema.ServerMetadata.TABLE_NAME} " +
+            "ON ${Schema.ChainTransaction.TABLE_NAME}.${Schema.ChainTransaction.UID} " +
+            "   = ${Schema.ServerMetadata.TABLE_NAME}.${Schema.ServerMetadata.TX_CHAIN_ID}; ")
     fun getAll(): Flow<List<TxWithMetadata>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

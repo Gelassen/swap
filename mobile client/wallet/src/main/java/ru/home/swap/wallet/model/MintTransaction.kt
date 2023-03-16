@@ -8,7 +8,7 @@ import ru.home.swap.wallet.storage.TxStatus
 import ru.home.swap.wallet.storage.TxType
 
 data class MintTransaction(
-    override var uid: Long = -1,
+    override var uid: Long = 0L,
     override var status: String = TxStatus.TX_PENDING,
     val to: String = "",
     val value: Value = Value(),

@@ -5,7 +5,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import ru.home.swap.core.model.Service
 import ru.home.swap.wallet.model.ITransaction
-import ru.home.swap.wallet.model.MintTransaction
 import ru.home.swap.wallet.repository.IStorageRepository
 import java.util.concurrent.ConcurrentLinkedQueue
 
@@ -24,7 +23,7 @@ class FakeStorageRepository: IStorageRepository {
         TODO("Not yet implemented")
     }
 
-    override suspend fun createServerTx(service: Service, txChainId: Long): Service {
+    override suspend fun createServerTx(service: Service, txChainId: Int): Service {
         TODO("Not yet implemented")
     }
 
