@@ -4,6 +4,7 @@
     <string name="wallet_password">3ba9b75a087df0e7082e1d3d58308755e35e17ac1117a4caf42ef209d203cb4a</string>
     <string name="test_account_private_key">6cc625d1f47602232006d6d7b9c586cd838ffcad7a7c988cc27c8ce6934ca090</string>
     <string name="test_account_2_private_key">7300c460af63c70ba89189c4d39a0b8a3a75eee1ea7d7dcef1f96c5736031bf5</string>
+    <string name="test_account_3_private_key">96c1d1d177c07b55c04a12d5e6a7c0b029d23ed5619c081f312ac5fb86c919f9</string>
 
     <string name="chain_id">3347</string>
     <!--  0xB54e15454E0711b1917f88E656C2fc3E9dF4117d  -->

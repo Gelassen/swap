@@ -11,6 +11,8 @@ import org.web3j.abi.TypeReference
 import org.web3j.abi.datatypes.generated.Uint256
 import ru.home.swap.core.di.NetworkModule
 import ru.home.swap.core.extensions.attachIdlingResource
+import ru.home.swap.core.extensions.registerIdlingResource
+import ru.home.swap.core.extensions.unregisterIdlingResource
 import ru.home.swap.core.logger.Logger
 import ru.home.swap.core.model.Service
 import ru.home.swap.core.model.fromJson
@@ -62,6 +64,9 @@ class ChainWorker
 
     override suspend fun doWork(): Result {
         logger.d("[ChainWorker] Start work on minting a token")
+        val application = (applicationContext as Application)
+        application.registerIdlingResource()
+
         var result = Result.failure()
         setForeground(foregroundIndo)
 
@@ -91,8 +96,10 @@ class ChainWorker
             }
             .attachIdlingResource()
             .catch { logger.e("Failed ChainWorker", it) }
+            .onCompletion { application.unregisterIdlingResource() }
             .flowOn(backgroundDispatcher)
             .collect { result = processResponse(it) }
+
         logger.d("[ChainWorker] end work on minting a token")
         return result
     }
