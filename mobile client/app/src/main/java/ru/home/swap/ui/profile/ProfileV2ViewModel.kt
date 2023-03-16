@@ -40,7 +40,6 @@ import ru.home.swap.wallet.repository.IWalletRepository
 import ru.home.swap.wallet.storage.TxStatus
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
-import java.util.concurrent.ThreadLocalRandom
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -357,39 +356,13 @@ class ProfileV2ViewModel
     }
 
     fun checkAnExistingAccount() {
+        val useCase = CheckExistingAccountFlowUseCase()
         viewModelScope.launch {
             Log.d(App.TAG, "[a] Get cached account call")
             personRepository.getCachedAccount()
-                .flatMapConcat { it ->
-                    if (it.contact.isEmpty() && it.secret.isEmpty()) {
-                        Log.d(App.TAG, "[b1] Get cached account as an empty")
-                        flow<Response<PersonProfile>> {
-                            emit(Response.Data(it))
-                        }.stateIn(viewModelScope)
-                    } else {
-                        Log.d(App.TAG, "[b2] Get cached account call and request server for an actual one")
-                        personRepository.getAccount(it)
-                    }
-                }
-                .flatMapConcat { it ->
-                    if (it is Response.Data) {
-                        personRepository.cacheAccountAsFlow(it.data)
-                            .collect { it ->
-                                // no op, just execute the command
-                                Log.d(App.TAG, "account has been cached")
-                            }
-                    }
-                    flow {
-                        emit(it)
-                    }
-                }
-                .onStart {
-                    state.update { state ->
-                        state.copy(
-                            isLoading = true
-                        )
-                    }
-                }
+                .flatMapConcat { it -> useCase.checkAccount(it) }
+                .flatMapConcat { it -> useCase.cacheAccount(it) }
+                .onStart { state.update { state -> state.copy(isLoading = true) } }
                 .catch { e ->
                     Log.e(App.TAG, "Get an error when obtaining account", e)
                     state.update { state ->
@@ -682,4 +655,25 @@ class ProfileV2ViewModel
         }
     }
 
+    inner class CheckExistingAccountFlowUseCase {
+
+        fun checkAccount(personProfile: PersonProfile) = flow<PersonRepository.Response<PersonProfile>> {
+            if (personProfile.contact.isEmpty() && personProfile.secret.isEmpty()) {
+                Log.d(App.TAG, "[b1] Get cached account as an empty")
+                flow<Response<PersonProfile>> {
+                    emit(Response.Data(personProfile))
+                }.stateIn(viewModelScope)
+            } else {
+                Log.d(App.TAG, "[b2] Get cached account call and request server for an actual one")
+                personRepository.getAccount(personProfile)
+            }
+        }
+
+        fun cacheAccount(response: Response<PersonProfile>) = flow {
+            if (response is Response.Data) {
+                personRepository.cacheAccount(response.data)
+            }
+            emit(response)
+        }
+    }
 }
