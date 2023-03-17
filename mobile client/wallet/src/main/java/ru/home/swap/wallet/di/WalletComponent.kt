@@ -2,11 +2,13 @@ package ru.home.swap.wallet.di
 
 import ru.home.swap.wallet.TestWalletActivity
 import dagger.Component
+import kotlinx.coroutines.CoroutineScope
 import ru.home.swap.core.di.CoreComponent
 import ru.home.swap.wallet.WalletApplication
 import ru.home.swap.wallet.repository.IStorageRepository
 import ru.home.swap.wallet.repository.IWalletRepository
 import ru.home.swap.wallet.storage.dao.ChainTransactionDao
+import javax.inject.Named
 import javax.inject.Scope
 
 @Scope
@@ -23,4 +25,6 @@ interface WalletComponent {
     fun providesWalletRepository(): IWalletRepository
     fun providesStorageRepository(): IStorageRepository
     fun providesChainTransactionDao(): ChainTransactionDao
+    @Named(WalletModule.CACHE_SCOPE)
+    fun providesCacheUtilsScope(): CoroutineScope
 }

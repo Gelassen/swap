@@ -2,6 +2,7 @@ package ru.home.swap.wallet.storage
 
 import kotlinx.coroutines.*
 import ru.home.swap.core.di.NetworkModule
+import ru.home.swap.wallet.di.WalletModule
 import ru.home.swap.wallet.repository.IStorageRepository
 import javax.inject.Inject
 import javax.inject.Named
@@ -9,7 +10,7 @@ import javax.inject.Named
 class CacheUtils
 @Inject constructor(
     val repository: IStorageRepository,
-    val scope: CoroutineScope, // supposed to be CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    @Named(WalletModule.CACHE_SCOPE) val scope: CoroutineScope, // supposed to be CoroutineScope(SupervisorJob() + Dispatchers.IO)
     @Named(NetworkModule.DISPATCHER_IO) val backgroundDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
 
