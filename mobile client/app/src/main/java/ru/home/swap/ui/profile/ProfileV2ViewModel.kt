@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.*
 import ru.home.swap.App
 import ru.home.swap.R
 import ru.home.swap.core.di.NetworkModule
-import ru.home.swap.core.extensions.attachIdlingResource
 import ru.home.swap.core.extensions.registerIdlingResource
 import ru.home.swap.core.extensions.unregisterIdlingResource
 import ru.home.swap.core.logger.Logger
@@ -31,14 +30,12 @@ import ru.home.swap.wallet.contract.Value
 import ru.home.swap.wallet.model.ITransaction
 import ru.home.swap.wallet.model.MintTransaction
 import ru.home.swap.wallet.model.RegisterUserTransaction
-import ru.home.swap.wallet.model.TransactionReceiptDomain
 import ru.home.swap.wallet.network.ChainWorker
 import ru.home.swap.wallet.network.getWorkRequest
 import ru.home.swap.wallet.providers.WalletProvider
 import ru.home.swap.wallet.repository.IStorageRepository
 import ru.home.swap.wallet.repository.IWalletRepository
-import ru.home.swap.wallet.storage.TxStatus
-import java.util.*
+import ru.home.swap.wallet.storage.model.TxStatus
 import java.util.concurrent.ConcurrentLinkedQueue
 import javax.inject.Inject
 import javax.inject.Named

@@ -1,11 +1,11 @@
-package ru.home.swap.wallet.storage
+package ru.home.swap.wallet.storage.model
 
 import androidx.room.Embedded
 import androidx.room.Relation
 import ru.home.swap.core.model.Service
 import ru.home.swap.wallet.model.ITransaction
 
-data class TxWithMetadata(
+data class TxWithMetadataEntity(
     @Embedded val serverMetadata: ServerRequestTransactionEntity,
     @Relation(
         parentColumn = Schema.ServerMetadata.TX_CHAIN_ID,
@@ -15,7 +15,7 @@ data class TxWithMetadata(
 )
 
 // TODO expand me to generic domain conversion
-fun TxWithMetadata.toDomain() : Pair<ITransaction, Service> {
+fun TxWithMetadataEntity.toDomain() : Pair<ITransaction, Service> {
     val transaction = tx.toDomain()
     val service = serverMetadata.toDomainObject()
     return Pair(transaction, service)

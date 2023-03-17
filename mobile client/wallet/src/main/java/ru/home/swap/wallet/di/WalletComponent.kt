@@ -6,7 +6,7 @@ import ru.home.swap.core.di.CoreComponent
 import ru.home.swap.wallet.WalletApplication
 import ru.home.swap.wallet.repository.IStorageRepository
 import ru.home.swap.wallet.repository.IWalletRepository
-import ru.home.swap.wallet.storage.ChainTransactionDao
+import ru.home.swap.wallet.storage.dao.ChainTransactionDao
 import javax.inject.Scope
 
 @Scope

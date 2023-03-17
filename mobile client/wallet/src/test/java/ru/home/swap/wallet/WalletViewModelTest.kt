@@ -19,7 +19,7 @@ import ru.home.swap.wallet.fakes.FakeStorageRepository
 import ru.home.swap.wallet.fakes.FakeWalletRepository
 import ru.home.swap.wallet.model.ITransaction
 import ru.home.swap.wallet.rules.MainCoroutineRule
-import ru.home.swap.wallet.storage.TxStatus
+import ru.home.swap.wallet.storage.model.TxStatus
 import java.math.BigInteger
 
 @OptIn(ExperimentalCoroutinesApi::class)

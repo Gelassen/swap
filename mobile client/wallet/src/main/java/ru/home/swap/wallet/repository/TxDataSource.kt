@@ -7,8 +7,8 @@ import ru.home.swap.core.extensions.registerIdlingResource
 import ru.home.swap.core.extensions.unregisterIdlingResource
 import ru.home.swap.core.logger.Logger
 import ru.home.swap.wallet.model.ITransaction
-import ru.home.swap.wallet.storage.ChainTransactionDao
-import ru.home.swap.wallet.storage.toDomain
+import ru.home.swap.wallet.storage.dao.ChainTransactionDao
+import ru.home.swap.wallet.storage.model.toDomain
 
 class TxDataSource(val application: Application, val dao: ChainTransactionDao, val pageSize: Int)
     : PagingSource<Int, ITransaction>()  {

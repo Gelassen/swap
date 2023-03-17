@@ -7,6 +7,10 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.sqlite.db.SupportSQLiteDatabase
 import ru.home.swap.core.App
+import ru.home.swap.wallet.storage.dao.ChainTransactionDao
+import ru.home.swap.wallet.storage.dao.ServerTransactionDao
+import ru.home.swap.wallet.storage.model.ChainTransactionEntity
+import ru.home.swap.wallet.storage.model.ServerRequestTransactionEntity
 
 @Database(entities = [ChainTransactionEntity::class, ServerRequestTransactionEntity::class],
     version = 9, exportSchema = false

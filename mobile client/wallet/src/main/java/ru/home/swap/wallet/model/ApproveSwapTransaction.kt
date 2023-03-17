@@ -3,9 +3,9 @@ package ru.home.swap.wallet.model
 import com.google.gson.GsonBuilder
 import ru.home.swap.wallet.contract.Match
 import ru.home.swap.wallet.converters.MatchTypeAdapter
-import ru.home.swap.wallet.storage.ChainTransactionEntity
-import ru.home.swap.wallet.storage.TxStatus
-import ru.home.swap.wallet.storage.TxType
+import ru.home.swap.wallet.storage.model.ChainTransactionEntity
+import ru.home.swap.wallet.storage.model.TxStatus
+import ru.home.swap.wallet.storage.model.TxType
 
 data class ApproveSwapTransaction(
     override var uid: Long = 0,

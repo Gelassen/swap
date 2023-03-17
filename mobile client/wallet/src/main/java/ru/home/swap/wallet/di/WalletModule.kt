@@ -5,18 +5,15 @@ import com.example.wallet.R
 import ru.home.swap.wallet.storage.AppDatabase
 import dagger.Module
 import dagger.Provides
-import kotlinx.coroutines.CoroutineDispatcher
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.web3j.protocol.http.HttpService
-import ru.home.swap.core.di.NetworkModule
 import ru.home.swap.core.network.interceptors.DefaultInterceptor
 import ru.home.swap.wallet.repository.*
-import ru.home.swap.wallet.storage.ChainTransactionDao
-import ru.home.swap.wallet.storage.Schema
-import ru.home.swap.wallet.storage.ServerTransactionDao
-import javax.inject.Named
+import ru.home.swap.wallet.storage.dao.ChainTransactionDao
+import ru.home.swap.wallet.storage.model.Schema
+import ru.home.swap.wallet.storage.dao.ServerTransactionDao
 
 @Module
 class WalletModule(val context: Application) {

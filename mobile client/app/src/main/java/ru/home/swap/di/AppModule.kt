@@ -14,11 +14,10 @@ import ru.home.swap.repository.IPersonRepository
 import ru.home.swap.repository.PersonRepository
 import ru.home.swap.repository.pagination.DemandsPagingSource
 import ru.home.swap.repository.pagination.OffersPagingSource
-import ru.home.swap.wallet.di.WalletMainScope
 import ru.home.swap.wallet.repository.IStorageRepository
 import ru.home.swap.wallet.repository.IWalletRepository
 import ru.home.swap.wallet.repository.TxDataSource
-import ru.home.swap.wallet.storage.ChainTransactionDao
+import ru.home.swap.wallet.storage.dao.ChainTransactionDao
 import javax.inject.Named
 
 @Module()

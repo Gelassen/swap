@@ -1,20 +1,22 @@
 package ru.home.swap.wallet.repository
 
-import android.util.Log
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import ru.home.swap.core.App
 import ru.home.swap.core.extensions.attachIdlingResource
 import ru.home.swap.core.logger.Logger
 import ru.home.swap.core.model.Service
 import ru.home.swap.wallet.model.ITransaction
-import ru.home.swap.wallet.model.MintTransaction
-import ru.home.swap.wallet.storage.*
-import ru.home.swap.wallet.storage.Schema.ChainTransaction.DEFAULT_PAGE_SIZE
+import ru.home.swap.wallet.storage.model.Schema.ChainTransaction.DEFAULT_PAGE_SIZE
+import ru.home.swap.wallet.storage.dao.ChainTransactionDao
+import ru.home.swap.wallet.storage.dao.ServerTransactionDao
+import ru.home.swap.wallet.storage.model.RequestStatus
+import ru.home.swap.wallet.storage.model.fromDomain
+import ru.home.swap.wallet.storage.model.toDomain
+import ru.home.swap.wallet.storage.model.toDomainObject
 
 class StorageRepository(
     val chainTransactionDao: ChainTransactionDao,

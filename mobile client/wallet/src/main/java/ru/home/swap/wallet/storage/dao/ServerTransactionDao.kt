@@ -1,6 +1,8 @@
-package ru.home.swap.wallet.storage
+package ru.home.swap.wallet.storage.dao
 
 import androidx.room.*
+import ru.home.swap.wallet.storage.model.Schema
+import ru.home.swap.wallet.storage.model.ServerRequestTransactionEntity
 
 @Dao
 interface ServerTransactionDao {

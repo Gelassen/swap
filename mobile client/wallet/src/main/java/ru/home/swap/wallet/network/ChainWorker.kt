@@ -24,7 +24,7 @@ import ru.home.swap.wallet.model.MintTransaction
 import ru.home.swap.wallet.model.TransactionReceiptDomain
 import ru.home.swap.wallet.repository.IStorageRepository
 import ru.home.swap.wallet.repository.IWalletRepository
-import ru.home.swap.wallet.storage.TxStatus
+import ru.home.swap.wallet.storage.model.TxStatus
 import javax.inject.Inject
 import javax.inject.Named
 

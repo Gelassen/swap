@@ -1,4 +1,4 @@
-package ru.home.swap.wallet.storage
+package ru.home.swap.wallet.storage.model
 
 class Schema {
 

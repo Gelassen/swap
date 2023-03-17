@@ -3,9 +3,9 @@ package ru.home.swap.wallet.model
 import com.google.gson.GsonBuilder
 import ru.home.swap.wallet.contract.Value
 import ru.home.swap.wallet.converters.ValueTypeAdapter
-import ru.home.swap.wallet.storage.ChainTransactionEntity
-import ru.home.swap.wallet.storage.TxStatus
-import ru.home.swap.wallet.storage.TxType
+import ru.home.swap.wallet.storage.model.ChainTransactionEntity
+import ru.home.swap.wallet.storage.model.TxStatus
+import ru.home.swap.wallet.storage.model.TxType
 
 data class MintTransaction(
     override var uid: Long = 0L,

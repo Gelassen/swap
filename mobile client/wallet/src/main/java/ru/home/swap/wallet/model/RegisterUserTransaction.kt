@@ -1,9 +1,9 @@
 package ru.home.swap.wallet.model
 
 import com.google.gson.Gson
-import ru.home.swap.wallet.storage.ChainTransactionEntity
-import ru.home.swap.wallet.storage.TxStatus
-import ru.home.swap.wallet.storage.TxType
+import ru.home.swap.wallet.storage.model.ChainTransactionEntity
+import ru.home.swap.wallet.storage.model.TxStatus
+import ru.home.swap.wallet.storage.model.TxType
 
 data class RegisterUserTransaction(
     override var uid: Long = -1L,

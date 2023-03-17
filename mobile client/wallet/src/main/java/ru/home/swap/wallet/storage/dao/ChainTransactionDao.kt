@@ -1,7 +1,10 @@
-package ru.home.swap.wallet.storage
+package ru.home.swap.wallet.storage.dao
 
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
+import ru.home.swap.wallet.storage.model.ChainTransactionEntity
+import ru.home.swap.wallet.storage.model.Schema
+import ru.home.swap.wallet.storage.model.TxWithMetadataEntity
 
 @Dao
 interface ChainTransactionDao {
@@ -12,14 +15,14 @@ interface ChainTransactionDao {
             "ON ${Schema.ChainTransaction.TABLE_NAME}.${Schema.ChainTransaction.UID} " +
             "   = ${Schema.ServerMetadata.TABLE_NAME}.${Schema.ServerMetadata.TX_CHAIN_ID} " +
             "WHERE ${Schema.ServerMetadata.TABLE_NAME}.${Schema.ServerMetadata.STATUS} = :status;")
-    fun getAll(status: String): Flow<List<TxWithMetadata>>
+    fun getAll(status: String): Flow<List<TxWithMetadataEntity>>
 
     @Query("" +
             "SELECT * FROM ${Schema.ChainTransaction.TABLE_NAME} " +
             "INNER JOIN ${Schema.ServerMetadata.TABLE_NAME} " +
             "ON ${Schema.ChainTransaction.TABLE_NAME}.${Schema.ChainTransaction.UID} " +
             "   = ${Schema.ServerMetadata.TABLE_NAME}.${Schema.ServerMetadata.TX_CHAIN_ID}; ")
-    fun getAll(): Flow<List<TxWithMetadata>>
+    fun getAll(): Flow<List<TxWithMetadataEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(vararg transactions: ChainTransactionEntity)

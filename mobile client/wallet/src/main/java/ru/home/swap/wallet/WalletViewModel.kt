@@ -20,7 +20,7 @@ import ru.home.swap.wallet.model.*
 import ru.home.swap.wallet.network.ChainWorker
 import ru.home.swap.wallet.network.getWorkRequest
 import ru.home.swap.wallet.repository.IStorageRepository
-import ru.home.swap.wallet.storage.TxStatus
+import ru.home.swap.wallet.storage.model.TxStatus
 import java.math.BigInteger
 import javax.inject.Inject
 import javax.inject.Named

@@ -1,6 +1,6 @@
 package ru.home.swap.wallet.model
 
-import ru.home.swap.wallet.storage.ChainTransactionEntity
+import ru.home.swap.wallet.storage.model.ChainTransactionEntity
 
 interface ITransaction {
     var uid: Long
