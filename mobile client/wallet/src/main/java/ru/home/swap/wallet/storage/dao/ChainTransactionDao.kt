@@ -42,4 +42,15 @@ interface ChainTransactionDao {
     @Delete
     suspend fun delete(transactions: ChainTransactionEntity)
 
+    @Query("SELECT COUNT(*) FROM ${Schema.ChainTransaction.TABLE_NAME}")
+    suspend fun getNumberOfRecordsInStorage(): Long
+
+    @Query("DELETE FROM ${Schema.ChainTransaction.TABLE_NAME} " +
+            "WHERE ${Schema.ChainTransaction.UID} IN " +
+            "(" +
+                "SELECT ${Schema.ChainTransaction.UID} FROM ${Schema.ChainTransaction.TABLE_NAME} " +
+                "ORDER BY ${Schema.ChainTransaction.UID} ASC LIMIT :limit" +
+            ")")
+    suspend fun removeCachedData(limit: Int)
+
 }

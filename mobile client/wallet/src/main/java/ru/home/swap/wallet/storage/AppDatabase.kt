@@ -13,7 +13,7 @@ import ru.home.swap.wallet.storage.model.ChainTransactionEntity
 import ru.home.swap.wallet.storage.model.ServerRequestTransactionEntity
 
 @Database(entities = [ChainTransactionEntity::class, ServerRequestTransactionEntity::class],
-    version = 9, exportSchema = false
+    version = 10, exportSchema = false
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase: RoomDatabase() {

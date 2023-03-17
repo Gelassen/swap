@@ -10,6 +10,7 @@ class Schema {
 
     object ServerMetadata {
         const val TABLE_NAME: String = "ServerTransactionMetadata"
+        const val UID: String = "uid"
         const val TX_CHAIN_ID: String = "txChainId"
         const val STATUS: String = "status"
     }

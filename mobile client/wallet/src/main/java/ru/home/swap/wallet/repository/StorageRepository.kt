@@ -91,4 +91,12 @@ class StorageRepository(
         chainTransactionDao.delete(tx.fromDomain())
     }
 
+    override suspend fun getStorageRecordsCount(): Long {
+        return chainTransactionDao.getNumberOfRecordsInStorage()
+    }
+
+    override suspend fun removeCachedData(limit: Int) {
+        chainTransactionDao.removeCachedData(limit)
+    }
+
 }

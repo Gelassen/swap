@@ -21,4 +21,8 @@ interface IStorageRepository {
 
     suspend fun removeChainTransaction(tx: ITransaction)
 
+    suspend fun getStorageRecordsCount(): Long
+
+    suspend fun removeCachedData(limit: Int)
+
 }

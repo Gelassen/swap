@@ -2,6 +2,7 @@ package ru.home.swap.wallet.storage.model
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -11,9 +12,19 @@ import ru.home.swap.wallet.contract.Value
 import ru.home.swap.wallet.converters.ValueTypeAdapter
 import java.lang.reflect.Type
 
-@Entity(tableName = Schema.ServerMetadata.TABLE_NAME)
+@Entity(
+    tableName = Schema.ServerMetadata.TABLE_NAME,
+    foreignKeys = [ForeignKey(
+        entity = ChainTransactionEntity::class,
+        parentColumns = arrayOf(Schema.ChainTransaction.UID),
+        childColumns = arrayOf(Schema.ServerMetadata.UID),
+        onDelete = ForeignKey.CASCADE
+    )]
+)
 data class ServerRequestTransactionEntity(
-    @PrimaryKey(autoGenerate = true) val uid: Long,
+    @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = Schema.ServerMetadata.UID)
+    val uid: Long,
     @ColumnInfo(name = "requestType") val requestType: String = "",
     @ColumnInfo(name = "payloadAsJsonString") val payloadAsJson: String,
     @ColumnInfo(name = Schema.ServerMetadata.TX_CHAIN_ID) val txChainId: Long,
