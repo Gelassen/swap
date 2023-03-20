@@ -16,6 +16,10 @@ import kotlin.collections.ArrayList
 class DemandsPagingSource(private val api: IApi, private val pageSize: Int)
     : PagingSource<Int, Service>() {
 
+    companion object {
+        const val DEFAULT_START_PAGE = 1
+    }
+
     private var contact: String? = null
     private var secret: String? = null
 
@@ -40,7 +44,7 @@ class DemandsPagingSource(private val api: IApi, private val pageSize: Int)
             )
             if (response.isSuccessful) {
                 val body = response.body()
-                val data = body?.payload?.asList() ?: Collections.emptyList()
+                val data = body?.payload?.toList() ?: Collections.emptyList()
                 Log.d(App.PAGING, "Paging call")
                 return LoadResult.Page(
                     data = data,
@@ -60,10 +64,6 @@ class DemandsPagingSource(private val api: IApi, private val pageSize: Int)
     fun setCredentials(contact: String, secret: String) {
         this.contact = contact
         this.secret = secret
-    }
-
-    private fun Collection<Service>.asList(): List<Service> {
-        return ArrayList<Service>(this)
     }
 
 }

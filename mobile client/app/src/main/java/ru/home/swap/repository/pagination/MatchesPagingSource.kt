@@ -11,9 +11,10 @@ import ru.home.swap.utils.AppCredentials
 import java.io.IOException
 import java.util.*
 import kotlin.IllegalStateException
+import kotlin.collections.ArrayList
 
-class OffersPagingSource(private val api: IApi, private val pageSize: Int)
-    : PagingSource<Int, Service>() {
+class MatchesPagingSource(private val api: IApi, private val pageSize: Int)
+    : PagingSource<Int, Any>() {
 
     companion object {
         const val DEFAULT_START_PAGE = 1
@@ -22,21 +23,21 @@ class OffersPagingSource(private val api: IApi, private val pageSize: Int)
     private var contact: String? = null
     private var secret: String? = null
 
-    override fun getRefreshKey(state: PagingState<Int, Service>): Int? {
+    override fun getRefreshKey(state: PagingState<Int, Any>): Int? {
         return state.anchorPosition?.let { anchorPosition ->
             state.closestPageToPosition(anchorPosition)?.prevKey?.plus(1)
                 ?: state.closestPageToPosition(anchorPosition)?.nextKey?.minus(1)
         }
     }
 
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Service> {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Any> {
         if (contact == null || secret == null)
             throw IllegalStateException("Credentials are empty. Did you pass credentials for API request?")
 
         try {
             val page = params.key ?: DEFAULT_START_PAGE
 
-            val response = api.getOffers(
+            val response = api.getMatchesForUserDemands(
                 credentials = AppCredentials.basic(contact, secret),
                 page = page,
                 size = pageSize

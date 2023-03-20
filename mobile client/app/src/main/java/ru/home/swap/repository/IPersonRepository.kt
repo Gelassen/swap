@@ -17,5 +17,4 @@ interface IPersonRepository {
     fun removeDemand(contact: String, secret: String, id: Long): Flow<PersonRepository.Response<PersonProfile>>
     fun getContacts(contact: String, secret: String, serviceId: Long): Flow<PersonRepository.Response<PersonProfile>>
     fun cleanCachedAccount(): Flow<Any>
-
 }

@@ -9,6 +9,7 @@ import ru.home.swap.App
 import ru.home.swap.R
 import ru.home.swap.core.converters.ApiResponseConverter
 import ru.home.swap.core.extensions.attachIdlingResource
+import ru.home.swap.core.logger.Logger
 import ru.home.swap.core.model.PersonProfile
 import ru.home.swap.core.model.Service
 import ru.home.swap.core.network.IApi
@@ -17,26 +18,28 @@ import java.net.HttpURLConnection
 
 class PersonRepository(val api: IApi, val cache: Cache, val context: Context): IPersonRepository {
 
+    private var logger: Logger = Logger.getInstance()
+
     override fun createAccountAsFlow(person: PersonProfile): Flow<Response<PersonProfile>> {
         return flow {
-            Log.d(App.TAG, "[a] createProfile() call")
+            logger.d( "[a] createProfile() call")
             val response = api.createProfile(
                 credentials = AppCredentials.basic(person.contact, person.secret),
                 person = person
             )
-            Log.d(App.TAG, "[b] get profile response")
+            logger.d( "[b] get profile response")
             if (response.isSuccessful) {
-                Log.d(App.TAG, "[c] response is ok")
+                logger.d( "[c] response is ok")
                 var payload = response.body()!!
                 emit(Response.Data(payload.payload))
             } else {
-                Log.d(App.TAG, "[d] response is not ok")
+                logger.d( "[d] response is not ok")
                 val errorPayload = ApiResponseConverter().toDomain(response.errorBody()?.string()!!);
                 emit(Response.Error.Message("${response.message()}:\n\n${errorPayload.payload}"))
             }
         }
             .catch { ex ->
-                Log.e(App.TAG, "Failed to create account and process result on network layer", ex)
+                logger.e( "Failed to create account and process result on network layer", ex)
                 emit(Response.Error.Exception(ex))
             }
     }
@@ -44,23 +47,23 @@ class PersonRepository(val api: IApi, val cache: Cache, val context: Context): I
     override suspend fun createAccount(person: PersonProfile): Response<PersonProfile> {
         lateinit var result: Response<PersonProfile>
         try {
-            Log.d(App.TAG, "[a] createProfile() call")
+            logger.d( "[a] createProfile() call")
             val response = api.createProfile(
                 credentials = AppCredentials.basic(person.contact, person.secret),
                 person = person
             )
-            Log.d(App.TAG, "[b] get profile response")
+            logger.d( "[b] get profile response")
             if (response.isSuccessful) {
-                Log.d(App.TAG, "[c] response is ok")
+                logger.d( "[c] response is ok")
                 var payload = response.body()!!
                 result = Response.Data(payload.payload)
             } else {
-                Log.d(App.TAG, "[d] response is not ok")
+                logger.d( "[d] response is not ok")
                 val errorPayload = ApiResponseConverter().toDomain(response.errorBody()?.string()!!);
                 result = Response.Error.Message("${response.message()}:\n\n${errorPayload.payload}")
             }
         } catch (ex: Exception) {
-            Log.e(App.TAG, "Failed to create account and process result on network layer", ex)
+            logger.e("Failed to create account and process result on network layer", ex)
             result = Response.Error.Exception(ex)
         }
         return result
@@ -84,12 +87,12 @@ class PersonRepository(val api: IApi, val cache: Cache, val context: Context): I
 
     override fun getAccount(person: PersonProfile): Flow<Response<PersonProfile>> {
         return flow {
-            Log.d(App.TAG, "[a] getProfile() call")
+            logger.d( "[a] getProfile() call")
             val response = api.getProfile(
                 credentials = AppCredentials.basic(person.contact, person.secret)
             )
             if (response.isSuccessful) {
-                Log.d(App.TAG, "[b1] get body and emit")
+                logger.d( "[b1] get body and emit")
                 if (response.code() == HttpURLConnection.HTTP_NO_CONTENT) {
                     emit(Response.Error.Message(context.getString(R.string.error_no_data_for_your_params)))
                 } else {
@@ -97,20 +100,20 @@ class PersonRepository(val api: IApi, val cache: Cache, val context: Context): I
                     emit(Response.Data(payload.payload))
                 }
             } else {
-                Log.d(App.TAG, "[b2] get error and emit")
+                logger.d( "[b2] get error and emit")
                 emit(Response.Error.Message(response.message()))
             }
         }
             .catch { ex ->
-                Log.d(App.TAG, "[c] get an exception")
-                Log.e(App.TAG, "Exception on getAccount() call", ex)
+                logger.d("[c] get an exception")
+                logger.e( "Exception on getAccount() call", ex)
                 emit(Response.Error.Exception(ex))
             }
     }
 
     override fun addOffer(contact: String, secret: String, newService: Service):  Flow<Response<PersonProfile>> {
         return flow {
-            Log.d(App.TAG, "[add offer] start")
+            logger.d( "[add offer] start")
             val response = api.addOffer(
                 credentials = AppCredentials.basic(contact, secret),
                 service = newService
@@ -120,22 +123,22 @@ class PersonRepository(val api: IApi, val cache: Cache, val context: Context): I
             * with server resources atomic at the same time
             * */
             if (response.isSuccessful) {
-                Log.d(App.TAG, "[add offer] success case")
+                logger.d( "[add offer] success case")
                 val profileResponse = api.getProfile(
                     credentials = AppCredentials.basic(contact, secret)
                 )
                 val payload = profileResponse.body()!!
                 emit(Response.Data(payload.payload))
             } else {
-                Log.d(App.TAG, "[add offer] error case")
+                logger.d( "[add offer] error case")
                 val errorPayload = ApiResponseConverter().toDomain(response.errorBody()?.string()!!);
                 emit(Response.Error.Message("${response.message()}:\n\n${errorPayload.payload}"))
             }
-            Log.d(App.TAG, "[add offer] end")
+            logger.d( "[add offer] end")
         }
             .attachIdlingResource()
             .catch { ex ->
-                Log.e(App.TAG, "Exception on addOffer() call", ex)
+                logger.e( "Exception on addOffer() call", ex)
                 emit(Response.Error.Exception(ex))
             }
     }
@@ -147,7 +150,7 @@ class PersonRepository(val api: IApi, val cache: Cache, val context: Context): I
                 service = newService
             )
             if (response.isSuccessful) {
-                Log.d(App.TAG, "[add demand] success case")
+                logger.d( "[add demand] success case")
                 val profileResponse = api.getProfile(
                     credentials = AppCredentials.basic(contact, secret)
                 )
@@ -159,7 +162,7 @@ class PersonRepository(val api: IApi, val cache: Cache, val context: Context): I
             }
         }
             .catch { ex ->
-                Log.e(App.TAG, "Exception on addDemand() call", ex)
+                logger.e( "Exception on addDemand() call", ex)
                 emit(Response.Error.Exception(ex))
             }
     }
@@ -171,7 +174,7 @@ class PersonRepository(val api: IApi, val cache: Cache, val context: Context): I
                 serviceId = id
             )
             if (response.isSuccessful) {
-                Log.d(App.TAG, "[delete offer] success case")
+                logger.d( "[delete offer] success case")
                 val profileResponse = api.getProfile(
                     credentials = AppCredentials.basic(contact, secret)
                 )
@@ -182,7 +185,7 @@ class PersonRepository(val api: IApi, val cache: Cache, val context: Context): I
             }
         }
             .catch { ex ->
-                Log.e(App.TAG, "Exception on removeOffer() call", ex)
+                logger.e( "Exception on removeOffer() call", ex)
                 emit(Response.Error.Exception(ex))
             }
     }
@@ -204,7 +207,7 @@ class PersonRepository(val api: IApi, val cache: Cache, val context: Context): I
             }
         }
             .catch { ex ->
-                Log.e(App.TAG, "Exception on removeOffer() call", ex)
+                logger.e( "Exception on removeOffer() call", ex)
                 emit(Response.Error.Exception(ex))
             }
     }
@@ -223,7 +226,7 @@ class PersonRepository(val api: IApi, val cache: Cache, val context: Context): I
             }
         }
             .catch { ex ->
-                Log.e(App.TAG, "Exception on removeOffer() call", ex)
+                logger.e( "Exception on removeOffer() call", ex)
                 emit(Response.Error.Exception(ex))
             }
     }

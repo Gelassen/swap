@@ -65,4 +65,12 @@ interface IApi {
     suspend fun getContacts(
         @Header("Authorization") credentials: String,
         @Query("serviceId") serviceId: Long): Response<ApiResponse<PersonProfile>>
+
+    @Headers("Content-Type: application/json; charset=utf-8")
+    @GET("/api/v1/account/matches")
+    suspend fun getMatchesForUserDemands(
+        @Header("Authorization") credentials: String,
+        @Query("page") page: Int,
+        @Query("size") size: Int
+    ): Response<ApiResponse<Collection<Any>>>
 }
