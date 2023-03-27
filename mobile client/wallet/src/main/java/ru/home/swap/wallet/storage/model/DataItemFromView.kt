@@ -3,22 +3,6 @@ package ru.home.swap.wallet.storage.model
 import androidx.room.DatabaseView
 import ru.home.swap.wallet.storage.model.Schema.*
 
-/*
-*
-*     @ColumnInfo(name = Schema.ServerMetadata.UID)
-    val uid: Long,
-    @ColumnInfo(name = "requestType") val requestType: String = "",
-    @ColumnInfo(name = "payloadAsJsonString") val payloadAsJson: String,
-    @ColumnInfo(name = Schema.ServerMetadata.TX_CHAIN_ID) val txChainId: Long,
-    @ColumnInfo(name = Schema.ServerMetadata.STATUS) val status: String
-* */
-/*
-*     @Query("" +
-            "SELECT * FROM ${Schema.ChainTransaction.TABLE_NAME} " +
-            "INNER JOIN ${Schema.ServerMetadata.TABLE_NAME} " +
-            "ON ${Schema.ChainTransaction.TABLE_NAME}.${Schema.ChainTransaction.UID} " +
-            "   = ${Schema.ServerMetadata.TABLE_NAME}.${Schema.ServerMetadata.TX_CHAIN_ID}; ")
-* */
 @DatabaseView(
     viewName = Views.ChainTxWithServerMetadata.VIEW_NAME,
     value =

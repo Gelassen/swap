@@ -1,11 +1,9 @@
 package ru.home.swap.repository
 
 import android.content.Context
-import android.util.Log
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
-import ru.home.swap.App
 import ru.home.swap.R
 import ru.home.swap.core.converters.ApiResponseConverter
 import ru.home.swap.core.extensions.attachIdlingResource
@@ -13,6 +11,7 @@ import ru.home.swap.core.logger.Logger
 import ru.home.swap.core.model.PersonProfile
 import ru.home.swap.core.model.Service
 import ru.home.swap.core.network.IApi
+import ru.home.swap.core.network.Response
 import ru.home.swap.utils.AppCredentials
 import java.net.HttpURLConnection
 
@@ -235,13 +234,13 @@ class PersonRepository(val api: IApi, val cache: Cache, val context: Context): I
         return cache.cleanProfile()
     }
 
-    @Deprecated(message = "Please use Response class defined in :core module")
-    sealed class Response<out T: Any> {
-        data class Data<out T: Any>(val data: T): Response<T>()
-        sealed class Error: Response<Nothing>() {
-            data class Exception(val error: Throwable): Error()
-            data class Message(val msg: String): Error()
-        }
-        /*data class Loading<Boolean>(val isLoading: Boolean): Response<kotlin.Boolean>()*/
-    }
+//    @Deprecated(message = "Please use Response class defined in :core module")
+//    sealed class Response<out T: Any> {
+//        data class Data<out T: Any>(val data: T): Response<T>()
+//        sealed class Error: Response<Nothing>() {
+//            data class Exception(val error: Throwable): Error()
+//            data class Message(val msg: String): Error()
+//        }
+//        /*data class Loading<Boolean>(val isLoading: Boolean): Response<kotlin.Boolean>()*/
+//    }
 }

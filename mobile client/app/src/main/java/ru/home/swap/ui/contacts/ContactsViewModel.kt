@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.*
 import ru.home.swap.core.model.PersonProfile
+import ru.home.swap.core.network.Response
 import ru.home.swap.repository.Cache
 import ru.home.swap.repository.IPersonRepository
 import ru.home.swap.repository.PersonRepository
@@ -55,28 +56,28 @@ class ContactsViewModel
         }
     }
 
-    private fun processResponse(response: PersonRepository.Response<PersonProfile>) {
+    private fun processResponse(response: Response<PersonProfile>) {
         when (response) {
-            is PersonRepository.Response.Data -> {
+            is Response.Data -> {
                 state.update { state ->
                     state.copy(
                         counterpartyProfile = response.data,
                         isLoading = false)
                 }
             }
-            is PersonRepository.Response.Error -> {
+            is Response.Error -> {
                 val msg = getErrorMessage(response)
                 state.update { state -> state.copy(errors = state.errors.plus(msg), isLoading = false) }
             }
         }
     }
 
-    private fun getErrorMessage(errorResponse: PersonRepository.Response.Error): String {
+    private fun getErrorMessage(errorResponse: Response.Error): String {
         var errorMessage = ""
-        if (errorResponse is PersonRepository.Response.Error.Exception) {
+        if (errorResponse is Response.Error.Exception) {
             errorMessage = "Something went wrong"
         } else {
-            errorMessage = "Something went wrong with server response: \n\n${(errorResponse as PersonRepository.Response.Error.Message).msg}"
+            errorMessage = "Something went wrong with server response: \n\n${(errorResponse as Response.Error.Message).msg}"
         }
         return errorMessage
     }

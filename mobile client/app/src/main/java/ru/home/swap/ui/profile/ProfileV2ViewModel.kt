@@ -22,6 +22,7 @@ import ru.home.swap.core.model.ChainService
 import ru.home.swap.core.model.PersonProfile
 import ru.home.swap.core.model.Service
 import ru.home.swap.core.model.toJson
+import ru.home.swap.core.network.Response
 import ru.home.swap.providers.PersonProvider
 import ru.home.swap.repository.IPersonRepository
 import ru.home.swap.repository.PersonRepository
@@ -345,7 +346,7 @@ class ProfileV2ViewModel
             } catch (ex: Exception) {
                 withContext(Dispatchers.Main) {
                     state.update { state ->
-                        val errors = state.errors + getErrorMessage(PersonRepository.Response.Error.Exception(ex))
+                        val errors = state.errors + getErrorMessage(Response.Error.Exception(ex))
                         state.copy(errors = errors, isLoading = false)
                     }
                 }
@@ -367,7 +368,7 @@ class ProfileV2ViewModel
                 .catch { e ->
                     Log.e(App.TAG, "Get an error when obtaining account", e)
                     state.update { state ->
-                        val errors = state.errors + getErrorMessage(PersonRepository.Response.Error.Exception(e))
+                        val errors = state.errors + getErrorMessage(Response.Error.Exception(e))
                         state.copy(errors = errors, isLoading = false)
                     }
                 }

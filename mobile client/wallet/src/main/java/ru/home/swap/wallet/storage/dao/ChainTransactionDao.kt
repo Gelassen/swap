@@ -62,8 +62,6 @@ interface ChainTransactionDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(transactions: ChainTransactionEntity): Long
 
-/*    @Query("SELECT * FROM ${Const.tableName} WHERE uid = :uid")
-    fun getById(uid: Long): Flow<ChainTransactionEntity>*/
 
     @Query("SELECT * FROM ${Schema.ChainTransaction.TABLE_NAME} WHERE uid = :uid")
     suspend fun getById(uid: Long): ChainTransactionEntity
