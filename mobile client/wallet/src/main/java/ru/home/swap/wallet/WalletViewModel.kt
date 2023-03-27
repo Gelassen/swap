@@ -280,7 +280,7 @@ class WalletViewModel
     @Deprecated("App has been migrated from List<ITransaction> to List<ITransaction, Service>")
     private fun getTxFromCache() {
         logger.d("[start] getTxFromCache()")
-        viewModelScope.launch {
+/*        viewModelScope.launch {
             cacheRepository.getAllChainTransactions()
                 .flowOn(backgroundDispatcher)
                 .collect {
@@ -291,7 +291,7 @@ class WalletViewModel
                         )
                     }
                 }
-        }
+        }*/
         logger.d("[end] getTxFromCache()")
     }
 

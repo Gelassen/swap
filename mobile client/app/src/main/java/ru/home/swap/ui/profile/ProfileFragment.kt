@@ -59,28 +59,32 @@ class ProfileFragment : BaseFragment(), ItemAdapter.Listener {
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 Log.d(App.TAG, "[collect] UI state collect is called")
-                viewModel.uiState.collect { it ->
-                    Log.d(App.TAG, "[collect] collected #${it.profile.offers.count()} offers items")
-                    (binding.offersList.adapter as ItemAdapter).submitList(it.profile.offers)
-                    Log.d(App.TAG, "[collect] collected #${it.profile.demands.count()} demands items")
-                    (binding.demandsList.adapter as ItemAdapter).submitList(it.profile.demands)
-                    onModelUpdate(it)
+                launch {
+                    viewModel.uiState.collect { it ->
+                        Log.d(App.TAG, "[collect] collected #${it.profile.offers.count()} offers items")
+                        (binding.offersList.adapter as ItemAdapter).submitList(it.profile.offers)
+                        Log.d(App.TAG, "[collect] collected #${it.profile.demands.count()} demands items")
+                        (binding.demandsList.adapter as ItemAdapter).submitList(it.profile.demands)
+                        onModelUpdate(it)
+                    }
                 }
+
             }
         }
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
-                viewModel.getPersonWalletAddress()
-            }
-        }
-        lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
-                viewModel.backgroundProcessMinedTx()
-            }
-        }
-        lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
-                viewModel.loadAllFromCache()
+                launch {
+                    viewModel.getPersonWalletAddress()
+                }
+                launch {
+                    viewModel.backgroundProcessMinedTx()
+                }
+                launch {
+                    viewModel.loadAllFromCache()
+                }
+/*                launch {
+                    viewModel.debugGetAllChainTx()
+                }*/
             }
         }
 

@@ -15,6 +15,7 @@ import androidx.work.WorkerParameters
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import ru.home.swap.core.di.NetworkModule
+import ru.home.swap.core.logger.Logger
 import ru.home.swap.core.network.Response
 import ru.home.swap.wallet.model.ITransaction
 import ru.home.swap.wallet.model.TransactionReceiptDomain
@@ -79,6 +80,7 @@ open class BaseChainWorker
     protected suspend fun preProcessResponse(it: Response<TransactionReceiptDomain>, newTx: ITransaction) {
         when(it) {
             is Response.Data -> {
+                Logger.getInstance().d("[preProcessResponse] start for ${newTx}")
                 if (it.data.isStatusOK()) {
                     newTx.status = TxStatus.TX_MINED
                     cacheRepository.createChainTx(newTx)

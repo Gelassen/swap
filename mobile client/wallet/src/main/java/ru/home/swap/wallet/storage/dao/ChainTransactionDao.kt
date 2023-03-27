@@ -2,21 +2,50 @@ package ru.home.swap.wallet.storage.dao
 
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
-import ru.home.swap.wallet.storage.model.ChainTransactionEntity
-import ru.home.swap.wallet.storage.model.Schema
-import ru.home.swap.wallet.storage.model.TxWithMetadataEntity
+import ru.home.swap.wallet.storage.model.*
 
+/**
+ * Main problem is a listener is notified several times when data in underlying tables
+ * has been changed. Possible options are:
+ * - implement @DatabaseView (issue remains)
+ * - add @Transaction annotation (issue remains)
+ * - execute both inserts into correlated tables within transaction (checking)
+ * */
 @Dao
 interface ChainTransactionDao {
 
+    /**
+     * Warning: it should be used outside of @Transaction
+     * */
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(transactions: ServerRequestTransactionEntity): Long
+
+    @Transaction
+    suspend fun insertWithinTransaction(transactionsOnChain: ChainTransactionEntity,
+                                        transactionsOnServer: ServerRequestTransactionEntity) {
+        val chainTxId = insert(transactionsOnChain)
+        transactionsOnServer.txChainId = chainTxId // keep an eye to make sure this is a valid uid
+        insert(transactionsOnServer)
+    }
+
+    @Transaction
+    @Query("SELECT * FROM ${Schema.Views.ChainTxWithServerMetadata.VIEW_NAME}")
+    fun getAllFromView(): Flow<List<DataItemFromView>>
+
+    @Deprecated(message =
+            "By not discovered yet cause, WHERE clause on sql query layer\n" +
+            "doesn't work properly for loadAllTransactions(); querying all\n" +
+            "transactions and filtration on the repository layer has solved\n" +
+            "the issue")
     @Query("" +
             "SELECT * FROM ${Schema.ChainTransaction.TABLE_NAME} " +
             "INNER JOIN ${Schema.ServerMetadata.TABLE_NAME} " +
             "ON ${Schema.ChainTransaction.TABLE_NAME}.${Schema.ChainTransaction.UID} " +
             "   = ${Schema.ServerMetadata.TABLE_NAME}.${Schema.ServerMetadata.TX_CHAIN_ID} " +
-            "WHERE ${Schema.ServerMetadata.TABLE_NAME}.${Schema.ServerMetadata.STATUS} = :status;")
+            "WHERE ${Schema.ServerMetadata.TABLE_NAME}.${Schema.ServerMetadata.STATUS} = :status")
     fun getAll(status: String): Flow<List<TxWithMetadataEntity>>
 
+    @Transaction
     @Query("" +
             "SELECT * FROM ${Schema.ChainTransaction.TABLE_NAME} " +
             "INNER JOIN ${Schema.ServerMetadata.TABLE_NAME} " +
@@ -27,6 +56,9 @@ interface ChainTransactionDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(vararg transactions: ChainTransactionEntity)
 
+    /**
+     * Warning: it should be used only within @Transaction
+     * */
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(transactions: ChainTransactionEntity): Long
 

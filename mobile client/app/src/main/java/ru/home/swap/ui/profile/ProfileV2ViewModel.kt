@@ -35,6 +35,8 @@ import ru.home.swap.wallet.network.getWorkRequest
 import ru.home.swap.wallet.providers.WalletProvider
 import ru.home.swap.wallet.repository.IStorageRepository
 import ru.home.swap.wallet.repository.IWalletRepository
+import ru.home.swap.wallet.storage.model.DataItemFromView
+import ru.home.swap.wallet.storage.model.RequestStatus
 import ru.home.swap.wallet.storage.model.TxStatus
 import java.util.concurrent.ConcurrentLinkedQueue
 import javax.inject.Inject
@@ -43,6 +45,7 @@ import javax.inject.Named
 data class ModelV2(
     var profile: PersonProfile = PersonProfile(),
     var pendingTx: ConcurrentLinkedQueue<Pair<ITransaction, Service>> = ConcurrentLinkedQueue(),
+    var pendingTxFromView: ConcurrentLinkedQueue<DataItemFromView> = ConcurrentLinkedQueue(),
     val isLoading: Boolean = false,
     val isAllowedToProcess: Boolean = true,
     val errors: List<String> = emptyList(),
@@ -383,21 +386,38 @@ class ProfileV2ViewModel
             .cachedIn(viewModelScope)
     }
 
+    fun debugGetAllChainTx() {
+        viewModelScope.launch {
+            cacheRepository
+                .getAllChainTx()
+                .collect {
+                    logger.d("[loadAllFromCache] debug: Collect result ${it.toString()}")
+                    queue.clear()
+                    queue.addAll(it)
+                }
+        }
+    }
+
     // it successfully notifies client after changes in db
     fun loadAllFromCache() {
         viewModelScope.launch {
             cacheRepository
                 .getAllChainTransactions()
-                .map { it -> it.filter { it.first.status == TxStatus.TX_MINED } }
+                /*.map { it -> it.filter {  it.status == TxStatus.TX_MINED && it.sStatus == RequestStatus.WAITING } }*/
+                .map { it -> it.filter { it.first.status == TxStatus.TX_MINED && it.second.status == RequestStatus.WAITING } }
                 .flowOn(backgroundDispatcher)
                 .collect {
-                    logger.d("[loadAllFromCache] Collect result ${it.toString()}")
+                    logger.d("[loadAllFromCache] 2. Collect result ${it.toString()}")
                     state.update { state ->
                         val newValues = it.subtract(uiState.value.pendingTx)
                         val data = ConcurrentLinkedQueue(state.pendingTx)
                         data.addAll(newValues)
-                        /*state.pendingTx.addAll(newValues)*/ // not sure if this insert changes the state
+                        state.pendingTx.addAll(newValues) // not sure if this insert changes the state
                         state.copy(pendingTx = data)
+/*                        val newValues = it.subtract(uiState.value.pendingTxFromView)
+                        val data = ConcurrentLinkedQueue(state.pendingTxFromView)
+                        data.addAll(newValues)
+                        state.copy(pendingTxFromView = data)*/
                     }
                 }
         }
@@ -408,6 +428,43 @@ class ProfileV2ViewModel
             it.copy(
                 errors = it.errors.filter { str -> !str.equals(it.errors.first()) }
             )
+        }
+    }
+
+    private val queue = ConcurrentLinkedQueue<Pair<ITransaction, Service>>()
+
+    fun createARecord(tx: ITransaction, service: Service) {
+        viewModelScope.launch {
+            cacheRepository.createChainTxAndServeTx(tx, service, false)
+//            val cachedTx = cacheRepository.createChainTx(tx)
+//            cacheRepository.createServerTx(service, cachedTx.uid, false)
+        }
+    }
+
+    fun updateARecord() {
+        viewModelScope.launch {
+            val record = getNextItem()
+            if (record == null) {
+                logger.d("there is no items in queue, skip")
+                return@launch
+            } else {
+                logger.d("updating a record ${record}")
+                record.first.status = TxStatus.TX_MINED
+                cacheRepository.createChainTxAndServeTx(record.first, record.second, true)
+/*                val cachedTx = cacheRepository.createChainTx(record.first)
+                cacheRepository.createServerTx(record.second, cachedTx.uid, true)*/
+            }
+        }
+    }
+
+    fun getNextItem(): Pair<ITransaction, Service>? {
+        val item = queue.poll()
+        if (item != null
+            && item.first.status.equals(TxStatus.TX_MINED)
+            && item.second.status.equals(RequestStatus.PROCESSED)) {
+            return getNextItem()
+        } else {
+            return item
         }
     }
 
@@ -625,7 +682,7 @@ class ProfileV2ViewModel
             personRepository.cacheAccount(it.data)
             cacheRepository.createServerTx(
                 service = currentTxPair!!.second,
-                txChainId = (currentTxPair!!.first as MintTransaction).tokenId.toLong(),
+                txChainId = (currentTxPair!!.first as MintTransaction).uid,
                 isProcessed = true
             )
         }

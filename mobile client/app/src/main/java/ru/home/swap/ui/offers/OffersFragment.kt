@@ -94,35 +94,35 @@ class OffersFragment: BaseFragment(), OffersAdapter.IListener {
     private fun listenUpdates() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                viewModel.uiState.collect { it ->
-                    Log.d(App.PAGING, "[offers] get update from viewmodel ${it.pagingData}")
-                    binding.progressIndicator.visibility = if (it.isLoading) View.VISIBLE else View.GONE
-                    if (it.errors.isNotEmpty()) {
-                        showErrorDialog(it.errors.get(0))
+                launch {
+                    viewModel.uiState.collect { it ->
+                        Log.d(App.PAGING, "[offers] get update from viewmodel ${it.pagingData}")
+                        binding.progressIndicator.visibility = if (it.isLoading) View.VISIBLE else View.GONE
+                        if (it.errors.isNotEmpty()) {
+                            showErrorDialog(it.errors.get(0))
+                        }
+                        if (it.pagingData != null) {
+                            throw UnsupportedOperationException("Not supported yet for new type ${it.pagingData.toString()}")
+//                            (binding.offersList.adapter as OffersAdapter).submitData(it.pagingData)
+                        }
+                        binding.noContent.visibility = if (binding.offersList.adapter!!.itemCount == 0) View.VISIBLE else View.GONE
                     }
-                    if (it.pagingData != null) {
-                        (binding.offersList.adapter as OffersAdapter).submitData(it.pagingData)
-                    }
-                    binding.noContent.visibility = if (binding.offersList.adapter!!.itemCount == 0) View.VISIBLE else View.GONE
                 }
-            }
-
-        }
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                (binding.offersList.adapter as OffersAdapter).loadStateFlow.collectLatest { loadState ->
-                    when (loadState.refresh) {
-                        is LoadState.Loading -> {
-                            // no op
-                        }
-                        is LoadState.Error -> {
-                            viewModel.addError((loadState.refresh as LoadState.Error).error.localizedMessage!!)
-                        }
-                        is LoadState.NotLoading -> {
-                            val isNoContent = binding.offersList.adapter!!.itemCount == 0
-                            binding.noContent.visibility =
-                                if (isNoContent) View.VISIBLE else View.GONE
-                            binding.progressIndicator.visibility = View.GONE
+                launch {
+                    (binding.offersList.adapter as OffersAdapter).loadStateFlow.collectLatest { loadState ->
+                        when (loadState.refresh) {
+                            is LoadState.Loading -> {
+                                // no op
+                            }
+                            is LoadState.Error -> {
+                                viewModel.addError((loadState.refresh as LoadState.Error).error.localizedMessage!!)
+                            }
+                            is LoadState.NotLoading -> {
+                                val isNoContent = binding.offersList.adapter!!.itemCount == 0
+                                binding.noContent.visibility =
+                                    if (isNoContent) View.VISIBLE else View.GONE
+                                binding.progressIndicator.visibility = View.GONE
+                            }
                         }
                     }
                 }

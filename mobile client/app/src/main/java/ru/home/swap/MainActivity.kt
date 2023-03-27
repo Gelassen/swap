@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity() {
         AndroidInjection.inject(this)
 
         lifecycleScope.launchWhenCreated {
-            cacheUtils.cleanCacheIfRequired()
+//            cacheUtils.cleanCacheIfRequired()
         }
 
         val navHostFragment = supportFragmentManager

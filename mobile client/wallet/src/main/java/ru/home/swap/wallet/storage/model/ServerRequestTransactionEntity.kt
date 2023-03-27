@@ -17,7 +17,7 @@ import java.lang.reflect.Type
     foreignKeys = [ForeignKey(
         entity = ChainTransactionEntity::class,
         parentColumns = arrayOf(Schema.ChainTransaction.UID),
-        childColumns = arrayOf(Schema.ServerMetadata.UID),
+        childColumns = arrayOf(Schema.ServerMetadata.TX_CHAIN_ID),
         onDelete = ForeignKey.CASCADE
     )]
 )
@@ -27,7 +27,7 @@ data class ServerRequestTransactionEntity(
     val uid: Long,
     @ColumnInfo(name = "requestType") val requestType: String = "",
     @ColumnInfo(name = "payloadAsJsonString") val payloadAsJson: String,
-    @ColumnInfo(name = Schema.ServerMetadata.TX_CHAIN_ID) val txChainId: Long,
+    @ColumnInfo(name = Schema.ServerMetadata.TX_CHAIN_ID) var txChainId: Long,
     @ColumnInfo(name = Schema.ServerMetadata.STATUS) val status: String
 /*    @Deprecated("Not used in V2 concept, but left as a possible improvement for the future")
     @ColumnInfo(name = "status") val status: String = ""*/

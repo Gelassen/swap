@@ -13,6 +13,7 @@ import ru.home.swap.repository.Cache
 import ru.home.swap.repository.IPersonRepository
 import ru.home.swap.repository.PersonRepository
 import ru.home.swap.repository.pagination.DemandsPagingSource
+import ru.home.swap.repository.pagination.MatchesPagingSource
 import ru.home.swap.repository.pagination.OffersPagingSource
 import ru.home.swap.wallet.repository.IStorageRepository
 import ru.home.swap.wallet.repository.IWalletRepository
@@ -33,6 +34,12 @@ class AppModule(val application: Application) {
     @Provides
     fun provideOffersPagingSource(api: IApi, context: Context): OffersPagingSource {
         return OffersPagingSource(api, Integer.parseInt(context.getString(R.string.page_size)))
+    }
+
+    @AppMainScope
+    @Provides
+    fun provideMatchPagingSource(api: IApi, context: Context): MatchesPagingSource {
+        return MatchesPagingSource(api, Integer.parseInt(context.getString(R.string.page_size)))
     }
 
     @AppMainScope
