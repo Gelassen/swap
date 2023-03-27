@@ -6,7 +6,6 @@ import androidx.fragment.app.Fragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import ru.home.swap.App
 import ru.home.swap.R
-import ru.home.swap.ui.profile.Model
 import ru.home.swap.ui.profile.ModelV2
 
 abstract class BaseFragment: Fragment(), IDialogListener {
