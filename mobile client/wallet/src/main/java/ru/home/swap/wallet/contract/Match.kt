@@ -5,6 +5,7 @@ import org.web3j.abi.datatypes.Bool
 import org.web3j.abi.datatypes.DynamicStruct
 import org.web3j.abi.datatypes.Utf8String
 import org.web3j.abi.datatypes.generated.Uint256
+import ru.home.swap.core.model.MatchSubject
 import ru.home.swap.wallet.contract.MatchConst.APPROVED_BY_FIRST_USER
 import ru.home.swap.wallet.contract.MatchConst.APPROVED_BY_SECOND_USER
 import ru.home.swap.wallet.contract.MatchConst.USER_FIRST
@@ -81,6 +82,17 @@ private object MatchConst {
     const val VALUE_OF_SECOND_USER = "valueOfSecondUser"
     const val APPROVED_BY_FIRST_USER = "approvedByFirstUser"
     const val APPROVED_BY_SECOND_USER = "approvedBySecondUser"
+}
+
+fun Match.toMatchSubject(): MatchSubject {
+    return MatchSubject(
+        userFirst = this.userFirst,
+        valueOfFirstUser = this.valueOfFirstUser,
+        userSecond = this.userSecond,
+        valueOfSecondUser = this.valueOfSecondUser,
+        approvedByFirstUser = this.approvedByFirstUser,
+        approvedBySecondUser = this.approvedBySecondUser
+    )
 }
 
 fun Match.convertToJson(): String {

@@ -38,7 +38,7 @@ class OffersAdapter(val listener: IListener, diffCallback: DiffUtil.ItemCallback
 
     class OffersComparator: DiffUtil.ItemCallback<Service>() {
         override fun areItemsTheSame(oldItem: Service, newItem: Service): Boolean =
-            oldItem.id == newItem.id
+            oldItem.uid == newItem.uid
 
         override fun areContentsTheSame(oldItem: Service, newItem: Service): Boolean =
             oldItem == newItem

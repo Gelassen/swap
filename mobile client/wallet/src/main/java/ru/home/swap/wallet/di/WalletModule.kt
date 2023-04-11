@@ -1,6 +1,7 @@
 package ru.home.swap.wallet.di
 
 import android.app.Application
+import androidx.work.WorkManager
 import com.example.wallet.R
 import ru.home.swap.wallet.storage.AppDatabase
 import dagger.Module
@@ -47,6 +48,12 @@ class WalletModule(val context: Application) {
             .addInterceptor(logging)
             .build()
         return HttpService(url, client)
+    }
+
+    @WalletMainScope
+    @Provides
+    fun providesWorkManager(app: Application): WorkManager {
+        return WorkManager.getInstance(app)
     }
 
     // scopes

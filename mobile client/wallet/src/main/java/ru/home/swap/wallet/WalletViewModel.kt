@@ -13,13 +13,17 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import ru.home.swap.core.di.NetworkModule
 import ru.home.swap.core.logger.Logger
+import ru.home.swap.core.model.*
 import ru.home.swap.core.network.Response
 import ru.home.swap.wallet.contract.Match
 import ru.home.swap.wallet.contract.convertToJson
+import ru.home.swap.wallet.contract.toMatchSubject
 import ru.home.swap.wallet.model.*
+import ru.home.swap.wallet.network.BaseChainWorker
 import ru.home.swap.wallet.network.ChainWorker
 import ru.home.swap.wallet.network.getWorkRequest
 import ru.home.swap.wallet.repository.IStorageRepository
+import ru.home.swap.wallet.storage.model.ServerTransaction
 import ru.home.swap.wallet.storage.model.TxStatus
 import java.math.BigInteger
 import javax.inject.Inject
@@ -41,6 +45,7 @@ class WalletViewModel
         private val app: Application,
         private val repository: IWalletRepository,
         private val cacheRepository: IStorageRepository,
+        private val workManager: WorkManager,
         @Named(NetworkModule.DISPATCHER_IO) val backgroundDispatcher: CoroutineDispatcher = Dispatchers.IO
     ): AndroidViewModel(app) {
 
@@ -51,10 +56,6 @@ class WalletViewModel
         .asStateFlow()
         .stateIn(viewModelScope, SharingStarted.Eagerly, state.value)
 
-    init {
-        getTxFromCache()
-    }
-
     fun balanceOf(owner: String) {
         logger.d("[start] balanceOf()")
         viewModelScope.launch {
@@ -63,9 +64,9 @@ class WalletViewModel
                 .collect { value ->
                     logger.d("collect get balance result")
                     processBalanceOfResponse(value)
+                    logger.d("[end] balanceOf()")
                 }
         }
-        logger.d("[end] balanceOf()")
     }
 
     private fun processBalanceOfResponse(value: Response<BigInteger>) {
@@ -93,7 +94,6 @@ class WalletViewModel
     fun mintToken(to: String, value: Value, uri: String) {
         logger.d("[start] mintToken()")
         viewModelScope.launch {
-            val workManager = WorkManager.getInstance(app)
             val work = workManager.getWorkRequest<ChainWorker>(ChainWorker.Builder.build(to, value.convertToJson(), uri, "stub"))
             workManager.enqueue(work)
             workManager
@@ -104,139 +104,110 @@ class WalletViewModel
                         WorkInfo.State.SUCCEEDED -> { logger.d("[mint token] succeeded status with result: ${it.toString()}")}
                         WorkInfo.State.FAILED -> {
                             logger.d("[mint token] failed status with result: ${it.toString()}")
-                            val error = it.outputData.keyValueMap.get(ChainWorker.KEY_ERROR_MSG) as String
+                            val error = it.outputData.keyValueMap.get(BaseChainWorker.Consts.KEY_ERROR_MSG) as String
                             state.update { state -> state.copy(isLoading = false, errors = state.errors.plus(error)) }
                         }
                         else -> { logger.d("[mint token] unexpected state with result: ${it.toString()}") }
                     }
+                    logger.d("[end] mintToken()")
                 }
         }
-        logger.d("[end] mintToken()")
     }
 
-    @Deprecated(message = "Get token ids over call, not by filter events as it is very time consuming")
-    fun getTokensThatBelongsToMeNotConsumedNotExpired(account: String) {
-        logger.d("[start] getTokens()")
-        viewModelScope.launch {
-            repository.getTransferEvents()
-                .flowOn(backgroundDispatcher) // explicitly choose network thread
-                .filter { it ->
-                    it.to?.lowercase().equals(account.lowercase())
-                }
-                .map { it ->
-                    // TODO consider to add async {} here to request offers asynchronously
-                    val valueResponse = repository.getOffer(it.tokenId.toString())
-                    if (valueResponse is Response.Data<*>) {
-                        Token(it.tokenId!!.toLong(), valueResponse.data as Value)
-                    } else {
-                        Token(it.tokenId!!.toLong(), Value())
-                    }
-                }
-                .filter { it ->
-                    !it.value.isConsumed
-                            && it.value.availabilityEnd.toLong() > System.currentTimeMillis()
-                }
-                .flowOn(backgroundDispatcher)
-                .collect { token ->
-                    logger.d("Collect result value for tokens owned by swap address $token")
-                    state.update {
-                        it.tokens.add(token)
-                        logger.d("${account} tokens ${it.tokens}")
-                        it.copy(
-                            status = Status.MY_TOKENS,
-                            tokens = it.tokens
-                        )
-
-                    }
-                }
-        }
-        logger.d("[end] getTokens()")
-    }
-
-    fun registerUserOnSwapMarket(userWalletAddress: String) {
+    fun registerUserOnSwapMarket(userWalletAddress: String, personProfile: PersonProfile) {
         logger.d("[start] registerUserOnSwapMarket()")
         viewModelScope.launch {
-            lateinit var newTx: ITransaction
-            cacheRepository.createChainTxAsFlow(RegisterUserTransaction(userWalletAddress = userWalletAddress))
-                .map { it ->
-                    newTx= it
-                    repository.registerUserOnSwapMarket(userWalletAddress)
-                }
-                .onEach { it -> preProcessResponse(it, newTx) }
-                .flowOn(backgroundDispatcher)
-                .collect { it -> processResponse(it) }
+            val tx = RegisterUserTransaction(userWalletAddress = userWalletAddress)
+            val serverTx = ServerTransaction(
+                requestType = RequestType.TX_REGISTER_USER,
+                payload = personProfile
+            )
+            val cachedRecordsIds = cacheRepository.createChainTxAndServerTx(tx, serverTx)
+            val responseFromChain = repository.registerUserOnSwapMarket(userWalletAddress)
+
+            tx.uid = cachedRecordsIds.first
+            serverTx.uid = cachedRecordsIds.second
+            preProcessResponse(responseFromChain, tx, serverTx)
+            processResponse(responseFromChain)
+            logger.d("[end] registerUserOnSwapMarket()")
         }
-        logger.d("[end] registerUserOnSwapMarket()")
     }
 
     fun approveTokenManager(swapChainAddress: String) {
+        logger.d("[start] approveTokenManager()")
         viewModelScope.launch {
             val tx = ApproveTokenManagerTransaction(swapMarketContractAddress = swapChainAddress, isApproved = true)
-            lateinit var newTx: ITransaction
-            cacheRepository.createChainTxAsFlow(tx)
-                .map {
-                    newTx = it
-                    repository.approveTokenManager(swapChainAddress, true)
-                }
-                .onEach { preProcessResponse(it, newTx) }
-                .flowOn(backgroundDispatcher)
-                .collect {
-                    processResponse(it)
-                }
+            val cachedRecordId = cacheRepository.createChainTx(tx)
+            val responseFromChain = repository.approveTokenManager(swapChainAddress, true)
+
+            tx.uid = cachedRecordId
+            preProcessResponse(responseFromChain, tx)
+            processResponse(responseFromChain)
+            logger.d("[end] approveTokenManager()")
         }
     }
 
     fun approveSwap(matchSubj: Match) {
+        logger.d("[start] approveSwap()")
         viewModelScope.launch {
-            lateinit var newTx: ITransaction
-            cacheRepository.createChainTxAsFlow(ApproveSwapTransaction(match = matchSubj))
-                .map {
-                    newTx = it
-                    repository.approveSwap(matchSubj)
-                }
-                .onEach { preProcessResponse(it, newTx) }
-                .flowOn(backgroundDispatcher)
-                .collect { processResponse(it) }
-        }
-    }
+            val tx = ApproveSwapTransaction(match = matchSubj)
+            val serverTx = ServerTransaction(
+                requestType = RequestType.TX_APPROVE_SWAP,
+                payload = matchSubj.toMatchSubject()
+            )
+            val cachedRecordsIds = cacheRepository.createChainTxAndServerTx(tx, serverTx)
+            val responseFromChain = repository.approveSwap(matchSubj)
 
-    @Deprecated("Since SwapChainV2.sol registerDemand() is not supported")
-    fun registerDemand(userAddress: String, demand: String) {
-        viewModelScope.launch {
-            val tx = RegisterDemandTransaction(userAddress = userAddress, demand = demand)
-            lateinit var newTx: ITransaction
-            cacheRepository.createChainTxAsFlow(tx)
-                .map {
-                    newTx = it
-                    repository.registerDemand(userAddress, demand)
-                }
-                .onEach { preProcessResponse(it, newTx) }
-                .flowOn(backgroundDispatcher)
-                .collect { processResponse(it) }
+            tx.uid = cachedRecordsIds.first
+            serverTx.uid = cachedRecordsIds.second
+            preProcessResponse(responseFromChain, tx, serverTx)
+            processResponse(responseFromChain)
+            logger.d("[end] approveSwap()")
         }
     }
 
     fun getTokenIdsForUser(userAddress: String) {
+        logger.d("[start] getTokenIdsForUser()")
         viewModelScope.launch {
             repository.getTokenIdsWithValues(userAddress, false)
                 .flowOn(backgroundDispatcher)
                 .collect {
                     processTokenIdsResponse(userAddress, it)
+                    logger.d("[end] getTokenIdsForUser()")
                 }
         }
     }
 
     fun getMatchesForProfile(firstUserAddress: String, secondUserAddress: String) {
+        logger.d("[start] getMatchesForProfile()")
         viewModelScope.launch {
             repository.getMatchesAsFlow(firstUserAddress, secondUserAddress)
                 .flowOn(backgroundDispatcher)
                 .collect { it ->
                     logger.d("Get matches result ${it.toString()}")
+                    logger.d("[end] getMatchesForProfile()")
                 }
         }
     }
 
+    fun swap(matchSubj: Match) {
+        logger.d("[start] swap()")
+        viewModelScope.launch {
+            val tx = SwapTransaction(match = matchSubj)
+            val serverTx = ServerTransaction(
+                requestType = RequestType.TX_SWAP,
+                payload = matchSubj.toMatchSubject()
+            )
+            val cachedRecordsIds = cacheRepository.createChainTxAndServerTx(tx, serverTx)
+            val responseFromChain = repository.swap(matchSubj)
 
+            tx.uid = cachedRecordsIds.first
+            serverTx.uid = cachedRecordsIds.second
+            preProcessResponse(responseFromChain, tx, serverTx)
+            processResponse(responseFromChain)
+            logger.d("[end] swap()")
+        }
+    }
 
     private fun processTokenIdsResponse(userAddress: String, response: Response<List<*>>) {
         when (response) {
@@ -252,20 +223,6 @@ class WalletViewModel
         }
     }
 
-    fun swap(subj: Match) {
-        viewModelScope.launch {
-            lateinit var newTx: ITransaction
-            cacheRepository.createChainTxAsFlow(SwapTransaction(match = subj))
-                .map {
-                    newTx = it
-                    repository.swap(subj)
-                }
-                .onEach { preProcessResponse(it, newTx) }
-                .flowOn(backgroundDispatcher)
-                .collect { processResponse(it) }
-        }
-    }
-
     private fun getWorkRequest(inputData: Data): OneTimeWorkRequest {
         return OneTimeWorkRequestBuilder<ChainWorker>()
             .setConstraints(
@@ -277,44 +234,22 @@ class WalletViewModel
             .build()
     }
 
-    @Deprecated("App has been migrated from List<ITransaction> to List<ITransaction, Service>")
-    private fun getTxFromCache() {
-        logger.d("[start] getTxFromCache()")
-/*        viewModelScope.launch {
-            cacheRepository.getAllChainTransactions()
-                .flowOn(backgroundDispatcher)
-                .collect {
-                    logger.d("Collect result of getTxFromCache() call")
-                    state.update { state ->
-                        state.copy(
-                            pendingTx = it.map { it -> it.first }
-                        )
-                    }
-                }
-        }*/
-        logger.d("[end] getTxFromCache()")
+    private suspend fun preProcessResponse(it: Response<TransactionReceiptDomain>, newTx: ITransaction, serverTxPayload: ServerTransaction): Pair<Long, Long> {
+        when(it) {
+            is Response.Data -> { newTx.status = if (it.data.isStatusOK()) TxStatus.TX_MINED else TxStatus.TX_REVERTED }
+            is Response.Error.Message -> { newTx.status = TxStatus.TX_EXCEPTION }
+            is Response.Error.Exception -> { newTx.status = TxStatus.TX_EXCEPTION }
+        }
+        return cacheRepository.createChainTxAndServerTx(newTx, serverTxPayload)
     }
 
-    private fun preProcessResponse(it: Response<TransactionReceiptDomain>, newTx: ITransaction) {
+    private suspend fun preProcessResponse(it: Response<TransactionReceiptDomain>, newTx: ITransaction): Long {
         when(it) {
-            is Response.Data -> {
-                if (it.data.isStatusOK()) {
-                    newTx.status = TxStatus.TX_MINED
-                    cacheRepository.createChainTxAsFlow(newTx)
-                } else {
-                    newTx.status = TxStatus.TX_REVERTED
-                    cacheRepository.createChainTxAsFlow(newTx)
-                }
-            }
-            is Response.Error.Message -> {
-                newTx.status = TxStatus.TX_EXCEPTION
-                cacheRepository.createChainTxAsFlow(newTx)
-            }
-            is Response.Error.Exception -> {
-                newTx.status = TxStatus.TX_EXCEPTION
-                cacheRepository.createChainTxAsFlow(newTx)
-            }
+            is Response.Data -> { newTx.status = if (it.data.isStatusOK()) TxStatus.TX_MINED else TxStatus.TX_REVERTED }
+            is Response.Error.Message -> { newTx.status = TxStatus.TX_EXCEPTION }
+            is Response.Error.Exception -> { newTx.status = TxStatus.TX_EXCEPTION }
         }
+        return cacheRepository.createChainTx(newTx)
     }
 
     private fun processResponse(it: Response<TransactionReceiptDomain>) {

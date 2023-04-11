@@ -72,7 +72,7 @@ class DemandsFragment: BaseFragment(), OffersAdapter.IListener {
 
     override fun onItemClick(item: Service) {
         Log.e(App.TAG, "On item click ${item.title}")
-        val bundle = bundleOf(ContactsFragment.Params.EXTRA_SERVICE_ID to item.id)
+        val bundle = bundleOf(ContactsFragment.Params.EXTRA_SERVICE_ID to item.uid)
         findNavController().navigate(R.id.action_demandsFragment_to_contactsFragment, bundle)
     }
 

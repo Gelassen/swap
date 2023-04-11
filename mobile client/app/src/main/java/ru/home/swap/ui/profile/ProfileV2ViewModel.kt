@@ -18,26 +18,23 @@ import ru.home.swap.core.di.NetworkModule
 import ru.home.swap.core.extensions.registerIdlingResource
 import ru.home.swap.core.extensions.unregisterIdlingResource
 import ru.home.swap.core.logger.Logger
-import ru.home.swap.core.model.ChainService
-import ru.home.swap.core.model.PersonProfile
-import ru.home.swap.core.model.Service
-import ru.home.swap.core.model.toJson
+import ru.home.swap.core.model.*
 import ru.home.swap.core.network.Response
+import ru.home.swap.network.RegisterUserWorker
 import ru.home.swap.providers.PersonProvider
 import ru.home.swap.repository.IPersonRepository
-import ru.home.swap.repository.PersonRepository
-import ru.home.swap.repository.PersonRepository.*
 import ru.home.swap.wallet.contract.Value
 import ru.home.swap.wallet.model.ITransaction
 import ru.home.swap.wallet.model.MintTransaction
 import ru.home.swap.wallet.model.RegisterUserTransaction
+import ru.home.swap.wallet.network.BaseChainWorker
 import ru.home.swap.wallet.network.ChainWorker
 import ru.home.swap.wallet.network.getWorkRequest
 import ru.home.swap.wallet.providers.WalletProvider
 import ru.home.swap.wallet.repository.IStorageRepository
 import ru.home.swap.wallet.repository.IWalletRepository
 import ru.home.swap.wallet.storage.model.DataItemFromView
-import ru.home.swap.wallet.storage.model.RequestStatus
+import ru.home.swap.wallet.storage.model.ServerTransaction
 import ru.home.swap.wallet.storage.model.TxStatus
 import java.util.concurrent.ConcurrentLinkedQueue
 import javax.inject.Inject
@@ -45,7 +42,7 @@ import javax.inject.Named
 
 data class ModelV2(
     var profile: PersonProfile = PersonProfile(),
-    var pendingTx: ConcurrentLinkedQueue<Pair<ITransaction, Service>> = ConcurrentLinkedQueue(),
+    var pendingTx: ConcurrentLinkedQueue<Pair<ITransaction, ServerTransaction>> = ConcurrentLinkedQueue(),
     var pendingTxFromView: ConcurrentLinkedQueue<DataItemFromView> = ConcurrentLinkedQueue(),
     val isLoading: Boolean = false,
     val isAllowedToProcess: Boolean = true,
@@ -135,12 +132,13 @@ class ProfileV2ViewModel
                     when(item.first.type) {
                         /* token are created only for offer, demands registered just as a db record */
                         MintTransaction::class.java.simpleName -> { useCase.processMintTx(item) }
+                        RegisterUserTransaction::class.java.simpleName -> { useCase.processRegisterUserTx(item) }
                         else -> { throw UnsupportedOperationException("Did you forget to add support of ${item.first.type} class tx?") }
                     }
                 }
                 .onStart { state.update { state -> state.copy(isLoading = true) } }
                 .flatMapConcat {
-                    if (it is Response.Data) { useCase.updateCacheForMintTx(it)}
+                    if (it is Response.Data) { useCase.updateCacheForCompletedTx(it)}
                     flow { emit(it) }
                 }
                 .collect { it ->
@@ -177,22 +175,22 @@ class ProfileV2ViewModel
             workManager
                 .getWorkInfoByIdLiveData(workRequest.id)
                 .asFlow()
+                .onCompletion {  state.update { state -> state.copy(isLoading = false) } }
                 .collect { it ->
                     when(it.state) {
                         WorkInfo.State.SUCCEEDED -> { logger.d("[mint token] succeeded status with result: ${it.toString()}")}
                         WorkInfo.State.FAILED -> {
                             logger.d("[mint token] failed status with result: ${it.toString()}")
                             var error = ""
-                            if (it.outputData.keyValueMap.containsKey(ChainWorker.KEY_ERROR_MSG)) {
-                                error = it.outputData.keyValueMap.get(ChainWorker.KEY_ERROR_MSG) as String
+                            if (it.outputData.keyValueMap.containsKey(BaseChainWorker.Consts.KEY_ERROR_MSG)) {
+                                error = it.outputData.keyValueMap.get(BaseChainWorker.Consts.KEY_ERROR_MSG) as String
                             } else {
-                                error = "Something went during minting the token"
+                                error = "Something went wrong during minting the token"
                             }
-                            state.update { state -> state.copy(isLoading = false, errors = state.errors.plus(error)) }
+                            state.update { state -> state.copy(errors = state.errors.plus(error)) }
                         }
                         else -> { logger.d("[mint token] unexpected state with result: ${it.toString()}") }
                     }
-                    state.update { state -> state.copy(isLoading = false) }
                 }
         }
         logger.d("[end] mintToken()")
@@ -203,7 +201,7 @@ class ProfileV2ViewModel
             personRepository.removeOffer(
                 contact = uiState.value.profile.contact,
                 secret = uiState.value.profile.secret,
-                id = item.id)
+                id = item.uid)
                 .flatMapConcat { it ->
                     if (it is Response.Data) {
                         personRepository.cacheAccountAsFlow(it.data)
@@ -248,7 +246,7 @@ class ProfileV2ViewModel
             personRepository.removeDemand(
                 contact = uiState.value.profile.contact,
                 secret = uiState.value.profile.secret,
-                id = item.id)
+                id = item.uid)
                 .flatMapConcat { it ->
                     if (it is Response.Data) {
                         personRepository.cacheAccountAsFlow(it.data)
@@ -288,75 +286,49 @@ class ProfileV2ViewModel
     }
 
     fun createAnAccount(person: PersonProfile) {
-        state.update { state -> state.copy(isLoading = true) }
-        viewModelScope.launch(backgroundDispatcher) {
-            try {
-                app.registerIdlingResource()
-                var cachedPersonProfile = this@ProfileV2ViewModel.personRepository.cacheAccount(person)
-                var createAccountResponse = this@ProfileV2ViewModel.personRepository.createAccount(person)
-                when(createAccountResponse) {
-                    is Response.Data -> {
-                        this@ProfileV2ViewModel.personRepository.cacheAccount(createAccountResponse.data)
-                        val cachedTx = cacheRepository.createChainTx(RegisterUserTransaction(userWalletAddress = person.userWalletAddress))
-                        val chainTx = walletRepository.registerUserOnSwapMarket(userWalletAddress = person.userWalletAddress)
-                        when(chainTx) {
-                            is ru.home.swap.core.network.Response.Data -> {
-                                if (chainTx.data.isStatusOK()) {
-                                    cachedTx.status = TxStatus.TX_MINED
-                                } else {
-                                    cachedTx.status = TxStatus.TX_REVERTED
-                                }
-                            }
-                            is ru.home.swap.core.network.Response.Error.Message -> {
-                                cachedTx.status = TxStatus.TX_EXCEPTION
-                            }
-                            is ru.home.swap.core.network.Response.Error.Exception -> {
-                                // cover the case when user has been registered on both backend and chain, aka sign-in
-                                if (chainTx.error.message?.contains("User already registered") == true) {
-                                    // we consider previous successful tx as sharing its mined status with this tx
-                                    // to avoid confusion from user perspective who will observe UI
-                                    cachedTx.status = TxStatus.TX_MINED
-                                } else {
-                                    cachedTx.status = TxStatus.TX_EXCEPTION
-                                }
-                            }
-                        }
-                        cacheRepository.createChainTx(cachedTx)
-                        withContext(Dispatchers.Main) {
+        logger.d("[start] createAnAccount")
+        viewModelScope.launch {
+            state.update { state -> state.copy(isLoading = true) }
+            val workManager = WorkManager.getInstance(app)
+            val work = RegisterUserWorker.Builder.build(person)
+            val workRequest = workManager.getWorkRequest<RegisterUserWorker>(work)
+            workManager.enqueue(workRequest)
+            workManager
+                .getWorkInfoByIdLiveData(workRequest.id)
+                .asFlow()
+                .collect { it ->
+                    when(it.state) {
+                        WorkInfo.State.SUCCEEDED -> {
+                            logger.d("[create an account] succeeded status with result: ${it}")
                             state.update { state ->
-                                if (cachedTx.status == TxStatus.TX_MINED
-                                    || (chainTx as ru.home.swap.core.network.Response.Error.Exception).error.message?.contains("User already registered") == true) {
-                                    state.copy(
-                                        isLoading = false,
-                                        profile = createAccountResponse.data,
-                                        status = StateFlagV2.PROFILE
-                                    )
-                                } else {
-                                    val txError = "Failed register the profile on chain with status ${cachedTx.status}"
-                                    state.copy(
-                                        isLoading = false,
-                                        errors = state.errors + txError
-                                    )
-                                }
+                                state.copy(
+                                    isLoading = false,
+                                    profile = PersonProfile().fromJson(it.outputData.getString(RegisterUserWorker.KEY_PERSON_PROFILE)!!),
+                                    status = StateFlagV2.PROFILE
+                                )
                             }
                         }
+                        WorkInfo.State.FAILED -> {
+                            logger.d("[create an account] failed status with result: ${it}")
+                            var error = ""
+                            if (it.outputData.keyValueMap.containsKey(BaseChainWorker.Consts.KEY_ERROR_MSG)) {
+                                error = it.outputData.keyValueMap.get(BaseChainWorker.Consts.KEY_ERROR_MSG) as String
+                            } else {
+                                error = "Something went during creating an account"
+                            }
+                            state.update { state -> state.copy(isLoading = false, errors = state.errors.plus(error)) }
+                            // TODO clean cached account
+                            personRepository.cleanCachedAccount().collect { /* no op */ }
+                        }
+                        else -> { logger.d("[create an account] unexpected state with result: ${it}") }
                     }
-                    else -> { updateStateProfile(createAccountResponse) }
+                    state.update { state -> state.copy(isLoading = false) }
+                    logger.d("[end] createAnAccount")
                 }
-            } catch (ex: Exception) {
-                withContext(Dispatchers.Main) {
-                    state.update { state ->
-                        val errors = state.errors + getErrorMessage(Response.Error.Exception(ex))
-                        state.copy(errors = errors, isLoading = false)
-                    }
-                }
-            }
-            finally {
-                app.unregisterIdlingResource()
-            }
         }
     }
 
+    @OptIn(FlowPreview::class)
     fun checkAnExistingAccount() {
         val useCase = CheckExistingAccountFlowUseCase()
         viewModelScope.launch {
@@ -375,6 +347,9 @@ class ProfileV2ViewModel
                 .collect { it ->
                     Log.d(App.TAG, "[c] Get the result")
                     updateState(it)
+                    // we have to cancel this call to prevent further callbacks from cache updates
+                    // on 'SignIn screen' the correct way is to wait for the response from the chain
+                    this.cancel("Just one-shoot call for cached profile preferences")
                 }
         }
     }
@@ -404,9 +379,9 @@ class ProfileV2ViewModel
         viewModelScope.launch {
             cacheRepository
                 .getAllChainTransactions()
-                /*.map { it -> it.filter {  it.status == TxStatus.TX_MINED && it.sStatus == RequestStatus.WAITING } }*/
                 .map { it -> it.filter { it.first.status == TxStatus.TX_MINED && it.second.status == RequestStatus.WAITING } }
                 .flowOn(backgroundDispatcher)
+                .catch { ex -> logger.e("Failed to get data from the cache", ex) }
                 .collect {
                     logger.d("[loadAllFromCache] 2. Collect result ${it.toString()}")
                     state.update { state ->
@@ -415,10 +390,6 @@ class ProfileV2ViewModel
                         data.addAll(newValues)
                         state.pendingTx.addAll(newValues) // not sure if this insert changes the state
                         state.copy(pendingTx = data)
-/*                        val newValues = it.subtract(uiState.value.pendingTxFromView)
-                        val data = ConcurrentLinkedQueue(state.pendingTxFromView)
-                        data.addAll(newValues)
-                        state.copy(pendingTxFromView = data)*/
                     }
                 }
         }
@@ -432,13 +403,15 @@ class ProfileV2ViewModel
         }
     }
 
-    private val queue = ConcurrentLinkedQueue<Pair<ITransaction, Service>>()
+    private val queue = ConcurrentLinkedQueue<Pair<ITransaction, ServerTransaction>>()
 
     fun createARecord(tx: ITransaction, service: Service) {
         viewModelScope.launch {
-            cacheRepository.createChainTxAndServeTx(tx, service, false)
-//            val cachedTx = cacheRepository.createChainTx(tx)
-//            cacheRepository.createServerTx(service, cachedTx.uid, false)
+            val serverTx = ServerTransaction(
+                requestType = RequestType.TX_REGISTER_OFFER,
+                payload = service
+            )
+            cacheRepository.createChainTxAndServerTx(tx, serverTx)
         }
     }
 
@@ -451,14 +424,13 @@ class ProfileV2ViewModel
             } else {
                 logger.d("updating a record ${record}")
                 record.first.status = TxStatus.TX_MINED
-                cacheRepository.createChainTxAndServeTx(record.first, record.second, true)
-/*                val cachedTx = cacheRepository.createChainTx(record.first)
-                cacheRepository.createServerTx(record.second, cachedTx.uid, true)*/
+                record.second.status = RequestStatus.PROCESSED
+                cacheRepository.createChainTxAndServerTx(record.first, record.second)
             }
         }
     }
 
-    fun getNextItem(): Pair<ITransaction, Service>? {
+    fun getNextItem(): Pair<ITransaction, ServerTransaction>? {
         val item = queue.poll()
         if (item != null
             && item.first.status.equals(TxStatus.TX_MINED)
@@ -639,9 +611,9 @@ class ProfileV2ViewModel
 
     inner class BackgroundFlowUseCase {
 
-        var currentTxPair: Pair<ITransaction, Service>? = null
+        var currentTxPair: Pair<ITransaction, ServerTransaction>? = null
 
-        fun waitUntilGetAnItem(): Flow< Pair<ITransaction, Service>> {
+        fun waitUntilGetAnItem(): Flow< Pair<ITransaction, ServerTransaction>> {
             return flow {
                 while(state.value.isAllowedToProcess) {
                     getApplication<Application>().registerIdlingResource()
@@ -666,26 +638,34 @@ class ProfileV2ViewModel
             }
         }
 
-        fun processMintTx(item: Pair<ITransaction, Service>): Flow<Response<PersonProfile>> {
+        // TODO extend to support the all the rest types of tx
+        fun processMintTx(item: Pair<ITransaction, ServerTransaction>): Flow<Response<PersonProfile>> {
             logger.d("[queue polling] process MintTransaction item")
             currentTxPair = item
-            item.second.chainService.tokenId = (item.first as MintTransaction).tokenId
-            val newService = item.second
+            (item.second.payload as Service).chainService.tokenId = (item.first as MintTransaction).tokenId
+            val newService = item.second.payload
             logger.d("[addOffer::server] ${item.first} \n and \n ${item.second}")
             return personRepository.addOffer(
                 contact = uiState.value.profile.contact,
                 secret = uiState.value.profile.secret,
-                newService = newService
+                newService = newService as Service
             )
         }
 
-        suspend fun updateCacheForMintTx(it: Response.Data<PersonProfile>) {
+        suspend fun updateCacheForCompletedTx(it: Response.Data<PersonProfile>) {
+            assert(currentTxPair != null)
             personRepository.cacheAccount(it.data)
-            cacheRepository.createServerTx(
-                service = currentTxPair!!.second,
-                txChainId = (currentTxPair!!.first as MintTransaction).uid,
-                isProcessed = true
+            currentTxPair!!.second.status = RequestStatus.PROCESSED
+            cacheRepository.createChainTxAndServerTx(
+                currentTxPair!!.first,
+                currentTxPair!!.second
             )
+        }
+
+        fun processRegisterUserTx(item: Pair<ITransaction, ServerTransaction>): Flow<Response<PersonProfile>> {
+            currentTxPair = item
+            val personProfile = (item.second.payload as PersonProfile)
+            return personRepository.createAccountAsFlow(personProfile)
         }
     }
 

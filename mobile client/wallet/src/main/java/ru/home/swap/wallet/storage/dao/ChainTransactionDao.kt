@@ -2,6 +2,7 @@ package ru.home.swap.wallet.storage.dao
 
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
+import ru.home.swap.core.logger.Logger
 import ru.home.swap.wallet.storage.model.*
 
 /**
@@ -22,10 +23,12 @@ interface ChainTransactionDao {
 
     @Transaction
     suspend fun insertWithinTransaction(transactionsOnChain: ChainTransactionEntity,
-                                        transactionsOnServer: ServerRequestTransactionEntity) {
+                                        transactionsOnServer: ServerRequestTransactionEntity): Pair<Long, Long> {
+        Logger.getInstance().d("[insertWithinTransaction] ${transactionsOnChain} and ${transactionsOnServer}")
         val chainTxId = insert(transactionsOnChain)
         transactionsOnServer.txChainId = chainTxId // keep an eye to make sure this is a valid uid
-        insert(transactionsOnServer)
+        val serverTxId = insert(transactionsOnServer)
+        return Pair(chainTxId, serverTxId)
     }
 
     @Transaction
@@ -39,7 +42,7 @@ interface ChainTransactionDao {
             "the issue")
     @Query("" +
             "SELECT * FROM ${Schema.ChainTransaction.TABLE_NAME} " +
-            "INNER JOIN ${Schema.ServerMetadata.TABLE_NAME} " +
+            "LEFT OUTER JOIN ${Schema.ServerMetadata.TABLE_NAME} " +
             "ON ${Schema.ChainTransaction.TABLE_NAME}.${Schema.ChainTransaction.UID} " +
             "   = ${Schema.ServerMetadata.TABLE_NAME}.${Schema.ServerMetadata.TX_CHAIN_ID} " +
             "WHERE ${Schema.ServerMetadata.TABLE_NAME}.${Schema.ServerMetadata.STATUS} = :status")
@@ -48,7 +51,7 @@ interface ChainTransactionDao {
     @Transaction
     @Query("" +
             "SELECT * FROM ${Schema.ChainTransaction.TABLE_NAME} " +
-            "INNER JOIN ${Schema.ServerMetadata.TABLE_NAME} " +
+            "LEFT OUTER JOIN ${Schema.ServerMetadata.TABLE_NAME} " +
             "ON ${Schema.ChainTransaction.TABLE_NAME}.${Schema.ChainTransaction.UID} " +
             "   = ${Schema.ServerMetadata.TABLE_NAME}.${Schema.ServerMetadata.TX_CHAIN_ID}; ")
     fun getAll(): Flow<List<TxWithMetadataEntity>>
@@ -57,7 +60,9 @@ interface ChainTransactionDao {
     suspend fun insertAll(vararg transactions: ChainTransactionEntity)
 
     /**
-     * Warning: it should be used only within @Transaction
+     * Warning: it should be used only within @Transaction. The exception is made
+     * for on-chain tx which should not have a record on sever, e.g. approve
+     * token manager
      * */
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(transactions: ChainTransactionEntity): Long

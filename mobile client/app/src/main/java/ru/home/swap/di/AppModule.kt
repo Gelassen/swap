@@ -64,8 +64,9 @@ class AppModule(val application: Application) {
     @Provides
     fun providesMyWorkerFactory(repository: IWalletRepository,
                                 storageRepository: IStorageRepository,
+                                personRepository: IPersonRepository,
                                 @Named(NetworkModule.DISPATCHER_IO) dispatcher: CoroutineDispatcher
     ): MyWorkerFactory {
-        return MyWorkerFactory(repository, storageRepository, dispatcher)
+        return MyWorkerFactory(repository, storageRepository, personRepository, dispatcher)
     }
 }

@@ -4,19 +4,20 @@ import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 
 data class Service(
-    @SerializedName("id")
-    var id: Long = 0L,
+    var uid: Long = 0L,
     @SerializedName("title")
     val title: String = "",
     val date: Long = 0L,
     val index: List<String> = emptyList(),
     @SerializedName("chainService")
     val chainService: ChainService = ChainService(),
-    @Transient
-    var status: String = ""
-)
+) : IPayload {
+    override fun toJson(): String {
+        return Gson().toJson(this)
+    }
+}
 
-fun Service.toJson(): String {
+fun List<Service>.toJson(): String {
     return Gson().toJson(this)
 }
 

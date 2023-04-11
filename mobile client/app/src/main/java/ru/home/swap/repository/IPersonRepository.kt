@@ -17,5 +17,6 @@ interface IPersonRepository {
     fun removeOffer(contact: String, secret: String, id: Long): Flow<Response<PersonProfile>>
     fun removeDemand(contact: String, secret: String, id: Long): Flow<Response<PersonProfile>>
     fun getContacts(contact: String, secret: String, serviceId: Long): Flow<Response<PersonProfile>>
+    @Deprecated("Rewrite on single call within suspend function")
     fun cleanCachedAccount(): Flow<Any>
 }

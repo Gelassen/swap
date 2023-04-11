@@ -16,7 +16,7 @@ import ru.home.swap.wallet.storage.model.ServerRequestTransactionEntity
 @Database(
     entities = [ChainTransactionEntity::class, ServerRequestTransactionEntity::class],
     views = [DataItemFromView::class],
-    version = 17,
+    version = 20,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

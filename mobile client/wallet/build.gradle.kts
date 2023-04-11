@@ -81,13 +81,25 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
     testImplementation("androidx.arch.core:core-testing:2.1.0")
-    testImplementation("org.mockito:mockito-inline:3.12.4")
-    testImplementation("org.mockito:mockito-core:3.12.4")
+//    testImplementation("org.mockito:mockito-inline:3.12.4")
+    testImplementation("org.mockito:mockito-core:4.5.1")
     testImplementation("app.cash.turbine:turbine:0.12.1")
     testImplementation("com.google.code.gson:gson:2.10")
+    testImplementation("org.json:json:20180813")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
+    testImplementation("io.mockk:mockk:1.12.3")
 
     androidTestImplementation("androidx.test.ext:junit:1.1.30")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
+/*    androidTestImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
+    androidTestImplementation("androidx.arch.core:core-testing:2.1.0")
+    androidTestImplementation("org.mockito:mockito-inline:3.12.4")
+    androidTestImplementation("org.mockito:mockito-core:3.12.4")
+    androidTestImplementation("app.cash.turbine:turbine:0.12.1")
+    androidTestImplementation("com.google.code.gson:gson:2.10")
+    androidTestImplementation("androidx.work:work-testing:2.8.1")
+    androidTestImplementation("junit:junit:4.13.2")*/
+
 
     implementation(project(":core"))
 }

@@ -44,6 +44,7 @@ class Cache(val context: Context) {
     }
 
     fun getProfile(): Flow<PersonProfile> {
+        context.dataStore.data
         return context.dataStore.data
             .map { preferences ->
                 Log.d(App.TAG, "[cache] get profile from cache")

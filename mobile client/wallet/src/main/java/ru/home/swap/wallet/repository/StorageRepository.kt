@@ -6,6 +6,8 @@ import androidx.paging.PagingData
 import kotlinx.coroutines.flow.*
 import ru.home.swap.core.extensions.attachIdlingResource
 import ru.home.swap.core.logger.Logger
+import ru.home.swap.core.model.IPayload
+import ru.home.swap.core.model.RequestStatus
 import ru.home.swap.core.model.Service
 import ru.home.swap.wallet.model.ITransaction
 import ru.home.swap.wallet.storage.model.Schema.ChainTransaction.DEFAULT_PAGE_SIZE
@@ -25,14 +27,24 @@ class StorageRepository(
     }*/
     val logger: Logger = Logger.getInstance()
 
-    override suspend fun createChainTxAndServeTx(tx: ITransaction, service: Service, isProcessed: Boolean) {
-        chainTransactionDao.insertWithinTransaction(
+    override suspend fun createChainTxAndServerTx(tx: ITransaction, serverTx: ServerTransaction): Pair<Long, Long> {
+        val result: Pair<Long, Long> = chainTransactionDao.insertWithinTransaction(
             transactionsOnChain = tx.fromDomain(),
-            transactionsOnServer = service.fromDomain(0L, isProcessed)
+            transactionsOnServer = serverTx.fromDomain()
         )
+        return result
     }
 
-    override fun createChainTxAsFlow(tx: ITransaction): Flow<ITransaction> {
+    override suspend fun createChainTx(tx: ITransaction): Long {
+        val rowId = chainTransactionDao.insert(tx.fromDomain())
+        return rowId
+    }
+
+    override suspend fun getChainTx(id: Long): ITransaction {
+        return chainTransactionDao.getById(id).toDomain()
+    }
+
+/*    override fun createChainTxAsFlow(tx: ITransaction): Flow<ITransaction> {
         return flow {
             val rowId = chainTransactionDao.insert(tx.fromDomain())
             val cachedTx = chainTransactionDao.getById(rowId)
@@ -51,14 +63,14 @@ class StorageRepository(
         val rowId = serverDao.insert(service.fromDomain(txChainId, isProcessed))
         val cachedTx = serverDao.getById(rowId)
         return cachedTx.toDomainObject()
-    }
+    }*/
 
-    override fun getAllChainTransactions(): Flow<List<Pair<ITransaction, Service>>> {
+    override fun getAllChainTransactions(): Flow<List<Pair<ITransaction, ServerTransaction>>> {
         return chainTransactionDao.getAll()
             .map {
 //                val filteredIt = it.filter { it -> it.serverMetadata.status.equals(RequestStatus.WAITING) }
                 logger.d("[loadAllFromCache] 1. get items ${it.count()}")
-                val result = mutableListOf<Pair<ITransaction,Service>>()
+                val result = mutableListOf<Pair<ITransaction,ServerTransaction>>()
                 for (item in it) {
                     result.add(item.toDomain())
                 }
@@ -66,11 +78,11 @@ class StorageRepository(
             }
     }
 
-    override fun getAllChainTx(): Flow<List<Pair<ITransaction, Service>>> {
+    override fun getAllChainTx(): Flow<List<Pair<ITransaction, ServerTransaction>>> {
         return chainTransactionDao.getAll()
             .map {
                 val filteredIt = it.filter { it -> it.serverMetadata.status.equals(RequestStatus.WAITING) }
-                val result = mutableListOf<Pair<ITransaction,Service>>()
+                val result = mutableListOf<Pair<ITransaction,ServerTransaction>>()
                 for (item in filteredIt) {
                     result.add(item.toDomain())
                 }

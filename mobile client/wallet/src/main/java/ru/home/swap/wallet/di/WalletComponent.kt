@@ -1,5 +1,6 @@
 package ru.home.swap.wallet.di
 
+import androidx.work.WorkManager
 import ru.home.swap.wallet.TestWalletActivity
 import dagger.Component
 import kotlinx.coroutines.CoroutineScope
@@ -27,4 +28,5 @@ interface WalletComponent {
     fun providesChainTransactionDao(): ChainTransactionDao
     @Named(WalletModule.CACHE_SCOPE)
     fun providesCacheUtilsScope(): CoroutineScope
+    fun providesWorkManager(): WorkManager
 }

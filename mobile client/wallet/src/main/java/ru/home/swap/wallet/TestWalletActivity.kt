@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory
 import org.web3j.protocol.http.HttpService
 import ru.home.swap.core.di.ViewModelFactory
 import ru.home.swap.core.logger.Logger
+import ru.home.swap.core.model.PersonProfile
 import ru.home.swap.wallet.contract.Match
 import java.math.BigInteger
 import javax.inject.Inject
@@ -28,12 +29,16 @@ class TestWalletActivity: AppCompatActivity() {
     lateinit var viewModelFactory: ViewModelFactory
     lateinit var walletViewModel: WalletViewModel
 
+    lateinit var personProfile: PersonProfile
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.mint_token_activity)
 
         WalletDi(application).getWalletComponent().inject(this)
         walletViewModel = ViewModelProvider(this, viewModelFactory).get(WalletViewModel::class.java)
+
+        personProfile = PersonProfile(userWalletAddress = getString(R.string.my_account))
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
@@ -58,12 +63,14 @@ class TestWalletActivity: AppCompatActivity() {
 
         findViewById<Button>(R.id.registerUser)
             .setOnClickListener {
-                walletViewModel.registerUserOnSwapMarket(FIRST_USER)
+                val personProfile = PersonProfile(userWalletAddress = getString(R.string.my_account))
+                walletViewModel.registerUserOnSwapMarket(FIRST_USER, personProfile = personProfile)
             }
 
         findViewById<Button>(R.id.registerSecondUser)
             .setOnClickListener {
-                walletViewModel.registerUserOnSwapMarket(SECOND_USER)
+                val personProfile = PersonProfile(userWalletAddress = getString(R.string.my_account_2))
+                walletViewModel.registerUserOnSwapMarket(SECOND_USER, personProfile)
             }
 
         findViewById<Button>(R.id.approveTokenManager)
@@ -128,14 +135,16 @@ class TestWalletActivity: AppCompatActivity() {
 
         findViewById<Button>(R.id.registerDemandFirstUser)
             .setOnClickListener {
-                val demandOfFirstUser = SECOND_USER_OFFER
-                walletViewModel.registerDemand(FIRST_USER, demandOfFirstUser)
+                /**
+                 * Register demand is deprecated since V2 smart contract
+                 * */
             }
 
         findViewById<Button>(R.id.registerDemandSecondUser)
             .setOnClickListener {
-                val demandOfSecondUser = FIRST_USER_OFFER
-                walletViewModel.registerDemand(SECOND_USER, demandOfSecondUser)
+                /**
+                 * Register demand is deprecated since V2 smart contract
+                 * */
             }
 
         findViewById<Button>(R.id.getMatches)

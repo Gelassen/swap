@@ -8,6 +8,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import ru.home.swap.core.di.NetworkModule
 import ru.home.swap.di.AppMainScope
+import ru.home.swap.repository.IPersonRepository
 import ru.home.swap.wallet.network.ChainWorker
 import ru.home.swap.wallet.repository.IStorageRepository
 import ru.home.swap.wallet.repository.IWalletRepository
@@ -22,6 +23,7 @@ import javax.inject.Named
 class MyWorkerFactory @Inject constructor(
     val repository: IWalletRepository,
     val cacheRepository: IStorageRepository,
+    val personRepository: IPersonRepository,
     @Named(NetworkModule.DISPATCHER_IO) val backgroundDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : WorkerFactory()/*DelegatingWorkerFactory()*/ {
     /*    init {
@@ -42,7 +44,16 @@ class MyWorkerFactory @Inject constructor(
                     cacheRepository =  cacheRepository,
                     backgroundDispatcher = backgroundDispatcher
                 )
-            else -> null
+            RegisterUserWorker::class.java.name ->
+                RegisterUserWorker(
+                    context = appContext,
+                    params = workerParameters,
+                    repository = repository,
+                    cacheRepository = cacheRepository,
+                    backgroundDispatcher = backgroundDispatcher,
+                    personRepository = personRepository
+                )
+            else -> throw IllegalStateException("Unknown worker. Did you forget to register a new type of worker in the factory?")
         }
     }
 

@@ -16,11 +16,13 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import ru.home.swap.core.di.NetworkModule
 import ru.home.swap.core.logger.Logger
+import ru.home.swap.core.model.IPayload
 import ru.home.swap.core.network.Response
 import ru.home.swap.wallet.model.ITransaction
 import ru.home.swap.wallet.model.TransactionReceiptDomain
 import ru.home.swap.wallet.repository.IStorageRepository
 import ru.home.swap.wallet.repository.IWalletRepository
+import ru.home.swap.wallet.storage.model.ServerTransaction
 import ru.home.swap.wallet.storage.model.TxStatus
 import javax.inject.Inject
 import javax.inject.Named
@@ -39,6 +41,11 @@ open class BaseChainWorker
     val cacheRepository: IStorageRepository,
     @Named(NetworkModule.DISPATCHER_IO) val backgroundDispatcher: CoroutineDispatcher = Dispatchers.IO
 ): CoroutineWorker(context, params) {
+
+    object Consts {
+        const val KEY_ERROR = "KEY_ERROR"
+        const val KEY_ERROR_MSG = "KEY_ERROR_MSG"
+    }
 
     protected var foregroundIndo: ForegroundInfo
 
@@ -77,27 +84,22 @@ open class BaseChainWorker
         return notificationChannelId
     }
 
-    protected suspend fun preProcessResponse(it: Response<TransactionReceiptDomain>, newTx: ITransaction) {
+    protected suspend fun preProcessResponse(it: Response<TransactionReceiptDomain>, newTx: ITransaction, serverTx: ServerTransaction): Pair<Long, Long> {
         when(it) {
-            is Response.Data -> {
-                Logger.getInstance().d("[preProcessResponse] start for ${newTx}")
-                if (it.data.isStatusOK()) {
-                    newTx.status = TxStatus.TX_MINED
-                    cacheRepository.createChainTx(newTx)
-                } else {
-                    newTx.status = TxStatus.TX_REVERTED
-                    cacheRepository.createChainTx(newTx)
-                }
-            }
-            is Response.Error.Message -> {
-                newTx.status = TxStatus.TX_EXCEPTION
-                cacheRepository.createChainTx(newTx)
-            }
-            is Response.Error.Exception -> {
-                newTx.status = TxStatus.TX_EXCEPTION
-                cacheRepository.createChainTx(newTx)
-            }
+            is Response.Data -> { newTx.status = if (it.data.isStatusOK()) TxStatus.TX_MINED else TxStatus.TX_REVERTED }
+            is Response.Error.Message -> { newTx.status = TxStatus.TX_EXCEPTION }
+            is Response.Error.Exception -> { newTx.status = TxStatus.TX_EXCEPTION }
         }
+        return cacheRepository.createChainTxAndServerTx(newTx, serverTx)
+    }
+
+    protected suspend fun preProcessResponse(it: Response<TransactionReceiptDomain>, newTx: ITransaction): Long {
+        when(it) {
+            is Response.Data -> { newTx.status = if (it.data.isStatusOK()) TxStatus.TX_MINED else TxStatus.TX_REVERTED }
+            is Response.Error.Message -> { newTx.status = TxStatus.TX_EXCEPTION }
+            is Response.Error.Exception -> { newTx.status = TxStatus.TX_EXCEPTION }
+        }
+        return cacheRepository.createChainTx(newTx)
     }
 
     private fun createForegroundInfo(progress: String): ForegroundInfo {

@@ -15,7 +15,7 @@ data class TxWithMetadataEntity(
 )
 
 // TODO expand me to generic domain conversion
-fun TxWithMetadataEntity.toDomain() : Pair<ITransaction, Service> {
+fun TxWithMetadataEntity.toDomain() : Pair<ITransaction, ServerTransaction> {
     val transaction = tx.toDomain()
     val service = serverMetadata.toDomainObject()
     return Pair(transaction, service)
