@@ -5,7 +5,6 @@ import dagger.android.AndroidInjectionModule
 import dagger.android.ContributesAndroidInjector
 import dagger.android.support.AndroidSupportInjectionModule
 import ru.home.swap.MainActivity
-import ru.home.swap.TestActivity
 import ru.home.swap.ui.chains.ChainsFragment
 import ru.home.swap.ui.contacts.ContactsFragment
 import ru.home.swap.ui.demands.DemandsFragment
@@ -50,6 +49,4 @@ abstract class InjectorModule {
     @ContributesAndroidInjector
     abstract fun provideMainActivity(): MainActivity
 
-    @ContributesAndroidInjector
-    abstract fun provideTestActivity(): TestActivity
 }

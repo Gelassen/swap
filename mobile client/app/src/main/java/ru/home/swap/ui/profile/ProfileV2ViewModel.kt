@@ -317,7 +317,7 @@ class ProfileV2ViewModel
                                 error = "Something went during creating an account"
                             }
                             state.update { state -> state.copy(isLoading = false, errors = state.errors.plus(error)) }
-                            // TODO clean cached account
+
                             personRepository.cleanCachedAccount().collect { /* no op */ }
                         }
                         else -> { logger.d("[create an account] unexpected state with result: ${it}") }
@@ -362,18 +362,6 @@ class ProfileV2ViewModel
             .cachedIn(viewModelScope)
     }
 
-    fun debugGetAllChainTx() {
-        viewModelScope.launch {
-            cacheRepository
-                .getAllChainTx()
-                .collect {
-                    logger.d("[loadAllFromCache] debug: Collect result ${it.toString()}")
-                    queue.clear()
-                    queue.addAll(it)
-                }
-        }
-    }
-
     // it successfully notifies client after changes in db
     fun loadAllFromCache() {
         viewModelScope.launch {
@@ -400,75 +388,6 @@ class ProfileV2ViewModel
             it.copy(
                 errors = it.errors.filter { str -> !str.equals(it.errors.first()) }
             )
-        }
-    }
-
-    private val queue = ConcurrentLinkedQueue<Pair<ITransaction, ServerTransaction>>()
-
-    fun createARecord(tx: ITransaction, service: Service) {
-        viewModelScope.launch {
-            val serverTx = ServerTransaction(
-                requestType = RequestType.TX_REGISTER_OFFER,
-                payload = service
-            )
-            cacheRepository.createChainTxAndServerTx(tx, serverTx)
-        }
-    }
-
-    fun updateARecord() {
-        viewModelScope.launch {
-            val record = getNextItem()
-            if (record == null) {
-                logger.d("there is no items in queue, skip")
-                return@launch
-            } else {
-                logger.d("updating a record ${record}")
-                record.first.status = TxStatus.TX_MINED
-                record.second.status = RequestStatus.PROCESSED
-                cacheRepository.createChainTxAndServerTx(record.first, record.second)
-            }
-        }
-    }
-
-    fun getNextItem(): Pair<ITransaction, ServerTransaction>? {
-        val item = queue.poll()
-        if (item != null
-            && item.first.status.equals(TxStatus.TX_MINED)
-            && item.second.status.equals(RequestStatus.PROCESSED)) {
-            return getNextItem()
-        } else {
-            return item
-        }
-    }
-
-    private fun updateStateProfile(it: Response<PersonProfile>) {
-        when (it) {
-            is Response.Data -> {
-                Log.d(App.TAG, "[5a] collect the data")
-                state.update { state ->
-                    state.copy(
-                        profile = it.data,
-                        status = StateFlagV2.PROFILE,
-                        isLoading = false
-                    )
-                }
-            }
-            is Response.Error -> {
-                Log.d(App.TAG, "[5b] collect the error")
-                state.update { state ->
-                    state.copy(
-                        errors = state.errors + getErrorMessage(it),
-                        isLoading = false
-                    )
-                }
-                viewModelScope.launch {
-                    personRepository.cleanCachedAccount()
-                        .collect { it ->
-                            /* no op */
-                            Log.d(App.TAG, "Receive callback from cache clean")
-                        }
-                }
-            }
         }
     }
 
