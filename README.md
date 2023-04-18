@@ -140,6 +140,11 @@ $admin.peers
 $txpool.status
 $var contract = eth.contract(abi)
 $contract.at('<contract address>').methodCall()
+
+$ var tx = { from: eth.accounts[0], to: eth.accounts[1], value: web3.toWei(0.1, 'ether') };
+$ eth.sendTransaction(tx);
+
+$ web3.eth.getGasPrice(function(e, r) { console.log(r) })
 ```
 # Important points 
 Each change on solidity contract changes its bytecode. Client side uses Java\Kotlin wrapper of the contract with its bytecode under the hood. It means changes in solidity code should lead to change in Java\Kotlin code simultaneously. 
