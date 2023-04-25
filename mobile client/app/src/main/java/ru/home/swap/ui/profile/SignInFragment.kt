@@ -12,19 +12,15 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import dagger.android.support.AndroidSupportInjection
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import ru.home.swap.App
 import ru.home.swap.BuildConfig
 import ru.home.swap.R
-import ru.home.swap.core.model.DebugProfiles
+import ru.home.swap.model.DebugProfiles
 import ru.home.swap.databinding.SigninFragmentBinding
 import ru.home.swap.core.di.ViewModelFactory
 import ru.home.swap.providers.PersonProvider
 import ru.home.swap.ui.common.BaseFragment
-import ru.home.swap.wallet.TestWalletActivity
-import ru.home.swap.wallet.contract.Value
-import java.math.BigInteger
 import javax.inject.Inject
 
 class SignInFragment: BaseFragment() {
@@ -68,7 +64,7 @@ class SignInFragment: BaseFragment() {
         binding.progressIndicator.visibility = View.GONE
 
         if (BuildConfig.DEBUG) {
-            val profiles = DebugProfiles()
+            val profiles = DebugProfiles(requireContext())
             binding.debugBadge.visibility = View.VISIBLE
             binding.debugBadge.setOnClickListener {
                 val profile = profiles.next()

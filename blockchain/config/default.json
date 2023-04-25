@@ -7,7 +7,7 @@
     },
     "private_testnet" : {
         "api" : "http://192.168.1.243:2001/",
-        "privateKey" : "6cc625d1f47602232006d6d7b9c586cd838ffcad7a7c988cc27c8ce6934ca090",
+        "privateKey" : "44e63ab9167d1af1d3b40a6b02102e16f1ad510e0b5cae3d05685363a668e45f",
         "dataDir" : "",
         "address" : "", 
         "password" : ""

@@ -230,6 +230,28 @@ class PersonRepository(val api: IApi, val cache: Cache, val context: Context): I
             }
     }
 
+    override suspend fun getAggregatedMatches(contact: String, secret: String): Response<List<Any>> {
+        lateinit var result: Response<List<Any>>
+        try {
+            val response = api.getMatchesForUserDemands(
+                credentials = AppCredentials.basic(contact, secret),
+                page = 0,
+                size = 0
+            )
+            if (response.isSuccessful) {
+                val payload = response.body()!!
+                result = Response.Data(payload.payload.toList())
+            } else {
+                val errorPayload = ApiResponseConverter().toDomain(response.errorBody()?.string()!!);
+                result = Response.Error.Message("${response.message()}:\n\n${errorPayload.payload}")
+            }
+        } catch (ex: Exception) {
+            logger.e("Failed to fetch aggregated matches", ex)
+            result = Response.Error.Exception(ex)
+        }
+        return result
+    }
+
     override fun cleanCachedAccount(): Flow<Any> {
         return cache.cleanProfile()
     }

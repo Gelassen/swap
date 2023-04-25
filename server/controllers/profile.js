@@ -308,15 +308,90 @@ exports.getMatchesByProfile = async function(req, res) {
             result = network.getMsg(204, profileResult);
         } else {
             // TODO draft, has not been tested yet. 
+            // TODO consider to add pagination
+            /**
+             * Current response:
+             * 
+             * [
+   {
+      "id":138,
+      "userFirstProfileId":4317,
+      "userSecondProfileId":4313,
+      "userFirstServiceId":14094,
+      "userSecondServiceId":14059,
+      "approvedByFirstUser":0,
+      "approvedBySecondUser":0,
+      "idChainServiceFirst":8,
+      "userAddressFirst":"0x52E7400Ba1B956B11394a5045F8BC3682792E1AC",
+      "tokendIdFirst":77,
+      "userAddressSecond":"0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd",
+      "tokenIdSecond":20
+   },
+   {
+      "id":139,
+      "userFirstProfileId":4317,
+      "userSecondProfileId":4313,
+      "userFirstServiceId":14094,
+      "userSecondServiceId":14057,
+      "approvedByFirstUser":0,
+      "approvedBySecondUser":0,
+      "idChainServiceFirst":6,
+      "userAddressFirst":"0x52E7400Ba1B956B11394a5045F8BC3682792E1AC",
+      "tokendIdFirst":77,
+      "userAddressSecond":"0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd",
+      "tokenIdSecond":18
+   }
+]Connection 12 released[
+   "model"
+]"model"[
+   {
+      "id":138,
+      "userFirstProfileId":4317,
+      "userSecondProfileId":4313,
+      "userFirstServiceId":14094,
+      "userSecondServiceId":14059,
+      "approvedByFirstUser":false,
+      "approvedBySecondUser":false,
+      "userFirstService":{
+         "idChainService":8,
+         "userAddress":"0x52E7400Ba1B956B11394a5045F8BC3682792E1AC"
+      },
+      "userSecondService":{
+         "userAddress":"0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd",
+         "tokenId":20
+      }
+   },
+   {
+      "id":139,
+      "userFirstProfileId":4317,
+      "userSecondProfileId":4313,
+      "userFirstServiceId":14094,
+      "userSecondServiceId":14057,
+      "approvedByFirstUser":false,
+      "approvedBySecondUser":false,
+      "userFirstService":{
+         "idChainService":6,
+         "userAddress":"0x52E7400Ba1B956B11394a5045F8BC3682792E1AC"
+      },
+      "userSecondService":{
+         "userAddress":"0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd",
+         "tokenId":18
+      }
+   }
+]
+             * 
+             */
             let model = await match.getByProfileId(profileResult.id);
             logger.log(`[model] model ${JSON.stringify(model)}`);
             let aggregatedModel = [];
+            logger.log(`[start] request aggregated matches`);
             await Promise.all(model.map(async (matchItem) => {
                 let matchOnChain = await chain.getSwapChainContractInstance()
                                             .getMatches(
                                                 matchItem.userFirstService.userAddress,
                                                 matchItem.userFirstService.userAddress
                                             );
+                logger.log(`[end] within callback of aggregated matches ${matchOnChain}`);
                 matchItem.chainObject = matchOnChain;
                 aggregatedModel.add(matchItem);
             }));

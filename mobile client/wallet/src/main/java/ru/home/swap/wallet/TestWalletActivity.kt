@@ -173,9 +173,9 @@ class TestWalletActivity: AppCompatActivity() {
     }
 
     companion object {
-        const val FIRST_USER = "0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd"
+        const val FIRST_USER = "0x0A8b295B4266d8fEB55d46a96B31936FE265C01F"
         const val FIRST_USER_OFFER = "Consulting"
-        const val SECOND_USER = "0x52E7400Ba1B956B11394a5045F8BC3682792E1AC"
+        const val SECOND_USER = "0xED337a9841aa5349ACe99931460E0443a199E746"
         const val SECOND_USER_OFFER = "Farmer products"
     }
 

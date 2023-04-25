@@ -34,13 +34,14 @@ async function main() {
     console.log("SwapChainV2Contract address: ", contract.address)
 
   } else {
+    // since 18th of April 2023, a separate script is used for this aim; see scripts/keys.js
     const nodeConfig = configChain.get("private_testnet");
     const pwd = new Utils().recoverPasswordForNode(
       nodeConfig.password, 
       nodeConfig.address, 
       nodeConfig.dataDir
       );
-    console.log("Provide this pasword to hardhat private network config: ", pwd);
+    console.log("Provide this password to hardhat private network config: ", pwd);
   }
 }
 

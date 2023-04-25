@@ -113,8 +113,8 @@ exports.getByProfileId = function(profileId, req, res) {
             // make sure you prevent sql injection by validating first ${profileId}
             const sql = `SELECT 
                 id, userFirstProfileId, userSecondProfileId, userFirstServiceId, userSecondServiceId, approvedByFirstUser, approvedBySecondUser, 
-                chainServicesFirst.idChainService as idChainServiceFirst, chainServicesFirst.userAddress as userAddressFirst, chainServicesFirst.tokenId as tokendIdFirst,
-                chainServicesSecond.idChainService as idChainServiceFirst, chainServicesSecond.userAddress as userAddressSecond, chainServicesSecond.tokenId as tokenIdSecond
+                chainServicesFirst.idChainService as idChainServiceFirst, chainServicesFirst.userWalletAddress as userAddressFirst, chainServicesFirst.tokenId as tokendIdFirst,
+                chainServicesSecond.idChainService as idChainServiceFirst, chainServicesSecond.userWalletAddress as userAddressSecond, chainServicesSecond.tokenId as tokenIdSecond
                 FROM ${MatchTable.TABLE_NAME} 
                 INNER JOIN ${ChainServicesTable.TABLE_NAME} as chainServicesFirst
                 ON ${MatchTable.USER_FIRST_SERVICE_ID} = chainServicesFirst.${ChainServicesTable.SERVER_SERVICE_ID}

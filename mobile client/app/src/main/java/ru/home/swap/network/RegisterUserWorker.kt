@@ -104,7 +104,7 @@ class RegisterUserWorker
                     result = Result.success(
                         workDataOf(
                             Pair(KEY_ERROR, false),
-                            Pair(KEY_PERSON_PROFILE, personProfile)
+                            Pair(KEY_PERSON_PROFILE, personProfile.toJson())
                         )
                     )
                 } else {

@@ -1,11 +1,12 @@
-package ru.home.swap.core.model
+package ru.home.swap.model
 
-import android.app.Person
-import java.lang.IllegalArgumentException
+import android.content.Context
+import ru.home.swap.core.R
+import ru.home.swap.core.model.PersonProfile
 import java.util.*
 import kotlin.collections.ArrayList
 
-class DebugProfiles {
+class DebugProfiles(val context: Context) {
 
     private val profiles: MutableCollection<PersonProfile> = ArrayList()
 
@@ -15,7 +16,7 @@ class DebugProfiles {
                 contact = "+79207008090",
                 name = "Dmitry",
                 secret = "onemoretime",
-                userWalletAddress = "0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd"
+                userWalletAddress =  context.getString(com.example.wallet.R.string.my_account)
             )
         )
         profiles.add(
@@ -23,7 +24,7 @@ class DebugProfiles {
                 contact = "+79101000108",
                 name = "Jane",
                 secret = "catchme",
-                userWalletAddress = "0x52E7400Ba1B956B11394a5045F8BC3682792E1AC"
+                userWalletAddress = context.getString(com.example.wallet.R.string.my_account_2)
             )
         )
         profiles.add(
@@ -31,6 +32,22 @@ class DebugProfiles {
                 contact = "John",
                 name = "911",
                 secret = "007"
+            )
+        )
+        profiles.add(
+            PersonProfile(
+                contact = "+79201000989",
+                name = "Julia N.",
+                secret = "wireframes",
+                userWalletAddress = "0x60476837d7ebd4bd9d543888bec87e48648fa321"
+            )
+        )
+        profiles.add(
+            PersonProfile(
+                contact = "+79202000989",
+                name = "Dmitry K.",
+                secret = "expertise",
+                userWalletAddress = "0xa24c5c43bcf8efe680f81cfb1375b4fa97f2a43f"
             )
         )
     }
@@ -44,8 +61,8 @@ class DebugProfiles {
     }
 
     fun next(index: Int) : PersonProfile {
-        if (index >= profiles.size) {
-            next = 0 // start from the beginning
+        if (index >= profiles.size - 1) {
+            next = -1 // start from the beginning
             //throw IllegalArgumentException("There is no such data. Did you pass correct index?")
         }
         return profiles.elementAt(index)

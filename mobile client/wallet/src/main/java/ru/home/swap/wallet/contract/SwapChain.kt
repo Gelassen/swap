@@ -8,6 +8,7 @@ import org.web3j.crypto.Credentials
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.RemoteCall
 import org.web3j.protocol.core.RemoteFunctionCall
+import org.web3j.protocol.core.methods.request.Transaction
 import org.web3j.protocol.core.methods.response.TransactionReceipt
 import org.web3j.tx.Contract
 import org.web3j.tx.TransactionManager
@@ -101,7 +102,6 @@ class SwapChain : Contract, ISwapChain {
             listOf(Address(userWalletAddress)),
             emptyList()
         )
-
         return executeRemoteCallTransaction(function)
     }
 

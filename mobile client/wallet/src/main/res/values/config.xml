@@ -2,21 +2,26 @@
 <resources>
     <!-- SECURITY BREACH: allowed for quick prototyping only -->
     <string name="wallet_password">3ba9b75a087df0e7082e1d3d58308755e35e17ac1117a4caf42ef209d203cb4a</string>
-    <string name="test_account_private_key">6cc625d1f47602232006d6d7b9c586cd838ffcad7a7c988cc27c8ce6934ca090</string>
-    <string name="test_account_2_private_key">7300c460af63c70ba89189c4d39a0b8a3a75eee1ea7d7dcef1f96c5736031bf5</string>
-    <string name="test_account_3_private_key">96c1d1d177c07b55c04a12d5e6a7c0b029d23ed5619c081f312ac5fb86c919f9</string>
+    <string name="test_account_private_key">44e63ab9167d1af1d3b40a6b02102e16f1ad510e0b5cae3d05685363a668e45f</string> <!-- new test chain -->
+    <string name="test_account_2_private_key">ef7f592d3f3c1d0ddfa8d138a4b4c0ceb0b50e35b1d67b22ce4ee0097c4681ea</string> <!-- new test chain -->
+<!--    <string name="test_account_3_private_key">96c1d1d177c07b55c04a12d5e6a7c0b029d23ed5619c081f312ac5fb86c919f9</string>-->
 
-    <string name="chain_id">3347</string>
+    <string name="chain_id">50101</string> <!-- new chain -->
     <!--  0xB54e15454E0711b1917f88E656C2fc3E9dF4117d  -->
-    <string name="my_account">0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd</string>
-    <string name="my_account_2">0x52E7400Ba1B956B11394a5045F8BC3682792E1AC</string>
+    <string name="my_account">0xEb113bC600201aAe92c165269749f91A63A9a007</string> <!-- new test  chain -->
+    <string name="my_account_2">0x699f9f9893dAD69450B333596A79FB55D8B35A4b</string> <!-- new test chain -->
     <!-- 0x3106248fbb449ed92b03d6f93f43f464cd95b74d -->
-    <string name="swap_value_contract_address">0x608b6F62Eb361686db34C2af5454917E8c1bFC1F</string>
+    <string name="swap_value_contract_address">0x39a4588487c4626D136A2250A00f36Cd2790e27D</string> <!-- new test chain -->
     <!-- Origin swap chain address: 0xbEC5032A1A14f94169Fcfd69B9DB637e1902AD65 -->
     <!-- Debug swap chain address: 0x8bC0B5C62dD269256587E46d465c9091808C3BaA -->
-    <string name="swap_chain_contract_address">0x9ceAECB2931a9681Bf23c79F68615ec96BcB0EFd</string>
+    <string name="swap_chain_contract_address">0x2f232Fa3A477040ea884c1B1E7D23AE92f05AcCb</string> <!-- new test chain -->
 
     <!-- by legacy reason originally it was rinkeby -->
 <!--    https://goerli.infura.io/v3/ce67e157fc964d3bbf7ff1db09aa316a-->
     <string name="ethereum_api_endpoint">http://192.168.1.243:2001</string>
+    <!-- Fresh accounts without dirty data -->
+    <string name="my_account_3">0x60476837d7ebd4bd9d543888bec87e48648fa321</string>
+    <string name="test_account_3_private_key">0x60476837d7ebd4bd9d543888bec87e48648fa321</string>
+    <string name="my_account_4">0xa24c5c43bcf8efe680f81cfb1375b4fa97f2a43f</string>
+    <string name="test_account_4_private_key">8b3c4e13bb00b5b65175363ac984181586dd2756087a0661a920f80fedc4b53a</string>
 </resources>
