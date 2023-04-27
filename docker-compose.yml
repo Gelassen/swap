@@ -37,17 +37,30 @@ services:
     
     container_name: server
 
-    image: node:18-alpine
+    image: node:18-alpine 
 
-    command: bash -c "npm install && npm start"
-
-    working_dir: /server
+    working_dir: /usr/src/swap/server
     
     volumes:
-      - ./infrastructure/server:/server
+      - ./server:/usr/src/swap/server
     
+    # 'Additional property copy is not allowed' issue... 
+    # ref: https://forums.docker.com/t/does-docker-compose-v3-support-copy-property/135791
+    # copy: ./server:/usr/src/swap/server 
+
+    # command: bash -c "npm install && npm start" # alpine image doesn't have bash installed
+
+    command: > 
+      sh -c "npm install && npm start"
+
     ports:
       - "3100:3100"
+
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
 
     depends_on:
       database:
@@ -60,4 +73,5 @@ services:
   #     - ./:/blockchain
   #   ports:
   #     - 3100:3100
+
     
