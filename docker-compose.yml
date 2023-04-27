@@ -1,0 +1,63 @@
+version: '3.8'
+services:
+  database:
+    
+    container_name: swap-database-default
+
+    # image: mysql-server:8.0.32 
+    image: mysql:8.0.33 # https://hub.docker.com/layers/library/mysql/8.0.33/images/sha256-b45a7c3e6fb15526e8bf62ebb940cd460617e36f46155b8514fd9c9388231817?context=explore
+    
+    # command: mysqld --character-set-server=utf8mb3 --collation-server=utf8mb3_unicode_ci
+
+    environment:
+      - "MYSQL_ROOT_PASSWORD=secret"
+      - "MYSQL_DATABASE=homestead"
+      - "MYSQL_USER=homestead"
+      - "MYSQL_PASSWORD=secret"
+      - "MYSQL_ROOT_HOST=127.0.0.1"
+
+    volumes:
+      - ./infrastructure/mysql:/var/lib/mysql
+      # it files *.sql files that are found in /docker-entrypoint-initdb.d will be executed on startup
+      # - ./server/db_schema/db_swap_schema.sql:/docker-entrypoint-initdb.d/1_db_swap_schema.sql #:rw (or :ro?)
+      # - ./server/db_schema/test_db_swap_schema_and_data.sql:/docker-entrypoint-initdb.d/2_test_db_swap_schema_and_data.sql #:ro
+      - ./server/db_schema:/docker-entrypoint-initdb.d:rw
+    
+    ports:
+      - "3307:3306"
+
+    healthcheck:
+      test: "/usr/bin/mysql --user=homestead --password=secret --execute \"SHOW DATABASES;\""
+      # test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      interval: 2s
+      timeout: 20s
+      retries: 3
+
+  server:
+    
+    container_name: server
+
+    image: node:18-alpine
+
+    command: bash -c "npm install && npm start"
+
+    working_dir: /server
+    
+    volumes:
+      - ./infrastructure/server:/server
+    
+    ports:
+      - "3100:3100"
+
+    depends_on:
+      database:
+        condition: service_healthy
+
+  # blockchain:
+  #   image: node:18-alpine
+  #   working_dir: /blockchain
+  #   volumes: 
+  #     - ./:/blockchain
+  #   ports:
+  #     - 3100:3100
+    
