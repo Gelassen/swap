@@ -41,7 +41,7 @@ async function main() {
       nodeConfig.address, 
       nodeConfig.dataDir
       );
-    console.log("Provide this password to hardhat private network config: ", pwd);
+    console.log("Provide this pasword to hardhat private network config: ", pwd);
   }
 }
 

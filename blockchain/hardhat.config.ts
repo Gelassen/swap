@@ -16,10 +16,10 @@ const config: HardhatUserConfig = {
     private_testnet: {
       url: configChain.get("private_testnet").api,
       accounts: [`0x${configChain.get("private_testnet").privateKey}`],
-      chainId: 50101 
+      chainId: 50101
     }
   }
   
 };
-// chain id is replaced on a new one
+
 export default config;

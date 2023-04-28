@@ -13,7 +13,6 @@ for (let idx = 0; idx < addressArray.length; idx++) {
     printKey(addressArray[idx], passwordArray[idx], datadirArray[idx]);
 }
 
-
 function printKey(address, password, datadir) {
     var keyObject = keythereum.importFromFile(address, datadir);
     var privateKey = keythereum.recover(password, keyObject);
