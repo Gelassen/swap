@@ -11,7 +11,11 @@
     "@openzeppelin/contracts": "^4.7.3",
     "@openzeppelin/test-helpers": "^0.5.16",
     "config": "^3.3.8",
-    "hardhat": "^2.11.2",
+    "hardhat": "^2.14.0",
     "keythereum": "^2.0.0"
+  },
+  "dependencies": {
+    "geth": "^0.4.0",
+    "git": "^0.1.5"
   }
 }

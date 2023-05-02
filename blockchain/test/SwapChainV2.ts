@@ -12,7 +12,7 @@ import "./SwapValue";
  * 
  * Ref https://stackoverflow.com/a/70686426/3649629
  */
-describe.only("SwapChain V2 test", async function () {
+describe("SwapChain V2 test", async function () {
 
     const DATE_2022_12_14 = 1671014555000;
     const DATE_2023_12_14 = 1702539434000;

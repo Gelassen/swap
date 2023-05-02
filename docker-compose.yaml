@@ -1,95 +1,105 @@
 version: '3.8'
 services:
-  database:
+  # database:
     
-    container_name: swap-database-default
+  #   container_name: swap-database-default
 
-    # image: mysql-server:8.0.32 
-    image: mysql:8.0.33 # https://hub.docker.com/layers/library/mysql/8.0.33/images/sha256-b45a7c3e6fb15526e8bf62ebb940cd460617e36f46155b8514fd9c9388231817?context=explore
+  #   # image: mysql-server:8.0.32 
+  #   image: mysql:8.0.33 # https://hub.docker.com/layers/library/mysql/8.0.33/images/sha256-b45a7c3e6fb15526e8bf62ebb940cd460617e36f46155b8514fd9c9388231817?context=explore
     
-    # command: mysqld --character-set-server=utf8mb3 --collation-server=utf8mb3_unicode_ci
+  #   # command: mysqld --character-set-server=utf8mb3 --collation-server=utf8mb3_unicode_ci
 
-    environment:
-      - "MYSQL_ROOT_PASSWORD=secret"
-      - "MYSQL_DATABASE=homestead"
-      - "MYSQL_USER=homestead"
-      - "MYSQL_PASSWORD=secret"
-      - "MYSQL_ROOT_HOST=127.0.0.1"
+  #   environment:
+  #     - "MYSQL_ROOT_PASSWORD=secret"
+  #     - "MYSQL_DATABASE=homestead"
+  #     - "MYSQL_USER=homestead"
+  #     - "MYSQL_PASSWORD=secret"
+  #     - "MYSQL_ROOT_HOST=127.0.0.1"
 
-    volumes:
-      - ./infrastructure/mysql:/var/lib/mysql
-      # it files *.sql files that are found in /docker-entrypoint-initdb.d will be executed on startup
-      # - ./server/db_schema/db_swap_schema.sql:/docker-entrypoint-initdb.d/1_db_swap_schema.sql #:rw (or :ro?)
-      # - ./server/db_schema/test_db_swap_schema_and_data.sql:/docker-entrypoint-initdb.d/2_test_db_swap_schema_and_data.sql #:ro
-      - ./server/db_schema:/docker-entrypoint-initdb.d:rw
+  #   volumes:
+  #     - ./infrastructure/mysql:/var/lib/mysql
+  #     # it files *.sql files that are found in /docker-entrypoint-initdb.d will be executed on startup
+  #     # - ./server/db_schema/db_swap_schema.sql:/docker-entrypoint-initdb.d/1_db_swap_schema.sql #:rw (or :ro?)
+  #     # - ./server/db_schema/test_db_swap_schema_and_data.sql:/docker-entrypoint-initdb.d/2_test_db_swap_schema_and_data.sql #:ro
+  #     - ./server/db_schema:/docker-entrypoint-initdb.d:rw
     
-    ports:
-      - "3307:3306"
+  #   ports:
+  #     - "3307:3306"
 
-    healthcheck:
-      test: "/usr/bin/mysql --user=homestead --password=secret --execute \"SHOW DATABASES;\""
-      # test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
-      interval: 2s
-      timeout: 20s
-      retries: 3
+  #   healthcheck:
+  #     test: "/usr/bin/mysql --user=homestead --password=secret --execute \"SHOW DATABASES;\""
+  #     # test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+  #     interval: 2s
+  #     timeout: 20s
+  #     retries: 3
 
-  server:
+  # server:
     
-    container_name: server
+  #   container_name: server
 
-    image: node:18-alpine 
+  #   image: node:18-alpine 
 
-    working_dir: /usr/src/swap/server
+  #   working_dir: /usr/src/swap/server
     
-    volumes:
-      - ./server:/usr/src/swap/server
+  #   volumes:
+  #     - ./server:/usr/src/swap/server
     
-    # 'Additional property copy is not allowed' issue... 
-    # ref: https://forums.docker.com/t/does-docker-compose-v3-support-copy-property/135791
-    # copy: ./server:/usr/src/swap/server 
+  #   # 'Additional property copy is not allowed' issue... 
+  #   # ref: https://forums.docker.com/t/does-docker-compose-v3-support-copy-property/135791
+  #   # copy: ./server:/usr/src/swap/server 
 
-    # command: bash -c "npm install && npm start" # alpine image doesn't have bash installed
+  #   # command: bash -c "npm install && npm start" # alpine image doesn't have bash installed
+
+  #   command: > 
+  #     sh -c "npm install && npm start"
+
+  #   ports:
+  #     - "3100:3100"
+
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '1'
+  #         memory: 512M
+
+  #   depends_on:
+  #     database:
+  #       condition: service_healthy
+
+  ## Consider to move blockchain node into a separate docker file due its big size
+
+  blockchain:
+    
+    container_name: private-ethereum-chain
+
+    image: node:18-alpine
+
+    build:
+      context: .
+      dockerfile: ./blockchain/eth_nodes.dockerfile
+
+    working_dir: /opt/eth
 
     command: > 
-      sh -c "npm install && npm start"
+      sh -c "apk update && 
+             apk add bash && 
+             npm install geth &&
+             npm install git"
+      sh -c "git clone https://github.com/ethereum/go-ethereum.git"
+      sh -c "cd go-ethereum && make geth"
+      geth --version
 
+    volumes: 
+      - ./blockchain:/opt/eth
+      - ./infrastructure/blockchain/bash:/usr/bin/bash
+    
     ports:
-      - "3100:3100"
+      - 3100:3100
 
     deploy:
       resources:
         limits:
-          cpus: '1'
-          memory: 512M
-
-    depends_on:
-      database:
-        condition: service_healthy
-
-  ## Consider to move blockchain node into a separate docker file due its big size
-
-  # blockchain:
-    
-  #   container_name: private-ethereum-chain
-
-  #   image: node:18-alpine
-    
-  #   working_dir: /usr/src/swap/blockchain
-
-  #   command: > 
-  #     sh -c "apk update && 
-  #            apk add bash && 
-  #            npm install geth &&
-  #            npm install git"
-  #     sh -c "git clone https://github.com/ethereum/go-ethereum.git"
-  #     sh -c "cd go-ethereum && make geth"
-  #     geth --version
-
-  #   volumes: 
-  #     - ./blockchain:/usr/src/swap/blockchain
-  #     - ./infrastructure/blockchain/bash:/usr/bin/bash
-    
-  #   ports:
-  #     - 3100:3100
+          cpus: '2'
+          memory: 1024M
 
     
