@@ -6,8 +6,8 @@
         "privateKey" : "3ba9b75a087df0e7082e1d3d58308755e35e17ac1117a4caf42ef209d203cb4a"
     },
     "private_testnet" : {
-        "api" : "http://192.168.1.243:2001/",
-        "privateKey" : "44e63ab9167d1af1d3b40a6b02102e16f1ad510e0b5cae3d05685363a668e45f",
+        "api" : "http://172.16.254.1:8545/",
+        "privateKey" : "b41876883829b2339b1921d7005f805e9f1dc5f382084fa52b07361213a45e3b",
         "dataDir" : "",
         "address" : "", 
         "password" : ""
