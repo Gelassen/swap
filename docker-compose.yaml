@@ -1,105 +1,156 @@
 version: '3.8'
 services:
-  # database:
-    
-  #   container_name: swap-database-default
+  database:
+    container_name: swap-database-default
+    # image: mysql-server:8.0.32 
+    image: mysql:8.0.33 # https://hub.docker.com/layers/library/mysql/8.0.33/images/sha256-b45a7c3e6fb15526e8bf62ebb940cd460617e36f46155b8514fd9c9388231817?context=explore
+    # command: mysqld --character-set-server=utf8mb3 --collation-server=utf8mb3_unicode_ci
+    environment:
+      - "MYSQL_ROOT_PASSWORD=secret"
+      - "MYSQL_DATABASE=homestead"
+      - "MYSQL_USER=homestead"
+      - "MYSQL_PASSWORD=secret"
+      - "MYSQL_ROOT_HOST=127.0.0.1"
+    volumes:
+      - ./infrastructure/mysql:/var/lib/mysql
+      # it files *.sql files that are found in /docker-entrypoint-initdb.d will be executed on startup
+      # - ./server/db_schema/db_swap_schema.sql:/docker-entrypoint-initdb.d/1_db_swap_schema.sql #:rw (or :ro?)
+      # - ./server/db_schema/test_db_swap_schema_and_data.sql:/docker-entrypoint-initdb.d/2_test_db_swap_schema_and_data.sql #:ro
+      - ./server/db_schema:/docker-entrypoint-initdb.d:rw
+    ports:
+      - "3307:3306"
+    networks:
+      priv-eth-net:
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      # test: "/usr/bin/mysql --user=homestead --password=secret --execute \"SHOW DATABASES;\""
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      interval: 2s
+      timeout: 20s
+      retries: 3
 
-  #   # image: mysql-server:8.0.32 
-  #   image: mysql:8.0.33 # https://hub.docker.com/layers/library/mysql/8.0.33/images/sha256-b45a7c3e6fb15526e8bf62ebb940cd460617e36f46155b8514fd9c9388231817?context=explore
+  server:
+    container_name: server
+    image: node:18-alpine 
+    working_dir: /usr/src/swap/server
+    volumes:
+      - ./server:/usr/src/swap/server
     
-  #   # command: mysqld --character-set-server=utf8mb3 --collation-server=utf8mb3_unicode_ci
+    # 'Additional property copy is not allowed' issue... 
+    # ref: https://forums.docker.com/t/does-docker-compose-v3-support-copy-property/135791
+    # copy: ./server:/usr/src/swap/server 
 
+    # command: bash -c "npm install && npm start" # alpine image doesn't have bash installed
+
+    command: > 
+      sh -c "npm install && npm start"
+    ports:
+      - "3100:3100"
+    networks:
+      priv-eth-net:
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+    depends_on:
+      database:
+        condition: service_healthy
+
+  # # blockchain section
+  # geth-bootnode:
+  #   hostname: geth-bootnode
+  #   container_name: geth-bootnode
+  #   env_file:
+  #     - .env
+  #   image: geth-client
+  #   build:
+  #     context: ./blockchain/private-chain/node-bootnode
+  #     args:
+  #       - ACCOUNT_PASSWORD=${ACCOUNT_PASSWORD}
+  #       - NODE_ACCOUNT_PWD_FILENAME=${NODE_1_ACCOUNT_PWD_FILENAME}
+  #       - NODE_ACCOUNT_PWD=${NODE_1_ACCOUNT_PWD}
+  #       - NODE_ACCOUNT=${NODE_1_ACCOUNT}
+  #       - NETWORK_ID=${NETWORK_ID}
+  #       - BOOTNODE_NODEKEYHEX=${BOOTNODE_NODEKEYHEX}
+  #       - NETWORK=${NETWORK}
   #   environment:
-  #     - "MYSQL_ROOT_PASSWORD=secret"
-  #     - "MYSQL_DATABASE=homestead"
-  #     - "MYSQL_USER=homestead"
-  #     - "MYSQL_PASSWORD=secret"
-  #     - "MYSQL_ROOT_HOST=127.0.0.1"
+  #     - NODE_ACCOUNT=${NODE_1_ACCOUNT}
+  #   # Ref. issue: https://github.com/ethereum/go-ethereum/issues/27298
+  #   # volumes:
+  #   #   - ./infrastructure/eth-chain/bootnode/geth/chaindata:/tmp/geth/chaindata
+  #   #   - ./infrastructure/eth-chain/bootnode/geth/ethash:/tmp/geth/ethash
+  #   #   - ./infrastructure/eth-chain/bootnode/ethash:/root/.ethash
+  #   networks:
+  #     priv-eth-net:
 
-  #   volumes:
-  #     - ./infrastructure/mysql:/var/lib/mysql
-  #     # it files *.sql files that are found in /docker-entrypoint-initdb.d will be executed on startup
-  #     # - ./server/db_schema/db_swap_schema.sql:/docker-entrypoint-initdb.d/1_db_swap_schema.sql #:rw (or :ro?)
-  #     # - ./server/db_schema/test_db_swap_schema_and_data.sql:/docker-entrypoint-initdb.d/2_test_db_swap_schema_and_data.sql #:ro
-  #     - ./server/db_schema:/docker-entrypoint-initdb.d:rw
-    
+  # geth-rpc-endpoint:
+  #   hostname: geth-rpc-endpoint
+  #   container_name: geth-rpc-endpoint
+  #   env_file:
+  #     - .env
+  #   build:
+  #     context: ./blockchain/private-chain/node-geth-rpc-endpoint
+  #     args: 
+  #       - NODE_ACCOUNT_PWD_FILENAME=${NODE_2_ACCOUNT_PWD_FILENAME}
+  #       - NODE_ACCOUNT_PWD=${NODE_2_ACCOUNT_PWD}
+  #       - NODE_ACCOUNT=${NODE_2_ACCOUNT}
+  #       - NETWORK_ID=${NETWORK_ID}
+  #       - BOOTNODE=${BOOTNODE}
+  #       - NETWORK=${NETWORK}
+  #   environment:
+  #     - NODE_ACCOUNT=${NODE_2_ACCOUNT}
+  #   # volumes:
+  #   #   - ./infrastructure/eth-chain/rpc-endpoint/geth/chaindata:/tmp/geth/chaindata
+  #   #   - ./infrastructure/eth-chain/rpc-endpoint/geth/ethash:/tmp/geth/ethash
+  #   #   - ./infrastructure/eth-chain/rpc-endpoint/ethash:/root/.ethash
+  #   depends_on:
+  #     - geth-bootnode    
   #   ports:
-  #     - "3307:3306"
+  #     - "8545:8545"
+  #   networks:
+  #     priv-eth-net:
 
-  #   healthcheck:
-  #     test: "/usr/bin/mysql --user=homestead --password=secret --execute \"SHOW DATABASES;\""
-  #     # test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
-  #     interval: 2s
-  #     timeout: 20s
-  #     retries: 3
-
-  # server:
-    
-  #   container_name: server
-
-  #   image: node:18-alpine 
-
-  #   working_dir: /usr/src/swap/server
-    
-  #   volumes:
-  #     - ./server:/usr/src/swap/server
-    
-  #   # 'Additional property copy is not allowed' issue... 
-  #   # ref: https://forums.docker.com/t/does-docker-compose-v3-support-copy-property/135791
-  #   # copy: ./server:/usr/src/swap/server 
-
-  #   # command: bash -c "npm install && npm start" # alpine image doesn't have bash installed
-
-  #   command: > 
-  #     sh -c "npm install && npm start"
-
-  #   ports:
-  #     - "3100:3100"
+  # geth-miner:
+  #   hostname: geth-miner
+  #   container_name: geth-miner
+  #   env_file:
+  #     - .env
+  #   build:
+  #     context: ./blockchain/private-chain/node-miner
+  #     args: 
+  #       - NODE_ACCOUNT_PWD_FILENAME=${NODE_3_ACCOUNT_PWD_FILENAME}
+  #       - NODE_ACCOUNT_PWD=${NODE_3_ACCOUNT_PWD}
+  #       - ETHERBASE_ACCOUNT=${NODE_3_ACCOUNT}
+  #       - NODE_ACCOUNT=${NODE_3_ACCOUNT}
+  #       - NETWORK_ID=${NETWORK_ID}
+  #       - BOOTNODE=${BOOTNODE}
+  #       - NETWORK=${NETWORK}
+  #   environment:
+  #     - NODE_ACCOUNT=${NODE_3_ACCOUNT}
+  #   # volumes:
+  #   #   - ./infrastructure/eth-chain/miner/geth/chaindata:/tmp/geth/chaindata
+  #   #   - ./infrastructure/eth-chain/miner/geth/ethash:/tmp/geth/ethash
+  #   #   - ./infrastructure/eth-chain/miner/ethash:/root/.ethash
+  #   depends_on:
+  #     - geth-bootnode
+  #   networks:
+  #     priv-eth-net:
 
   #   deploy:
   #     resources:
   #       limits:
-  #         cpus: '1'
-  #         memory: 512M
+  #         cpus: '2'
+  #         memory: 1024M
 
-  #   depends_on:
-  #     database:
-  #       condition: service_healthy
-
-  ## Consider to move blockchain node into a separate docker file due its big size
-
-  blockchain:
-    
-    container_name: private-ethereum-chain
-
-    image: node:18-alpine
-
-    build:
-      context: .
-      dockerfile: ./blockchain/eth_nodes.dockerfile
-
-    working_dir: /opt/eth
-
-    command: > 
-      sh -c "apk update && 
-             apk add bash && 
-             npm install geth &&
-             npm install git"
-      sh -c "git clone https://github.com/ethereum/go-ethereum.git"
-      sh -c "cd go-ethereum && make geth"
-      geth --version
-
-    volumes: 
-      - ./blockchain:/opt/eth
-      - ./infrastructure/blockchain/bash:/usr/bin/bash
-    
-    ports:
-      - 3100:3100
-
-    deploy:
-      resources:
-        limits:
-          cpus: '2'
-          memory: 1024M
-
-    
+networks:
+  priv-eth-net:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 172.16.254.0/28    
