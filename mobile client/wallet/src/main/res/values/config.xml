@@ -1,27 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Docker based chain -->
     <!-- SECURITY BREACH: allowed for quick prototyping only -->
-    <string name="wallet_password">3ba9b75a087df0e7082e1d3d58308755e35e17ac1117a4caf42ef209d203cb4a</string>
-    <string name="test_account_private_key">44e63ab9167d1af1d3b40a6b02102e16f1ad510e0b5cae3d05685363a668e45f</string> <!-- new test chain -->
-    <string name="test_account_2_private_key">ef7f592d3f3c1d0ddfa8d138a4b4c0ceb0b50e35b1d67b22ce4ee0097c4681ea</string> <!-- new test chain -->
-<!--    <string name="test_account_3_private_key">96c1d1d177c07b55c04a12d5e6a7c0b029d23ed5619c081f312ac5fb86c919f9</string>-->
+    <string name="first_account">0x367103555b34Eb9a46D92833e7293D540bFd7143</string>
+    <string name="second_account">0x1a75262751ac4E6290Ec8287d1De823F33036498</string>
+    <string name="third_account">0xd9df253d1f92dcba495c8b0a9616e9d817bb12b7</string>
+    <string name="fourth_account">0x46aF655eB60F0a863663Fc5D7D5fb11EC8808a51</string>
+    <string name="fifth_account">0x5136C3b985293C10A6882cE9DB4f5719c7C486a3</string>
+
+    <string name="first_acc_private_key">c2eaf79b0c2d5892b2f2a06e47a5b4b86ab5eb638663b48c36bea8253ef5d32d</string>
+    <string name="second_acc_private_key">b41876883829b2339b1921d7005f805e9f1dc5f382084fa52b07361213a45e3b</string>
+    <string name="third_acc_private_key">8f6971b448d18daebc1db62c2a0d048c9450b9e1174b82ddc804ecd3e7377ce2</string>
+    <string name="fourth_acc_private_key">536ec9ff6dd0ef63b6dada6fa3c41f4c59622a1a92e22784b1485451f7c2a42f</string>
+    <string name="fifth_acc_private_key">2b4f5910d334ef9d1cefa8fe531faa3bdc8be32b2d647913fbde0fa5625b88dc</string>
 
     <string name="chain_id">50101</string> <!-- new chain -->
-    <!--  0xB54e15454E0711b1917f88E656C2fc3E9dF4117d  -->
-    <string name="my_account">0xEb113bC600201aAe92c165269749f91A63A9a007</string> <!-- new test  chain -->
-    <string name="my_account_2">0x699f9f9893dAD69450B333596A79FB55D8B35A4b</string> <!-- new test chain -->
-    <!-- 0x3106248fbb449ed92b03d6f93f43f464cd95b74d -->
-    <string name="swap_value_contract_address">0x39a4588487c4626D136A2250A00f36Cd2790e27D</string> <!-- new test chain -->
-    <!-- Origin swap chain address: 0xbEC5032A1A14f94169Fcfd69B9DB637e1902AD65 -->
-    <!-- Debug swap chain address: 0x8bC0B5C62dD269256587E46d465c9091808C3BaA -->
-    <string name="swap_chain_contract_address">0x2f232Fa3A477040ea884c1B1E7D23AE92f05AcCb</string> <!-- new test chain -->
-
-    <!-- by legacy reason originally it was rinkeby -->
-<!--    https://goerli.infura.io/v3/ce67e157fc964d3bbf7ff1db09aa316a-->
-    <string name="ethereum_api_endpoint">http://192.168.1.243:2001</string>
-    <!-- Fresh accounts without dirty data -->
-    <string name="my_account_3">0x60476837d7ebd4bd9d543888bec87e48648fa321</string>
-    <string name="test_account_3_private_key">0x60476837d7ebd4bd9d543888bec87e48648fa321</string>
-    <string name="my_account_4">0xa24c5c43bcf8efe680f81cfb1375b4fa97f2a43f</string>
-    <string name="test_account_4_private_key">8b3c4e13bb00b5b65175363ac984181586dd2756087a0661a920f80fedc4b53a</string>
+    <string name="ethereum_api_endpoint">http://172.16.254.1:8545</string>
+    <string name="swap_value_contract_address">0x4A74BA9F97f7fa8dB26d52d8a3EB4a42F820d0bD</string>
+    <string name="swap_chain_contract_address">0x317BC151563567ef15B30cF83AF8B6177875d878</string>
 </resources>

@@ -47,7 +47,7 @@ class WalletRepository(
         web3 = Web3j.build(httpService)
         runBlocking {
             launch(Dispatchers.IO) {
-                loadContract(R.string.test_account_2_private_key)
+                loadContract(R.string.third_acc_private_key)
             }
         }
     }
@@ -464,7 +464,7 @@ class WalletRepository(
 
     @Deprecated(message = "User loadContract(key) method with explicitly passed user account key")
     private suspend fun loadContract() = withContext(Dispatchers.IO) {
-        loadContract(R.string.test_account_private_key)
+        loadContract(R.string.second_acc_private_key)
     }
 
     /*
@@ -495,7 +495,7 @@ class WalletRepository(
 
     @Deprecated(message = "Use getCredentials(key) with explicitly passed user account key")
     private fun getCredentials() : Credentials {
-        return getCredentials(R.string.test_account_private_key)
+        return getCredentials(R.string.second_acc_private_key)
     }
 
     private fun getCredentials(userAccountPrivateKeyReference: Int): Credentials {

@@ -38,7 +38,7 @@ class TestWalletActivity: AppCompatActivity() {
         WalletDi(application).getWalletComponent().inject(this)
         walletViewModel = ViewModelProvider(this, viewModelFactory).get(WalletViewModel::class.java)
 
-        personProfile = PersonProfile(userWalletAddress = getString(R.string.my_account))
+        personProfile = PersonProfile(userWalletAddress = getString(R.string.first_account))
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
@@ -63,13 +63,13 @@ class TestWalletActivity: AppCompatActivity() {
 
         findViewById<Button>(R.id.registerUser)
             .setOnClickListener {
-                val personProfile = PersonProfile(userWalletAddress = getString(R.string.my_account))
+                val personProfile = PersonProfile(userWalletAddress = getString(R.string.first_account))
                 walletViewModel.registerUserOnSwapMarket(FIRST_USER, personProfile = personProfile)
             }
 
         findViewById<Button>(R.id.registerSecondUser)
             .setOnClickListener {
-                val personProfile = PersonProfile(userWalletAddress = getString(R.string.my_account_2))
+                val personProfile = PersonProfile(userWalletAddress = getString(R.string.second_account))
                 walletViewModel.registerUserOnSwapMarket(SECOND_USER, personProfile)
             }
 

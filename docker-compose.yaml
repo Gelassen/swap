@@ -83,10 +83,10 @@ services:
     environment:
       - NODE_ACCOUNT=${NODE_1_ACCOUNT}
     # Ref. issue: https://github.com/ethereum/go-ethereum/issues/27298
-    # volumes:
+    volumes:
     #   - ./infrastructure/eth-chain/bootnode/geth/chaindata:/tmp/geth/chaindata
-    #   - ./infrastructure/eth-chain/bootnode/geth/ethash:/tmp/geth/ethash
-    #   - ./infrastructure/eth-chain/bootnode/ethash:/root/.ethash
+      - ./infrastructure/eth-chain/bootnode/geth/ethash:/tmp/geth/ethash
+      - ./infrastructure/eth-chain/bootnode/ethash:/root/.ethash
     networks:
       priv-eth-net:
 
@@ -106,10 +106,10 @@ services:
         - NETWORK=${NETWORK}
     environment:
       - NODE_ACCOUNT=${NODE_2_ACCOUNT}
-    # volumes:
+    volumes:
     #   - ./infrastructure/eth-chain/rpc-endpoint/geth/chaindata:/tmp/geth/chaindata
-    #   - ./infrastructure/eth-chain/rpc-endpoint/geth/ethash:/tmp/geth/ethash
-    #   - ./infrastructure/eth-chain/rpc-endpoint/ethash:/root/.ethash
+      - ./infrastructure/eth-chain/rpc-endpoint/geth/ethash:/tmp/geth/ethash
+      - ./infrastructure/eth-chain/rpc-endpoint/ethash:/root/.ethash
     depends_on:
       - geth-bootnode    
     ports:
@@ -134,10 +134,10 @@ services:
         - NETWORK=${NETWORK}
     environment:
       - NODE_ACCOUNT=${NODE_3_ACCOUNT}
-    # volumes:
+    volumes:
     #   - ./infrastructure/eth-chain/miner/geth/chaindata:/tmp/geth/chaindata
-    #   - ./infrastructure/eth-chain/miner/geth/ethash:/tmp/geth/ethash
-    #   - ./infrastructure/eth-chain/miner/ethash:/root/.ethash
+      - ./infrastructure/eth-chain/miner/geth/ethash:/tmp/geth/ethash
+      - ./infrastructure/eth-chain/miner/ethash:/root/.ethash
     depends_on:
       - geth-bootnode
     networks:
