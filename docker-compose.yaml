@@ -39,6 +39,7 @@ services:
     working_dir: /usr/src/swap/server
     volumes:
       - ./server:/usr/src/swap/server
+      - ./infrastructure/server:/root
     
     # 'Additional property copy is not allowed' issue... 
     # ref: https://forums.docker.com/t/does-docker-compose-v3-support-copy-property/135791
@@ -49,7 +50,7 @@ services:
     command: > 
       sh -c "npm install && npm start"
     ports:
-      - "3100:3100"
+      - "3000:3000" # port depends on environment config, keep an eye on it when env will be changed
     networks:
       priv-eth-net:
     deploy:
@@ -62,91 +63,91 @@ services:
       database:
         condition: service_healthy
 
-  # # blockchain section
-  # geth-bootnode:
-  #   hostname: geth-bootnode
-  #   container_name: geth-bootnode
-  #   env_file:
-  #     - .env
-  #   image: geth-client
-  #   build:
-  #     context: ./blockchain/private-chain/node-bootnode
-  #     args:
-  #       - ACCOUNT_PASSWORD=${ACCOUNT_PASSWORD}
-  #       - NODE_ACCOUNT_PWD_FILENAME=${NODE_1_ACCOUNT_PWD_FILENAME}
-  #       - NODE_ACCOUNT_PWD=${NODE_1_ACCOUNT_PWD}
-  #       - NODE_ACCOUNT=${NODE_1_ACCOUNT}
-  #       - NETWORK_ID=${NETWORK_ID}
-  #       - BOOTNODE_NODEKEYHEX=${BOOTNODE_NODEKEYHEX}
-  #       - NETWORK=${NETWORK}
-  #   environment:
-  #     - NODE_ACCOUNT=${NODE_1_ACCOUNT}
-  #   # Ref. issue: https://github.com/ethereum/go-ethereum/issues/27298
-  #   # volumes:
-  #   #   - ./infrastructure/eth-chain/bootnode/geth/chaindata:/tmp/geth/chaindata
-  #   #   - ./infrastructure/eth-chain/bootnode/geth/ethash:/tmp/geth/ethash
-  #   #   - ./infrastructure/eth-chain/bootnode/ethash:/root/.ethash
-  #   networks:
-  #     priv-eth-net:
+  # blockchain section
+  geth-bootnode:
+    hostname: geth-bootnode
+    container_name: geth-bootnode
+    env_file:
+      - .env
+    image: geth-client
+    build:
+      context: ./blockchain/private-chain/node-bootnode
+      args:
+        - ACCOUNT_PASSWORD=${ACCOUNT_PASSWORD}
+        - NODE_ACCOUNT_PWD_FILENAME=${NODE_1_ACCOUNT_PWD_FILENAME}
+        - NODE_ACCOUNT_PWD=${NODE_1_ACCOUNT_PWD}
+        - NODE_ACCOUNT=${NODE_1_ACCOUNT}
+        - NETWORK_ID=${NETWORK_ID}
+        - BOOTNODE_NODEKEYHEX=${BOOTNODE_NODEKEYHEX}
+        - NETWORK=${NETWORK}
+    environment:
+      - NODE_ACCOUNT=${NODE_1_ACCOUNT}
+    # Ref. issue: https://github.com/ethereum/go-ethereum/issues/27298
+    # volumes:
+    #   - ./infrastructure/eth-chain/bootnode/geth/chaindata:/tmp/geth/chaindata
+    #   - ./infrastructure/eth-chain/bootnode/geth/ethash:/tmp/geth/ethash
+    #   - ./infrastructure/eth-chain/bootnode/ethash:/root/.ethash
+    networks:
+      priv-eth-net:
 
-  # geth-rpc-endpoint:
-  #   hostname: geth-rpc-endpoint
-  #   container_name: geth-rpc-endpoint
-  #   env_file:
-  #     - .env
-  #   build:
-  #     context: ./blockchain/private-chain/node-geth-rpc-endpoint
-  #     args: 
-  #       - NODE_ACCOUNT_PWD_FILENAME=${NODE_2_ACCOUNT_PWD_FILENAME}
-  #       - NODE_ACCOUNT_PWD=${NODE_2_ACCOUNT_PWD}
-  #       - NODE_ACCOUNT=${NODE_2_ACCOUNT}
-  #       - NETWORK_ID=${NETWORK_ID}
-  #       - BOOTNODE=${BOOTNODE}
-  #       - NETWORK=${NETWORK}
-  #   environment:
-  #     - NODE_ACCOUNT=${NODE_2_ACCOUNT}
-  #   # volumes:
-  #   #   - ./infrastructure/eth-chain/rpc-endpoint/geth/chaindata:/tmp/geth/chaindata
-  #   #   - ./infrastructure/eth-chain/rpc-endpoint/geth/ethash:/tmp/geth/ethash
-  #   #   - ./infrastructure/eth-chain/rpc-endpoint/ethash:/root/.ethash
-  #   depends_on:
-  #     - geth-bootnode    
-  #   ports:
-  #     - "8545:8545"
-  #   networks:
-  #     priv-eth-net:
+  geth-rpc-endpoint:
+    hostname: geth-rpc-endpoint
+    container_name: geth-rpc-endpoint
+    env_file:
+      - .env
+    build:
+      context: ./blockchain/private-chain/node-geth-rpc-endpoint
+      args: 
+        - NODE_ACCOUNT_PWD_FILENAME=${NODE_2_ACCOUNT_PWD_FILENAME}
+        - NODE_ACCOUNT_PWD=${NODE_2_ACCOUNT_PWD}
+        - NODE_ACCOUNT=${NODE_2_ACCOUNT}
+        - NETWORK_ID=${NETWORK_ID}
+        - BOOTNODE=${BOOTNODE}
+        - NETWORK=${NETWORK}
+    environment:
+      - NODE_ACCOUNT=${NODE_2_ACCOUNT}
+    # volumes:
+    #   - ./infrastructure/eth-chain/rpc-endpoint/geth/chaindata:/tmp/geth/chaindata
+    #   - ./infrastructure/eth-chain/rpc-endpoint/geth/ethash:/tmp/geth/ethash
+    #   - ./infrastructure/eth-chain/rpc-endpoint/ethash:/root/.ethash
+    depends_on:
+      - geth-bootnode    
+    ports:
+      - "8545:8545"
+    networks:
+      priv-eth-net:
 
-  # geth-miner:
-  #   hostname: geth-miner
-  #   container_name: geth-miner
-  #   env_file:
-  #     - .env
-  #   build:
-  #     context: ./blockchain/private-chain/node-miner
-  #     args: 
-  #       - NODE_ACCOUNT_PWD_FILENAME=${NODE_3_ACCOUNT_PWD_FILENAME}
-  #       - NODE_ACCOUNT_PWD=${NODE_3_ACCOUNT_PWD}
-  #       - ETHERBASE_ACCOUNT=${NODE_3_ACCOUNT}
-  #       - NODE_ACCOUNT=${NODE_3_ACCOUNT}
-  #       - NETWORK_ID=${NETWORK_ID}
-  #       - BOOTNODE=${BOOTNODE}
-  #       - NETWORK=${NETWORK}
-  #   environment:
-  #     - NODE_ACCOUNT=${NODE_3_ACCOUNT}
-  #   # volumes:
-  #   #   - ./infrastructure/eth-chain/miner/geth/chaindata:/tmp/geth/chaindata
-  #   #   - ./infrastructure/eth-chain/miner/geth/ethash:/tmp/geth/ethash
-  #   #   - ./infrastructure/eth-chain/miner/ethash:/root/.ethash
-  #   depends_on:
-  #     - geth-bootnode
-  #   networks:
-  #     priv-eth-net:
+  geth-miner:
+    hostname: geth-miner
+    container_name: geth-miner
+    env_file:
+      - .env
+    build:
+      context: ./blockchain/private-chain/node-miner
+      args: 
+        - NODE_ACCOUNT_PWD_FILENAME=${NODE_3_ACCOUNT_PWD_FILENAME}
+        - NODE_ACCOUNT_PWD=${NODE_3_ACCOUNT_PWD}
+        - ETHERBASE_ACCOUNT=${NODE_3_ACCOUNT}
+        - NODE_ACCOUNT=${NODE_3_ACCOUNT}
+        - NETWORK_ID=${NETWORK_ID}
+        - BOOTNODE=${BOOTNODE}
+        - NETWORK=${NETWORK}
+    environment:
+      - NODE_ACCOUNT=${NODE_3_ACCOUNT}
+    # volumes:
+    #   - ./infrastructure/eth-chain/miner/geth/chaindata:/tmp/geth/chaindata
+    #   - ./infrastructure/eth-chain/miner/geth/ethash:/tmp/geth/ethash
+    #   - ./infrastructure/eth-chain/miner/ethash:/root/.ethash
+    depends_on:
+      - geth-bootnode
+    networks:
+      priv-eth-net:
 
-  #   deploy:
-  #     resources:
-  #       limits:
-  #         cpus: '2'
-  #         memory: 1024M
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1024M
 
 networks:
   priv-eth-net:
