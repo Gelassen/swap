@@ -1,0 +1,8 @@
+{
+    "dbConfig" : {
+        "host"     : "172.16.254.1",
+        "port"     : "3307",
+        "user"     : "gelassen",
+        "password" : "password"
+    }
+}

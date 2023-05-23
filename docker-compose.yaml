@@ -1,26 +1,43 @@
 version: '3.8'
 services:
   database:
+    hostname: swap-database
     container_name: swap-database-default
     # image: mysql-server:8.0.32 
     image: mysql:8.0.33 # https://hub.docker.com/layers/library/mysql/8.0.33/images/sha256-b45a7c3e6fb15526e8bf62ebb940cd460617e36f46155b8514fd9c9388231817?context=explore
     # command: mysqld --character-set-server=utf8mb3 --collation-server=utf8mb3_unicode_ci
+    # image: custom-mysql
+    # build:
+      # context: ./database
+    env_file:
+      - .env
     environment:
-      - "MYSQL_ROOT_PASSWORD=secret"
-      - "MYSQL_DATABASE=homestead"
-      - "MYSQL_USER=homestead"
-      - "MYSQL_PASSWORD=secret"
-      - "MYSQL_ROOT_HOST=127.0.0.1"
+      - "MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}"
+      - "MYSQL_DATABASE=${MYSQL_DATABASE}"
+      - "MYSQL_USER=${MYSQL_USER}"
+      - "MYSQL_PASSWORD=${MYSQL_PASSWORD}"
+      - "MYSQL_ROOT_HOST=${MYSQL_ROOT_HOST}"
+    
     volumes:
+      - ./database/custom-sql-commands.sql:/docker-entrypoint-initdb.d/custom-sql-commands.sql 
+      # - ./database/mysqld.cnf:/etc/mysql/mysql.conf.d/mysqld.cnf
+      - ./database/custom.cnf:/etc/custom.cnf
       - ./infrastructure/mysql:/var/lib/mysql
       # it files *.sql files that are found in /docker-entrypoint-initdb.d will be executed on startup
       # - ./server/db_schema/db_swap_schema.sql:/docker-entrypoint-initdb.d/1_db_swap_schema.sql #:rw (or :ro?)
       # - ./server/db_schema/test_db_swap_schema_and_data.sql:/docker-entrypoint-initdb.d/2_test_db_swap_schema_and_data.sql #:ro
       - ./server/db_schema:/docker-entrypoint-initdb.d:rw
+    # command:
+    #   - /bin/bash
+    #   - -c
+    #   - |
+    #       /etc/init.d/mysqld start
+    #       mysql -u ${MYSQL_USER} -p ${MYSQL_PASSWORD} -h ${MYSQL_ROOT_HOST} ${MYSQL_DATABASE} < custom-sql-commands.sql
     ports:
       - "3307:3306"
     networks:
       priv-eth-net:
+    restart: on-failure
     deploy:
       resources:
         limits:
@@ -29,11 +46,12 @@ services:
     healthcheck:
       # test: "/usr/bin/mysql --user=homestead --password=secret --execute \"SHOW DATABASES;\""
       test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
-      interval: 2s
+      interval: 7s
       timeout: 20s
       retries: 3
 
   server:
+    hostname: swap-server
     container_name: server
     image: node:18-alpine 
     working_dir: /usr/src/swap/server
@@ -48,7 +66,7 @@ services:
     # command: bash -c "npm install && npm start" # alpine image doesn't have bash installed
 
     command: > 
-      sh -c "npm install && npm start"
+      sh -c "npm install && npm run start:docker"
     ports:
       - "3000:3000" # port depends on environment config, keep an eye on it when env will be changed
     networks:
@@ -147,7 +165,7 @@ services:
       resources:
         limits:
           cpus: '2'
-          memory: 1024M
+          memory: 2048M
 
 networks:
   priv-eth-net:
