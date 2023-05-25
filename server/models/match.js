@@ -160,8 +160,8 @@ exports.makePotentialMatch = function(profileId, userDemand, req, res) {
                             SELECT * 
                             FROM ${ServerServicesTable.TABLE_NAME} 
                             WHERE offer = 1
-                                AND profileId != ${profileId}
-                                AND title LIKE('%${userDemand.title}%') 
+                                AND profileId != ?
+                                AND title LIKE(?) 
                         ) AS offers
                     INNER JOIN LATERAL
                         (
@@ -169,11 +169,11 @@ exports.makePotentialMatch = function(profileId, userDemand, req, res) {
                             FROM
                             (
                                 SELECT * 
-                                FROM ${ServerServicesTable.TABLE_NAME}
+                                FROM ${ServerServicesTable.TABLE_NAME} 
                                 WHERE 
                                     (
                                         offer = 1
-                                        AND profileId = ${profileId}
+                                        AND profileId = ?
                                     )
                             ) as q1
                             INNER JOIN LATERAL
@@ -183,7 +183,7 @@ exports.makePotentialMatch = function(profileId, userDemand, req, res) {
                                 WHERE 
                                     (
                                         offer = 0
-                                        AND profileId != ${profileId}
+                                        AND profileId != ?
                                         AND title LIKE(q1.title)
                                     ) 
                             ) q2
@@ -199,7 +199,10 @@ exports.makePotentialMatch = function(profileId, userDemand, req, res) {
                 logger.log("sql query: " + sqlQuery);
                 connection.query(
                     {sql: sqlQuery, TIMEOUT},
-                    [],
+                    [
+                        profileId, "%" +  userDemand.title + "%", // known escape upper comma issue
+                        profileId, profileId
+                    ],
                     function(error, rows, fields) {
                         logger.log(`rows - ${JSON.stringify(rows)}`);
                         if (error != null) {

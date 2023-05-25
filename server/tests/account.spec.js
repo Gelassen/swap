@@ -162,7 +162,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .expect(204);
     });
-    it('on POST /api/v1/account without 1st mandatory field receives BAD_REQUST code', async() => {
+    it('on POST /api/v1/account without 1st mandatory field receives BAD_REQUEST code', async() => {
         // do not move in the general class -- it is malformed request
         let postPayload = { "contact":"", "secret":"jms123", "name":"Test James", "userWalletAddress":"0xB54e15454E0711b1917f88E656C2fc3E9dF4117d", "offers":[], "demands":[]};
         // check there is no such profile in system
@@ -814,6 +814,49 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .expect(204);
     });
+    it('on POST /api/v1/account/demands with demand value which requires escaping receives OK code', async() => {
+        let postPayload = getJamesAccountPayload(); 
+        let testPayload = getJamesDemandPayload(); 
+        testPayload.title = "Farmer's products";
+        // prepare initial database state
+        await request(app)
+            .get('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(204, {});
+        await request(app)
+            .post('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(postPayload)
+            .expect('Content-Type', 'application/json; charset=utf-8')
+            .expect(200, { "payload" : postPayload })
+        let response = await request(app)
+            .get('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(200)
+        postPayload.id = response.body.payload.id;
+        expect(response.body.payload).toEqual(postPayload);
+        
+        await request(app)
+            .post('/api/v1/account/demands')    
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(testPayload)
+            .expect(200, {})
+        response = await request(app)
+            .get('/api/v1/account')
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(200)
+        
+        // clean database
+        await request(app)
+            .delete(`/api/v1/account/${response.body.payload.id}`)
+            .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+            .expect(204);
+    });
     // ethereum chain is not mocked, therefore there should be a full integration test
     it.skip('on POST /api/v1/account/demands with valid payload and existing match, get matches returns single value', async() => {
         // prepare initial database state
@@ -995,7 +1038,7 @@ describe('Test suite to cover GET and POSTS under different conditions', () => {
             .set('Content-Type', 'application/json; charset=utf-8')
             .expect(401, { "payload" : "There is no account for this credentials. Are you authorized?" } );
     });
-    it('on DELETE /api/v1/account/demands with existing profile amd correct service id receives NO CONTENT code', async() => {
+    it('on DELETE /api/v1/account/demands with existing profile and correct service id receives NO CONTENT code', async() => {
         let postPayload = getJamesAccountPayload(); 
         let testPayload = getOfferPayload();
         // prepare the initial database state

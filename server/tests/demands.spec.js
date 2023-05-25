@@ -76,7 +76,7 @@ describe('Cover /api/v1/demands with tests', () => {
             .set('Content-Type', 'application/json; charset=utf-8')
             .expect(400, { "payload" : "Did you add auth header?" })
     });
-    it('On GET /api/v1/demands with mailformed auth header receives BAD_REQUEST code', async() => {
+    it('On GET /api/v1/demands with malformed auth header receives BAD_REQUEST code', async() => {
         await request(app)
             .get('/api/v1/demands')
             .set('Authorization', 'VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
@@ -153,7 +153,7 @@ describe('Cover /api/v1/demands with tests', () => {
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .expect(204);
     });
-    it('On GET /api/v1/demands with existing account and avaiable matches receives OK code with services', async() => {
+    it('On GET /api/v1/demands with existing account and available matches receives OK code with services', async() => {
         let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
         let postServicePayload = { "title" : "Develop software", "date" : 0, "index" : ["Develop software"]};
         // add account in system
