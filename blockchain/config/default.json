@@ -7,7 +7,7 @@
     },
     "private_testnet" : {
         "api" : "http://172.16.254.1:8545/",
-        "privateKey" : "b41876883829b2339b1921d7005f805e9f1dc5f382084fa52b07361213a45e3b",
+        "privateKey" : "c2eaf79b0c2d5892b2f2a06e47a5b4b86ab5eb638663b48c36bea8253ef5d32d",
         "dataDir" : "",
         "address" : "", 
         "password" : ""

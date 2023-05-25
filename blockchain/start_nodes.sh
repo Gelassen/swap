@@ -28,11 +28,11 @@ fi
 
 # nodes should be run over http to allow curl interactiion for add peer automation
 
-geth --allow-insecure-unlock --http --http.addr "0.0.0.0" --port $NODE1_PORT_UDP_TCP --http.corsdomain '*' --authrpc.port $NODE1_PORT_RPC --http.port $NODE1_PORT --http.api admin,personal,eth,net,web3  --datadir ./node1/data --miner.gasprice 0 --verbosity 3 &
+geth --allow-insecure-unlock --http --http.addr "0.0.0.0" --port $NODE1_PORT_UDP_TCP --http.corsdomain '*' --authrpc.port $NODE1_PORT_RPC --http.port $NODE1_PORT --http.api admin,personal,eth,net,web3  --datadir ./node1/data --miner.gasprice 1 --miner.gaslimit '0x1C9C380' --verbosity 3 &
 
-geth --http --port $NODE2_PORT_UDP_TCP --http.corsdomain '*' --authrpc.port $NODE2_PORT_RPC --http.port $NODE2_PORT --http.api admin,personal,eth,net,web3  --datadir ./node2/data --miner.gasprice 0 --verbosity 3 &
+geth --http --port $NODE2_PORT_UDP_TCP --http.corsdomain '*' --authrpc.port $NODE2_PORT_RPC --http.port $NODE2_PORT --http.api admin,personal,eth,net,web3  --datadir ./node2/data --miner.gasprice 1 --miner.gaslimit '0x1C9C380' --verbosity 3 &
 
-geth --http --port $NODE3_PORT_UDP_TCP --http.corsdomain '*' --authrpc.port $NODE3_PORT_RPC --http.port $NODE3_PORT --http.api admin,personal,eth,net,web3  --datadir ./node3/data --miner.gasprice 0 --verbosity 3 &
+geth --http --port $NODE3_PORT_UDP_TCP --http.corsdomain '*' --authrpc.port $NODE3_PORT_RPC --http.port $NODE3_PORT --http.api admin,personal,eth,net,web3  --datadir ./node3/data --miner.gasprice 1 --miner.gaslimit '0x1C9C380' --verbosity 3 &
 
 echo "Install jq"
 

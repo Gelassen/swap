@@ -47,7 +47,9 @@ class WalletRepository(
         web3 = Web3j.build(httpService)
         runBlocking {
             launch(Dispatchers.IO) {
-                loadContract(R.string.third_acc_private_key)
+                // FIXME after introducing DebugProfiles this loadContract()
+                //  should be dynamically configured too
+                loadContract(R.string.first_acc_private_key)
             }
         }
     }

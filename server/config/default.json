@@ -17,10 +17,10 @@
         "isAllowed" : true
     },
     "chain" : {
-        "host"               : "192.168.1.243",
+        "host"               : "192.168.1.17",
         "port"               : "2001",
-        "swapTokenAddress"   : "0x608b6F62Eb361686db34C2af5454917E8c1bFC1F",
-        "swapChainV2Address" : "0x9ceAECB2931a9681Bf23c79F68615ec96BcB0EFd",
-        "privateKey"         : "0x96c1d1d177c07b55c04a12d5e6a7c0b029d23ed5619c081f312ac5fb86c919f9"
+        "swapTokenAddress"   : "0xb6dca6603D4A100E364D84398aF0f89f143EBa12",
+        "swapChainV2Address" : "0xE5F326a3554b17c3164088fe4de969D6a15B19e2",
+        "privateKey"         : "0x44e63ab9167d1af1d3b40a6b02102e16f1ad510e0b5cae3d05685363a668e45f"
     }
 }
