@@ -11,7 +11,7 @@ let converter = require('../utils/converter')
 const config = require('config');
 
 // const chain = require('../models/chain/chain');
-const { SwapToken, SwapChainV2, chain } = require('../models/chain/chain');
+const { SwapToken, SwapChainV2, DebugUtil, chain } = require('../models/chain/chain');
 
 /*
     This method covers both cases - sign in and register a new account. It is left 
@@ -408,46 +408,33 @@ exports.getMatchesByProfile = async function(req, res) {
 }
 
 exports.getChainOnlyMatches = async function(req, res) {
-    let swapChainContract = getSwapChainContractInstance();
-    let firstUser = "0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd";
-    let secondUser = "0x52E7400Ba1B956B11394a5045F8BC3682792E1AC";
-    let result = await swapChainContract.getMatches(firstUser, secondUser);
-
-    logger.log(`[get matches] result ${JSON.stringify(result)}`);
+    let debugUtil = chain.getDebugUtilInstance(); 
     let response = ""
-    if (result.length >= 0) {
-        response = network.getMsg(200, result);
+    if (!(await debugUtil.isTokenContractValid()) 
+        || !(await debugUtil.isChainContractValid())) {
+        response = network.getErrorMsg(500, "One of or both contracts are not deployed by addresses in config")
     } else {
-        response = network.getMsg(409, result, "Failed to obtain matches from chain")
+        let swapChainContract = chain.getSwapChainContractInstance();
+        let firstUser = "0x367103555b34Eb9a46D92833e7293D540bFd7143";
+        let secondUser = "0x1a75262751ac4E6290Ec8287d1De823F33036498";
+        
+        try {
+            let result = await swapChainContract.getMatches(firstUser, secondUser);
+    
+            logger.log(`[get matches] result ${JSON.stringify(result)}`);
+            
+            if (result.length >= 0) {
+                response = network.getMsg(200, result);
+            } else {
+                response = network.getMsg(409, result, "Failed to obtain matches from chain")
+            }
+        } catch (exception) {
+            response = util.getErrorMsg(500, error);
+        }
+        
+        // let usersResult = await swapChainContract.getUsers();
+        // let response = network.getMsg(200, usersResult);
     }
-    // let usersResult = await swapChainContract.getUsers();
-    // let response = network.getMsg(200, usersResult);
 
     network.send(req, res, response);
-}
-
-function testChainModuleCall() {
-    let nodeUrl = `http://${config.get("chain").host}:${config.get("chain").port}`;
-    let privateKey = config.get("chain").privateKey;
-    let swapTokenAddress = config.get("chain").swapTokenAddress;
-    logger.log("[profile/get] start")
-    let swapToken = new SwapToken(privateKey, nodeUrl, swapTokenAddress);
-    // let result = await swapToken.balanceOf("0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd");
-    // logger.log(`Get balanceOf() result ${JSON.stringify(result)}`);
-}
-
-function getSwapChainContractInstance() {
-    let nodeUrl = `http://${config.get("chain").host}:${config.get("chain").port}`;
-    let privateKey = config.get("chain").privateKey;
-    let swapChainAddress = config.get("chain").swapChainV2Address;
-
-    return new SwapChainV2(privateKey, nodeUrl, swapChainAddress);
-}
-
-function getSwapValueContractInstance() {
-    let nodeUrl = `http://${config.get("chain").host}:${config.get("chain").port}`;
-    let privateKey = config.get("chain").privateKey;
-    let swapTokenAddress = config.get("chain").swapTokenAddress;
-
-    return new SwapToken(privateKey, nodeUrl, swapTokenAddress);
 }

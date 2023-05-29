@@ -59,6 +59,28 @@ class SwapChainV2 extends Contract {
     }
 }
 
+class DebugUtil {
+
+    constructor(nodeUrl) {
+        this.provider = new ethers.providers.getDefaultProvider(nodeUrl);
+    }
+
+    async isTokenContractValid() {
+        let tokenAddress = config.get("chain").swapTokenAddress;
+        let bytecode = await this.provider.getCode(tokenAddress);
+        console.log(`Token contract bytecode: ${bytecode}`); 
+        return bytecode.length > 0 && bytecode != "0x";
+    }
+
+    async isChainContractValid() {
+        let tokenAddress = config.get("chain").swapChainV2Address;
+        let bytecode = await this.provider.getCode(tokenAddress); 
+        console.log(`Chain contract bytecode: ${bytecode}`);
+        return bytecode.length != 0 && bytecode != "0x";
+    }
+
+} 
+
 // class Chain {
 
 //     getSwapChainContractInstance() {
@@ -80,8 +102,12 @@ class SwapChainV2 extends Contract {
 
 let chain = {}
 
+chain.prepareEndpoint = function() {
+    return `http://${config.get("chain").host}:${config.get("chain").port}`;
+}
+
 chain.getSwapChainContractInstance = function() {
-    let nodeUrl = `http://${config.get("chain").host}:${config.get("chain").port}`;
+    let nodeUrl = this.prepareEndpoint();
     let privateKey = config.get("chain").privateKey;
     let swapChainAddress = config.get("chain").swapChainV2Address;
 
@@ -89,11 +115,16 @@ chain.getSwapChainContractInstance = function() {
 }
 
 chain.getSwapValueContractInstance = function() {
-    let nodeUrl = `http://${config.get("chain").host}:${config.get("chain").port}`;
+    let nodeUrl = this.prepareEndpoint();
     let privateKey = config.get("chain").privateKey;
     let swapTokenAddress = config.get("chain").swapTokenAddress;
 
     return new SwapToken(privateKey, nodeUrl, swapTokenAddress);
 }
 
-module.exports = { SwapToken, SwapChainV2, chain }
+chain.getDebugUtilInstance = function() {
+    let nodeUrl = this.prepareEndpoint();
+    return new DebugUtil(nodeUrl);
+}
+
+module.exports = { SwapToken, SwapChainV2, DebugUtil, chain }
