@@ -18,4 +18,4 @@ geth --unlock ${NODE_ACCOUNT} \
      --networkid=${NETWORK_ID} \
      --datadir /tmp \
      --netrestrict=${NETWORK} \
-     --verbosity=3
+     --verbosity=5
