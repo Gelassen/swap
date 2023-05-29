@@ -8,8 +8,8 @@
     "chain" : {
         "host"               : "172.16.254.1",
         "port"               : "8545",
-        "swapTokenAddress"   : "0x4A74BA9F97f7fa8dB26d52d8a3EB4a42F820d0bD",
-        "swapChainV2Address" : "0x317BC151563567ef15B30cF83AF8B6177875d878",
+        "swapTokenAddress"   : "0x51fc2cFEC79AB290279795cFa1Cb4740186619EA",
+        "swapChainV2Address" : "0xdC57efbc4bC6BAD885E64e2E57875Ae47e4eE20f",
         "privateKey"         : "0xc2eaf79b0c2d5892b2f2a06e47a5b4b86ab5eb638663b48c36bea8253ef5d32d"
     }
 }
