@@ -19,8 +19,8 @@
     "chain" : {
         "host"               : "192.168.1.17",
         "port"               : "2001",
-        "swapTokenAddress"   : "0xb6dca6603D4A100E364D84398aF0f89f143EBa12",
-        "swapChainV2Address" : "0xE5F326a3554b17c3164088fe4de969D6a15B19e2",
-        "privateKey"         : "0x44e63ab9167d1af1d3b40a6b02102e16f1ad510e0b5cae3d05685363a668e45f"
+        "swapTokenAddress"   : "0x51fc2cFEC79AB290279795cFa1Cb4740186619EA",
+        "swapChainV2Address" : "0xdC57efbc4bC6BAD885E64e2E57875Ae47e4eE20f",
+        "privateKey"         : "0xc2eaf79b0c2d5892b2f2a06e47a5b4b86ab5eb638663b48c36bea8253ef5d32d"
     }
 }
