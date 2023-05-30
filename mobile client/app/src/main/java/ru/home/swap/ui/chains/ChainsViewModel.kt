@@ -14,7 +14,6 @@ import ru.home.swap.core.di.NetworkModule
 import ru.home.swap.core.logger.Logger
 import ru.home.swap.core.model.PersonProfile
 import ru.home.swap.repository.IPersonRepository
-import ru.home.swap.repository.PersonRepository
 import ru.home.swap.wallet.model.ITransaction
 import ru.home.swap.wallet.repository.IStorageRepository
 import javax.inject.Inject
@@ -70,8 +69,8 @@ class ChainsViewModel
         }
     }
 
-    fun fetchAggregatedMatches() {
-        logger.d("[start] fetchAggregatedMatches")
+    fun fetchMatches() {
+        logger.d("[start] fetchMatches")
         viewModelScope.launch {
             // wait for the account instance from cache
             while (uiState.value.profile.contact.isEmpty()) {
@@ -79,11 +78,11 @@ class ChainsViewModel
                 continue
             }
 
-            val matches = personRepository.getAggregatedMatches(
+            val matches = personRepository.getMatches(
                 contact = uiState.value.profile.contact,
                 secret = uiState.value.profile.secret,
             )
-            logger.d("Get aggregated matches ${matches}")
+            logger.d("Get matches ${matches}")
             // TODO put matches in Room's cache, wait for sample response to
             //  define final table structure
 

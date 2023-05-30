@@ -16,7 +16,7 @@
 
     <string name="chain_id">50101</string> <!-- new chain -->
 <!--    <string name="ethereum_api_endpoint">http://172.16.254.1:8545</string> docker based endpoint -->
-    <string name="ethereum_api_endpoint">http://192.168.1.17:3000</string>
+    <string name="ethereum_api_endpoint">http://192.168.1.17:2001</string>
     <string name="swap_value_contract_address">0x51fc2cFEC79AB290279795cFa1Cb4740186619EA</string>
     <string name="swap_chain_contract_address">0xdC57efbc4bC6BAD885E64e2E57875Ae47e4eE20f</string>
 </resources>

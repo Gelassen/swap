@@ -125,10 +125,10 @@ contract SwapChainV2 is ISwapChainV2 {
         }
 
         int256 hashedKey = _getValidHash(subj._userFirst, subj._userSecond);
-        require(hashedKey != NOT_VALID, "Can not add match object. Do yours keys can be hashed? ");
+        require(hashedKey != NOT_VALID, "Can not add match object. Could yours keys be hashed? ");
 
         Match memory item = _matchesByUser[uint256(hashedKey)][uint256(matchItemIndex)]; // we have to use this version instead of subj because users and its values might have changed order
-        require(item._approvedByFirstUser == false || item._approvedBySecondUser == false, "This match object already approved by both users.");
+        require(item._approvedByFirstUser == false || item._approvedBySecondUser == false, "This match object is already approved by both users.");
 
         if (msg.sender == item._userFirst) {
             require(item._approvedByFirstUser == false, "Match is already approved by this, first, user.");

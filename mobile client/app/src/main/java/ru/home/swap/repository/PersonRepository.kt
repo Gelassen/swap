@@ -230,7 +230,7 @@ class PersonRepository(val api: IApi, val cache: Cache, val context: Context): I
             }
     }
 
-    override suspend fun getAggregatedMatches(contact: String, secret: String): Response<List<Any>> {
+    override suspend fun getMatches(contact: String, secret: String): Response<List<Any>> {
         lateinit var result: Response<List<Any>>
         try {
             val response = api.getMatchesForUserDemands(

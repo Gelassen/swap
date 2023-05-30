@@ -383,19 +383,12 @@ exports.getMatchesByProfile = async function(req, res) {
              */
             let model = await match.getByProfileId(profileResult.id);
             logger.log(`[model] model ${JSON.stringify(model)}`);
-            let aggregatedModel = [];
-            logger.log(`[start] request aggregated matches`);
-            await Promise.all(model.map(async (matchItem) => {
-                let matchOnChain = await chain.getSwapChainContractInstance()
-                                            .getMatches(
-                                                matchItem.userFirstService.userAddress,
-                                                matchItem.userFirstService.userAddress
-                                            );
-                logger.log(`[end] within callback of aggregated matches ${matchOnChain}`);
-                matchItem.chainObject = matchOnChain;
-                aggregatedModel.add(matchItem);
-            }));
-            result = network.getMsg(200, aggregatedModel);
+            /**
+             * Aggregated chain & db query is not necessary here, 
+             * see https://github.com/Gelassen/swap/issues/18 for more details 
+             * 
+             */
+            result = network.getMsg(200, model);
             if (model.code !== undefined && model.code == 500) {
                 result = model;
             } else {
@@ -419,6 +412,7 @@ exports.getChainOnlyMatches = async function(req, res) {
         let secondUser = "0x1a75262751ac4E6290Ec8287d1De823F33036498";
         
         try {
+            // this code is not valid until approveSwap() has been called with one of users
             let result = await swapChainContract.getMatches(firstUser, secondUser);
     
             logger.log(`[get matches] result ${JSON.stringify(result)}`);
