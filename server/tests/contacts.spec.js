@@ -3,9 +3,9 @@ const app = require('../app');
 
 beforeAll(async() => {
     // prepare initial state
-    let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
-    let postServicePayload = { "title" : "Develop software", "date" : 0, "index" : ["Develop software"]};
-    let anotherServicePayload = { "title" : "Draw sketches", "date" : 0, "index" : ["Draw sketches"]};
+    let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James", "userWalletAddress":"0x52E7400Ba1B956B11394a5045F8BC3682792E1AC", "offers":[],"demands":[]};
+    let postServicePayload = { "title" : "Develop software", "date" : 0, "chainService" : { "tokenId" : 0, "serverServiceId" : 10, "userWalletAddress" : "0x52E7400Ba1B956B11394a5045F8BC3682792E1AC"}, "index" : ["Develop software"]};
+    let anotherServicePayload = { "title" : "Draw sketches", "date" : 0, "chainService" : { "tokenId" : 1, "serverServiceId" : 11, "userWalletAddress" : "0x52E7400Ba1B956B11394a5045F8BC3682792E1AC"}, "index" : ["Draw sketches"]};
     await request(app)
         .post('/api/v1/account')
         .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
@@ -75,7 +75,7 @@ describe('Cover /api/v1/contacts with tests', () => {
             .expect(401, { "payload" : "There is no account for this credentials. Are you authorized?" });
     });
     it('On GET /api/v1/contacts with existing profile and existing service receives OK status code', async() => {
-        let postBobProfile = {"contact":"Bob@gmail.com","secret":"bupa","name":"Bob","offers":[],"demands":[]};
+        let postBobProfile = {"contact":"Bob@gmail.com","secret":"bupa","name":"Bob", "userWalletAddress":"0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd", "offers":[],"demands":[]};
         await request(app)
             .post('/api/v1/account')
             .set('Authorization', 'Basic Qm9iQGdtYWlsLmNvbTpidXBh')
