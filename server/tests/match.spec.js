@@ -6,10 +6,10 @@ const dbConfig = config.dbConfig;
 const MAX_PAGE_SIZE = dbConfig.maxPageSize;
 
 beforeEach(async() => {
-    let jamesPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
+    let jamesPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James", "userWalletAddress":"0x52E7400Ba1B956B11394a5045F8BC3682792E1AC", "offers":[],"demands":[]};
     let jamesTestPayload = {"title":"Software development","date": 1746057600,"index":["Hacking servers by nights"]};
 
-    let janePayload = {"contact":"TestJane@gmail.com","secret":"jne123","name":"Test Jane","offers":[],"demands":[]};
+    let janePayload = {"contact":"TestJane@gmail.com","secret":"jne123","name":"Test Jane","userWalletAddress":"0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd", "offers":[],"demands":[]};
     // add james in system
     await request(app)
         .post('/api/v1/account')
@@ -71,7 +71,7 @@ afterEach(async() => {
         .expect(204);
 });
 
-describe('Test suite to cover match logic', () => {
+describe.only('Test suite to cover match logic', () => {
 
     it('on POST /api/v1/account/demands with valid payload and existing match, get matches returns single value', async() => {
         // prepare initial database state
@@ -201,4 +201,65 @@ describe('Test suite to cover match logic', () => {
         expect(matchSecondResponsePayload[0].approvedByFirstUser).toEqual(true);
         expect(matchSecondResponsePayload[0].approvedBySecondUser).toEqual(true);
     });
+
+    it.only('on GET /api/v1/account/matches with valid scenario receives match object with ids and all required fields', async() => {
+        // prepare initial database state
+        let janeDemandPayload = {"title":"Software development","date": 1746057600,"index":["Software development"]};
+        await request(app)
+            .post('/api/v1/account/demands')    
+            .set('Authorization', 'Basic VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .send(janeDemandPayload)
+            .expect(200, {})
+
+        let matchResponse = await request(app)
+            .get('/api/v1/account/matches')
+            .set('Authorization', 'Basic VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(200);
+        console.log(`matchResponse ${JSON.stringify(matchResponse)}`);
+
+        let matches = matchResponse.text.payload; 
+        expect(matches.length).toEqual(1); 
+        let match = matches[0];
+        expect(match.id).toBeDefined(); //.not.toBeUndefined();
+        expect(match.userFirstProfileId).toBeDefined();//.not.toBeUndefined();
+        expect(match.userSecondProfileId).toBeDefined();//.not.toBeUndefined();
+        expect(match.userFirstServiceId).toBeDefined();//.not.toBeUndefined();
+        expect(match.userSecondServiceId).toBeDefined();
+        expect(match.approvedByFirstUser).toBeDefined();
+        expect(match.approvedBySecondUser).toBeDefined();
+
+        expect(match.userFirstProfileName).toBeDefined();
+        expect(match.userSecondProfileName).toBeDefined();
+        expect(match.userFirstService.idChainService).toBeDefined();
+        expect(match.userFirstService.userAddress).toBeDefined();
+        expect(match.userFirstService.title).toEqual("Product management");
+        expect(match.userSecondService.idChainService).toBeDefined();
+        expect(match.userSecondService.userAddress).toBeDefined();
+        expect(match.userSecondService.title).toEqual("Software development");
+    });
+
+    // {
+    //     "code":200,
+    //     "payload":[
+    //        {
+    //           "id":140,
+    //           "userFirstProfileId":4320,
+    //           "userSecondProfileId":4319,
+    //           "userFirstServiceId":14103,
+    //           "userSecondServiceId":14099,
+    //           "approvedByFirstUser":false,
+    //           "approvedBySecondUser":false,
+    //           "userFirstService":{
+    //              "idChainService":46,
+    //              "userAddress":"0x1a75262751ac4E6290Ec8287d1De823F33036498"
+    //           },
+    //           "userSecondService":{
+    //              "userAddress":"0x367103555b34Eb9a46D92833e7293D540bFd7143",
+    //              "tokenId":0
+    //           }
+    //        }
+    //     ]
+    //  }
 })

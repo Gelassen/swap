@@ -240,7 +240,7 @@ function prepareIndex(row) {
 }
 
 function requestToDomainChainService(reqBody) {
-    console.log(`[coverter:chainService] ${JSON.stringify(reqBody)}`)
+    console.log(`[converter:chainService] ${JSON.stringify(reqBody)}`)
     result = {};
     result.userWalletAddress = reqBody.chainService.userWalletAddress;
     result.tokenId = reqBody.chainService.tokenId;

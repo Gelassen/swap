@@ -1,7 +1,7 @@
 const config = require('config')
 const { resolve } = require('path/posix');
 const pool = require('../database');
-const { MatchTable, ChainServicesTable, ServerServicesTable } = require('../models/tables/schema')
+const { MatchTable, ChainServicesTable, ServerServicesTable, ProfileTable } = require('../models/tables/schema')
 const util = require('../utils/network')
 const logger = require('../utils/logger') 
 const converter = require('../utils/converter');
@@ -113,13 +113,18 @@ exports.getByProfileId = function(profileId, req, res) {
             // make sure you prevent sql injection by validating first ${profileId}
             const sql = `SELECT 
                 id, userFirstProfileId, userSecondProfileId, userFirstServiceId, userSecondServiceId, approvedByFirstUser, approvedBySecondUser, 
-                chainServicesFirst.idChainService as idChainServiceFirst, chainServicesFirst.userWalletAddress as userAddressFirst, chainServicesFirst.tokenId as tokendIdFirst,
-                chainServicesSecond.idChainService as idChainServiceFirst, chainServicesSecond.userWalletAddress as userAddressSecond, chainServicesSecond.tokenId as tokenIdSecond
+                firstUserProfile.name as userFirstProfileName, secondUserProfile.name as userSecondProfileName, 
+                chainServicesFirst.idChainService as idChainServiceFirst, chainServicesFirst.userWalletAddress as userAddressFirst, chainServicesFirst.tokenId as tokenIdFirst, chainServicesFirst.title as titleFirst,
+                chainServicesSecond.idChainService as idChainServiceFirst, chainServicesSecond.userWalletAddress as userAddressSecond, chainServicesSecond.tokenId as tokenIdSecond, chainServicesSecond.title as titleSecond 
                 FROM ${MatchTable.TABLE_NAME} 
                 INNER JOIN ${ChainServicesTable.TABLE_NAME} as chainServicesFirst
                 ON ${MatchTable.USER_FIRST_SERVICE_ID} = chainServicesFirst.${ChainServicesTable.SERVER_SERVICE_ID}
                 INNER JOIN ${ChainServicesTable.TABLE_NAME} as chainServicesSecond 
                 ON ${MatchTable.USER_SECOND_SERVICE_ID} = chainServicesSecond.${ChainServicesTable.SERVER_SERVICE_ID}
+                INNER JOIN ${ProfileTable.TABLE_NAME} as firstUserProfile 
+                ON ${MatchTable.TABLE_NAME}.userFirstProfileId = firstUserProfile.${ProfileTable.ID} 
+                INNER JOIN ${ProfileTable.TABLE_NAME} as secondUserProfile 
+                ON ${MatchTable.TABLE_NAME}.userSecondProfileId = secondUserProfile.${ProfileTable.ID} 
                 WHERE 
                     ${MatchTable.USER_FIRST_PROFILE_ID} = ${profileId}
                      OR  
