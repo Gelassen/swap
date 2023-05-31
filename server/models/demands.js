@@ -4,6 +4,7 @@ const pool = require('../database');
 const util = require('../utils/network')
 const logger = require('../utils/logger') 
 const converter = require('../utils/converter')
+const { ChainServicesTable } = require('../models/tables/schema')
 
 const TIMEOUT = config.dbConfig.timeout;
 const OFFER = 1;
@@ -15,6 +16,8 @@ exports.getDemands = function(fullProfile, page, size) {
             if (err) throw err;
             
             const sql = `SELECT * FROM Service 
+                INNER JOIN ${ChainServicesTable.TABLE_NAME} 
+                ON Service.id = ${ChainServicesTable.TABLE_NAME}.${ChainServicesTable.SERVER_SERVICE_ID} 
                 WHERE profileId != ${fullProfile.id} 
                 AND offer = ${DEMAND} 
                 AND (${prepareWhereClause(fullProfile.offers)})

@@ -11,11 +11,11 @@ const MAX_PAGE_SIZE = dbConfig.maxPageSize;
  */
 
 beforeAll(async() => {
-    let postBobProfile = {"contact":"Bob@gmail.com","secret":"bupa","name":"Bob","offers":[],"demands":[]};
-    let postBobService = { "title" : "Play tenis", "date" : 0, "index" : ["Play tenis"] };
+    let postBobProfile = {"contact":"Bob@gmail.com","secret":"bupa","name":"Bob", "userWalletAddress":"0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd", "offers":[],"demands":[]};
+    let postBobService = { "title" : "Play tennis", "date" : 0, "chainService" : { "tokenId" : 0, "serverServiceId" : 10, "userWalletAddress" : "0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd"}, "index" : ["Play tennis"] };
     
-    let postEveProfile = {"contact":"Eve@gmail.com","secret":"dontbeevilgoogle","name":"Eve","offers":[],"demands":[]};
-    let postEveService = { "title" : "Develop software", "date" : 0, "index" : ["Develop software"] };
+    let postEveProfile = {"contact":"Eve@gmail.com","secret":"dontbeevilgoogle","name":"Eve", "userWalletAddress":"0x52E7400Ba1B956B11394a5045F8BC3682792E1AC", "offers":[],"demands":[]};
+    let postEveService = { "title" : "Develop software", "date" : 0, "chainService" : { "tokenId" : 1, "serverServiceId" : 11, "userWalletAddress" : "0x52E7400Ba1B956B11394a5045F8BC3682792E1AC"}, "index" : ["Develop software"] };
     // add account in system
     await request(app)
         .post('/api/v1/account')
@@ -91,7 +91,7 @@ describe('Cover /api/v1/demands with tests', () => {
             .expect(400, { "payload" : "There is no such account." });
     });
     it('On GET /api/v1/demands with existing account but empty offers receives OK code with error message', async() => {
-        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
+        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James", "userWalletAddress":"0x0008DC8a5c80db6e8FCc042f0cC54a298F8F2FFd", "offers":[],"demands":[]};
         // add account in system
         await request(app)
             .post('/api/v1/account')
@@ -119,8 +119,8 @@ describe('Cover /api/v1/demands with tests', () => {
             .expect(204);
     });
     it('On GET /api/v1/demands with existing account but zero matches receives OK code with empty payload', async() => {
-        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
-        let postServicePayload = { "title" : "there is no match for this offer", "date" : 0, "index" : ["there is no match for this offer"]};
+        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","userWalletAddress" : "0x0007400Ba1B956B11394a5045F8BC3682792E1AC", "offers":[],"demands":[]};
+        let postServicePayload = { "title" : "there is no match for this offer", "date" : 0, "chainService" : { "tokenId" : 1, "serverServiceId" : 11, "userWalletAddress" : "0x0007400Ba1B956B11394a5045F8BC3682792E1AC"}, "index" : ["there is no match for this offer"]};
         // add account in system
         await request(app)
             .post('/api/v1/account')
@@ -153,9 +153,9 @@ describe('Cover /api/v1/demands with tests', () => {
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .expect(204);
     });
-    it('On GET /api/v1/demands with existing account and available matches receives OK code with services', async() => {
-        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
-        let postServicePayload = { "title" : "Develop software", "date" : 0, "index" : ["Develop software"]};
+    it.only('On GET /api/v1/demands with existing account and available matches receives OK code with services', async() => {
+        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James", "userWalletAddress":"0x0007400Ba1B956B11394a5045F8BC3682792E1AC", "offers":[],"demands":[]};
+        let postServicePayload = { "id" : 101, "title" : "Develop software", "date" : 0, "chainService" : { "tokenId" : 1, "serverServiceId" : 101, "userWalletAddress" : "0x0007400Ba1B956B11394a5045F8BC3682792E1AC"}, "index" : ["Develop software"]};
         // add account in system
         await request(app)
             .post('/api/v1/account')
