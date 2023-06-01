@@ -6,8 +6,8 @@ const dbConfig = config.dbConfig;
 const MAX_PAGE_SIZE = dbConfig.maxPageSize;
 
 beforeEach(async() => {
-    let jamesPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James", "userWalletAddress":"0x52E7400Ba1B956B11394a5045F8BC3682792E1AC", "offers":[],"demands":[]};
-    let jamesTestPayload = {"title":"Software development","date": 1746057600,"index":["Hacking servers by nights"]};
+    let jamesPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James", "userWalletAddress":"0x0007400Ba1B956B11394a5045F8BC3682792E1AC", "offers":[],"demands":[]};
+    let jamesTestPayload = {"title":"Software development","date": 1746057600,"chainService" : { "tokenId" : 0, "serverServiceId" : 10, "userWalletAddress" : "0x0007400Ba1B956B11394a5045F8BC3682792E1AC"},"index":["Hacking servers by nights"]};
 
     let janePayload = {"contact":"TestJane@gmail.com","secret":"jne123","name":"Test Jane","userWalletAddress":"0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd", "offers":[],"demands":[]};
     // add james in system
@@ -39,7 +39,7 @@ beforeEach(async() => {
         .send(janePayload)
         .expect('Content-Type', 'application/json; charset=utf-8')
         .expect(200)
-    let janeOfferPayload = {"title":"Product management","date": 1746057600,"index":["Product management"]};
+    let janeOfferPayload = {"title":"Product management","date": 1746057600, "chainService" : { "tokenId" : 0, "serverServiceId" : 10, "userWalletAddress" : "0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd"}, "index":["Product management"]};
     await request(app)
         .post('/api/v1/account/offers')    
         .set('Authorization', 'Basic VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==')
@@ -71,12 +71,12 @@ afterEach(async() => {
         .expect(204);
 });
 
-describe.only('Test suite to cover match logic', () => {
+describe('Test suite to cover match logic', () => {
 
     it('on POST /api/v1/account/demands with valid payload and existing match, get matches returns single value', async() => {
         // prepare initial database state
         // prepare demands 
-        let janeDemandPayload = {"title":"Software development","date": 1746057600,"index":["Software development"]};
+        let janeDemandPayload = {"title":"Software development","date": 1746057600, "userWalletAddress":"0x0007400Ba1B956B11394a5045F8BC3682792E1AC", "index":["Software development"]};
         
         await request(app)
             .post('/api/v1/account/demands')    
@@ -97,7 +97,7 @@ describe.only('Test suite to cover match logic', () => {
 
     it('on POST /api/v1/account/matches with approve from the first user server returns positive result and query to matches returns response with approved flag', async() => {
         // prepare initial database state
-        let janeDemandPayload = {"title":"Software development","date": 1746057600,"index":["Software development"]};
+        let janeDemandPayload = {"title":"Software development","date": 1746057600, "userWalletAddress":"0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd", "index":["Software development"]};
         await request(app)
             .post('/api/v1/account/demands')    
             .set('Authorization', 'Basic VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==')
@@ -141,7 +141,7 @@ describe.only('Test suite to cover match logic', () => {
 
     it('on POST /api/v1/account/matches with approve from the first and the second users server returns positive result and query to matches returns response with both approved flag', async() => {
         // prepare initial database state
-        let janeDemandPayload = {"title":"Software development","date": 1746057600,"index":["Software development"]};
+        let janeDemandPayload = {"title":"Software development","date": 1746057600, "userWalletAddress" : "0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd", "index":["Software development"]};
         await request(app)
             .post('/api/v1/account/demands')    
             .set('Authorization', 'Basic VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==')
@@ -204,7 +204,7 @@ describe.only('Test suite to cover match logic', () => {
 
     it.only('on GET /api/v1/account/matches with valid scenario receives match object with ids and all required fields', async() => {
         // prepare initial database state
-        let janeDemandPayload = {"title":"Software development","date": 1746057600,"index":["Software development"]};
+        let janeDemandPayload = {"title":"Software development","date": 1746057600, "userWalletAddress":"0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd", "index":["Software development"]};
         await request(app)
             .post('/api/v1/account/demands')    
             .set('Authorization', 'Basic VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==')

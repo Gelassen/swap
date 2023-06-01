@@ -112,10 +112,10 @@ exports.getByProfileId = function(profileId, req, res) {
             if (err) throw err;
             // make sure you prevent sql injection by validating first ${profileId}
             const sql = `SELECT 
-                id, userFirstProfileId, userSecondProfileId, userFirstServiceId, userSecondServiceId, approvedByFirstUser, approvedBySecondUser, 
+                ${MatchTable.TABLE_NAME}.${MatchTable.ID} as id, userFirstProfileId, userSecondProfileId, userFirstServiceId, userSecondServiceId, approvedByFirstUser, approvedBySecondUser, 
                 firstUserProfile.name as userFirstProfileName, secondUserProfile.name as userSecondProfileName, 
-                chainServicesFirst.idChainService as idChainServiceFirst, chainServicesFirst.userWalletAddress as userAddressFirst, chainServicesFirst.tokenId as tokenIdFirst, chainServicesFirst.title as titleFirst,
-                chainServicesSecond.idChainService as idChainServiceFirst, chainServicesSecond.userWalletAddress as userAddressSecond, chainServicesSecond.tokenId as tokenIdSecond, chainServicesSecond.title as titleSecond 
+                chainServicesFirst.idChainService as idChainServiceFirst, chainServicesFirst.userWalletAddress as userAddressFirst, chainServicesFirst.tokenId as tokenIdFirst, 
+                chainServicesSecond.idChainService as idChainServiceFirst, chainServicesSecond.userWalletAddress as userAddressSecond, chainServicesSecond.tokenId as tokenIdSecond 
                 FROM ${MatchTable.TABLE_NAME} 
                 INNER JOIN ${ChainServicesTable.TABLE_NAME} as chainServicesFirst
                 ON ${MatchTable.USER_FIRST_SERVICE_ID} = chainServicesFirst.${ChainServicesTable.SERVER_SERVICE_ID}
