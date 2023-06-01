@@ -48,28 +48,28 @@ beforeEach(async() => {
         .expect(200)
 });
 
-afterEach(async() => {
-    // clean database from test data
-    const jamesResponse = await request(app)
-        .get('/api/v1/account')
-        .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
-        .expect('Content-Type', 'application/json; charset=utf-8')
-        .expect(200);
-    await request(app)
-        .delete(`/api/v1/account/${jamesResponse.body.payload.id}`)
-        .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
-        .expect(204);
+// afterEach(async() => {
+//     // clean database from test data
+//     const jamesResponse = await request(app)
+//         .get('/api/v1/account')
+//         .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+//         .expect('Content-Type', 'application/json; charset=utf-8')
+//         .expect(200);
+//     await request(app)
+//         .delete(`/api/v1/account/${jamesResponse.body.payload.id}`)
+//         .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
+//         .expect(204);
 
-    const janeResponse = await request(app)
-        .get('/api/v1/account')
-        .set('Authorization', 'Basic VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==')
-        .expect('Content-Type', 'application/json; charset=utf-8')
-        .expect(200);
-    await request(app)
-        .delete(`/api/v1/account/${janeResponse.body.payload.id}`)
-        .set('Authorization', 'Basic VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==')
-        .expect(204);
-});
+//     const janeResponse = await request(app)
+//         .get('/api/v1/account')
+//         .set('Authorization', 'Basic VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==')
+//         .expect('Content-Type', 'application/json; charset=utf-8')
+//         .expect(200);
+//     await request(app)
+//         .delete(`/api/v1/account/${janeResponse.body.payload.id}`)
+//         .set('Authorization', 'Basic VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==')
+//         .expect(204);
+// });
 
 describe('Test suite to cover match logic', () => {
 
@@ -219,7 +219,8 @@ describe('Test suite to cover match logic', () => {
             .expect(200);
         console.log(`matchResponse ${JSON.stringify(matchResponse)}`);
 
-        let matches = matchResponse.text.payload; 
+        let text = JSON.parse(matchResponse.text); 
+        let matches = text.payload
         expect(matches.length).toEqual(1); 
         let match = matches[0];
         expect(match.id).toBeDefined(); //.not.toBeUndefined();
@@ -234,10 +235,10 @@ describe('Test suite to cover match logic', () => {
         expect(match.userSecondProfileName).toBeDefined();
         expect(match.userFirstService.idChainService).toBeDefined();
         expect(match.userFirstService.userAddress).toBeDefined();
-        expect(match.userFirstService.title).toEqual("Product management");
+        expect(match.userFirstServiceTitle).toEqual("Product management");
         expect(match.userSecondService.idChainService).toBeDefined();
         expect(match.userSecondService.userAddress).toBeDefined();
-        expect(match.userSecondService.title).toEqual("Software development");
+        expect(match.userSecondServiceTitle).toEqual("Software development");
     });
 
     // {

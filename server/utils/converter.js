@@ -189,7 +189,11 @@ exports.dbToNewDomainServerMatch = function(rows) {
         serverMatch.userSecondServiceId = rows[id].userSecondServiceId;
         serverMatch.approvedByFirstUser = rows[id].approvedByFirstUser === 1; // 0 is false, 1 is true
         serverMatch.approvedBySecondUser = rows[id].approvedBySecondUser === 1; // 0 is false, 1 is true
-
+        serverMatch.userFirstProfileName = rows[id].userFirstProfileName;
+        serverMatch.userSecondProfileName = rows[id].userSecondProfileName;
+        serverMatch.userFirstServiceTitle = rows[id].firstServiceTitle;
+        serverMatch.userSecondServiceTitle = rows[id].secondServiceTitle;
+        
         let firstChainService = {}
         firstChainService.idChainService = rows[id].idChainServiceFirst;
         firstChainService.userAddress = rows[id].userAddressFirst;

@@ -113,9 +113,9 @@ exports.getByProfileId = function(profileId, req, res) {
             // make sure you prevent sql injection by validating first ${profileId}
             const sql = `SELECT 
                 ${MatchTable.TABLE_NAME}.${MatchTable.ID} as id, userFirstProfileId, userSecondProfileId, userFirstServiceId, userSecondServiceId, approvedByFirstUser, approvedBySecondUser, 
-                firstUserProfile.name as userFirstProfileName, secondUserProfile.name as userSecondProfileName, 
+                firstUserProfile.name as userFirstProfileName, secondUserProfile.name as userSecondProfileName, firstService.title as firstServiceTitle, secondService.title as secondServiceTitle,
                 chainServicesFirst.idChainService as idChainServiceFirst, chainServicesFirst.userWalletAddress as userAddressFirst, chainServicesFirst.tokenId as tokenIdFirst, 
-                chainServicesSecond.idChainService as idChainServiceFirst, chainServicesSecond.userWalletAddress as userAddressSecond, chainServicesSecond.tokenId as tokenIdSecond 
+                chainServicesSecond.idChainService as idChainServiceSecond, chainServicesSecond.userWalletAddress as userAddressSecond, chainServicesSecond.tokenId as tokenIdSecond 
                 FROM ${MatchTable.TABLE_NAME} 
                 INNER JOIN ${ChainServicesTable.TABLE_NAME} as chainServicesFirst
                 ON ${MatchTable.USER_FIRST_SERVICE_ID} = chainServicesFirst.${ChainServicesTable.SERVER_SERVICE_ID}
@@ -125,6 +125,10 @@ exports.getByProfileId = function(profileId, req, res) {
                 ON ${MatchTable.TABLE_NAME}.userFirstProfileId = firstUserProfile.${ProfileTable.ID} 
                 INNER JOIN ${ProfileTable.TABLE_NAME} as secondUserProfile 
                 ON ${MatchTable.TABLE_NAME}.userSecondProfileId = secondUserProfile.${ProfileTable.ID} 
+                INNER JOIN Service as firstService 
+                ON firstService.id = PotentialMatches.userFirstServiceId  
+                INNER JOIN Service as secondService 
+                ON secondService.id = PotentialMatches.userSecondServiceId
                 WHERE 
                     ${MatchTable.USER_FIRST_PROFILE_ID} = ${profileId}
                      OR  
