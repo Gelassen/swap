@@ -14,9 +14,9 @@ exports.getDemands = function(fullProfile, page, size) {
     return new Promise((resolve) => {
         pool.getConnection(function(err, connection) {
             if (err) throw err;
-            
+            // offers have assigned chain's records, but demands doesn't have it
             const sql = `SELECT * FROM Service 
-                INNER JOIN ${ChainServicesTable.TABLE_NAME} 
+                LEFT OUTER JOIN ${ChainServicesTable.TABLE_NAME} 
                 ON Service.id = ${ChainServicesTable.TABLE_NAME}.${ChainServicesTable.SERVER_SERVICE_ID} 
                 WHERE profileId != ${fullProfile.id} 
                 AND offer = ${DEMAND} 

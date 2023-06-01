@@ -153,7 +153,7 @@ describe('Cover /api/v1/demands with tests', () => {
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .expect(204);
     });
-    it.only('On GET /api/v1/demands with existing account and available matches receives OK code with services', async() => {
+    it('On GET /api/v1/demands with existing account and available matches receives OK code with services', async() => {
         let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James", "userWalletAddress":"0x0007400Ba1B956B11394a5045F8BC3682792E1AC", "offers":[],"demands":[]};
         let postServicePayload = { "id" : 101, "title" : "Develop software", "date" : 0, "chainService" : { "tokenId" : 1, "serverServiceId" : 101, "userWalletAddress" : "0x0007400Ba1B956B11394a5045F8BC3682792E1AC"}, "index" : ["Develop software"]};
         // add account in system
@@ -176,8 +176,10 @@ describe('Cover /api/v1/demands with tests', () => {
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .set('Content-Type', 'application/json; charset=utf-8')
             .expect(200);
+        console.log("Demands response: " + JSON.stringify(demandsResponse));
         expect(demandsResponse.body.payload.length).toEqual(1);
         postServicePayload.id = demandsResponse.body.payload.at(0).id;
+        delete postServicePayload["chainService"];
         expect(demandsResponse.body.payload.at(0)).toEqual(postServicePayload);
 
         // clean database from test data
@@ -192,9 +194,9 @@ describe('Cover /api/v1/demands with tests', () => {
             .expect(204);
     });
     it('On GET /api/v1/demands with existing account and two available matches receives OK code with 2 services', async() => {
-        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
-        let postServicePayload = { "title" : "Develop software", "date" : 0, "index" : ["Develop software"]};
-        let postAnotherService = { "title" : "Play tenis", "date" : 0, "index" : ["Play tenis"] };
+        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James", "userWalletAddress" : "0x0007400Ba1B956B11394a5045F8BC3682792E1AC", "offers":[],"demands":[]};
+        let postServicePayload = { "title" : "Develop software", "date" : 0, "chainService" : { "tokenId" : 1, "serverServiceId" : 101, "userWalletAddress" : "0x0007400Ba1B956B11394a5045F8BC3682792E1AC"}, "index" : ["Develop software"]};
+        let postAnotherService = { "title" : "Play tennis", "date" : 0, "chainService" : { "tokenId" : 2, "serverServiceId" : 102, "userWalletAddress" : "0x0007400Ba1B956B11394a5045F8BC3682792E1AC"}, "index" : ["Play tennis"] };
         await request(app)
             .post('/api/v1/account')
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
@@ -223,6 +225,8 @@ describe('Cover /api/v1/demands with tests', () => {
         expect(demandsResponse.body.payload.length).toEqual(2);
         postAnotherService.id = demandsResponse.body.payload.at(0).id;
         postServicePayload.id = demandsResponse.body.payload.at(1).id;
+        delete postAnotherService["chainService"];
+        delete postServicePayload["chainService"];
         expect(demandsResponse.body.payload.at(0)).toEqual(postAnotherService);
         expect(demandsResponse.body.payload.at(1)).toEqual(postServicePayload);
 
@@ -247,8 +251,8 @@ describe('Cover /api/v1/demands with tests', () => {
     it('On GET /api/v1/demands?page=1 with existing account and 10+ available matches receives OK and only first 10', async() => {
         // prepare test data
         const theNumberOfLastItemInQuery = '9';
-        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
-        let postServicePayload = { "title" : "Develop software", "date" : 0, "index" : ["Develop software"]};
+        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James", "userWalletAddress" : "0x0007400Ba1B956B11394a5045F8BC3682792E1AC", "offers":[],"demands":[]};
+        let postServicePayload = { "title" : "Develop software", "date" : 0, "chainService" : { "tokenId" : 1, "serverServiceId" : 101, "userWalletAddress" : "0x0007400Ba1B956B11394a5045F8BC3682792E1AC"}, "index" : ["Develop software"]};
         await request(app)
             .post('/api/v1/account')
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
@@ -264,7 +268,7 @@ describe('Cover /api/v1/demands with tests', () => {
             .expect(200, {})
         const matchServiceCount = 20;
         for (id = 0; id < matchServiceCount; id++) {
-            let postAnotherService = { "title" : `Play tenis ${id}`, "date" : 0, "index" : [`Play tenis ${id}`] };
+            let postAnotherService = { "title" : `Play tennis ${id}`, "date" : 0, "chainService" : { "tokenId" : `${id}`, "serverServiceId" : `${id}`, "userWalletAddress" : "0x0007400Ba1B956B11394a5045F8BC3682792E1AC"}, "index" : [`Play tennis ${id}`] };
             await request(app)
                 .post('/api/v1/account/offers')    
                 .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
@@ -298,7 +302,7 @@ describe('Cover /api/v1/demands with tests', () => {
             .delete(`/api/v1/account/${response.body.payload.id}`)
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .expect(204);
-        // instead of removing all 20+ test services, just deop a whole profile and recreate 
+        // instead of removing all 20+ test services, just delete a whole profile and recreate 
         // again based on Jest.beforeAll() implementation
         const eveResponse = await request(app)
             .get('/api/v1/account')
@@ -309,7 +313,7 @@ describe('Cover /api/v1/demands with tests', () => {
             .delete(`/api/v1/account/${eveResponse.body.payload.id}`)
             .set('Authorization', 'Basic RXZlQGdtYWlsLmNvbTpkb250YmVldmlsZ29vZ2xl')
             .expect(204);
-        let postEveProfile = {"contact":"Eve@gmail.com","secret":"dontbeevilgoogle","name":"Eve","offers":[],"demands":[]};
+        let postEveProfile = {"contact":"Eve@gmail.com","secret":"dontbeevilgoogle","name":"Eve", "userWalletAddress" : "0x52E7400Ba1B956B11394a5045F8BC3682792E1AC", "offers":[],"demands":[]};
         let postEveService = { "title" : "Develop software", "date" : 0, "index" : ["Develop software"] };
         await request(app)
             .post('/api/v1/account')
@@ -335,8 +339,8 @@ describe('Cover /api/v1/demands with tests', () => {
         expect(eveAccountResponse.body.payload.demands.length).toEqual(1);
         // prepare initial state
         const theNumberOfLastItemInQuery = '19';
-        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
-        let postServicePayload = { "title" : "Develop software", "date" : 0, "index" : ["Develop software"]};
+        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James", "userWalletAddress" : "0x0007400Ba1B956B11394a5045F8BC3682792E1AC", "chainService" : { "tokenId" : 1, "serverServiceId" : 101, "userWalletAddress" : "0x0007400Ba1B956B11394a5045F8BC3682792E1AC"}, "offers":[],"demands":[]};
+        let postServicePayload = { "title" : "Develop software", "date" : 0, "chainService" : { "tokenId" : 1, "serverServiceId" : 101, "userWalletAddress" : "0x0007400Ba1B956B11394a5045F8BC3682792E1AC"}, "index" : ["Develop software"]};
         await request(app)
             .post('/api/v1/account')
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
@@ -352,7 +356,7 @@ describe('Cover /api/v1/demands with tests', () => {
             .expect(200, {})
         const matchServiceCount = 20;
         for (id = 1; id <= matchServiceCount; id++) {
-            let postAnotherService = { "title" : `Play tenis ${id}`, "date" : 0, "index" : [`Play tenis ${id}`] };
+            let postAnotherService = { "title" : `Play tennis ${id}`, "date" : 0, "chainService" : { "tokenId" : `${id}`, "serverServiceId" : `${id}`, "userWalletAddress" : "0x0007400Ba1B956B11394a5045F8BC3682792E1AC"}, "index" : [`Play tennis ${id}`] };
             await request(app)
                 .post('/api/v1/account/offers')    
                 .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
@@ -399,7 +403,7 @@ describe('Cover /api/v1/demands with tests', () => {
             .delete(`/api/v1/account/${eveResponse.body.payload.id}`)
             .set('Authorization', 'Basic RXZlQGdtYWlsLmNvbTpkb250YmVldmlsZ29vZ2xl')
             .expect(204);
-        let postEveProfile = {"contact":"Eve@gmail.com","secret":"dontbeevilgoogle","name":"Eve","offers":[],"demands":[]};
+        let postEveProfile = {"contact":"Eve@gmail.com","secret":"dontbeevilgoogle","name":"Eve", "userWalletAddress" : "0x52E7400Ba1B956B11394a5045F8BC3682792E1AC", "offers":[],"demands":[]};
         let postEveService = { "title" : "Develop software", "date" : 0, "index" : ["Develop software"] };
         await request(app)
             .post('/api/v1/account')
@@ -417,8 +421,8 @@ describe('Cover /api/v1/demands with tests', () => {
     });
     it('On GET /api/v1/demands?page=1 without page size receives BAD_REQUEST status code', async() => {
         // prepare initial state
-        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
-        let postServicePayload = { "title" : "Develop software", "date" : 0, "index" : ["Develop software"]};
+        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James", "userWalletAddress" : "0x0007400Ba1B956B11394a5045F8BC3682792E1AC", "offers":[],"demands":[]};
+        let postServicePayload = { "title" : "Develop software", "date" : 0, "chainService" : { "tokenId" : 1, "serverServiceId" : 101, "userWalletAddress" : "0x0007400Ba1B956B11394a5045F8BC3682792E1AC"}, "index" : ["Develop software"]};
         await request(app)
             .post('/api/v1/account')
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
@@ -453,8 +457,8 @@ describe('Cover /api/v1/demands with tests', () => {
     });
     it('On GET /api/v1/demands?page=1&size=101 with out of range page size receives BAD_REQUEST status code', async() => {
         // prepare initial state
-        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James","offers":[],"demands":[]};
-        let postServicePayload = { "title" : "Develop software", "date" : 0, "index" : ["Develop software"]};
+        let postPayload = {"contact":"TestJames@gmail.com","secret":"jms123","name":"Test James", "userWalletAddress" : "0x0007400Ba1B956B11394a5045F8BC3682792E1AC", "offers":[],"demands":[]};
+        let postServicePayload = { "title" : "Develop software", "date" : 0, "chainService" : { "tokenId" : 1, "serverServiceId" : 101, "userWalletAddress" : "0x0007400Ba1B956B11394a5045F8BC3682792E1AC"}, "index" : ["Develop software"]};
         await request(app)
             .post('/api/v1/account')
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
