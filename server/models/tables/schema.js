@@ -37,4 +37,11 @@ class ProfileTable {
     constructor() {/* no op */}
 }
 
-module.exports = { MatchTable, ChainServicesTable, ServerServicesTable, ProfileTable}
+class ServiceTable {
+    static TABLE_NAME = "Service"
+    static ID = "id"
+
+    constructor() {/* no op */}
+}
+
+module.exports = { MatchTable, ChainServicesTable, ServerServicesTable, ProfileTable, ServiceTable }

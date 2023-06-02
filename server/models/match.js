@@ -1,7 +1,7 @@
 const config = require('config')
 const { resolve } = require('path/posix');
 const pool = require('../database');
-const { MatchTable, ChainServicesTable, ServerServicesTable, ProfileTable } = require('../models/tables/schema')
+const { MatchTable, ChainServicesTable, ServerServicesTable, ProfileTable, ServiceTable } = require('../models/tables/schema')
 const util = require('../utils/network')
 const logger = require('../utils/logger') 
 const converter = require('../utils/converter');
@@ -125,10 +125,10 @@ exports.getByProfileId = function(profileId, req, res) {
                 ON ${MatchTable.TABLE_NAME}.userFirstProfileId = firstUserProfile.${ProfileTable.ID} 
                 INNER JOIN ${ProfileTable.TABLE_NAME} as secondUserProfile 
                 ON ${MatchTable.TABLE_NAME}.userSecondProfileId = secondUserProfile.${ProfileTable.ID} 
-                INNER JOIN Service as firstService 
-                ON firstService.id = PotentialMatches.userFirstServiceId  
-                INNER JOIN Service as secondService 
-                ON secondService.id = PotentialMatches.userSecondServiceId
+                INNER JOIN ${ServiceTable.TABLE_NAME} as firstService 
+                ON firstService.id = ${MatchTable.TABLE_NAME}.${MatchTable.USER_FIRST_SERVICE_ID} 
+                INNER JOIN ${ServiceTable.TABLE_NAME} as secondService 
+                ON secondService.id = ${MatchTable.TABLE_NAME}.${MatchTable.USER_SECOND_SERVICE_ID}
                 WHERE 
                     ${MatchTable.USER_FIRST_PROFILE_ID} = ${profileId}
                      OR  
