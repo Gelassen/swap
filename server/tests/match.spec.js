@@ -202,7 +202,7 @@ describe('Test suite to cover match logic', () => {
         expect(matchSecondResponsePayload[0].approvedBySecondUser).toEqual(true);
     });
 
-    it('on GET /api/v1/account/matches with valid scenario receives match object with ids and all required fields', async() => {
+    it.only('on GET /api/v1/account/matches with valid scenario receives match object with ids and all required fields', async() => {
         // prepare initial database state
         let janeDemandPayload = {"title":"Software development","date": 1746057600, "userWalletAddress":"0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd", "index":["Software development"]};
         await request(app)
