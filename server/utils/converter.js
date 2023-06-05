@@ -196,12 +196,14 @@ exports.dbToNewDomainServerMatch = function(rows) {
         
         let firstChainService = {}
         firstChainService.idChainService = rows[id].idChainServiceFirst;
-        firstChainService.userAddress = rows[id].userAddressFirst;
+        firstChainService.userWalletAddress = rows[id].userAddressFirst;
         firstChainService.tokenId = rows[id].tokenIdFirst;
+        firstChainService.serverServiceId = serverMatch.userFirstServiceId; // INNER JOIN is done over this column, so they should be equal
         let secondChainService = {}
         secondChainService.idChainService = rows[id].idChainServiceSecond;
-        secondChainService.userAddress = rows[id].userAddressSecond;
+        secondChainService.userWalletAddress = rows[id].userAddressSecond;
         secondChainService.tokenId = rows[id].tokenIdSecond;
+        secondChainService.serverServiceId = serverMatch.userSecondServiceId; // INNER JOIN is done over this column, so they should be equal
 
         serverMatch.userFirstService = firstChainService;
         serverMatch.userSecondService = secondChainService;

@@ -9,14 +9,17 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import ru.home.swap.core.App
 import ru.home.swap.wallet.storage.dao.ChainTransactionDao
 import ru.home.swap.wallet.storage.dao.ServerTransactionDao
-import ru.home.swap.wallet.storage.model.ChainTransactionEntity
-import ru.home.swap.wallet.storage.model.DataItemFromView
-import ru.home.swap.wallet.storage.model.ServerRequestTransactionEntity
+import ru.home.swap.wallet.storage.dao.SwapMatchDao
+import ru.home.swap.wallet.storage.model.*
 
 @Database(
-    entities = [ChainTransactionEntity::class, ServerRequestTransactionEntity::class],
+    entities = [
+        ChainTransactionEntity::class,
+        ServerRequestTransactionEntity::class,
+        MatchEntity::class,
+        ChainServiceEntity::class],
     views = [DataItemFromView::class],
-    version = 20,
+    version = 22,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -25,6 +28,8 @@ abstract class AppDatabase: RoomDatabase() {
     abstract fun chainTransactionDao(): ChainTransactionDao
 
     abstract fun serverTransactionDao(): ServerTransactionDao
+
+    abstract fun matchDao(): SwapMatchDao
 
     companion object {
         // For Singleton instantiation

@@ -9,6 +9,7 @@ import ru.home.swap.wallet.WalletApplication
 import ru.home.swap.wallet.repository.IStorageRepository
 import ru.home.swap.wallet.repository.IWalletRepository
 import ru.home.swap.wallet.storage.dao.ChainTransactionDao
+import ru.home.swap.wallet.storage.dao.SwapMatchDao
 import javax.inject.Named
 import javax.inject.Scope
 
@@ -26,6 +27,7 @@ interface WalletComponent {
     fun providesWalletRepository(): IWalletRepository
     fun providesStorageRepository(): IStorageRepository
     fun providesChainTransactionDao(): ChainTransactionDao
+    fun providesSwapMatchDao(): SwapMatchDao
     @Named(WalletModule.CACHE_SCOPE)
     fun providesCacheUtilsScope(): CoroutineScope
     fun providesWorkManager(): WorkManager

@@ -2,7 +2,7 @@ package ru.home.swap.core.model
 
 import com.google.gson.Gson
 import java.math.BigInteger
-
+// TODO verify SwapMatch {@link ru.home.swap.core.model.SwapMatch} could fully replace this class
 data class MatchSubject(
     var uid: Long = 0L,
     val userFirst: String,

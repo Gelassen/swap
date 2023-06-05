@@ -19,6 +19,7 @@ import ru.home.swap.wallet.storage.CacheUtils
 import ru.home.swap.wallet.storage.dao.ChainTransactionDao
 import ru.home.swap.wallet.storage.model.Schema
 import ru.home.swap.wallet.storage.dao.ServerTransactionDao
+import ru.home.swap.wallet.storage.dao.SwapMatchDao
 import javax.inject.Named
 
 @Module
@@ -74,8 +75,17 @@ class WalletModule(val context: Application) {
 
     @WalletMainScope
     @Provides
-    fun providesStorageRepository(dao: ChainTransactionDao, serverDao: ServerTransactionDao, pagedDataSource: TxDataSource): IStorageRepository {
-        return StorageRepository(dao, serverDao, pagedDataSource)
+    fun providesStorageRepository(
+        dao: ChainTransactionDao,
+        serverDao: ServerTransactionDao,
+        swapMatchDao: SwapMatchDao,
+        pagedDataSource: TxDataSource): IStorageRepository {
+
+        return StorageRepository(
+            chainTransactionDao = dao,
+            serverDao = serverDao,
+            matchDao = swapMatchDao,
+            pagedDataSource = pagedDataSource)
     }
 
     // cache
@@ -96,6 +106,12 @@ class WalletModule(val context: Application) {
     @Provides
     fun providesChainTransactionDao(database: AppDatabase): ChainTransactionDao {
         return database.chainTransactionDao()
+    }
+
+    @WalletMainScope
+    @Provides
+    fun providesSwapMatchDao(database: AppDatabase): SwapMatchDao {
+        return database.matchDao()
     }
 
     @WalletMainScope

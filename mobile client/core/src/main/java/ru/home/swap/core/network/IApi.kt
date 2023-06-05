@@ -4,6 +4,7 @@ import retrofit2.Response
 import retrofit2.http.*
 import ru.home.swap.core.model.PersonProfile
 import ru.home.swap.core.model.Service
+import ru.home.swap.core.model.SwapMatch
 import ru.home.swap.core.network.model.ApiResponse
 
 interface IApi {
@@ -72,5 +73,5 @@ interface IApi {
         @Header("Authorization") credentials: String,
         @Query("page") page: Int,
         @Query("size") size: Int
-    ): Response<ApiResponse<Collection<Any>>>
+    ): Response<ApiResponse<Collection<SwapMatch>>>
 }

@@ -13,11 +13,13 @@ import ru.home.swap.wallet.model.ITransaction
 import ru.home.swap.wallet.storage.model.Schema.ChainTransaction.DEFAULT_PAGE_SIZE
 import ru.home.swap.wallet.storage.dao.ChainTransactionDao
 import ru.home.swap.wallet.storage.dao.ServerTransactionDao
+import ru.home.swap.wallet.storage.dao.SwapMatchDao
 import ru.home.swap.wallet.storage.model.*
 
 class StorageRepository(
     val chainTransactionDao: ChainTransactionDao,
     val serverDao: ServerTransactionDao,
+    val matchDao: SwapMatchDao,
     val pagedDataSource: TxDataSource)
     : IStorageRepository {
 

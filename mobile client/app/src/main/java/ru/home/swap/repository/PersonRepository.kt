@@ -10,6 +10,7 @@ import ru.home.swap.core.extensions.attachIdlingResource
 import ru.home.swap.core.logger.Logger
 import ru.home.swap.core.model.PersonProfile
 import ru.home.swap.core.model.Service
+import ru.home.swap.core.model.SwapMatch
 import ru.home.swap.core.network.IApi
 import ru.home.swap.core.network.Response
 import ru.home.swap.utils.AppCredentials
@@ -230,8 +231,8 @@ class PersonRepository(val api: IApi, val cache: Cache, val context: Context): I
             }
     }
 
-    override suspend fun getMatches(contact: String, secret: String): Response<List<Any>> {
-        lateinit var result: Response<List<Any>>
+    override suspend fun getMatches(contact: String, secret: String): Response<List<SwapMatch>> {
+        lateinit var result: Response<List<SwapMatch>>
         try {
             val response = api.getMatchesForUserDemands(
                 credentials = AppCredentials.basic(contact, secret),

@@ -1,8 +1,8 @@
-package ru.home.swap.wallet.model
+package ru.home.swap.core.model
 
 import com.google.gson.annotations.SerializedName
 
-data class SwapMatchEntity(
+data class SwapMatch(
     @SerializedName("id")
     var id: Int,
     @SerializedName("userFirstProfileId")
@@ -26,7 +26,7 @@ data class SwapMatchEntity(
     @SerializedName("userSecondServiceTitle")
     var userSecondServiceTitle : String,
     @SerializedName("userFirstService")
-    var userFirstService : ChainServiceEntity = ChainServiceEntity(),
+    var userFirstService : ChainService = ChainService(),
     @SerializedName("userSecondService")
-    var userSecondService: ChainServiceEntity = ChainServiceEntity()
+    var userSecondService: ChainService = ChainService()
 )

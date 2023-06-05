@@ -20,6 +20,16 @@ class Schema {
         const val STATUS: String = "status"
     }
 
+    object ChainMatch {
+        const val TABLE_NAME: String = "SwapMatch"
+        const val UID: String = "uid"
+    }
+
+    object ChainService {
+        const val TABLE_NAME: String = "SwapService"
+        const val UID: String = "uid"
+    }
+
     object Views {
         object ChainTxWithServerMetadata {
             const val VIEW_NAME: String = "ChainTxWithServerMetadata"

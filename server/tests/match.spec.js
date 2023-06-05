@@ -234,10 +234,12 @@ describe('Test suite to cover match logic', () => {
         expect(match.userFirstProfileName).toBeDefined();
         expect(match.userSecondProfileName).toBeDefined();
         expect(match.userFirstService.idChainService).toBeDefined();
-        expect(match.userFirstService.userAddress).toBeDefined();
+        expect(match.userFirstService.userWalletAddress).toBeDefined();
+        expect(match.userFirstService.serverServiceId).toBeDefined();
         expect(match.userFirstServiceTitle).toEqual("Product management");
         expect(match.userSecondService.idChainService).toBeDefined();
-        expect(match.userSecondService.userAddress).toBeDefined();
+        expect(match.userSecondService.userWalletAddress).toBeDefined();
+        expect(match.userSecondService.serverServiceId).toBeDefined();
         expect(match.userSecondServiceTitle).toEqual("Software development");
     });
 
