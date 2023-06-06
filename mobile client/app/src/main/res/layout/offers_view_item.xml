@@ -29,11 +29,26 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:ellipsize="end"
+            android:inputType="textMultiLine"
             android:maxLines="2"
+            android:text="@{swapMatch.userFirstServiceTitle}"
             android:textColor="@color/blue_light"
-            android:text="@{swapMatch.userSecondServiceTitle}"
             tools:text="I offer more this French nice soft rolls and the tea." />
 
+        <TextView
+            android:id="@+id/offer_owner_with_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/offer_title"
+            android:layout_alignParentEnd="true"
+            android:layout_gravity="end"
+            android:ellipsize="end"
+            android:inputType="textMultiLine"
+            android:maxLines="2"
+            android:text="@{provider.decorateExtraDataForMatch(swapMatch.userFirstProfileName)}"
+            android:textColor="@color/blue_light"
+            android:textSize="12sp"
+            tools:text="by Jane" />
 <!--        <TextView-->
 <!--            android:id="@+id/offer_available_date"-->
 <!--            android:layout_width="wrap_content"-->

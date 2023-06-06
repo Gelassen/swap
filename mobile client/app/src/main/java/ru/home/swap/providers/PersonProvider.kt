@@ -4,6 +4,7 @@ import android.content.Context
 import android.telephony.PhoneNumberUtils
 import android.text.TextUtils
 import android.util.Patterns
+import ru.home.swap.core.model.SwapMatch
 import ru.home.swap.wallet.providers.WalletProvider
 import java.text.SimpleDateFormat
 import java.util.*
@@ -50,6 +51,10 @@ class PersonProvider {
 
     fun inputIsEthereumAddress(input: String) : Boolean {
         return WalletProvider().isValidEthereumAddress(input)
+    }
+
+    fun decorateExtraDataForMatch(person: String): String {
+        return "by $person"
     }
 
 }
