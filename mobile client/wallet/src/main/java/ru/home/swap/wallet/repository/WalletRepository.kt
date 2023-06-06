@@ -254,6 +254,21 @@ class WalletRepository(
         }
     }
 
+    override suspend fun burn(owner: String, tokenId: Long): Response<TransactionReceiptDomain> {
+        lateinit var response: Response<TransactionReceiptDomain>
+        try {
+            logger.d("[start] burn(${owner}, ${tokenId})")
+            val txReceipt = swapValueContract.burn(owner, tokenId).send()
+            response = Response.Data<TransactionReceiptDomain>(txReceipt.toDomain())
+        } catch (ex: Exception) {
+            logger.e("Failed to burn a token", ex)
+            response = Response.Error.Exception(ex)
+        } finally {
+            logger.d("[end] burn(${owner}, ${tokenId})")
+        }
+        return response
+    }
+
     override fun getOffer(tokenId: String): Flow<Response<Value>> {
         return flow {
             logger.d("[start] getOffer() for tokenId $tokenId")

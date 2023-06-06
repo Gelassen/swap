@@ -65,4 +65,6 @@ interface IWalletRepository {
     suspend fun getMatches(userFirst: String, userSecond: String): Response<List<Match>>
 
     fun getMatchesAsFlow(userFirst: String, userSecond: String): Flow<Response<List<Match>>>
+
+    suspend fun burn(owner: String, tokenId: Long): Response<TransactionReceiptDomain>
 }

@@ -11,6 +11,7 @@ interface IERC721 {
         val FUNC_SETAPPROVALFORALL = "setApprovalForAll"
         val FUNC_ISAPPROVEDFORALL = "isApprovedForAll"
         val FUNC_GETAPPROVED = "getApproved"
+        val FUNC_BURN = "burn"
     }
 
     fun balanceOf(owner: String): RemoteFunctionCall<BigInteger>
@@ -31,4 +32,6 @@ interface IERC721 {
     fun getApproved(tokenId: Long): RemoteFunctionCall<String>
 
     fun isApprovedForAll(owner: String, operator: String): RemoteFunctionCall<Boolean>
+
+    fun burn(owner: String, tokenId: Long): RemoteFunctionCall<TransactionReceipt>
 }
