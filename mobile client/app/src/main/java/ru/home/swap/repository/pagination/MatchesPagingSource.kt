@@ -5,7 +5,9 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import retrofit2.HttpException
 import ru.home.swap.App
+import ru.home.swap.core.model.MatchSubject
 import ru.home.swap.core.model.Service
+import ru.home.swap.core.model.SwapMatch
 import ru.home.swap.core.network.IApi
 import ru.home.swap.utils.AppCredentials
 import java.io.IOException
@@ -14,7 +16,7 @@ import kotlin.IllegalStateException
 import kotlin.collections.ArrayList
 
 class MatchesPagingSource(private val api: IApi, private val pageSize: Int)
-    : PagingSource<Int, Any>() {
+    : PagingSource<Int, SwapMatch>() {
 
     companion object {
         const val DEFAULT_START_PAGE = 1
@@ -23,14 +25,14 @@ class MatchesPagingSource(private val api: IApi, private val pageSize: Int)
     private var contact: String? = null
     private var secret: String? = null
 
-    override fun getRefreshKey(state: PagingState<Int, Any>): Int? {
+    override fun getRefreshKey(state: PagingState<Int, SwapMatch>): Int? {
         return state.anchorPosition?.let { anchorPosition ->
             state.closestPageToPosition(anchorPosition)?.prevKey?.plus(1)
                 ?: state.closestPageToPosition(anchorPosition)?.nextKey?.minus(1)
         }
     }
 
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Any> {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, SwapMatch> {
         if (contact == null || secret == null)
             throw IllegalStateException("Credentials are empty. Did you pass credentials for API request?")
 

@@ -86,7 +86,7 @@ describe('Test suite to cover match logic', () => {
             .expect(200, {})
         
         let matchResponse = await request(app)
-            .get('/api/v1/account/matches')
+            .get('/api/v1/account/matches?page=1&size=20')
             .set('Authorization', 'Basic VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==')
             .set('Content-Type', 'application/json; charset=utf-8')
             .expect(200)
@@ -105,7 +105,7 @@ describe('Test suite to cover match logic', () => {
             .send(janeDemandPayload)
             .expect(200, {})
         let matchResponse = await request(app)
-            .get('/api/v1/account/matches')
+            .get('/api/v1/account/matches?page=1&size=20')
             .set('Authorization', 'Basic VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==')
             .set('Content-Type', 'application/json; charset=utf-8')
             .expect(200);
@@ -124,14 +124,14 @@ describe('Test suite to cover match logic', () => {
         expect(matchResponsePayload[0].approvedByFirstUser).toEqual(false);
         
         await request(app)
-            .post('/api/v1/account/matches')    
+            .post('/api/v1/account/matches?page=1&size=20')    
             .set('Authorization', 'Basic VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==')
             .set('Content-Type', 'application/json; charset=utf-8')
             .send(janeConfirmPayload)
             .expect(200)
 
         let matchSecondResponse = await request(app)
-            .get('/api/v1/account/matches')
+            .get('/api/v1/account/matches?page=1&size=20')
             .set('Authorization', 'Basic VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==')
             .set('Content-Type', 'application/json; charset=utf-8')
             .expect(200)
@@ -149,7 +149,7 @@ describe('Test suite to cover match logic', () => {
             .send(janeDemandPayload)
             .expect(200, {})
         let matchResponse = await request(app)
-            .get('/api/v1/account/matches')
+            .get('/api/v1/account/matches?page=1&size=20')
             .set('Authorization', 'Basic VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==')
             .set('Content-Type', 'application/json; charset=utf-8')
             .expect(200);
@@ -179,20 +179,20 @@ describe('Test suite to cover match logic', () => {
         expect(matchResponsePayload[0].approvedBySecondUser).toEqual(false);
         
         await request(app)
-            .post('/api/v1/account/matches')    
+            .post('/api/v1/account/matches?page=1&size=20')    
             .set('Authorization', 'Basic VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==')
             .set('Content-Type', 'application/json; charset=utf-8')
             .send(janeConfirmPayload)
             .expect(200)
         await request(app)
-            .post('/api/v1/account/matches')    
+            .post('/api/v1/account/matches?page=1&size=20')    
             .set('Authorization', 'Basic VGVzdEphbWVzQGdtYWlsLmNvbTpqbXMxMjM=')
             .set('Content-Type', 'application/json; charset=utf-8')
             .send(jamesConfirmPayload)
             .expect(200)
         // TODO finish test case
         let matchSecondResponse = await request(app)
-            .get('/api/v1/account/matches')
+            .get('/api/v1/account/matches?page=1&size=20')
             .set('Authorization', 'Basic VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==')
             .set('Content-Type', 'application/json; charset=utf-8')
             .expect(200)
@@ -202,7 +202,7 @@ describe('Test suite to cover match logic', () => {
         expect(matchSecondResponsePayload[0].approvedBySecondUser).toEqual(true);
     });
 
-    it.only('on GET /api/v1/account/matches with valid scenario receives match object with ids and all required fields', async() => {
+    it('on GET /api/v1/account/matches with valid scenario receives match object with ids and all required fields', async() => {
         // prepare initial database state
         let janeDemandPayload = {"title":"Software development","date": 1746057600, "userWalletAddress":"0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd", "index":["Software development"]};
         await request(app)
@@ -213,7 +213,7 @@ describe('Test suite to cover match logic', () => {
             .expect(200, {})
 
         let matchResponse = await request(app)
-            .get('/api/v1/account/matches')
+            .get('/api/v1/account/matches?page=1&size=20')
             .set('Authorization', 'Basic VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==')
             .set('Content-Type', 'application/json; charset=utf-8')
             .expect(200);
@@ -243,26 +243,27 @@ describe('Test suite to cover match logic', () => {
         expect(match.userSecondServiceTitle).toEqual("Software development");
     });
 
-    // {
-    //     "code":200,
-    //     "payload":[
-    //        {
-    //           "id":140,
-    //           "userFirstProfileId":4320,
-    //           "userSecondProfileId":4319,
-    //           "userFirstServiceId":14103,
-    //           "userSecondServiceId":14099,
-    //           "approvedByFirstUser":false,
-    //           "approvedBySecondUser":false,
-    //           "userFirstService":{
-    //              "idChainService":46,
-    //              "userAddress":"0x1a75262751ac4E6290Ec8287d1De823F33036498"
-    //           },
-    //           "userSecondService":{
-    //              "userAddress":"0x367103555b34Eb9a46D92833e7293D540bFd7143",
-    //              "tokenId":0
-    //           }
-    //        }
-    //     ]
-    //  }
+    it('on GET /api/v1/account/matches with missed page and size on the url query receives error code', async() => {
+        await request(app)
+            .get('/api/v1/account/matches')
+            .set('Authorization', 'Basic VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(400, { "payload" : "Did you forget to pass page in query, e.g. ?page=1 ?"});
+    });
+
+    it('on GET /api/v1/account/matches with missed size on the url query receives error code', async() => {
+        await request(app)
+            .get('/api/v1/account/matches?page=1')
+            .set('Authorization', 'Basic VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(400, { "payload" : "Did you pass page size? Maximum values per page is 100"});
+    });
+
+    it('on GET /api/v1/account/matches with missed page on the url query receives error code', async() => {
+        await request(app)
+            .get('/api/v1/account/matches?size=20')
+            .set('Authorization', 'Basic VGVzdEphbmVAZ21haWwuY29tOmpuZTEyMw==')
+            .set('Content-Type', 'application/json; charset=utf-8')
+            .expect(400, { "payload" : "Did you forget to pass page in query, e.g. ?page=1 ?"});
+    });
 })

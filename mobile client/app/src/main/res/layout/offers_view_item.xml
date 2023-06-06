@@ -4,8 +4,8 @@
 
     <data>
         <variable
-            name="service"
-            type="ru.home.swap.core.model.Service" />
+            name="swapMatch"
+            type="ru.home.swap.core.model.SwapMatch" />
         <variable
             name="provider"
             type="ru.home.swap.providers.PersonProvider" />
@@ -31,16 +31,16 @@
             android:ellipsize="end"
             android:maxLines="2"
             android:textColor="@color/blue_light"
-            android:text="@{service.title}"
+            android:text="@{swapMatch.userSecondServiceTitle}"
             tools:text="I offer more this French nice soft rolls and the tea." />
 
-        <TextView
-            android:id="@+id/offer_available_date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/offer_title"
-            android:text="@{provider.getDateInHumanReadableFormat(service.date)}"
-            tools:text="till May 2024"/>
+<!--        <TextView-->
+<!--            android:id="@+id/offer_available_date"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_below="@+id/offer_title"-->
+<!--            android:text="@{provider.getDateInHumanReadableFormat(swapMatch.date)}"-->
+<!--            tools:text="till May 2024"/>-->
 
     </RelativeLayout>
 

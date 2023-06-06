@@ -24,6 +24,7 @@ import ru.home.swap.R
 import ru.home.swap.core.model.Service
 import ru.home.swap.databinding.OffersFragmentBinding
 import ru.home.swap.core.di.ViewModelFactory
+import ru.home.swap.core.model.SwapMatch
 import ru.home.swap.ui.common.BaseFragment
 import ru.home.swap.ui.contacts.ContactsFragment
 import javax.inject.Inject
@@ -73,9 +74,9 @@ class OffersFragment: BaseFragment(), OffersAdapter.IListener {
         viewModel.removeShownError()
     }
 
-    override fun onItemClick(item: Service) {
-        Log.e(App.TAG, "On item click ${item.title}")
-        val bundle = bundleOf(ContactsFragment.Params.EXTRA_SERVICE_ID to item.uid)
+    override fun onItemClick(item: SwapMatch) {
+        Log.e(App.TAG, "On item click ${item.userSecondServiceTitle}")
+        val bundle = bundleOf(ContactsFragment.Params.EXTRA_SERVICE_ID to item.id) // FIXME just a stub due refactoring, reimplemenet it
         findNavController().navigate(R.id.action_offersFragment_to_contactsFragment, bundle)
     }
 
@@ -102,8 +103,8 @@ class OffersFragment: BaseFragment(), OffersAdapter.IListener {
                             showErrorDialog(it.errors.get(0))
                         }
                         if (it.pagingData != null) {
-                            throw UnsupportedOperationException("Not supported yet for new type ${it.pagingData.toString()}")
-//                            (binding.offersList.adapter as OffersAdapter).submitData(it.pagingData)
+//                            throw UnsupportedOperationException("Not supported yet for new type ${it.pagingData}")
+                            (binding.offersList.adapter as OffersAdapter).submitData(it.pagingData)
                         }
                         binding.noContent.visibility = if (binding.offersList.adapter!!.itemCount == 0) View.VISIBLE else View.GONE
                     }

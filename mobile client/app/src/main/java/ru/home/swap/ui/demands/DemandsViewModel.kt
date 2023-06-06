@@ -11,13 +11,14 @@ import kotlinx.coroutines.flow.*
 import ru.home.swap.R
 import ru.home.swap.core.model.PersonProfile
 import ru.home.swap.core.model.Service
+import ru.home.swap.core.model.SwapMatch
 import ru.home.swap.repository.IPersonRepository
 import ru.home.swap.repository.PersonRepository
 import ru.home.swap.repository.pagination.DemandsPagingSource
 import javax.inject.Inject
 
 data class Model(
-    val pagingData: PagingData<Service>? = null,
+    val pagingData: PagingData<SwapMatch>? = null,
     val profile: PersonProfile? = null,
     val isLoading: Boolean = false,
     val errors: List<String> = emptyList()
@@ -36,7 +37,7 @@ class DemandsViewModel
         .stateIn(viewModelScope, SharingStarted.Eagerly, state.value)
 
     suspend fun fetchDemands() {
-        if (uiState.value.profile == null) {
+/*        if (uiState.value.profile == null) {
             repository.getCachedAccount()
                 .onStart {state.update { state -> state.copy(isLoading = true) } }
                 .flatMapConcat { it ->
@@ -69,7 +70,7 @@ class DemandsViewModel
                         )
                     }
                 }
-        }
+        }*/
     }
 
     private fun getPagingData(profile: PersonProfile): Flow<PagingData<Service>> {

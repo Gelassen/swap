@@ -21,6 +21,7 @@ import ru.home.swap.R
 import ru.home.swap.core.model.Service
 import ru.home.swap.databinding.DemandsFragmentBinding
 import ru.home.swap.core.di.ViewModelFactory
+import ru.home.swap.core.model.SwapMatch
 import ru.home.swap.ui.common.BaseFragment
 import ru.home.swap.ui.contacts.ContactsFragment
 import ru.home.swap.ui.offers.OffersAdapter
@@ -70,10 +71,10 @@ class DemandsFragment: BaseFragment(), OffersAdapter.IListener {
         viewModel.removeShownError()
     }
 
-    override fun onItemClick(item: Service) {
-        Log.e(App.TAG, "On item click ${item.title}")
-        val bundle = bundleOf(ContactsFragment.Params.EXTRA_SERVICE_ID to item.uid)
-        findNavController().navigate(R.id.action_demandsFragment_to_contactsFragment, bundle)
+    override fun onItemClick(item: SwapMatch) {
+        Log.e(App.TAG, "On item click ${item.userSecondServiceTitle}")
+        val bundle = bundleOf(ContactsFragment.Params.EXTRA_SERVICE_ID to item.id) // FIXME just a stub due refactoring, reimplemenet it
+        findNavController().navigate(R.id.action_offersFragment_to_contactsFragment, bundle)
     }
 
     private fun setupList() {

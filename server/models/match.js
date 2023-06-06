@@ -106,7 +106,7 @@ exports.getByProfileIdAndServiceIds = function(profileId, firstServiceId, second
     })
 }
 
-exports.getByProfileId = function(profileId, req, res) {
+exports.getByProfileId = function(profileId, page, size) {
     return new Promise((resolve) => {
         pool.getConnection(function(err, connection) {
             if (err) throw err;
@@ -130,9 +130,12 @@ exports.getByProfileId = function(profileId, req, res) {
                 INNER JOIN ${ServiceTable.TABLE_NAME} as secondService 
                 ON secondService.id = ${MatchTable.TABLE_NAME}.${MatchTable.USER_SECOND_SERVICE_ID}
                 WHERE 
+                (
                     ${MatchTable.USER_FIRST_PROFILE_ID} = ${profileId}
                      OR  
-                    ${MatchTable.USER_SECOND_PROFILE_ID} = ${profileId}
+                    ${MatchTable.USER_SECOND_PROFILE_ID} = ${profileId} 
+                ) 
+                ${prepareLimitClause(page, size)}
             ;`;
             logger.log("sql query: " + sql)
             connection.query(
@@ -415,5 +418,16 @@ function prepareMatchBulkInsertQuery(matches) {
             ),`;
     }
     return baseSqlQuery.substring(0, baseSqlQuery.length - 1) + ";";
+}
+
+
+function prepareLimitClause(page, size) {
+    const MIN_VALUE = 1;
+    let result = '';
+    if (page < MIN_VALUE || page == MIN_VALUE) {
+        page = MIN_VALUE;
+    }
+    result = `LIMIT ${size} OFFSET ${page * size - size}`;
+    return result;
 }
 

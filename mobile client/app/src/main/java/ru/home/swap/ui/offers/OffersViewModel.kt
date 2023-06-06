@@ -11,12 +11,13 @@ import kotlinx.coroutines.flow.*
 import ru.home.swap.R
 import ru.home.swap.core.model.PersonProfile
 import ru.home.swap.core.model.Service
+import ru.home.swap.core.model.SwapMatch
 import ru.home.swap.repository.IPersonRepository
 import ru.home.swap.repository.pagination.MatchesPagingSource
 import javax.inject.Inject
 
 data class Model(
-    val pagingData: PagingData<Any>? = null,
+    val pagingData: PagingData<SwapMatch>? = null,
     val profile: PersonProfile? = null,
     val isLoading: Boolean = false,
     val errors: List<String> = emptyList(),
@@ -72,7 +73,7 @@ class OffersViewModel
         }
     }
 
-    private fun getPagingData(profile: PersonProfile): Flow<PagingData<Any>> {
+    private fun getPagingData(profile: PersonProfile): Flow<PagingData<SwapMatch>> {
         matchesPagingSource.setCredentials(profile.contact, profile.secret)
         val pageSize = application.getString(R.string.page_size).toInt()
         return Pager(
