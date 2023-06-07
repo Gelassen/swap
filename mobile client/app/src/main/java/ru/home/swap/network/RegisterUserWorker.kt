@@ -46,8 +46,6 @@ class RegisterUserWorker
         }
     }
 
-    private val logger = Logger.getInstance()
-
     override suspend fun doWork(): Result {
         logger.d("[RegisterUserWorker] Start work on register user")
         val application = (applicationContext as Application)

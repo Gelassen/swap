@@ -20,6 +20,7 @@ import ru.home.swap.wallet.contract.convertToJson
 import ru.home.swap.wallet.contract.toMatchSubject
 import ru.home.swap.wallet.model.*
 import ru.home.swap.wallet.network.BaseChainWorker
+import ru.home.swap.wallet.network.BurnTokenWorker
 import ru.home.swap.wallet.network.MintTokenWorker
 import ru.home.swap.wallet.network.getWorkRequest
 import ru.home.swap.wallet.repository.IStorageRepository
@@ -94,7 +95,7 @@ class WalletViewModel
     fun mintToken(to: String, value: Value, uri: String) {
         logger.d("[start] mintToken()")
         viewModelScope.launch {
-            val work = workManager.getWorkRequest<MintTokenWorker>(MintTokenWorker.Builder.build(to, value.convertToJson(), uri, "stub"))
+            val work = workManager.getWorkRequest<MintTokenWorker>(MintTokenWorker.Builder.build(to, value.convertToJson(), uri, Service().toJson()))
             workManager.enqueue(work)
             workManager
                 .getWorkInfoByIdLiveData(work.id)
@@ -206,6 +207,41 @@ class WalletViewModel
             preProcessResponse(responseFromChain, tx, serverTx)
             processResponse(responseFromChain)
             logger.d("[end] swap()")
+        }
+    }
+
+    fun burn(personProfile: PersonProfile, tokenId: Long, service: Service) {
+        logger.d("[start] burn() ${personProfile.userWalletAddress}, ${tokenId}, ${service}")
+        viewModelScope.launch {
+            val workManager = WorkManager.getInstance(app)
+            val work = BurnTokenWorker.Builder.build(
+                personProfile.userWalletAddress,
+                tokenId,
+                service.toJson()
+            )
+            val workRequest = workManager.getWorkRequest<BurnTokenWorker>(work)
+            workManager.enqueue(workRequest)
+            workManager
+                .getWorkInfoByIdLiveData(workRequest.id)
+                .asFlow()
+                .onCompletion {  state.update { state -> state.copy(isLoading = false) } }
+                .collect { it ->
+                    when(it.state) {
+                        WorkInfo.State.SUCCEEDED -> { logger.d("[burn token] succeeded status with result: ${it}")}
+                        WorkInfo.State.FAILED -> {
+                            logger.d("[burn token] failed status with result: ${it}")
+                            var error = ""
+                            if (it.outputData.keyValueMap.containsKey(BaseChainWorker.Consts.KEY_ERROR_MSG)) {
+                                error = it.outputData.keyValueMap.get(BaseChainWorker.Consts.KEY_ERROR_MSG) as String
+                            } else {
+                                error = "Something went wrong during burn the token"
+                            }
+                            state.update { state -> state.copy(errors = state.errors.plus(error)) }
+                        }
+                        else -> { logger.d("[burn token] unexpected state with result: ${it}") }
+                    }
+                }
+            logger.d("[end] burn()")
         }
     }
 

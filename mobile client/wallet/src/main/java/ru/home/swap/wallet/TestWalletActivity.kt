@@ -17,6 +17,7 @@ import org.web3j.protocol.http.HttpService
 import ru.home.swap.core.di.ViewModelFactory
 import ru.home.swap.core.logger.Logger
 import ru.home.swap.core.model.PersonProfile
+import ru.home.swap.core.model.Service
 import ru.home.swap.wallet.contract.Match
 import java.math.BigInteger
 import javax.inject.Inject
@@ -83,12 +84,12 @@ class TestWalletActivity: AppCompatActivity() {
 
         findViewById<Button>(R.id.checkBalance)
             .setOnClickListener {
-                walletViewModel.balanceOf(FIRST_USER/*getString(R.string.my_account)*/)
+                walletViewModel.balanceOf(getString(R.string.first_account))
             }
 
         findViewById<Button>(R.id.mintToken)
             .setOnClickListener {
-                val to = FIRST_USER/*getString(R.string.my_account)*/
+                val to = getString(R.string.first_account)
                 val value = Value(
                     FIRST_USER_OFFER,
                     BigInteger.valueOf(1665158348220),
@@ -116,7 +117,7 @@ class TestWalletActivity: AppCompatActivity() {
 
         findViewById<Button>(R.id.getMyTokens)
             .setOnClickListener {
-                val account = FIRST_USER//applicationContext.getString(R.string.my_account)
+                val account = getString(R.string.first_account)
                 walletViewModel.getTokenIdsForUser(account)
             }
 
@@ -157,6 +158,14 @@ class TestWalletActivity: AppCompatActivity() {
                 val subj = getMatchObj()
                 walletViewModel.swap(subj)
             }
+
+        findViewById<Button>(R.id.burnToken)
+            .setOnClickListener {
+                val personProfile = PersonProfile(userWalletAddress = getString(R.string.first_account))
+                val tokenId = 4L // TODO depends on test result
+                val service = Service(uid = 0)//personProfile.offers.get(personProfile.offers.size - 1)
+                walletViewModel.burn(personProfile, tokenId, service)
+            }
     }
 
     private fun getMatchObj() : Match {
@@ -174,7 +183,7 @@ class TestWalletActivity: AppCompatActivity() {
 
     companion object {
         const val FIRST_USER = "0x0A8b295B4266d8fEB55d46a96B31936FE265C01F"
-        const val FIRST_USER_OFFER = "Consulting"
+        const val FIRST_USER_OFFER = "Consulting (debug)"
         const val SECOND_USER = "0xED337a9841aa5349ACe99931460E0443a199E746"
         const val SECOND_USER_OFFER = "Farmer products"
     }

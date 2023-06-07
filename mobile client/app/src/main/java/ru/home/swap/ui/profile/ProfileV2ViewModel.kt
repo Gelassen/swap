@@ -216,7 +216,7 @@ class ProfileV2ViewModel
             val workManager = WorkManager.getInstance(app)
             val work = BurnTokenWorker.Builder.build(
                 uiState.value.profile.userWalletAddress,
-                service.chainService.tokenId,
+                service.chainService.tokenId.toLong(),
                 service.toJson()
             )
             val workRequest = workManager.getWorkRequest<BurnTokenWorker>(work)

@@ -39,7 +39,7 @@ class BurnTokenWorker
     }
 
     object Builder {
-        fun build(owner: String, tokenId: Int, service: String): Data {
+        fun build(owner: String, tokenId: Long, service: String): Data {
             return workDataOf(
                 Pair(KEY_OWNER, owner),
                 Pair(KEY_TOKEN_ID, tokenId),
@@ -58,9 +58,12 @@ class BurnTokenWorker
 
         try {
             val (tx, serverTx) = prepareBurnTransaction()
-            cacheRepository.createChainTxAndServerTx(tx as ITransaction, serverTx as ServerTransaction)
+            val cachedRecordsIds = cacheRepository.createChainTxAndServerTx(tx as ITransaction, serverTx as ServerTransaction)
 
             val responseFromChain = repository.burn((tx as BurnTransaction).owner, (tx as BurnTransaction).tokenId)
+
+            tx.uid = cachedRecordsIds.first
+            serverTx.uid = cachedRecordsIds.second
             preProcessResponse(responseFromChain, tx, serverTx)
             result = processResponse(responseFromChain)
         } catch (ex: Exception) {

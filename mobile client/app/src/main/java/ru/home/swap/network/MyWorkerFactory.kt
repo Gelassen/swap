@@ -9,6 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import ru.home.swap.core.di.NetworkModule
 import ru.home.swap.di.AppMainScope
 import ru.home.swap.repository.IPersonRepository
+import ru.home.swap.wallet.network.BurnTokenWorker
 import ru.home.swap.wallet.network.MintTokenWorker
 import ru.home.swap.wallet.repository.IStorageRepository
 import ru.home.swap.wallet.repository.IWalletRepository
@@ -52,6 +53,14 @@ class MyWorkerFactory @Inject constructor(
                     cacheRepository = cacheRepository,
                     backgroundDispatcher = backgroundDispatcher,
                     personRepository = personRepository
+                )
+            BurnTokenWorker::class.java.name ->
+                BurnTokenWorker(
+                    context = appContext,
+                    params = workerParameters,
+                    repository = repository,
+                    cacheRepository = cacheRepository,
+                    backgroundDispatcher = backgroundDispatcher
                 )
             else -> throw IllegalStateException("Unknown worker. Did you forget to register a new type of worker in the factory?")
         }
