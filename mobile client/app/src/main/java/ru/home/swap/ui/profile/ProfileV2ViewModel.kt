@@ -24,11 +24,13 @@ import ru.home.swap.network.RegisterUserWorker
 import ru.home.swap.providers.PersonProvider
 import ru.home.swap.repository.IPersonRepository
 import ru.home.swap.wallet.contract.Value
+import ru.home.swap.wallet.model.BurnTransaction
 import ru.home.swap.wallet.model.ITransaction
 import ru.home.swap.wallet.model.MintTransaction
 import ru.home.swap.wallet.model.RegisterUserTransaction
 import ru.home.swap.wallet.network.BaseChainWorker
-import ru.home.swap.wallet.network.ChainWorker
+import ru.home.swap.wallet.network.MintTokenWorker
+import ru.home.swap.wallet.network.BurnTokenWorker
 import ru.home.swap.wallet.network.getWorkRequest
 import ru.home.swap.wallet.providers.WalletProvider
 import ru.home.swap.wallet.repository.IStorageRepository
@@ -97,6 +99,18 @@ class ProfileV2ViewModel
         loadAllFromCache()
     }
 
+    /**
+     * TODO: [ready for tests] remove offer
+     * 1. cache chain and server tx
+     * 2. execute burn() on-chain
+     * 3. get tx from queue and do backend remove()
+     * 4. in a backend response the client will get person profile which should be updated in cache
+     *
+     * For test:
+     * 1. Test burn() on-chain call in isolated environment of TestWalletActivity
+     * 2. Run a whole process to confirm it works
+     * */
+
     private val logger = Logger.getInstance()
 
     private val assignedUri = "uri is turned off in current version"
@@ -133,6 +147,7 @@ class ProfileV2ViewModel
                         /* token are created only for offer, demands registered just as a db record */
                         MintTransaction::class.java.simpleName -> { useCase.processMintTx(item) }
                         RegisterUserTransaction::class.java.simpleName -> { useCase.processRegisterUserTx(item) }
+                        BurnTransaction::class.java.simpleName -> { useCase.processBurnTransaction(item) }
                         else -> { throw UnsupportedOperationException("Did you forget to add support of ${item.first.type} class tx?") }
                     }
                 }
@@ -143,7 +158,7 @@ class ProfileV2ViewModel
                 }
                 .collect { it ->
                     Log.d(App.TAG, "[add offer] start collect data in viewmodel")
-                    processServerResponse(it) { addOfferSpecialHandler(it) }
+                    processServerResponse(it) { defaultSpecialHandler(it) }
                 }
         }
     }
@@ -164,13 +179,13 @@ class ProfileV2ViewModel
             val workManager = WorkManager.getInstance(app)
 
             val requestBuilder = RequestBuilder()
-            val work = ChainWorker.Builder.build(
+            val work = MintTokenWorker.Builder.build(
                 requestBuilder.prepareToAddress(),
                 requestBuilder.prepareValueParam(),
                 assignedUri,
                 requestBuilder.prepareServiceParam()
             )
-            val workRequest = workManager.getWorkRequest<ChainWorker>(work)
+            val workRequest = workManager.getWorkRequest<MintTokenWorker>(work)
             workManager.enqueue(workRequest)
             workManager
                 .getWorkInfoByIdLiveData(workRequest.id)
@@ -196,9 +211,37 @@ class ProfileV2ViewModel
         logger.d("[end] mintToken()")
     }
 
-    fun removeOffer(item: Service) {
+    fun removeOffer(service: Service) {
         viewModelScope.launch {
-            personRepository.removeOffer(
+            val workManager = WorkManager.getInstance(app)
+            val work = BurnTokenWorker.Builder.build(
+                uiState.value.profile.userWalletAddress,
+                service.chainService.tokenId,
+                service.toJson()
+            )
+            val workRequest = workManager.getWorkRequest<BurnTokenWorker>(work)
+            workManager.enqueue(workRequest)
+            workManager
+                .getWorkInfoByIdLiveData(workRequest.id)
+                .asFlow()
+                .onCompletion {  state.update { state -> state.copy(isLoading = false) } }
+                .collect { it ->
+                    when(it.state) {
+                        WorkInfo.State.SUCCEEDED -> { logger.d("[burn token] succeeded status with result: ${it}")}
+                        WorkInfo.State.FAILED -> {
+                            logger.d("[burn token] failed status with result: ${it}")
+                            var error = ""
+                            if (it.outputData.keyValueMap.containsKey(BaseChainWorker.Consts.KEY_ERROR_MSG)) {
+                                error = it.outputData.keyValueMap.get(BaseChainWorker.Consts.KEY_ERROR_MSG) as String
+                            } else {
+                                error = "Something went wrong during burn the token"
+                            }
+                            state.update { state -> state.copy(errors = state.errors.plus(error)) }
+                        }
+                        else -> { logger.d("[burn token] unexpected state with result: ${it}") }
+                    }
+                }
+/*            personRepository.removeOffer(
                 contact = uiState.value.profile.contact,
                 secret = uiState.value.profile.secret,
                 id = item.uid)
@@ -214,7 +257,7 @@ class ProfileV2ViewModel
                         emit(it)
                     }
                 }
-                .collect { it -> processServerResponse(it) { removeOfferSpecialHandler(it) } }
+                .collect { it -> processServerResponse(it) { removeOfferSpecialHandler(it) } }*/
         }
     }
 
@@ -451,9 +494,10 @@ class ProfileV2ViewModel
         }
     }
 
-    private fun addOfferSpecialHandler(response: Response.Data<PersonProfile>) {
-        Log.d(App.TAG, "[add offer] positive case")
+    private fun defaultSpecialHandler(response: Response.Data<PersonProfile>) {
+        Log.d(App.TAG, "[offer operation] positive case")
         state.value.profile.offers = response.data.offers
+        state.value.profile.demands = response.data.demands
         state.update { state ->
             state.copy(
                 isLoading = false,
@@ -526,6 +570,24 @@ class ProfileV2ViewModel
         fun clearProposal() {
             proposal.set("")
         }
+
+        fun prepareOwner(): String {
+            return uiState.value.profile.userWalletAddress
+        }
+
+        fun prepareTokenId(subj: SwapMatch): Int {
+            return subj.userFirstService.tokenId
+        }
+
+        fun prepareService(subj: SwapMatch): String {
+            return Service(
+                uid = subj.userFirstServiceId.toLong(), // we need just an uid, the rest are stubs
+                title = subj.userFirstServiceTitle,
+                date = 0,
+                index = emptyList(),
+                chainService = ChainService()
+            ).toJson()
+        }
     }
 
     inner class BackgroundFlowUseCase {
@@ -557,7 +619,6 @@ class ProfileV2ViewModel
             }
         }
 
-        // TODO extend to support the all the rest types of tx
         fun processMintTx(item: Pair<ITransaction, ServerTransaction>): Flow<Response<PersonProfile>> {
             logger.d("[queue polling] process MintTransaction item")
             currentTxPair = item
@@ -585,6 +646,16 @@ class ProfileV2ViewModel
             currentTxPair = item
             val personProfile = (item.second.payload as PersonProfile)
             return personRepository.createAccountAsFlow(personProfile)
+        }
+
+        fun processBurnTransaction(item: Pair<ITransaction, ServerTransaction>): Flow<Response<PersonProfile>> {
+            currentTxPair = item
+            val serviceId = (item.second.payload as Service).uid
+            return personRepository.removeOffer(
+                contact = uiState.value.profile.contact,
+                secret = uiState.value.profile.secret,
+                id = serviceId
+            )
         }
     }
 

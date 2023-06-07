@@ -20,7 +20,7 @@ import ru.home.swap.wallet.contract.convertToJson
 import ru.home.swap.wallet.contract.toMatchSubject
 import ru.home.swap.wallet.model.*
 import ru.home.swap.wallet.network.BaseChainWorker
-import ru.home.swap.wallet.network.ChainWorker
+import ru.home.swap.wallet.network.MintTokenWorker
 import ru.home.swap.wallet.network.getWorkRequest
 import ru.home.swap.wallet.repository.IStorageRepository
 import ru.home.swap.wallet.storage.model.ServerTransaction
@@ -94,7 +94,7 @@ class WalletViewModel
     fun mintToken(to: String, value: Value, uri: String) {
         logger.d("[start] mintToken()")
         viewModelScope.launch {
-            val work = workManager.getWorkRequest<ChainWorker>(ChainWorker.Builder.build(to, value.convertToJson(), uri, "stub"))
+            val work = workManager.getWorkRequest<MintTokenWorker>(MintTokenWorker.Builder.build(to, value.convertToJson(), uri, "stub"))
             workManager.enqueue(work)
             workManager
                 .getWorkInfoByIdLiveData(work.id)
@@ -224,7 +224,7 @@ class WalletViewModel
     }
 
     private fun getWorkRequest(inputData: Data): OneTimeWorkRequest {
-        return OneTimeWorkRequestBuilder<ChainWorker>()
+        return OneTimeWorkRequestBuilder<MintTokenWorker>()
             .setConstraints(
                 Constraints.Builder()
                     .setRequiredNetworkType(NetworkType.CONNECTED)

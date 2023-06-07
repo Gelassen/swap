@@ -34,7 +34,7 @@ import java.lang.IllegalStateException
 import javax.inject.Inject
 import javax.inject.Named
 
-class ChainWorker
+class MintTokenWorker
 @Inject constructor(
     context: Context,
     params: WorkerParameters,
@@ -44,8 +44,6 @@ class ChainWorker
 ): BaseChainWorker(context, params, repository, cacheRepository, backgroundDispatcher) {
 
     companion object {
-        private val TAG_CHAIN = "CHAIN"
-
         private const val KEY_TO = "KEY_TO"
         private const val KEY_VALUE_JSON = "KEY_VALUE_JSON"
         private const val KEY_URI = "KEY_URI"

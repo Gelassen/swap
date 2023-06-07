@@ -20,6 +20,12 @@ import ru.home.swap.core.model.toJson
 // At the top level of your kotlin file:
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
+/**
+ * TODO:
+ * almost a year later a Room cache layer has been implemented to cover new requirements;
+ * now it become more convenient to operate with profile from Room db rather than datastore;
+ * task to migrate profile caching is not urgent, but valuable - considered as a tech debt;
+ * */
 class Cache(val context: Context) {
     val PROFILE_ID_KEY = stringPreferencesKey("PROFILE_ID_KEY")
     val PROFILE_CONTACT_KEY = stringPreferencesKey("PROFILE_CONTACT_KEY")

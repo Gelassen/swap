@@ -1,5 +1,6 @@
 package ru.home.swap.wallet.network
 
+import android.app.Application
 import android.content.Context
 import androidx.work.Data
 import androidx.work.WorkerParameters
@@ -7,6 +8,8 @@ import androidx.work.workDataOf
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import ru.home.swap.core.di.NetworkModule
+import ru.home.swap.core.extensions.registerIdlingResource
+import ru.home.swap.core.extensions.unregisterIdlingResource
 import ru.home.swap.core.model.RequestType
 import ru.home.swap.core.model.Service
 import ru.home.swap.core.model.fromJson
@@ -20,7 +23,7 @@ import ru.home.swap.wallet.storage.model.ServerTransaction
 import javax.inject.Inject
 import javax.inject.Named
 
-class RemoveServiceWorker
+class BurnTokenWorker
 @Inject constructor(
     context: Context,
     params: WorkerParameters,
@@ -36,7 +39,7 @@ class RemoveServiceWorker
     }
 
     object Builder {
-        fun build(owner: String, tokenId: Long, service: Service): Data {
+        fun build(owner: String, tokenId: Int, service: String): Data {
             return workDataOf(
                 Pair(KEY_OWNER, owner),
                 Pair(KEY_TOKEN_ID, tokenId),
@@ -47,14 +50,24 @@ class RemoveServiceWorker
 
     override suspend fun doWork(): Result {
         logger.d("[RemoveServiceWorker] start work on burn a token")
+        val application = (applicationContext as Application)
+        application.registerIdlingResource()
+
         var result = Result.failure()
         setForeground(foregroundIndo)
 
-        val (tx, serverTx) = prepareBurnTransaction()
-        cacheRepository.createChainTxAndServerTx(tx as ITransaction, serverTx as ServerTransaction)
+        try {
+            val (tx, serverTx) = prepareBurnTransaction()
+            cacheRepository.createChainTxAndServerTx(tx as ITransaction, serverTx as ServerTransaction)
 
-        val response = repository.burn((tx as BurnTransaction).owner, (tx as BurnTransaction).tokenId)
-        result = processResponse(response)
+            val responseFromChain = repository.burn((tx as BurnTransaction).owner, (tx as BurnTransaction).tokenId)
+            preProcessResponse(responseFromChain, tx, serverTx)
+            result = processResponse(responseFromChain)
+        } catch (ex: Exception) {
+            logger.e("Failed to remove a token", ex)
+        } finally {
+            application.unregisterIdlingResource()
+        }
         logger.d("[RemoveServiceWorker] stop work on burn a token")
         return result
     }

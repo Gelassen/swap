@@ -9,7 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import ru.home.swap.core.di.NetworkModule
 import ru.home.swap.di.AppMainScope
 import ru.home.swap.repository.IPersonRepository
-import ru.home.swap.wallet.network.ChainWorker
+import ru.home.swap.wallet.network.MintTokenWorker
 import ru.home.swap.wallet.repository.IStorageRepository
 import ru.home.swap.wallet.repository.IWalletRepository
 import javax.inject.Inject
@@ -36,8 +36,8 @@ class MyWorkerFactory @Inject constructor(
         workerParameters: WorkerParameters
     ): ListenableWorker? {
         return when(workerClassName) {
-            ChainWorker::class.java.name ->
-                ChainWorker(
+            MintTokenWorker::class.java.name ->
+                MintTokenWorker(
                     context = appContext,
                     params = workerParameters,
                     repository = repository,
