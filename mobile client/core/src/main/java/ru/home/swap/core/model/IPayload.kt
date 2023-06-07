@@ -11,6 +11,7 @@ object RequestType {
     const val TX_SWAP = "txSwap"
     const val TX_REGISTER_OFFER = "txRegisterOffer"
     const val TX_REGISTER_DEMAND = "txRegisterDemand"
+    const val TX_BURN = "burn"
 }
 
 object RequestStatus {

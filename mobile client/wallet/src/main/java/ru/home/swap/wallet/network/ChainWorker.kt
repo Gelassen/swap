@@ -63,8 +63,6 @@ class ChainWorker
         }
     }
 
-    private val logger = Logger.getInstance()
-
     override suspend fun doWork(): Result {
         logger.d("[ChainWorker] Start work on minting a token")
         val application = (applicationContext as Application)

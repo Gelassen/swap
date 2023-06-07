@@ -49,6 +49,8 @@ open class BaseChainWorker
 
     protected var foregroundIndo: ForegroundInfo
 
+    protected val logger = Logger.getInstance()
+
     private val notificationId = 1001
     private val notificationChannelId = 10001
     private val notificationChannelName = "Ongoing work with ethereum ledger"
