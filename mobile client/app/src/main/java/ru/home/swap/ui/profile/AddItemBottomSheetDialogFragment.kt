@@ -11,14 +11,29 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import dagger.android.support.AndroidSupportInjection
 import ru.home.swap.App
-import ru.home.swap.AppApplication
 import ru.home.swap.R
 import ru.home.swap.databinding.AddItemFragmentBinding
 import ru.home.swap.core.di.ViewModelFactory
+import java.lang.IllegalStateException
 import javax.inject.Inject
 
 
 class AddItemBottomSheetDialogFragment: BottomSheetDialogFragment() {
+
+    interface IAddItemDialog {
+        fun onAddItemDialogDismiss()
+    }
+
+    companion object {
+
+        const val TAG = "AddItemBottomSheetDialogFragment"
+
+        fun newInstance(args: Bundle): AddItemBottomSheetDialogFragment{
+            val fragment = AddItemBottomSheetDialogFragment()
+            fragment.arguments = args
+            return fragment
+        }
+    }
 
     private lateinit var binding: AddItemFragmentBinding
 
@@ -46,6 +61,11 @@ class AddItemBottomSheetDialogFragment: BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        if (parentFragment !is IAddItemDialog) {
+            throw IllegalStateException("Did you forget to implement IAddItemDialog interface? " +
+                    "One of the parent's fragments in the hierarchy must respond on addItem() action.")
+        }
+
         view.findViewById<TextView>(R.id.offer_option)
             .setOnClickListener {
                 binding.groupChoice.onOfferClick()
@@ -59,19 +79,8 @@ class AddItemBottomSheetDialogFragment: BottomSheetDialogFragment() {
         binding.save.setOnClickListener {
             Log.d(App.TAG, "${viewModel.proposal.get()}")
             viewModel.addItem(binding.groupChoice.isOfferSelected())
+            (parentFragment as IAddItemDialog).onAddItemDialogDismiss()
             dismiss()
-        }
-    }
-
-
-    companion object {
-
-        const val TAG = "AddItemBottomSheetDialogFragment"
-
-        fun newInstance(args: Bundle): AddItemBottomSheetDialogFragment{
-            val fragment = AddItemBottomSheetDialogFragment()
-            fragment.arguments = args
-            return fragment
         }
     }
 }

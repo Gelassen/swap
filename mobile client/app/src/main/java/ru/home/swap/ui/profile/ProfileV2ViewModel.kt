@@ -99,21 +99,6 @@ class ProfileV2ViewModel
         loadAllFromCache()
     }
 
-    /**
-     * TODO: [ready for tests] remove offer
-     * 1. cache chain and server tx
-     * 2. execute burn() on-chain
-     * 3. get tx from queue and do backend remove()
-     * 4. in a backend response the client will get person profile which should be updated in cache
-     *
-     * For test:
-     * 1. Test burn() on-chain call in isolated environment of TestWalletActivity
-     * 2. Run a whole process to confirm it works
-     *
-     * Bugs:
-     * - [in progress] service id passed on DELETE is not correct
-     * */
-
     private val logger = Logger.getInstance()
 
     private val assignedUri = "uri is turned off in current version"
@@ -290,6 +275,10 @@ class ProfileV2ViewModel
                 }
                 .collect { it -> processServerResponse(it) { removeDemandSpecialHandler(it) } }
         }
+    }
+
+    fun clearInputField() {
+        RequestBuilder().clearProposal()
     }
 
     fun createAnAccount() {

@@ -22,7 +22,10 @@ import ru.home.swap.ui.common.BaseFragment
 import javax.inject.Inject
 
 
-class ProfileFragment : BaseFragment(), ItemAdapter.Listener {
+class ProfileFragment :
+    BaseFragment(),
+    ItemAdapter.Listener,
+    AddItemBottomSheetDialogFragment.IAddItemDialog {
 
     @Inject
     lateinit var viewModelFactory: ViewModelFactory
@@ -120,5 +123,9 @@ class ProfileFragment : BaseFragment(), ItemAdapter.Listener {
 
     override fun onPositiveClick() {
         viewModel.removeShownError()
+    }
+
+    override fun onAddItemDialogDismiss() {
+        viewModel.clearInputField()
     }
 }
