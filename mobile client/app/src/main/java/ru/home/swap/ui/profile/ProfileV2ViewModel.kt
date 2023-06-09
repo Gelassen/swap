@@ -109,6 +109,9 @@ class ProfileV2ViewModel
      * For test:
      * 1. Test burn() on-chain call in isolated environment of TestWalletActivity
      * 2. Run a whole process to confirm it works
+     *
+     * Bugs:
+     * - [in progress] service id passed on DELETE is not correct
      * */
 
     private val logger = Logger.getInstance()
@@ -241,23 +244,6 @@ class ProfileV2ViewModel
                         else -> { logger.d("[burn token] unexpected state with result: ${it}") }
                     }
                 }
-/*            personRepository.removeOffer(
-                contact = uiState.value.profile.contact,
-                secret = uiState.value.profile.secret,
-                id = item.uid)
-                .flatMapConcat { it ->
-                    if (it is Response.Data) {
-                        personRepository.cacheAccountAsFlow(it.data)
-                            .collect { it ->
-                                // no op, just execute the command
-                                Log.d(App.TAG, "account has been cached")
-                            }
-                    }
-                    flow {
-                        emit(it)
-                    }
-                }
-                .collect { it -> processServerResponse(it) { removeOfferSpecialHandler(it) } }*/
         }
     }
 
@@ -570,24 +556,6 @@ class ProfileV2ViewModel
         fun clearProposal() {
             proposal.set("")
         }
-
-        fun prepareOwner(): String {
-            return uiState.value.profile.userWalletAddress
-        }
-
-        fun prepareTokenId(subj: SwapMatch): Int {
-            return subj.userFirstService.tokenId
-        }
-
-        fun prepareService(subj: SwapMatch): String {
-            return Service(
-                uid = subj.userFirstServiceId.toLong(), // we need just an uid, the rest are stubs
-                title = subj.userFirstServiceTitle,
-                date = 0,
-                index = emptyList(),
-                chainService = ChainService()
-            ).toJson()
-        }
     }
 
     inner class BackgroundFlowUseCase {
@@ -650,7 +618,7 @@ class ProfileV2ViewModel
 
         fun processBurnTransaction(item: Pair<ITransaction, ServerTransaction>): Flow<Response<PersonProfile>> {
             currentTxPair = item
-            val serviceId = (item.second.payload as Service).uid
+            val serviceId = (item.second.payload as Service).id
             return personRepository.removeOffer(
                 contact = uiState.value.profile.contact,
                 secret = uiState.value.profile.secret,

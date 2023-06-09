@@ -60,6 +60,7 @@ fun ServerRequestTransactionEntity.toDomainObject(): ServerTransaction {
     return when (this.requestType) {
         RequestType.TX_REGISTER_OFFER -> { this.toDomainGeneric<Service>() }
         RequestType.TX_REGISTER_USER -> { this.toDomainGeneric<PersonProfile>() }
+        RequestType.TX_BURN -> { this.toDomainGeneric<Service>() }
         else -> { throw IllegalArgumentException("RequestType from cache is unknown. Did you forget to add support of a new RequestType?") }
     }
 }

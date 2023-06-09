@@ -5,6 +5,7 @@ import com.google.gson.annotations.SerializedName
 
 data class Service(
     var uid: Long = 0L,
+    val id: Long = 0L,
     @SerializedName("title")
     val title: String = "",
     val date: Long = 0L,

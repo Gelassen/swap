@@ -72,6 +72,7 @@ class StorageRepository(
             .map {
 //                val filteredIt = it.filter { it -> it.serverMetadata.status.equals(RequestStatus.WAITING) }
                 logger.d("[loadAllFromCache] 1. get items ${it.count()}")
+                logger.d("Result from query cache for all tx: ${it}")
                 val result = mutableListOf<Pair<ITransaction,ServerTransaction>>()
                 for (item in it) {
                     result.add(item.toDomain())

@@ -27,7 +27,7 @@ class PersonRepository(val api: IApi, val cache: Cache, val context: Context): I
                 credentials = AppCredentials.basic(person.contact, person.secret),
                 person = person
             )
-            logger.d( "[b] get profile response")
+            logger.d( "[b] get profile response ${person}")
             if (response.isSuccessful) {
                 logger.d( "[c] response is ok")
                 var payload = response.body()!!
@@ -52,7 +52,7 @@ class PersonRepository(val api: IApi, val cache: Cache, val context: Context): I
                 credentials = AppCredentials.basic(person.contact, person.secret),
                 person = person
             )
-            logger.d( "[b] get profile response")
+            logger.d( "[b] get profile response ${person}")
             if (response.isSuccessful) {
                 logger.d( "[c] response is ok")
                 var payload = response.body()!!
