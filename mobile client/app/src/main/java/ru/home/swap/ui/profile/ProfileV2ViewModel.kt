@@ -260,7 +260,7 @@ class ProfileV2ViewModel
             personRepository.removeDemand(
                 contact = uiState.value.profile.contact,
                 secret = uiState.value.profile.secret,
-                id = item.uid)
+                id = item.id)
                 .flatMapConcat { it ->
                     if (it is Response.Data) {
                         personRepository.cacheAccountAsFlow(it.data)

@@ -49,7 +49,7 @@ class WalletRepository(
             launch(Dispatchers.IO) {
                 // FIXME after introducing DebugProfiles this loadContract()
                 //  should be dynamically configured too
-                loadContract(R.string.first_acc_private_key)
+                loadContract(R.string.third_acc_private_key)
             }
         }
     }

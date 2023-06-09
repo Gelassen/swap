@@ -34,7 +34,7 @@ class ItemAdapter(val isOffers: Boolean, val listener: Listener)
                 binding.executePendingBindings()
                 binding.removeService.setOnClickListener {
                     if (listener == null) return@setOnClickListener
-                    listener!!.onRemove(item, isOffers)
+                    listener.onRemove(item, isOffers)
                     notifyItemChanged(position)
                 }
             }

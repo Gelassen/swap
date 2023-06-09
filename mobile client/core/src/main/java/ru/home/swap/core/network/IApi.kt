@@ -42,7 +42,7 @@ interface IApi {
         @Path("id") serviceId: Long): Response<ApiResponse<PersonProfile>>
 
     @Headers("Content-Type: application/json; charset=utf-8")
-    @DELETE("/api/v1/account/offers/{id}")
+    @DELETE("/api/v1/account/demands/{id}")
     suspend fun removeDemand(
         @Header("Authorization") credentials: String,
         @Path("id") serviceId: Long): Response<ApiResponse<PersonProfile>>
