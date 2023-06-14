@@ -2,6 +2,7 @@
 <resources>
 <!--    <string name="url">http://192.168.1.19:3000</string> &lt;!&ndash; physical device url &ndash;&gt;-->
     <string name="url">http://10.0.3.2:3000</string> <!-- genymotion url -->
+<!--    <string name="url">http://10.0.3.2:3100</string> &lt;!&ndash; genymotion url for integration tests &ndash;&gt;-->
 <!--&lt;!&ndash;    <string name="url">http://10.0.2.2:3000</string> &lt;!&ndash; default emulator url &ndash;&gt;&ndash;&gt;-->
 <!--    <string name="url">http://172.16.254.1:3000</string> &lt;!&ndash; docker API &ndash;&gt;-->
 </resources>

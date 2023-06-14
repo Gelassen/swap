@@ -4,6 +4,7 @@ import androidx.work.Configuration
 import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector
+import ru.home.swap.core.di.CoreComponent
 import ru.home.swap.core.di.CoreModule
 import ru.home.swap.core.di.DaggerCoreComponent
 import ru.home.swap.core.di.NetworkModule
@@ -14,7 +15,7 @@ import ru.home.swap.network.MyWorkerFactory
 import ru.home.swap.wallet.WalletApplication
 import javax.inject.Inject
 
-class AppApplication(): WalletApplication(), Configuration.Provider, HasAndroidInjector {
+open class AppApplication(): WalletApplication(), Configuration.Provider, HasAndroidInjector {
 
     @Inject
     lateinit var androidInjector : DispatchingAndroidInjector<Any>
@@ -26,26 +27,8 @@ class AppApplication(): WalletApplication(), Configuration.Provider, HasAndroidI
 
     override fun onCreate() {
         super.onCreate()
-
-        val coreComponent = DaggerCoreComponent
-            .builder()
-            .coreModule(CoreModule(this))
-            .networkModule(NetworkModule(this))
-            .build()
-
-        component = DaggerAppComponent
-            .builder()
-            .appModule(AppModule(this))
-            .coreComponent(coreComponent)
-            .walletComponent(
-                walletComponent
-/*                DaggerWalletComponent
-                    .builder()
-                    .walletModule(WalletModule(this))
-                    .coreComponent(coreComponent)
-                    .build()*/
-            )
-            .build()
+        // TODO: if a test scenario DI config would be done, DI configuration should be move into separate class
+        component = prepareAppComponent()
         component.inject(this)
     }
 
@@ -63,5 +46,25 @@ class AppApplication(): WalletApplication(), Configuration.Provider, HasAndroidI
 
     override fun androidInjector(): AndroidInjector<Any> {
         return androidInjector
+    }
+
+    protected open fun prepareAppComponent(): AppComponent {
+        return DaggerAppComponent
+            .builder()
+            .appModule(AppModule(this))
+            .coreComponent(coreComponent)
+            .walletComponent(
+                walletComponent
+/*                DaggerWalletComponent
+                    .builder()
+                    .walletModule(WalletModule(this))
+                    .coreComponent(coreComponent)
+                    .build()*/
+            )
+            .build()
+    }
+
+    fun setDependencyComponent(component: AppComponent) {
+        this.component = component
     }
 }

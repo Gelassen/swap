@@ -23,10 +23,10 @@ class SignInFragmentTest : BaseFragmentTest() {
         robot.clickDebugButton()
 
         robot
-            .seesName("Dmitry")
-            .seesContact("+79207008090")
-            .seesSecret("onemoretime")
-            .seesWalletAddress("0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd")
+            .seesName(ProfileRobot.FIRST_USER_NAME)
+            .seesContact(ProfileRobot.FIRST_USER_CONTACT)
+            .seesSecret(ProfileRobot.FIRST_USER_SECRET)
+            .seesWalletAddress(ProfileRobot.FIRST_USER_ADDRESS)
             .clickSubmitButton()
 
         robot.seesErrorDialog("Something went wrong")

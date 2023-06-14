@@ -14,7 +14,7 @@ import ru.home.swap.core.network.IApi
 import javax.inject.Named
 
 @Module
-class NetworkModule(val context: Context) {
+open class NetworkModule(val context: Context) {
 
     companion object {
         const val DISPATCHER_IO = "Dispatchers.IO"
@@ -23,7 +23,7 @@ class NetworkModule(val context: Context) {
 
     @CoreMainScope
     @Provides
-    fun providesApi(httpClient: OkHttpClient): IApi {
+    open fun providesApi(httpClient: OkHttpClient): IApi {
 //        val customGson = GsonBuilder().registerTypeAdapterFactory(CustomTypeAdapterFactory()).create()
         val url = context.getString(R.string.url)
         val retrofit = Retrofit.Builder()

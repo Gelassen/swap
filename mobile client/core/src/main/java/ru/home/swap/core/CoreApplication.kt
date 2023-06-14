@@ -12,7 +12,11 @@ open class CoreApplication(): Application() {
 
     override fun onCreate() {
         super.onCreate()
-        coreComponent = DaggerCoreComponent
+        coreComponent = prepareCoreComponent()
+    }
+
+    protected open fun prepareCoreComponent(): CoreComponent {
+        return DaggerCoreComponent
             .builder()
             .coreModule(CoreModule(this))
             .networkModule(NetworkModule(this))

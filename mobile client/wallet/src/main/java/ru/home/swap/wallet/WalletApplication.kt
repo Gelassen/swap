@@ -11,15 +11,16 @@ open class WalletApplication(): CoreApplication() {
 
     override fun onCreate() {
         super.onCreate()
-        walletComponent = DaggerWalletComponent
+        walletComponent = prepareWalletComponent()
+        walletComponent.inject(this)
+    }
+
+    protected open fun prepareWalletComponent(): WalletComponent {
+        return DaggerWalletComponent
             .builder()
             .walletModule(WalletModule(this))
             .coreComponent(coreComponent)
             .build()
-
-        walletComponent.inject(this)
     }
-
-
 
 }
