@@ -19,6 +19,19 @@ import ru.home.swap.wallet.di.WalletModule
 
 class TestAppApplication: AppApplication() {
 
+    companion object Config {
+        const val SERVER_ENDPOINT = "http://10.0.3.2:3100"
+        const val ETHEREUM_ENDPOINT = "http://192.168.1.17:2004/"
+        const val SWAP_TOKEN_ADDRESS = "0x699e2DE0c5EdD6Aa0d6319a6cBBbb0a902269d45"
+        const val SWAP_MARKET_ADDRESS = "0x3276D551e55Ce2EfEFB71c4Fb339ad37617a1eBa"
+        const val CHAIN_ID = "50102"
+
+        const val FIRST_USER_NAME = "Dmitry"
+        const val FIRST_USER_CONTACT = "+79207008090"
+        const val FIRST_USER_SECRET = "onemoretime"
+        const val FIRST_USER_ADDRESS = "0x04C688b38E3Ca63EC888EbEBed6d39cde0833a71"
+    }
+
 /*    fun getTestComponent(): AppComponent {
         return DaggerAppComponent
             .builder()
@@ -68,7 +81,7 @@ class TestAppApplication: AppApplication() {
     private class TestNetworkModule(context: Context) : NetworkModule(context) {
 
         override fun providesApi(httpClient: OkHttpClient): IApi {
-            val url = "http://10.0.3.2:3100"//context.getString(R.string.url)
+            val url = /*"http://10.0.3.2:3100"*//*context.getString(R.string.url)*/
             val retrofit = Retrofit.Builder()
 //            .addConverterFactory(GsonConverterFactory.create(customGson))
                 .addConverterFactory(GsonConverterFactory.create())

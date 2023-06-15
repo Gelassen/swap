@@ -13,11 +13,16 @@ const config: HardhatUserConfig = {
       accounts: [`0x${configChain.get("wallet").privateKey}`],
       chainId: 5,
     },
+    private_network: {
+      url: configChain.get("private_network").api,
+      accounts: [`0x${configChain.get("private_network").privateKey}`],
+      chainId: 50101
+    },
     private_testnet: {
       url: configChain.get("private_testnet").api,
       accounts: [`0x${configChain.get("private_testnet").privateKey}`],
-      chainId: 50101
-    }
+      chainId: 50102
+    },
   }
   
 };

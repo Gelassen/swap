@@ -10,5 +10,12 @@
         "password" : "password",
         "database" : "test_db_swap",
         "maxSize"  : 10
+    },
+    "chain" : {
+        "host"               : "192.168.1.17",
+        "port"               : "2004",
+        "swapTokenAddress"   : "0x699e2DE0c5EdD6Aa0d6319a6cBBbb0a902269d45",
+        "swapChainV2Address" : "0x3276D551e55Ce2EfEFB71c4Fb339ad37617a1eBa",
+        "privateKey"         : "0x1b10d8e57de10a45bfefd9118f53be67df3e92a2ed805b9b87d22a494f1ca81a"
     }
 }
