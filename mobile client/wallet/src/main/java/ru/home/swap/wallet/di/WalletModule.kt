@@ -14,6 +14,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.web3j.protocol.http.HttpService
 import ru.home.swap.core.network.interceptors.DefaultInterceptor
+import ru.home.swap.wallet.model.ChainConfig
 import ru.home.swap.wallet.repository.*
 import ru.home.swap.wallet.storage.CacheUtils
 import ru.home.swap.wallet.storage.dao.ChainTransactionDao
@@ -23,10 +24,11 @@ import ru.home.swap.wallet.storage.dao.SwapMatchDao
 import javax.inject.Named
 
 @Module
-class WalletModule(val context: Application) {
+open class WalletModule(val context: Application) {
 
     companion object {
         const val CACHE_SCOPE = "cache"
+        const val CONFIG_SCOPE = "config"
     }
 
     // network
@@ -39,8 +41,18 @@ class WalletModule(val context: Application) {
 
     @WalletMainScope
     @Provides
-    fun providesWeb3jHttpService(interceptor: Interceptor): HttpService {
-        val url: String = context.getString(R.string.ethereum_api_endpoint)
+    @Named(CONFIG_SCOPE)
+    open fun providesEthereumEndpoint(): String {
+        return context.getString(R.string.ethereum_api_endpoint)
+    }
+
+    @WalletMainScope
+    @Provides
+    open fun providesWeb3jHttpService(
+        interceptor: Interceptor,
+        @Named(CONFIG_SCOPE) ethereumEndpoint: String): HttpService {
+
+        val url: String = ethereumEndpoint
         val logging = HttpLoggingInterceptor()
         logging.setLevel(HttpLoggingInterceptor.Level.BODY)
         val client = OkHttpClient
@@ -69,8 +81,8 @@ class WalletModule(val context: Application) {
 
     @WalletMainScope
     @Provides
-    fun providesWalletRepository(httpService: HttpService): IWalletRepository {
-        return WalletRepository(context, httpService)
+    fun providesWalletRepository(httpService: HttpService, chainConfig: ChainConfig): IWalletRepository {
+        return WalletRepository(context, httpService, chainConfig)
     }
 
     @WalletMainScope
@@ -124,5 +136,18 @@ class WalletModule(val context: Application) {
     @Provides
     fun providesCacheUtils(repository: IStorageRepository, @Named(CACHE_SCOPE) scope: CoroutineScope): CacheUtils {
         return CacheUtils(repository, scope)
+    }
+
+    // config
+
+    @WalletMainScope
+    @Provides
+    open fun providesChainConfig(): ChainConfig {
+        return ChainConfig(
+            chainId = context.getString(R.string.chain_id).toLong(),
+            swapTokenAddress = context.getString(R.string.swap_value_contract_address),
+            swapMarketAddress = context.getString(R.string.swap_chain_contract_address),
+            accountPrivateKey = context.getString(R.string.first_acc_private_key)
+        )
     }
 }

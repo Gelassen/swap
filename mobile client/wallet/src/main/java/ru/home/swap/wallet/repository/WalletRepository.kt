@@ -26,6 +26,7 @@ import org.web3j.tx.gas.DefaultGasProvider
 import ru.home.swap.core.logger.Logger
 import ru.home.swap.core.network.Response
 import ru.home.swap.wallet.contract.*
+import ru.home.swap.wallet.model.ChainConfig
 import ru.home.swap.wallet.model.Token
 import ru.home.swap.wallet.model.TransactionReceiptDomain
 import ru.home.swap.wallet.model.toDomain
@@ -34,7 +35,8 @@ import java.math.BigInteger
 
 class WalletRepository(
     val context: Context,
-    httpService: HttpService
+    httpService: HttpService,
+    val chainConfig: ChainConfig
 ) : IWalletRepository {
 
     private val logger: Logger = Logger.getInstance()
@@ -49,7 +51,7 @@ class WalletRepository(
             launch(Dispatchers.IO) {
                 // FIXME after introducing DebugProfiles this loadContract()
                 //  should be dynamically configured too
-                loadContract(R.string.third_acc_private_key)
+                loadContract(chainConfig.accountPrivateKey)
             }
         }
     }
@@ -489,23 +491,25 @@ class WalletRepository(
     * own wallet, own contract instance. Just leave it for debug purpose.
     * */
     private suspend fun loadContract(userAccountPrivateKeyReference: Int) = withContext(Dispatchers.IO) {
+        loadContract(context.getString(R.string.swap_value_contract_address))
+    }
+
+    private suspend fun loadContract(swapValueContractAddress: String) = withContext(Dispatchers.IO) {
         /*
         *  chainId required to mint tokens based on new ethereum standard (see https://blog.ethereum.org/2021/03/03/geth-v1-10-0)
         *  it is only available over custom RawTransactionManager which is used for both balanceOf() and mint() methods
         * */
-        val swapValueContractAddress: String = context.getString(R.string.swap_value_contract_address)
-        val chainId: Long = context.getString(R.string.chain_id).toLong()
+        val credentials = getCredentials(chainConfig.swapTokenAddress)
         swapValueContract = SwapValue.load(
-            swapValueContractAddress,
+            chainConfig.swapTokenAddress,
             web3,
-            RawTransactionManager(web3, getCredentials(userAccountPrivateKeyReference), chainId),
+            RawTransactionManager(web3, credentials, chainConfig.chainId),
             DefaultGasProvider()
         )
-        val swapChainContractAddress: String = context.getString(R.string.swap_chain_contract_address)
         swapChainContract = SwapChain.load(
-            swapChainContractAddress,
+            chainConfig.swapMarketAddress,
             web3,
-            RawTransactionManager(web3, getCredentials(userAccountPrivateKeyReference), chainId),
+            RawTransactionManager(web3, credentials, chainConfig.chainId),
             DefaultGasProvider()
         )
     }
@@ -517,6 +521,10 @@ class WalletRepository(
 
     private fun getCredentials(userAccountPrivateKeyReference: Int): Credentials {
         return Credentials.create(context.getString(userAccountPrivateKeyReference))
+    }
+
+    private fun getCredentials(userAccountPrivateKey: String): Credentials {
+        return Credentials.create(userAccountPrivateKey)
     }
 
 }
