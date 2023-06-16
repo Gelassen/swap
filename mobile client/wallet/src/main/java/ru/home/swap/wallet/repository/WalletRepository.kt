@@ -51,7 +51,7 @@ class WalletRepository(
             launch(Dispatchers.IO) {
                 // FIXME after introducing DebugProfiles this loadContract()
                 //  should be dynamically configured too
-                loadContract(chainConfig.accountPrivateKey)
+                loadContract()
             }
         }
     }
@@ -121,7 +121,7 @@ class WalletRepository(
 
     override fun getTransferEvents(): Flow<SwapValue.TransferEventResponse> {
         logger.d("start getTransferEvents()")
-        val swapValueContractAddress: String = context.getString(R.string.swap_value_contract_address)
+        val swapValueContractAddress: String = chainConfig.swapTokenAddress
         val ethFilter = EthFilter(
             DefaultBlockParameterName.EARLIEST,
             DefaultBlockParameterName.LATEST,
@@ -481,20 +481,11 @@ class WalletRepository(
         return finalResult
     }
 
-    @Deprecated(message = "User loadContract(key) method with explicitly passed user account key")
-    private suspend fun loadContract() = withContext(Dispatchers.IO) {
-        loadContract(R.string.second_acc_private_key)
-    }
-
     /*
     * We do not need to have an option to change the user. Each user will have its own mobile device,
     * own wallet, own contract instance. Just leave it for debug purpose.
     * */
-    private suspend fun loadContract(userAccountPrivateKeyReference: Int) = withContext(Dispatchers.IO) {
-        loadContract(context.getString(R.string.swap_value_contract_address))
-    }
-
-    private suspend fun loadContract(swapValueContractAddress: String) = withContext(Dispatchers.IO) {
+    private suspend fun loadContract() = withContext(Dispatchers.IO) {
         /*
         *  chainId required to mint tokens based on new ethereum standard (see https://blog.ethereum.org/2021/03/03/geth-v1-10-0)
         *  it is only available over custom RawTransactionManager which is used for both balanceOf() and mint() methods
@@ -512,15 +503,6 @@ class WalletRepository(
             RawTransactionManager(web3, credentials, chainConfig.chainId),
             DefaultGasProvider()
         )
-    }
-
-    @Deprecated(message = "Use getCredentials(key) with explicitly passed user account key")
-    private fun getCredentials() : Credentials {
-        return getCredentials(R.string.second_acc_private_key)
-    }
-
-    private fun getCredentials(userAccountPrivateKeyReference: Int): Credentials {
-        return Credentials.create(context.getString(userAccountPrivateKeyReference))
     }
 
     private fun getCredentials(userAccountPrivateKey: String): Credentials {

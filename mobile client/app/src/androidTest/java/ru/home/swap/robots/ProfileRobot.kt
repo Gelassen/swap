@@ -15,13 +15,6 @@ import ru.home.swap.utils.Utils.atPositionByTitle
 
 class ProfileRobot {
 
-    companion object {
-        const val FIRST_USER_NAME = "Dmitry"
-        const val FIRST_USER_CONTACT = "+79207008090"
-        const val FIRST_USER_SECRET = "onemoretime"
-        const val FIRST_USER_ADDRESS = "0x367103555b34Eb9a46D92833e7293D540bFd7143"
-    }
-
     fun seesName(name: String): ProfileRobot {
         onView(withId(R.id.name))
             .check(matches(ViewMatchers.isDisplayed()))

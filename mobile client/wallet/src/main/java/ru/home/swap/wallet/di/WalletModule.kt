@@ -13,6 +13,7 @@ import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.web3j.protocol.http.HttpService
+import ru.home.swap.core.model.PersonProfile
 import ru.home.swap.core.network.interceptors.DefaultInterceptor
 import ru.home.swap.wallet.model.ChainConfig
 import ru.home.swap.wallet.repository.*
@@ -37,13 +38,6 @@ open class WalletModule(val context: Application) {
     @Provides
     fun providesInterceptor(): Interceptor {
         return DefaultInterceptor(context)
-    }
-
-    @WalletMainScope
-    @Provides
-    @Named(CONFIG_SCOPE)
-    open fun providesEthereumEndpoint(): String {
-        return context.getString(R.string.ethereum_api_endpoint)
     }
 
     @WalletMainScope
@@ -139,6 +133,13 @@ open class WalletModule(val context: Application) {
     }
 
     // config
+
+    @WalletMainScope
+    @Provides
+    @Named(CONFIG_SCOPE)
+    open fun providesEthereumEndpoint(): String {
+        return context.getString(R.string.ethereum_api_endpoint)
+    }
 
     @WalletMainScope
     @Provides

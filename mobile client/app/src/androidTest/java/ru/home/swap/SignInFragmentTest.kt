@@ -23,10 +23,10 @@ class SignInFragmentTest : BaseFragmentTest() {
         robot.clickDebugButton()
 
         robot
-            .seesName(ProfileRobot.FIRST_USER_NAME)
-            .seesContact(ProfileRobot.FIRST_USER_CONTACT)
-            .seesSecret(ProfileRobot.FIRST_USER_SECRET)
-            .seesWalletAddress(ProfileRobot.FIRST_USER_ADDRESS)
+            .seesName(TestAppApplication.FIRST_USER_NAME)
+            .seesContact(TestAppApplication.FIRST_USER_CONTACT)
+            .seesSecret(TestAppApplication.FIRST_USER_SECRET)
+            .seesWalletAddress(TestAppApplication.FIRST_USER_ADDRESS)
             .clickSubmitButton()
 
         robot.seesErrorDialog("Something went wrong")
@@ -42,10 +42,10 @@ class SignInFragmentTest : BaseFragmentTest() {
         robot.clickDebugButton()
 
         robot
-            .seesName("Dmitry")
-            .seesContact("+79207008090")
-            .seesSecret("onemoretime")
-            .seesWalletAddress("0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2FFd")
+            .seesName(TestAppApplication.FIRST_USER_NAME)
+            .seesContact(TestAppApplication.FIRST_USER_CONTACT)
+            .seesSecret(TestAppApplication.FIRST_USER_SECRET)
+            .seesWalletAddress(TestAppApplication.FIRST_USER_ADDRESS)
             .clickSubmitButton()
 
         robot.seesErrorDialog("Failed register the profile on chain with status exception")
@@ -61,7 +61,7 @@ class SignInFragmentTest : BaseFragmentTest() {
         val newName = "Dmitry ${LocalDateTime.now()}"
         val newPhone = "+7920700803"
         val secret = "onemoretime"
-        val newWallet = "0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2006"
+        val newWallet = TestAppApplication.TestConfig.FIRST_USER_ADDRESS//"0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2006"
 
         robot.enterCustomDebugData(newName, newPhone, secret, newWallet)
         robot
