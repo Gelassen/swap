@@ -490,7 +490,7 @@ class WalletRepository(
         *  chainId required to mint tokens based on new ethereum standard (see https://blog.ethereum.org/2021/03/03/geth-v1-10-0)
         *  it is only available over custom RawTransactionManager which is used for both balanceOf() and mint() methods
         * */
-        val credentials = getCredentials(chainConfig.swapTokenAddress)
+        val credentials = getCredentials(chainConfig.accountPrivateKey)
         swapValueContract = SwapValue.load(
             chainConfig.swapTokenAddress,
             web3,
