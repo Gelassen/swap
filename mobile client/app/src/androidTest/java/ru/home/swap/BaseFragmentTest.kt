@@ -20,14 +20,9 @@ open class BaseFragmentTest {
     @Before
     fun setUp() {
         appContext = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext
-        val application = appContext as AppApplication
-//        application.setDependencyComponent(TestAppApplication(application).getTestComponent())
-
-//        (application.component as TestApplicationComponent).inject(this)
 
         IdlingRegistry.getInstance().register(NetworkIdlingResource.countingIdlingResource)
         IdlingRegistry.getInstance().register(dataBindingIdlingResource)
-        /*val context = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext*/
     }
 
     @After
