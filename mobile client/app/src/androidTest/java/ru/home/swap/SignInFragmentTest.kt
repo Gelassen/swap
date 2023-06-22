@@ -59,9 +59,9 @@ class SignInFragmentTest : BaseFragmentTest() {
         dataBindingIdlingResource.monitorActivity(activityScenario)
         // TODO I haven't found yet a way to automatically generate this input data, so it requires to do it manually
         val newName = "Dmitry ${LocalDateTime.now()}"
-        val newPhone = "+7920700803"
-        val secret = "onemoretime"
-        val newWallet = TestAppApplication.TestConfig.FIRST_USER_ADDRESS//"0x62F8DC8a5c80db6e8FCc042f0cC54a298F8F2006"
+        val newPhone = TestAppApplication.FIRST_USER_CONTACT
+        val secret = TestAppApplication.FIRST_USER_SECRET
+        val newWallet = TestAppApplication.FIRST_USER_ADDRESS
 
         robot.enterCustomDebugData(newName, newPhone, secret, newWallet)
         robot

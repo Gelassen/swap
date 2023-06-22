@@ -78,6 +78,18 @@ class MintTokenWorker
             (serverTx.payload as Service).chainService.id = cachedRecordsIds.first // FIXME double check if this is still relevant
 
             val responseFromChain = repository.mintToken(to as String, value as Value, uri as String)
+            // possible error handling
+            if (responseFromChain is Response.Data
+                && responseFromChain.data.topics.isEmpty()) {
+                val msg = "Logs field in chain's response is empty. Likely " +
+                        "you have received tx response instead of tx receipt response. " +
+                        "\n" +
+                        "It is a system error, please report it to the developer."
+                result = Result.failure(workDataOf(Pair(KEY_ERROR, true), Pair(KEY_ERROR_MSG, msg)))
+                preProcessResponse(responseFromChain, tx, serverTx)
+                return result
+            }
+
             if (responseFromChain is Response.Data) {
                 val tokenId = FunctionReturnDecoder.decodeIndexedValue(
                     responseFromChain.data.topics.get(responseFromChain.data.topics.size - 1),

@@ -22,9 +22,9 @@ class TestAppApplication: AppApplication() {
 
     companion object TestConfig {
         const val SERVER_ENDPOINT = "http://10.0.3.2:3100"
-        const val ETHEREUM_ENDPOINT = "http://192.168.1.17:2004/"
-        const val SWAP_TOKEN_ADDRESS = "0x699e2DE0c5EdD6Aa0d6319a6cBBbb0a902269d45"
-        const val SWAP_MARKET_ADDRESS = "0x3276D551e55Ce2EfEFB71c4Fb339ad37617a1eBa"
+        const val ETHEREUM_ENDPOINT = "http://192.168.1.223:2004/"
+        const val SWAP_TOKEN_ADDRESS = "0x6f295e9c86D9c1EF13ad3A15d4E5d5942ea47B32"
+        const val SWAP_MARKET_ADDRESS = "0x4CB24a97dbDF4fDe0aed89CE8F03C32Aa0268828"
         const val CHAIN_ID = "50102"
 
         const val FIRST_USER_NAME = "Dmitry"

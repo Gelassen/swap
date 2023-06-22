@@ -99,7 +99,7 @@ dependencies {
     implementation ("com.google.dagger:dagger:2.44.2")
     implementation ("com.google.dagger:dagger-android-support:2.44.2")
     implementation("com.google.dagger:dagger-android:2.44.2")
-
+    implementation("androidx.test.espresso.idling:idling-net:3.4.0")
 //    implementation("org.web3j:core:4.9.4")
 
     kapt("com.google.dagger:dagger-compiler:2.44.2")
@@ -114,6 +114,7 @@ dependencies {
 
     androidTestImplementation ("androidx.test.ext:junit:1.1.3")
     androidTestImplementation ("androidx.test.espresso:espresso-core:3.4.0")
+    androidTestImplementation("androidx.test.espresso.idling:idling-net:3.4.0")
 
     implementation(project(":core"))
     implementation(project(":wallet"))

@@ -13,7 +13,7 @@
         "password" : ""
     },
     "private_testnet" : {
-        "api" : "http://192.168.1.17:2004/",
+        "api" : "http://192.168.1.223:2004/",
         "privateKey" : "1b10d8e57de10a45bfefd9118f53be67df3e92a2ed805b9b87d22a494f1ca81a",
         "dataDir" : "",
         "address" : "", 

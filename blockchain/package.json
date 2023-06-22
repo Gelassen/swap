@@ -3,6 +3,7 @@
   "scripts": {
     "install": "npm install --save-dev keythereum && npm install --save-dev @openzeppelin/test-helpers && npm install --save-dev hardhat && npm install --save-dev @openzeppelin/contracts && npm install --save-dev config",
     "test": "REPORT_GAS=true npx hardhat test",
+    "test:debug": "REPORT_GAS=true npx hardhat test test/SwapChainV2.ts",
     "deploy": "npx hardhat run --network private_network scripts/deploy.ts",
     "deploy:test": "npx hardhat run --network private_testnet scripts/deploy.ts",
     "keys": "node scripts/keys.js"

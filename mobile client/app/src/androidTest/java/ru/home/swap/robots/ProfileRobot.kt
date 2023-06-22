@@ -84,7 +84,13 @@ class ProfileRobot {
         onView(withId(R.id.offers_list))
             .check(matches(isDisplayed()))
         onView(withId(R.id.offers_list))
-            .check(matches(atPositionByTitle(order, withText(StringContains.containsString(newOfferText)))))
+            .check(matches(
+                atPositionByTitle(
+                    position = order,
+                    itemMatcher = withText(StringContains.containsString(newOfferText)),
+                    title = R.id.text_service)
+                )
+            )
     }
 
     // Actions
