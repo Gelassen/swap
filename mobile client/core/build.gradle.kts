@@ -49,6 +49,7 @@ dependencies {
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
     implementation ("androidx.test.espresso:espresso-idling-resource:3.4.0")
+    implementation("androidx.test.espresso.idling:idling-net:3.5.1")
 
     kapt("com.google.dagger:dagger-compiler:2.44.2")
     kapt("com.google.dagger:dagger-android-processor:2.44.2")

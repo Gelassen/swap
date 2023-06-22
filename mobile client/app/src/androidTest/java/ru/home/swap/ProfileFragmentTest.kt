@@ -27,7 +27,6 @@ class ProfileFragmentTest : BaseFragmentTest() {
         val secret = TestAppApplication.FIRST_USER_SECRET
         val newWallet = TestAppApplication.FIRST_USER_ADDRESS
 
-
         robot.enterCustomDebugData(newName, newPhone, secret, newWallet)
         robot
             .seesName(newName)
@@ -52,5 +51,51 @@ class ProfileFragmentTest : BaseFragmentTest() {
 
         activityScenario.close()
     }
+
+    @Test
+    fun onAddNewDemand_validDemandAndEnvironmentIsOk_seesNewDemand() {
+        val activityScenario = ActivityScenario.launch(MainActivity::class.java)
+        dataBindingIdlingResource.monitorActivity(activityScenario)
+        val newName = "Dmitry ${LocalDateTime.now()}"
+        val newPhone = TestAppApplication.FIRST_USER_CONTACT
+        val secret = TestAppApplication.FIRST_USER_SECRET
+        val newWallet = TestAppApplication.FIRST_USER_ADDRESS
+
+        robot.enterCustomDebugData(newName, newPhone, secret, newWallet)
+        robot
+            .seesName(newName)
+            .seesContact(newPhone)
+            .seesSecret(secret)
+            .seesWalletAddress(newWallet)
+            .clickSubmitButton()
+
+
+        val newDemand = "Farmer Products ${System.currentTimeMillis()}"
+        robot
+            .seesNavView()
+            /*.seesProfileTitle("\n\n\n${newName}") // issue with time -- there is a strange diff*/
+            .clickAddItemButton()
+        robot
+            .seesAddNewItemDialog()
+            .enterNewDemand(newDemand)
+        robot.clickSaveNewItemButton()
+        robot.scrollToDemandsSection()
+        robot.seesNewDemand(
+            order = 0,
+            newDemandText = newDemand
+        )
+
+        activityScenario.close()
+    }
+
+    // TODO test remove offer
+    @Test
+    fun onRemoveOffer_defaultConditions_offerHasBeenRemovedFromProfile() {
+        
+    }
+    // TODO test remove demands
+
+    // TODO test matching offers
+    // TODO test matching demands
 
 }

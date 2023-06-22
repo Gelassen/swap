@@ -4,6 +4,7 @@ import android.view.KeyEvent
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions
 import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.action.ViewActions.scrollTo
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.RootMatchers.isDialog
 import androidx.test.espresso.matcher.ViewMatchers
@@ -47,7 +48,7 @@ class ProfileRobot {
 
     fun seesNavView(): ProfileRobot {
         onView(withId(R.id.navigation_bar))
-            .check(matches(ViewMatchers.isDisplayed()))
+            .check(matches(isDisplayed()))
         return this
     }
 
@@ -93,6 +94,19 @@ class ProfileRobot {
             )
     }
 
+    fun seesNewDemand(order: Int, newDemandText: String) {
+        onView(withId(R.id.demands_list))
+            .check(matches(isDisplayed()))
+        onView(withId(R.id.demands_list))
+            .check(matches(
+                atPositionByTitle(
+                    position = order,
+                    itemMatcher = withText(StringContains.containsString(newDemandText)),
+                    title = R.id.text_service
+                )
+            ))
+    }
+
     // Actions
 
     fun clickDebugButton() {
@@ -111,6 +125,15 @@ class ProfileRobot {
     }
 
     fun enterNewOffer(query: String) {
+        onView(withId(R.id.editText))
+            .perform(ViewActions.replaceText(query))
+            .perform(ViewActions.pressKey(KeyEvent.KEYCODE_ENTER))
+        /*.perform(typeText(query), pressKey(KeyEvent.KEYCODE_ENTER)) // Unicode chars is not supported here */
+    }
+
+    fun enterNewDemand(query: String) {
+        onView(withId(R.id.demand_option))
+            .perform(click())
         onView(withId(R.id.editText))
             .perform(ViewActions.replaceText(query))
             .perform(ViewActions.pressKey(KeyEvent.KEYCODE_ENTER))
@@ -136,6 +159,11 @@ class ProfileRobot {
         onView(withId(R.id.wallet_address))
             .perform(ViewActions.replaceText(wallet))
             .perform(ViewActions.pressKey(KeyEvent.KEYCODE_ENTER))
+    }
+
+    fun scrollToDemandsSection() {
+        onView(withId(R.id.demands_list))
+            .perform(scrollTo(), click())
     }
 
 }
