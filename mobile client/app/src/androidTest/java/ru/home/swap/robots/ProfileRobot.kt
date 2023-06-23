@@ -12,13 +12,14 @@ import androidx.test.espresso.matcher.ViewMatchers.*
 import org.hamcrest.CoreMatchers.containsString
 import org.hamcrest.core.StringContains
 import ru.home.swap.R
+import ru.home.swap.utils.RecyclerViewMatcher
 import ru.home.swap.utils.Utils.atPositionByTitle
 
 class ProfileRobot {
 
     fun seesName(name: String): ProfileRobot {
         onView(withId(R.id.name))
-            .check(matches(ViewMatchers.isDisplayed()))
+            .check(matches(isDisplayed()))
             .check(matches(withText(containsString(name))))
         return this
     }
@@ -107,6 +108,11 @@ class ProfileRobot {
             ))
     }
 
+    fun doesNotSeeAnItemInOffers(item: String) {
+        onView(withId(R.id.offers_list))
+            .check(matches(RecyclerViewMatcher(R.id.offers_list).hasNotAnItem(item)))
+    }
+
     // Actions
 
     fun clickDebugButton() {
@@ -164,6 +170,12 @@ class ProfileRobot {
     fun scrollToDemandsSection() {
         onView(withId(R.id.demands_list))
             .perform(scrollTo(), click())
+    }
+
+    fun clickRemoveOffer(order: Int, newOfferText: String) {
+        seesNewOffer(order, newOfferText)
+        onView(RecyclerViewMatcher(R.id.offers_list).atPositionOnView(order, R.id.remove_service))
+            .perform(click())
     }
 
 }
