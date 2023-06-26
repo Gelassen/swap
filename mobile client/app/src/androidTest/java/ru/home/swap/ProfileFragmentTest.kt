@@ -115,20 +115,62 @@ class ProfileFragmentTest : BaseFragmentTest() {
             .seesAddNewItemDialog()
             .enterNewOffer(newOffer)
         robot.clickSaveNewItemButton()
-        robot.seesNewOffer(
-            order = 0,
-            newOfferText = newOffer
-        )
-        robot.clickRemoveOffer(
-            order = 0,
-            newOfferText = newOffer
-        )
+        robot
+            .seesNewOffer(
+                order = 0,
+                newOfferText = newOffer
+            )
+            .clickRemoveOffer(
+                order = 0,
+                newOfferText = newOffer
+            )
         robot.doesNotSeeAnItemInOffers(newOffer)
 
         activityScenario.close()
     }
     // TODO test remove demands
+    @Test
+    fun onRemoveDemand_defaultConditions_demandHasBeenRemovedFromProfile() {
+        val activityScenario = ActivityScenario.launch(MainActivity::class.java)
+        dataBindingIdlingResource.monitorActivity(activityScenario)
 
+        val newName = "Dmitry ${LocalDateTime.now()}"
+        val newPhone = TestAppApplication.FIRST_USER_CONTACT
+        val secret = TestAppApplication.FIRST_USER_SECRET
+        val newWallet = TestAppApplication.FIRST_USER_ADDRESS
+
+        robot.enterCustomDebugData(newName, newPhone, secret, newWallet)
+        robot
+            .seesName(newName)
+            .seesContact(newPhone)
+            .seesSecret(secret)
+            .seesWalletAddress(newWallet)
+            .clickSubmitButton()
+
+        // profile screen
+        val newDemand = "Farmer products ${System.currentTimeMillis()}"
+        robot
+            .seesNavView()
+            /*.seesProfileTitle("\n\n\n${newName}") // issue with time -- there is a strange diff*/
+            .clickAddItemButton()
+        robot
+            .seesAddNewItemDialog()
+            .enterNewDemand(newDemand)
+        robot.clickSaveNewItemButton()
+        robot.scrollToDemandsSection()
+        robot
+            .seesNewDemand(
+            order = 0,
+            newDemandText = newDemand
+        )
+            .clickRemoveDemand(
+            order = 0,
+            newDemandText = newDemand
+        )
+        robot.doesNotSeeAnItemInDemands(newDemand)
+
+        activityScenario.close()
+    }
     // TODO test matching offers
     // TODO test matching demands
 

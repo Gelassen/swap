@@ -82,7 +82,7 @@ class ProfileRobot {
         return this
     }
 
-    fun seesNewOffer(order: Int, newOfferText: String) {
+    fun seesNewOffer(order: Int, newOfferText: String): ProfileRobot {
         onView(withId(R.id.offers_list))
             .check(matches(isDisplayed()))
         onView(withId(R.id.offers_list))
@@ -93,9 +93,10 @@ class ProfileRobot {
                     title = R.id.text_service)
                 )
             )
+        return this
     }
 
-    fun seesNewDemand(order: Int, newDemandText: String) {
+    fun seesNewDemand(order: Int, newDemandText: String): ProfileRobot {
         onView(withId(R.id.demands_list))
             .check(matches(isDisplayed()))
         onView(withId(R.id.demands_list))
@@ -106,11 +107,17 @@ class ProfileRobot {
                     title = R.id.text_service
                 )
             ))
+        return this
     }
 
     fun doesNotSeeAnItemInOffers(item: String) {
         onView(withId(R.id.offers_list))
             .check(matches(RecyclerViewMatcher(R.id.offers_list).hasNotAnItem(item)))
+    }
+
+    fun doesNotSeeAnItemInDemands(item: String) {
+        onView(withId(R.id.demands_list))
+            .check(matches(RecyclerViewMatcher(R.id.demands_list).hasNotAnItem(item)))
     }
 
     // Actions
@@ -175,6 +182,12 @@ class ProfileRobot {
     fun clickRemoveOffer(order: Int, newOfferText: String) {
         seesNewOffer(order, newOfferText)
         onView(RecyclerViewMatcher(R.id.offers_list).atPositionOnView(order, R.id.remove_service))
+            .perform(click())
+    }
+
+    fun clickRemoveDemand(order: Int, newDemandText: String) {
+        seesNewDemand(order, newDemandText)
+        onView(RecyclerViewMatcher(R.id.demands_list).atPositionOnView(order, R.id.remove_service))
             .perform(click())
     }
 

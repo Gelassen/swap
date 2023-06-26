@@ -1,5 +1,6 @@
 package ru.home.swap.repository
 
+import android.app.Application
 import android.content.Context
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -7,6 +8,7 @@ import kotlinx.coroutines.flow.flow
 import ru.home.swap.R
 import ru.home.swap.core.converters.ApiResponseConverter
 import ru.home.swap.core.extensions.attachIdlingResource
+import ru.home.swap.core.extensions.registerIdlingResource
 import ru.home.swap.core.logger.Logger
 import ru.home.swap.core.model.PersonProfile
 import ru.home.swap.core.model.Service
@@ -206,10 +208,12 @@ class PersonRepository(val api: IApi, val cache: Cache, val context: Context): I
                 emit(Response.Error.Message(response.message()))
             }
         }
+            .attachIdlingResource()
             .catch { ex ->
                 logger.e( "Exception on removeOffer() call", ex)
                 emit(Response.Error.Exception(ex))
             }
+
     }
 
     override fun getContacts(contact: String, secret: String, serviceId: Long): Flow<Response<PersonProfile>> {
