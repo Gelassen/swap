@@ -3,6 +3,7 @@ package ru.home.swap.utils
 import android.view.View
 import android.content.res.Resources
 import android.content.res.Resources.NotFoundException
+import android.view.View.MeasureSpec.UNSPECIFIED
 import androidx.core.util.Preconditions
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.matcher.BoundedMatcher
@@ -112,6 +113,21 @@ class RecyclerViewMatcher(private val recyclerId: Int) {
                 val item = (view.adapter!! as ItemAdapter).currentList.find { it -> it.title.equals(textWithinItem) }
                 return item == null
             }
+        }
+    }
+
+    fun hasItemWithRequestedText(text: String, occurrences: Int): Matcher<View> {
+        return object : BoundedMatcher<View, RecyclerView>(RecyclerView::class.java) {
+
+            override fun describeTo(description: Description) {
+                description.appendText("has not ${occurrences} items with ${text} text")
+            }
+
+            override fun matchesSafely(view: RecyclerView): Boolean {
+                val count = (view.adapter!! as ItemAdapter).currentList.count { it -> it.title.contains(text) }
+                return count == occurrences
+            }
+
         }
     }
 

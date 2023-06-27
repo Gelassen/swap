@@ -32,6 +32,12 @@ class TestAppApplication: AppApplication() {
         const val FIRST_USER_SECRET = "onemoretime"
         const val FIRST_USER_ADDRESS = "0x04C688b38E3Ca63EC888EbEBed6d39cde0833a71"
         const val FIRST_USER_PRIVATE_KEY = "1b10d8e57de10a45bfefd9118f53be67df3e92a2ed805b9b87d22a494f1ca81a"
+
+        const val SECOND_USER_NAME = "Jane"
+        const val SECOND_USER_CONTACT = "+79201002030"
+        const val SECOND_USER_SECRET = "likevinniethepooh"
+        const val SECOND_USER_ADDRESS = "0x83c663a6787430897719F875f2a86Af445A92Bc2"
+        const val SECOND_USER_PRIVATE_KEY = "d89baf3e71c0d9bc952f9f14a86b3752140d0129e9fea3bedbe45a2d0953bcf4"
     }
 
 /*    fun getTestComponent(): AppComponent {

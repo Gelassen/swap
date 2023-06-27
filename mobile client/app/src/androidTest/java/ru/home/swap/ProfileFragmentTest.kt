@@ -128,7 +128,7 @@ class ProfileFragmentTest : BaseFragmentTest() {
 
         activityScenario.close()
     }
-    // TODO test remove demands
+
     @Test
     fun onRemoveDemand_defaultConditions_demandHasBeenRemovedFromProfile() {
         val activityScenario = ActivityScenario.launch(MainActivity::class.java)
@@ -172,6 +172,66 @@ class ProfileFragmentTest : BaseFragmentTest() {
         activityScenario.close()
     }
     // TODO test matching offers
+    /**
+     * Several options here:
+     * 1. Manually pre-configurate test user here and run single test here
+     * 2. Implement /logout option and setup 2nd user over test
+     * 3. Implement a couple of grade tasks which will pre-configurate test environment
+     *    including 2nd user and run test against it.
+     * */
+    @Test
+    fun onOpenOffersScreen_matchesHasBeenSetup_singleOfferIsShown() {
+        val activityScenario = ActivityScenario.launch(MainActivity::class.java)
+        dataBindingIdlingResource.monitorActivity(activityScenario)
+        val newName = "Dmitry ${LocalDateTime.now()}"
+        val newPhone = TestAppApplication.FIRST_USER_CONTACT
+        val secret = TestAppApplication.FIRST_USER_SECRET
+        val newWallet = TestAppApplication.FIRST_USER_ADDRESS
+
+        robot.enterCustomDebugData(newName, newPhone, secret, newWallet)
+        robot
+            .seesName(newName)
+            .seesContact(newPhone)
+            .seesSecret(secret)
+            .seesWalletAddress(newWallet)
+            .clickSubmitButton()
+
+        // profile screen: offers
+        val newOffer = "Custom Software Development ${System.currentTimeMillis()}"
+        robot
+            .seesNavView()
+            /*.seesProfileTitle("\n\n\n${newName}") // issue with time -- there is a strange diff*/
+            .clickAddItemButton()
+        robot
+            .seesAddNewItemDialog()
+            .enterNewOffer(newOffer)
+        robot.clickSaveNewItemButton()
+        robot.seesNewOffer(
+            order = 0,
+            newOfferText = newOffer
+        )
+        // profile screen: demands
+        val newDemand = "Farmer Products"
+        robot
+            .seesNavView()
+            /*.seesProfileTitle("\n\n\n${newName}") // issue with time -- there is a strange diff*/
+            .clickAddItemButton()
+        robot
+            .seesAddNewItemDialog()
+            .enterNewDemand(newDemand)
+        robot.clickSaveNewItemButton()
+        robot.scrollToDemandsSection()
+        robot.seesNewDemand(
+            order = 0,
+            newDemandText = newDemand
+        )
+
+        // offers screen
+        robot.clickOffersNavigationTab()
+        robot.seesMatch(newDemand)
+
+        activityScenario.close()
+    }
     // TODO test matching demands
 
 }

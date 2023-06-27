@@ -8,15 +8,11 @@
     "private_network" : {
         "api" : "http://192.168.1.17:2001/",
         "privateKey" : "c2eaf79b0c2d5892b2f2a06e47a5b4b86ab5eb638663b48c36bea8253ef5d32d",
-        "dataDir" : "",
-        "address" : "", 
-        "password" : ""
+        "chainId" : 50101
     },
     "private_testnet" : {
         "api" : "http://192.168.1.223:2004/",
         "privateKey" : "1b10d8e57de10a45bfefd9118f53be67df3e92a2ed805b9b87d22a494f1ca81a",
-        "dataDir" : "",
-        "address" : "", 
-        "password" : ""
+        "chainId" : 50102
     }
 }

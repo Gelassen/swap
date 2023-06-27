@@ -19,6 +19,8 @@ import ru.home.swap.core.model.Service
 import ru.home.swap.databinding.ProfileFragmentBinding
 import ru.home.swap.core.di.ViewModelFactory
 import ru.home.swap.ui.common.BaseFragment
+import ru.home.swap.utils.ServiceIdsComparator
+import java.util.*
 import javax.inject.Inject
 
 
@@ -65,9 +67,9 @@ class ProfileFragment :
                 launch {
                     viewModel.uiState.collect { it ->
                         Log.d(App.TAG, "[collect] collected #${it.profile.offers.count()} offers items")
-                        (binding.offersList.adapter as ItemAdapter).submitList(it.profile.offers)
+                        (binding.offersList.adapter as ItemAdapter).submitList(it.profile.offers.sortedWith(ServiceIdsComparator()))
                         Log.d(App.TAG, "[collect] collected #${it.profile.demands.count()} demands items")
-                        (binding.demandsList.adapter as ItemAdapter).submitList(it.profile.demands)
+                        (binding.demandsList.adapter as ItemAdapter).submitList(it.profile.demands.sortedWith(ServiceIdsComparator()))
                         onModelUpdate(it)
                     }
                 }

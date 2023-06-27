@@ -49,6 +49,14 @@ class DebugProfiles(val context: Context) {
                 userWalletAddress = context.getString(com.example.wallet.R.string.fourth_account)
             )
         )
+        profiles.add(
+            PersonProfile(
+                contact = "+79201002030",
+                name = "Jane Test",
+                secret = "likevinniethepooh",
+                userWalletAddress = "0x83c663a6787430897719F875f2a86Af445A92Bc2"
+            )
+        )
     }
 
     private var next: Int = 0

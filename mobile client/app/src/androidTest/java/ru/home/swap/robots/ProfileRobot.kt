@@ -15,6 +15,11 @@ import ru.home.swap.R
 import ru.home.swap.utils.RecyclerViewMatcher
 import ru.home.swap.utils.Utils.atPositionByTitle
 
+/**
+ * For current size of application it is a reasonable to keep a single robot for all screens
+ * and use case scenarios. With time app might grow further, in such case consider refactor
+ * this logic into multiple robots per screen or business scenario use cases.
+ * */
 class ProfileRobot {
 
     fun seesName(name: String): ProfileRobot {
@@ -26,21 +31,21 @@ class ProfileRobot {
 
     fun seesContact(input: String): ProfileRobot {
         onView(withId(R.id.contact_phone))
-            .check(matches(ViewMatchers.isDisplayed()))
+            .check(matches(isDisplayed()))
             .check(matches(withText(containsString(input))))
         return this
     }
 
     fun seesSecret(input: String): ProfileRobot {
         onView(withId(R.id.secret))
-            .check(matches(ViewMatchers.isDisplayed()))
+            .check(matches(isDisplayed()))
             .check(matches(withText(containsString(input))))
         return this
     }
 
     fun seesWalletAddress(input: String): ProfileRobot {
         onView(withId(R.id.wallet_address))
-            .check(matches(ViewMatchers.isDisplayed()))
+            .check(matches(isDisplayed()))
             .check(matches(withText(containsString(input))))
         return this
     }
@@ -110,14 +115,27 @@ class ProfileRobot {
         return this
     }
 
-    fun doesNotSeeAnItemInOffers(item: String) {
+    fun doesNotSeeAnItemInOffers(item: String): ProfileRobot {
         onView(withId(R.id.offers_list))
             .check(matches(RecyclerViewMatcher(R.id.offers_list).hasNotAnItem(item)))
+        return this
     }
 
-    fun doesNotSeeAnItemInDemands(item: String) {
+    fun doesNotSeeAnItemInDemands(item: String): ProfileRobot {
         onView(withId(R.id.demands_list))
             .check(matches(RecyclerViewMatcher(R.id.demands_list).hasNotAnItem(item)))
+        return this
+    }
+
+    fun seesMatch(myDemand: String) {
+        onView(withId(R.id.offers_list))
+            .check(matches(
+                RecyclerViewMatcher(R.id.offers_list)
+                    .hasItemWithRequestedText(
+                        text =  myDemand,
+                        occurrences = 1
+                    )
+            ))
     }
 
     // Actions
@@ -188,6 +206,11 @@ class ProfileRobot {
     fun clickRemoveDemand(order: Int, newDemandText: String) {
         seesNewDemand(order, newDemandText)
         onView(RecyclerViewMatcher(R.id.demands_list).atPositionOnView(order, R.id.remove_service))
+            .perform(click())
+    }
+
+    fun clickOffersNavigationTab() {
+        onView(withId(R.id.navigation_offers))
             .perform(click())
     }
 
