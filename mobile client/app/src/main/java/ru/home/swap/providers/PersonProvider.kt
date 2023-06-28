@@ -42,11 +42,11 @@ class PersonProvider {
     }
 
     fun contactIsPhone(contact: String) : Boolean {
-        return android.util.Patterns.PHONE.matcher(contact).matches()
+        return Patterns.PHONE.matcher(contact).matches()
     }
 
     fun contactIsEmail(contact: String) : Boolean {
-        return android.util.Patterns.EMAIL_ADDRESS.matcher(contact).matches()
+        return Patterns.EMAIL_ADDRESS.matcher(contact).matches()
     }
 
     fun inputIsEthereumAddress(input: String) : Boolean {
@@ -57,4 +57,7 @@ class PersonProvider {
         return "by $person"
     }
 
+    fun decorateOfferForExchange(callerOfferForExchange: String): String {
+        return "in exchange for ${callerOfferForExchange}"
+    }
 }
