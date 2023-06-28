@@ -4,6 +4,9 @@
 
     <data>
         <variable
+            name="callerId"
+            type="String" />
+        <variable
             name="swapMatch"
             type="ru.home.swap.core.model.SwapMatch" />
         <variable
@@ -31,7 +34,7 @@
             android:ellipsize="end"
             android:inputType="textMultiLine"
             android:maxLines="2"
-            android:text="@{swapMatch.userFirstServiceTitle}"
+            android:text="@{provider.prepareOfferForCaller(swapMatch, callerId)}"
             android:textColor="@color/blue_light"
             tools:text="I offer more this French nice soft rolls and the tea." />
 
@@ -40,16 +43,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/offer_title"
-            android:layout_marginTop="2dp"
+            android:layout_toLeftOf="@+id/offer_owner_with_description"
+            android:layout_alignParentStart="true"
             android:layout_gravity="center_vertical"
+            android:layout_marginTop="2dp"
             android:ellipsize="end"
             android:inputType="textMultiLine"
             android:maxLines="2"
-            android:text="@{provider.decorateOfferForExchange(swapMatch.userSecondServiceTitle)}"
-            android:textColor="@color/white"
-            android:textStyle="bold"
-            tools:text="in exchange for nice talks"
-            />
+            android:text="@{provider.prepareOfferFromCaller(swapMatch, callerId)}"
+            android:textColor="@color/grey"
+            tools:text="in exchange for nice talks" />
 
         <TextView
             android:id="@+id/offer_owner_with_description"
@@ -59,10 +62,9 @@
             android:layout_alignParentEnd="true"
             android:layout_gravity="end"
             android:ellipsize="end"
-
             android:inputType="textMultiLine"
             android:maxLines="2"
-            android:text="@{provider.decorateExtraDataForMatch(swapMatch.userFirstProfileName)}"
+            android:text="@{provider.prepareOfferOwner(swapMatch, callerId)}"
             android:textColor="@color/blue_light"
             android:textSize="12sp"
             tools:text="by Jane" />

@@ -35,7 +35,7 @@ class OffersFragment: BaseFragment(), OffersAdapter.IListener {
     @Inject
     lateinit var viewModelFactory: ViewModelFactory
 
-    private lateinit var viewModel: OffersViewModel
+    private lateinit var viewModel: OffersV2ViewModel
     private lateinit var binding: OffersFragmentBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,7 +48,7 @@ class OffersFragment: BaseFragment(), OffersAdapter.IListener {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        viewModel = ViewModelProvider(this, viewModelFactory).get(OffersViewModel::class.java)
+        viewModel = ViewModelProvider(this, viewModelFactory).get(OffersV2ViewModel::class.java)
 
         binding = OffersFragmentBinding.inflate(inflater, container, false)
         binding.lifecycleOwner = this
@@ -104,6 +104,7 @@ class OffersFragment: BaseFragment(), OffersAdapter.IListener {
                         }
                         if (it.pagingData != null) {
 //                            throw UnsupportedOperationException("Not supported yet for new type ${it.pagingData}")
+                            (binding.offersList.adapter as OffersAdapter).setProfileId(it.profile?.id)
                             (binding.offersList.adapter as OffersAdapter).submitData(it.pagingData)
                         }
                         binding.noContent.visibility = if (binding.offersList.adapter!!.itemCount == 0) View.VISIBLE else View.GONE

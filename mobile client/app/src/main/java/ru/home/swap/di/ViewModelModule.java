@@ -10,6 +10,7 @@ import ru.home.swap.core.di.ViewModelKey;
 import ru.home.swap.ui.chains.ChainsViewModel;
 import ru.home.swap.ui.contacts.ContactsViewModel;
 import ru.home.swap.ui.demands.DemandsViewModel;
+import ru.home.swap.ui.offers.OffersV2ViewModel;
 import ru.home.swap.ui.offers.OffersViewModel;
 import ru.home.swap.ui.profile.ProfileV2ViewModel;
 
@@ -27,6 +28,12 @@ public abstract class ViewModelModule {
     @ViewModelKey(OffersViewModel.class)
     @AppMainScope
     abstract ViewModel offersViewModel(OffersViewModel vm);
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(OffersV2ViewModel.class)
+    @AppMainScope
+    abstract ViewModel offersV2ViewModel(OffersV2ViewModel vm);
 
     @Binds
     @IntoMap

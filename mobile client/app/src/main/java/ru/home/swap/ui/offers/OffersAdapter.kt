@@ -9,9 +9,12 @@ import ru.home.swap.core.model.Service
 import ru.home.swap.core.model.SwapMatch
 import ru.home.swap.databinding.OffersViewItemBinding
 import ru.home.swap.providers.PersonProvider
+import kotlin.properties.Delegates
 
-class OffersAdapter(val listener: IListener, diffCallback: DiffUtil.ItemCallback<SwapMatch> = OffersComparator())
-    : PagingDataAdapter<SwapMatch, OffersAdapter.ViewHolder>(diffCallback) {
+class OffersAdapter(
+    val listener: IListener,
+    diffCallback: DiffUtil.ItemCallback<SwapMatch> = OffersComparator()
+) : PagingDataAdapter<SwapMatch, OffersAdapter.ViewHolder>(diffCallback) {
 
     interface IListener {
         fun onItemClick(item: SwapMatch)
@@ -20,8 +23,11 @@ class OffersAdapter(val listener: IListener, diffCallback: DiffUtil.ItemCallback
     class ViewHolder(internal val binding: OffersViewItemBinding)
         : RecyclerView.ViewHolder(binding.root)
 
+    private var profileId: Long? = null
+
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = getItem(position)
+        holder.binding.callerId = profileId.toString()
         holder.binding.swapMatch = item!!
         holder.binding.root.setOnClickListener {
             listener.onItemClick(item)
@@ -35,6 +41,10 @@ class OffersAdapter(val listener: IListener, diffCallback: DiffUtil.ItemCallback
         )
         holder.binding.provider = PersonProvider()
         return holder
+    }
+
+    fun setProfileId(id: Long?) {
+        profileId = id
     }
 
     class OffersComparator: DiffUtil.ItemCallback<SwapMatch>() {
