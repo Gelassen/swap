@@ -14,7 +14,7 @@ android {
         targetSdk = 32
 
 //        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        testInstrumentationRunner = "ru.home.government.MyCustomTestRunner"
+        testInstrumentationRunner = "ru.home.swap.MyCustomTestRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
 

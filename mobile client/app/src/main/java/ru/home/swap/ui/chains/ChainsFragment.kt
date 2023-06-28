@@ -40,33 +40,6 @@ class ChainsFragment: BaseFragment(), ChainsAdapter.ClickListener {
         return binding.root
     }
 
-    /*
-    *
-    *
-{
-   "code":200,
-   "payload":[
-      {
-         "id":140,
-         "userFirstProfileId":4320,
-         "userSecondProfileId":4319,
-         "userFirstServiceId":14103,
-         "userSecondServiceId":14099,
-         "approvedByFirstUser":false,
-         "approvedBySecondUser":false,
-         "userFirstService":{
-            "idChainService":46,
-            "userAddress":"0x1a75262751ac4E6290Ec8287d1De823F33036498"
-         },
-         "userSecondService":{
-            "userAddress":"0x367103555b34Eb9a46D92833e7293D540bFd7143",
-            "tokenId":0
-         }
-      }
-   ]
-}
-    * */
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.txList.adapter = ChainsAdapter(

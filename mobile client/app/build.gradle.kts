@@ -14,9 +14,9 @@ android {
     compileSdk = 33
 
     defaultConfig {
-        applicationId = "ru.home.swap"
+        applicationId = "io.github.gelassen.swap"
         minSdk = 21
-        targetSdk = 32
+        targetSdk = 33
         versionCode = 1
         versionName = "1.0"
 

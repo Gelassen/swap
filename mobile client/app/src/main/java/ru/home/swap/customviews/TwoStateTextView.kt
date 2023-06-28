@@ -1,6 +1,5 @@
 package ru.home.swap.customviews
 
-import android.R
 import android.content.Context
 import android.content.res.TypedArray
 import android.graphics.Canvas
@@ -8,6 +7,7 @@ import android.os.Build
 import android.util.AttributeSet
 import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.AppCompatTextView
+import ru.home.swap.R
 
 
 class TwoStateTextView : AppCompatTextView {
@@ -29,15 +29,15 @@ class TwoStateTextView : AppCompatTextView {
         init(context, attrs)
 /*        // TODO replace on color state list when minSdk will be API 23 or higher
         val colorStateList = context.getColorStateList(R.color.selector_two_state_view)*/
-        isEnabledTextColor = context.getColor(ru.home.swap.R.color.blue_light)
-        isDisabledTextColor = context.getColor(ru.home.swap.R.color.grey)
+        isEnabledTextColor = context.getColor(R.color.blue_light)
+        isDisabledTextColor = context.getColor(R.color.grey)
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onDraw(canvas: Canvas?) {
         setTextColor(
-            if (isChosen) context.getColor(ru.home.swap.R.color.blue_light)
-            else context.getColor(ru.home.swap.R.color.grey)
+            if (isChosen) context.getColor(R.color.blue_light)
+            else context.getColor(R.color.grey)
         )
         super.onDraw(canvas)
     }
@@ -51,10 +51,10 @@ class TwoStateTextView : AppCompatTextView {
     private fun init(context: Context, attrs: AttributeSet?) {
         val attributes: TypedArray = context.obtainStyledAttributes(
             attrs,
-            ru.home.swap.R.styleable.TwoStateTextView
+            R.styleable.TwoStateTextView
         )
         isChosen = attributes.getBoolean(
-            ru.home.swap.R.styleable.TwoStateTextView_selected,
+            R.styleable.TwoStateTextView_selected,
             true
         )
         attributes.recycle()

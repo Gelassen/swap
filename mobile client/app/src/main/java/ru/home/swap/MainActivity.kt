@@ -27,10 +27,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.main_activity)
         AndroidInjection.inject(this)
 
-        lifecycleScope.launchWhenCreated {
-//            cacheUtils.cleanCacheIfRequired()
-        }
-
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController

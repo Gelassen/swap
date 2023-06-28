@@ -197,10 +197,10 @@ class ProfileFragmentTest : BaseFragmentTest() {
             .clickSubmitButton()
 
         // profile screen: offers
-        val newOffer = "Custom Software Development ${System.currentTimeMillis()}"
+        val newOffer = "Custom Software Development"  //${System.currentTimeMillis()}
         robot
             .seesNavView()
-            /*.seesProfileTitle("\n\n\n${newName}") // issue with time -- there is a strange diff*/
+            .seesProfileTitle("\n\n\n${newName}") // issue with time -- there is a strange diff
             .clickAddItemButton()
         robot
             .seesAddNewItemDialog()
@@ -214,7 +214,7 @@ class ProfileFragmentTest : BaseFragmentTest() {
         val newDemand = "Farmer Products"
         robot
             .seesNavView()
-            /*.seesProfileTitle("\n\n\n${newName}") // issue with time -- there is a strange diff*/
+            .seesProfileTitle("\n\n\n${newName}") // issue with time -- there is a strange diff
             .clickAddItemButton()
         robot
             .seesAddNewItemDialog()
