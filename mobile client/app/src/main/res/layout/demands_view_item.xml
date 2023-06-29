@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="callerId"
+            type="String" />
+        <variable
+            name="swapMatch"
+            type="ru.home.swap.core.model.SwapMatch" />
+        <variable
+            name="provider"
+            type="ru.home.swap.providers.PersonProvider" />
+    </data>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="?android:listPreferredItemHeight"
+        android:gravity="center_vertical"
+        android:clickable="true"
+        android:focusable="true"
+        android:paddingStart="@dimen/base_margin"
+        android:paddingEnd="@dimen/base_margin"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:background="@color/white">
+
+        <TextView
+            android:id="@+id/offer_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:ellipsize="end"
+            android:inputType="textMultiLine"
+            android:maxLines="2"
+            android:text="@{provider.prepareOfferForCaller(swapMatch, callerId)}"
+            android:textColor="@color/blue_light"
+            tools:text="I offer more this French nice soft rolls and the tea." />
+
+        <TextView
+            android:id="@+id/offerInExchangeFor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/offer_title"
+            android:layout_toLeftOf="@+id/offer_owner_with_description"
+            android:layout_alignParentStart="true"
+            android:layout_gravity="center_vertical"
+            android:layout_marginTop="2dp"
+            android:ellipsize="end"
+            android:inputType="textMultiLine"
+            android:maxLines="2"
+            android:text="@{provider.prepareOfferFromCaller(swapMatch, callerId)}"
+            android:textColor="@color/grey"
+            tools:text="in exchange for nice talks" />
+
+        <TextView
+            android:id="@+id/offer_owner_with_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/offer_title"
+            android:layout_alignParentEnd="true"
+            android:layout_gravity="end"
+            android:ellipsize="end"
+            android:inputType="textMultiLine"
+            android:maxLines="2"
+            android:text="@{provider.prepareOfferOwner(swapMatch, callerId)}"
+            android:textColor="@color/blue_light"
+            android:textSize="12sp"
+            tools:text="by Jane" />
+<!--        <TextView-->
+<!--            android:id="@+id/offer_available_date"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_below="@+id/offer_title"-->
+<!--            android:text="@{provider.getDateInHumanReadableFormat(swapMatch.date)}"-->
+<!--            tools:text="till May 2024"/>-->
+
+    </RelativeLayout>
+
+
+</layout>

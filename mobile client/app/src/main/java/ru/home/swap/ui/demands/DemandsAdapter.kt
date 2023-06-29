@@ -1,4 +1,4 @@
-package ru.home.swap.ui.offers
+package ru.home.swap.ui.demands
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -9,10 +9,10 @@ import ru.home.swap.core.model.SwapMatch
 import ru.home.swap.databinding.OffersViewItemBinding
 import ru.home.swap.providers.PersonProvider
 
-class OffersAdapter(
+class DemandsAdapter(
     val listener: IListener,
     diffCallback: DiffUtil.ItemCallback<SwapMatch> = OffersComparator()
-) : PagingDataAdapter<SwapMatch, OffersAdapter.ViewHolder>(diffCallback) {
+) : PagingDataAdapter<SwapMatch, DemandsAdapter.ViewHolder>(diffCallback) {
 
     interface IListener {
         fun onItemClick(item: SwapMatch)
