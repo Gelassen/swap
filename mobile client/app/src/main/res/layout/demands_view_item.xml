@@ -7,8 +7,8 @@
             name="callerId"
             type="String" />
         <variable
-            name="swapMatch"
-            type="ru.home.swap.core.model.SwapMatch" />
+            name="service"
+            type="ru.home.swap.core.model.Service" />
         <variable
             name="provider"
             type="ru.home.swap.providers.PersonProvider" />
@@ -34,11 +34,11 @@
             android:ellipsize="end"
             android:inputType="textMultiLine"
             android:maxLines="2"
-            android:text="@{provider.prepareOfferForCaller(swapMatch, callerId)}"
+            android:text="@{service.title}"
             android:textColor="@color/blue_light"
             tools:text="I offer more this French nice soft rolls and the tea." />
 
-        <TextView
+      <!--  <TextView
             android:id="@+id/offerInExchangeFor"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -68,13 +68,13 @@
             android:textColor="@color/blue_light"
             android:textSize="12sp"
             tools:text="by Jane" />
-<!--        <TextView-->
-<!--            android:id="@+id/offer_available_date"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_below="@+id/offer_title"-->
-<!--            android:text="@{provider.getDateInHumanReadableFormat(swapMatch.date)}"-->
-<!--            tools:text="till May 2024"/>-->
+&lt;!&ndash;        <TextView&ndash;&gt;
+&lt;!&ndash;            android:id="@+id/offer_available_date"&ndash;&gt;
+&lt;!&ndash;            android:layout_width="wrap_content"&ndash;&gt;
+&lt;!&ndash;            android:layout_height="wrap_content"&ndash;&gt;
+&lt;!&ndash;            android:layout_below="@+id/offer_title"&ndash;&gt;
+&lt;!&ndash;            android:text="@{provider.getDateInHumanReadableFormat(swapMatch.date)}"&ndash;&gt;
+            tools:text="till May 2024"/>-->
 
     </RelativeLayout>
 

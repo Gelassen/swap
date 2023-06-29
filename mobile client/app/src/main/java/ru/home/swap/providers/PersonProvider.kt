@@ -10,7 +10,7 @@ import ru.home.swap.wallet.providers.WalletProvider
 import java.text.SimpleDateFormat
 import java.util.*
 
-class PersonProvider {
+class PersonProvider(val isDemand: Boolean = false) {
 
     fun isAnyOfCredentialsEmpty(contact: String, secret: String) : Boolean {
         return TextUtils.isEmpty(contact)
@@ -93,5 +93,18 @@ class PersonProvider {
             ""
         }
     }
+
+//    fun prepareDemandForCaller(swapMatch: SwapMatch, callerId: String): String {
+//        val caller = callerId.toInt()
+//        return if (caller == swapMatch.userFirstProfileId) {
+//            swapMatch.userSecondServiceTitle
+//        } else if (caller == swapMatch.userSecondProfileId) {
+//            swapMatch.userFirstServiceTitle
+//        } else {
+//            // it is illegal state, but instead of throwing an exception handle it gracefully
+//            Logger.getInstance().d("Illegal state for SwapMatch profile id, but it would be handled gracefully")
+//            ""
+//        }
+//    }
 
 }

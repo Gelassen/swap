@@ -214,4 +214,9 @@ class ProfileRobot {
             .perform(click())
     }
 
+    fun clickDemandsNavigationTab() {
+        onView(withId(R.id.navigation_demands))
+            .perform(click())
+    }
+
 }

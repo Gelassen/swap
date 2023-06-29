@@ -236,5 +236,58 @@ class ProfileFragmentTest : BaseFragmentTest() {
     }
 
     // TODO test matching demands
+    @Test
+    fun onOpenDemandsScreen_matchesHasBeenSetup_singleDemandIsShown() {
+        val activityScenario = ActivityScenario.launch(MainActivity::class.java)
+        dataBindingIdlingResource.monitorActivity(activityScenario)
+        val newName = "Dmitry ${LocalDateTime.now()}"
+        val newPhone = TestAppApplication.FIRST_USER_CONTACT
+        val secret = TestAppApplication.FIRST_USER_SECRET
+        val newWallet = TestAppApplication.FIRST_USER_ADDRESS
+
+        robot.enterCustomDebugData(newName, newPhone, secret, newWallet)
+        robot
+            .seesName(newName)
+            .seesContact(newPhone)
+            .seesSecret(secret)
+            .seesWalletAddress(newWallet)
+            .clickSubmitButton()
+
+        // profile screen: offers
+        val newOffer = "Custom Software Development"  //${System.currentTimeMillis()}
+        robot
+            .seesNavView()
+            .seesProfileTitle("\n\n\n${newName}") // issue with time -- there is a strange diff
+            .clickAddItemButton()
+        robot
+            .seesAddNewItemDialog()
+            .enterNewOffer(newOffer)
+        robot.clickSaveNewItemButton()
+        robot.seesNewOffer(
+            order = 0,
+            newOfferText = newOffer
+        )
+        // profile screen: demands
+        val newDemand = "Farmer products"
+        robot
+            .seesNavView()
+            .seesProfileTitle("\n\n\n${newName}") // issue with time -- there is a strange diff
+            .clickAddItemButton()
+        robot
+            .seesAddNewItemDialog()
+            .enterNewDemand(newDemand)
+        robot.clickSaveNewItemButton()
+        robot.scrollToDemandsSection()
+        robot.seesNewDemand(
+            order = 0,
+            newDemandText = newDemand
+        )
+
+        // offers screen
+        robot.clickDemandsNavigationTab()
+        robot.seesMatch(newOffer)
+
+        activityScenario.close()
+    }
 
 }

@@ -6,42 +6,56 @@ import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.CoroutineDispatcher
-import ru.home.swap.databinding.TxViewItemBinding
+import ru.home.swap.core.model.SwapMatch
+import ru.home.swap.databinding.OffersViewItemBinding
+import ru.home.swap.providers.PersonProvider
 import ru.home.swap.wallet.model.ITransaction
 
 class ChainsAdapter(
-    val clickListener: ClickListener,
-    diffCallback: DiffUtil.ItemCallback<ITransaction> = LawComparator(),
-    mainDispatcher: CoroutineDispatcher,
-    workerDispatcher: CoroutineDispatcher
-) : PagingDataAdapter<ITransaction, ChainsAdapter.ViewHolder>(
-    diffCallback,
-    mainDispatcher,
-    workerDispatcher
-) {
+    val listener: IListener,
+    diffCallback: DiffUtil.ItemCallback<SwapMatch> = OffersComparator(),
+) : PagingDataAdapter<SwapMatch, ChainsAdapter.ViewHolder>(diffCallback) {
 
-    interface ClickListener {
-        fun onItemClick(item: ITransaction)
+    interface IListener {
+        fun onItemClick(item: SwapMatch)
     }
 
+    class ViewHolder(internal val binding: OffersViewItemBinding)
+        : RecyclerView.ViewHolder(binding.root)
+
+    private var profileId: Long? = null
+
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.binding.tx = getItem(position)
-        holder.binding.root.setOnClickListener { clickListener.onItemClick(holder.binding.tx!!) }
+        val item = getItem(position)
+        holder.binding.callerId = profileId.toString()
+        holder.binding.swapMatch = item!!
+        holder.binding.root.setOnClickListener {
+            listener.onItemClick(item)
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val binding = TxViewItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return ViewHolder(binding)
+        val holder = ViewHolder(
+            OffersViewItemBinding.inflate(
+                LayoutInflater.from(parent.context), parent, false)
+        )
+        holder.binding.provider = PersonProvider()
+        return holder
     }
 
-    class ViewHolder(internal val binding: TxViewItemBinding) : RecyclerView.ViewHolder(binding.root)
+    fun setProfileId(id: Long?) {
+        profileId = id
+    }
 
-    class LawComparator: DiffUtil.ItemCallback<ITransaction>() {
-        override fun areItemsTheSame(oldItem: ITransaction, newItem: ITransaction): Boolean =
-            oldItem.uid == newItem.uid
+    class OffersComparator: DiffUtil.ItemCallback<SwapMatch>() {
+        override fun areItemsTheSame(oldItem: SwapMatch, newItem: SwapMatch): Boolean {
+            return (oldItem.id == newItem.id)
+                    && (oldItem.userFirstService.id == newItem.userFirstService.id)
+                    && (oldItem.userSecondService.id == newItem.userSecondService.id)
+        }
 
-        override fun areContentsTheSame(oldItem: ITransaction, newItem: ITransaction): Boolean =
-            oldItem.equals(newItem)
+        override fun areContentsTheSame(oldItem: SwapMatch, newItem: SwapMatch): Boolean =
+            oldItem == newItem
 
     }
 

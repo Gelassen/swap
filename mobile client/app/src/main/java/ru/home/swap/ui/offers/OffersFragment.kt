@@ -14,14 +14,11 @@ import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import dagger.android.AndroidInjection
 import dagger.android.support.AndroidSupportInjection
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import ru.home.swap.App
-import ru.home.swap.AppApplication
 import ru.home.swap.R
-import ru.home.swap.core.model.Service
 import ru.home.swap.databinding.OffersFragmentBinding
 import ru.home.swap.core.di.ViewModelFactory
 import ru.home.swap.core.model.SwapMatch

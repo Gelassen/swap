@@ -3,7 +3,6 @@ package ru.home.swap.utils
 import android.view.View
 import android.content.res.Resources
 import android.content.res.Resources.NotFoundException
-import android.view.View.MeasureSpec.UNSPECIFIED
 import androidx.core.util.Preconditions
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.matcher.BoundedMatcher

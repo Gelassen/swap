@@ -16,18 +16,17 @@ import dagger.android.support.AndroidSupportInjection
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import ru.home.swap.App
-import ru.home.swap.AppApplication
 import ru.home.swap.R
-import ru.home.swap.core.model.Service
 import ru.home.swap.databinding.DemandsFragmentBinding
 import ru.home.swap.core.di.ViewModelFactory
+import ru.home.swap.core.model.Service
 import ru.home.swap.core.model.SwapMatch
 import ru.home.swap.ui.common.BaseFragment
 import ru.home.swap.ui.contacts.ContactsFragment
 import ru.home.swap.ui.offers.OffersAdapter
 import javax.inject.Inject
 
-class DemandsFragment: BaseFragment(), OffersAdapter.IListener {
+class DemandsFragment: BaseFragment(), DemandsAdapter.IListener {
 
     @Inject
     lateinit var viewModelFactory: ViewModelFactory
@@ -71,14 +70,14 @@ class DemandsFragment: BaseFragment(), OffersAdapter.IListener {
         viewModel.removeShownError()
     }
 
-    override fun onItemClick(item: SwapMatch) {
-        Log.e(App.TAG, "On item click ${item.userSecondServiceTitle}")
+    override fun onItemClick(item: Service) {
+//        Log.e(App.TAG, "On item click ${item.userSecondServiceTitle}")
         val bundle = bundleOf(ContactsFragment.Params.EXTRA_SERVICE_ID to item.id) // FIXME just a stub due refactoring, reimplemenet it
         findNavController().navigate(R.id.action_offersFragment_to_contactsFragment, bundle)
     }
 
     private fun setupList() {
-        binding.demandsList.adapter = OffersAdapter(this)
+        binding.demandsList.adapter = DemandsAdapter(this)
         binding.demandsList.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
         binding.demandsList.addItemDecoration(
@@ -98,13 +97,13 @@ class DemandsFragment: BaseFragment(), OffersAdapter.IListener {
                     showErrorDialog(it.errors.get(0))
                 }
                 if (it.pagingData != null) {
-                    (binding.demandsList.adapter as OffersAdapter).submitData(it.pagingData)
+                    (binding.demandsList.adapter as DemandsAdapter).submitData(it.pagingData)
                 }
                 binding.noContent.visibility = if (binding.demandsList.adapter?.itemCount == 0) View.VISIBLE else View.GONE
             }
         }
         lifecycleScope.launch {
-            (binding.demandsList.adapter as OffersAdapter).loadStateFlow.collectLatest { loadState ->
+            (binding.demandsList.adapter as DemandsAdapter).loadStateFlow.collectLatest { loadState ->
                 when (loadState.refresh) {
                     is LoadState.Loading -> {
                         // no op
