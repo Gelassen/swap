@@ -38,8 +38,8 @@ class AppModule(val application: Application) {
 
     @AppMainScope
     @Provides
-    fun provideMatchPagingSource(api: IApi, context: Context): MatchesPagingSource {
-        return MatchesPagingSource(api, Integer.parseInt(context.getString(R.string.page_size)))
+    fun provideMatchPagingSource(api: IApi): MatchesPagingSource {
+        return MatchesPagingSource(application, api, Integer.parseInt(application.getString(R.string.page_size)))
     }
 
     @AppMainScope

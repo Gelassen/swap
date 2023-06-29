@@ -10,7 +10,9 @@ import androidx.test.espresso.matcher.BoundedMatcher
 import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.TypeSafeMatcher
+import ru.home.swap.ui.offers.OffersAdapter
 import ru.home.swap.ui.profile.ItemAdapter
+import java.lang.IllegalStateException
 
 /**
  * Credits to SO user
@@ -124,8 +126,26 @@ class RecyclerViewMatcher(private val recyclerId: Int) {
             }
 
             override fun matchesSafely(view: RecyclerView): Boolean {
-                val count = (view.adapter!! as ItemAdapter).currentList.count { it -> it.title.contains(text) }
-                return count == occurrences
+                when(view.adapter!!) {
+                    is ItemAdapter -> {
+                        val count = (view.adapter!! as ItemAdapter).currentList.count { it -> it.title.contains(text) }
+                        return count == occurrences
+                    }
+                    is OffersAdapter -> {
+                        val adapter = (view.adapter!! as OffersAdapter)
+                        var count = 0
+                        for (idx in 0 until adapter.itemCount) {
+                            val hasItem = adapter.peek(idx)!!.userSecondServiceTitle.contains(text)
+                            if (hasItem) count++
+                        }
+                        return count == occurrences
+                    }
+                    else -> {
+                        val txt: String = "This adapter has not been supported yet. " +
+                                "Is it a time reconsider hasItemWithRequestedText() has been designed?"
+                        throw IllegalStateException(txt)}
+                }
+
             }
 
         }

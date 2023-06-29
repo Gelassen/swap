@@ -1,10 +1,14 @@
 package ru.home.swap.repository.pagination
 
+import android.app.Application
 import android.util.Log
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import retrofit2.HttpException
 import ru.home.swap.App
+import ru.home.swap.AppApplication
+import ru.home.swap.core.extensions.registerIdlingResource
+import ru.home.swap.core.extensions.unregisterIdlingResource
 import ru.home.swap.core.model.MatchSubject
 import ru.home.swap.core.model.Service
 import ru.home.swap.core.model.SwapMatch
@@ -15,7 +19,10 @@ import java.util.*
 import kotlin.IllegalStateException
 import kotlin.collections.ArrayList
 
-class MatchesPagingSource(private val api: IApi, private val pageSize: Int)
+class MatchesPagingSource(
+    private val application: Application,
+    private val api: IApi,
+    private val pageSize: Int)
     : PagingSource<Int, SwapMatch>() {
 
     companion object {
@@ -37,6 +44,7 @@ class MatchesPagingSource(private val api: IApi, private val pageSize: Int)
             throw IllegalStateException("Credentials are empty. Did you pass credentials for API request?")
 
         try {
+            application.registerIdlingResource()
             val page = params.key ?: DEFAULT_START_PAGE
 
             val response = api.getMatchesForUserDemands(
@@ -60,6 +68,8 @@ class MatchesPagingSource(private val api: IApi, private val pageSize: Int)
             return LoadResult.Error(ex)
         } catch (ex: HttpException) {
             return LoadResult.Error(ex)
+        } finally {
+            application.unregisterIdlingResource()
         }
     }
 
