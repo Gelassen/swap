@@ -11,22 +11,20 @@ import kotlinx.coroutines.flow.*
 import ru.home.swap.R
 import ru.home.swap.core.model.PersonProfile
 import ru.home.swap.core.model.Service
-import ru.home.swap.core.model.SwapMatch
 import ru.home.swap.repository.IPersonRepository
-import ru.home.swap.repository.pagination.MatchesPagingSource
+import ru.home.swap.repository.pagination.OffersPagingSource
 import javax.inject.Inject
 
 data class Model(
-    val pagingData: PagingData<SwapMatch>? = null,
+    val pagingData: PagingData<Service>? = null,
     val profile: PersonProfile? = null,
     val isLoading: Boolean = false,
     val errors: List<String> = emptyList(),
 )
 
-@Deprecated("Use OffersV2ViewModel instead. It supports on-chain operations")
 class OffersViewModel
 @Inject constructor(
-    private val matchesPagingSource: MatchesPagingSource,
+    private val offersPagingSource: OffersPagingSource,
     private val repository: IPersonRepository,
     private val application: Context
 ): ViewModel() {
@@ -73,8 +71,8 @@ class OffersViewModel
         }
     }
 
-    private fun getPagingData(profile: PersonProfile): Flow<PagingData<SwapMatch>> {
-        matchesPagingSource.setCredentials(profile.contact, profile.secret)
+    private fun getPagingData(profile: PersonProfile): Flow<PagingData<Service>> {
+        offersPagingSource.setCredentials(profile.contact, profile.secret)
         val pageSize = application.getString(R.string.page_size).toInt()
         return Pager(
             config = PagingConfig(
@@ -83,7 +81,7 @@ class OffersViewModel
                 enablePlaceholders = false
             ),
             pagingSourceFactory = {
-                matchesPagingSource
+                offersPagingSource
             }
         )
             .flow

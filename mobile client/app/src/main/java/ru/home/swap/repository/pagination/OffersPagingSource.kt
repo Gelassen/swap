@@ -1,10 +1,13 @@
 package ru.home.swap.repository.pagination
 
+import android.app.Application
 import android.util.Log
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import retrofit2.HttpException
 import ru.home.swap.App
+import ru.home.swap.core.extensions.registerIdlingResource
+import ru.home.swap.core.extensions.unregisterIdlingResource
 import ru.home.swap.core.model.Service
 import ru.home.swap.core.network.IApi
 import ru.home.swap.utils.AppCredentials
@@ -12,7 +15,10 @@ import java.io.IOException
 import java.util.*
 import kotlin.IllegalStateException
 
-class OffersPagingSource(private val api: IApi, private val pageSize: Int)
+class OffersPagingSource(
+    private val application: Application,
+    private val api: IApi,
+    private val pageSize: Int)
     : PagingSource<Int, Service>() {
 
     companion object {
@@ -34,6 +40,7 @@ class OffersPagingSource(private val api: IApi, private val pageSize: Int)
             throw IllegalStateException("Credentials are empty. Did you pass credentials for API request?")
 
         try {
+            application.registerIdlingResource()
             val page = params.key ?: DEFAULT_START_PAGE
 
             val response = api.getOffers(
@@ -57,6 +64,9 @@ class OffersPagingSource(private val api: IApi, private val pageSize: Int)
             return LoadResult.Error(ex)
         } catch (ex: HttpException) {
             return LoadResult.Error(ex)
+        }
+        finally {
+            application.unregisterIdlingResource()
         }
     }
 

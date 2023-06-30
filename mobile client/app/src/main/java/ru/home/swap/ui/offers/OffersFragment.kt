@@ -21,6 +21,7 @@ import ru.home.swap.App
 import ru.home.swap.R
 import ru.home.swap.databinding.OffersFragmentBinding
 import ru.home.swap.core.di.ViewModelFactory
+import ru.home.swap.core.model.Service
 import ru.home.swap.core.model.SwapMatch
 import ru.home.swap.ui.common.BaseFragment
 import ru.home.swap.ui.contacts.ContactsFragment
@@ -32,7 +33,7 @@ class OffersFragment: BaseFragment(), OffersAdapter.IListener {
     @Inject
     lateinit var viewModelFactory: ViewModelFactory
 
-    private lateinit var viewModel: OffersV2ViewModel
+    private lateinit var viewModel: OffersViewModel
     private lateinit var binding: OffersFragmentBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,7 +46,7 @@ class OffersFragment: BaseFragment(), OffersAdapter.IListener {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        viewModel = ViewModelProvider(this, viewModelFactory).get(OffersV2ViewModel::class.java)
+        viewModel = ViewModelProvider(this, viewModelFactory).get(OffersViewModel::class.java)
 
         binding = OffersFragmentBinding.inflate(inflater, container, false)
         binding.lifecycleOwner = this
@@ -71,8 +72,8 @@ class OffersFragment: BaseFragment(), OffersAdapter.IListener {
         viewModel.removeShownError()
     }
 
-    override fun onItemClick(item: SwapMatch) {
-        Log.e(App.TAG, "On item click ${item.userSecondServiceTitle}")
+    override fun onItemClick(item: Service) {
+        Log.e(App.TAG, "On item click ${item.title}")
         val bundle = bundleOf(ContactsFragment.Params.EXTRA_SERVICE_ID to item.id) // FIXME just a stub due refactoring, reimplemenet it
         findNavController().navigate(R.id.action_offersFragment_to_contactsFragment, bundle)
     }

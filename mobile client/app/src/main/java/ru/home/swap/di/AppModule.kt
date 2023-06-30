@@ -33,7 +33,7 @@ class AppModule(val application: Application) {
     @AppMainScope
     @Provides
     fun provideOffersPagingSource(api: IApi, context: Context): OffersPagingSource {
-        return OffersPagingSource(api, Integer.parseInt(context.getString(R.string.page_size)))
+        return OffersPagingSource(application, api, Integer.parseInt(context.getString(R.string.page_size)))
     }
 
     @AppMainScope

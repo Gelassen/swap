@@ -127,10 +127,10 @@ class ProfileRobot {
         return this
     }
 
-    fun seesMatch(myDemand: String) {
-        onView(withId(R.id.offers_list))
+    fun seesMatch(myDemand: String, listId: Int = R.id.offers_list) {
+        onView(withId(listId))
             .check(matches(
-                RecyclerViewMatcher(R.id.offers_list)
+                RecyclerViewMatcher(listId)
                     .hasItemWithRequestedText(
                         text =  myDemand,
                         occurrences = 1
@@ -209,8 +209,8 @@ class ProfileRobot {
             .perform(click())
     }
 
-    fun clickOffersNavigationTab() {
-        onView(withId(R.id.navigation_offers))
+    fun clickChainsNavigationTab() {
+        onView(withId(R.id.navigation_chains))
             .perform(click())
     }
 

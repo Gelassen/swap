@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.CoroutineDispatcher
 import ru.home.swap.core.model.SwapMatch
 import ru.home.swap.databinding.OffersViewItemBinding
+import ru.home.swap.databinding.SwapmatchViewItemBinding
 import ru.home.swap.providers.PersonProvider
 import ru.home.swap.wallet.model.ITransaction
 
@@ -20,7 +21,7 @@ class ChainsAdapter(
         fun onItemClick(item: SwapMatch)
     }
 
-    class ViewHolder(internal val binding: OffersViewItemBinding)
+    class ViewHolder(internal val binding: SwapmatchViewItemBinding)
         : RecyclerView.ViewHolder(binding.root)
 
     private var profileId: Long? = null
@@ -36,7 +37,7 @@ class ChainsAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val holder = ViewHolder(
-            OffersViewItemBinding.inflate(
+            SwapmatchViewItemBinding.inflate(
                 LayoutInflater.from(parent.context), parent, false)
         )
         holder.binding.provider = PersonProvider()

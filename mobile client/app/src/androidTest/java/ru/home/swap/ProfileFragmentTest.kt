@@ -179,8 +179,8 @@ class ProfileFragmentTest : BaseFragmentTest() {
      * 3. Implement a couple of grade tasks which will pre-configurate test environment
      *    including 2nd user and run test against it.
      * */
-    @Ignore("By undiscovered reason open an 'offer' tab doesn't  work smoothly as a part of integration test, " +
-            "open it when the rest code has been commented out works as excpected")
+    @Ignore("By undiscovered reason open an 'chains' or any other tab doesn't  work smoothly as a part of integration test, " +
+            "open it when the rest code has been commented out works as expected")
     @Test
     fun onOpenOffersScreen_matchesHasBeenSetup_singleOfferIsShown() {
         val activityScenario = ActivityScenario.launch(MainActivity::class.java)
@@ -229,8 +229,8 @@ class ProfileFragmentTest : BaseFragmentTest() {
         )
 
         // offers screen
-        robot.clickOffersNavigationTab()
-        robot.seesMatch(/*newDemand*/"Farmer products")
+        robot.clickChainsNavigationTab()
+        robot.seesMatch(/*newDemand*/"Farmer products", R.id.txList)
 
         activityScenario.close()
     }

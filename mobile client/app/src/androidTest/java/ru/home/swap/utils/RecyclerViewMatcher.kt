@@ -4,11 +4,13 @@ import android.view.View
 import android.content.res.Resources
 import android.content.res.Resources.NotFoundException
 import androidx.core.util.Preconditions
+import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.matcher.BoundedMatcher
 import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.TypeSafeMatcher
+import ru.home.swap.ui.chains.ChainsAdapter
 import ru.home.swap.ui.offers.OffersAdapter
 import ru.home.swap.ui.profile.ItemAdapter
 import java.lang.IllegalStateException
@@ -130,7 +132,7 @@ class RecyclerViewMatcher(private val recyclerId: Int) {
                         val count = (view.adapter!! as ItemAdapter).currentList.count { it -> it.title.contains(text) }
                         return count == occurrences
                     }
-                    is OffersAdapter -> {
+                    is PagingDataAdapter<*,*> -> {
                         val adapter = (view.adapter!! as OffersAdapter)
                         var count = 0
                         for (idx in 0 until adapter.itemCount) {
