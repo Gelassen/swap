@@ -20,7 +20,12 @@ class SignInFragmentTest : BaseFragmentTest() {
         val activityScenario = ActivityScenario.launch(MainActivity::class.java)
         dataBindingIdlingResource.monitorActivity(activityScenario)
 
-        robot.clickDebugButton()
+        val newName = "Dmitry ${LocalDateTime.now()}"
+        val newPhone = TestAppApplication.FIRST_USER_CONTACT
+        val secret = TestAppApplication.FIRST_USER_SECRET
+        val newWallet = TestAppApplication.FIRST_USER_ADDRESS
+
+        robot.enterCustomDebugData(newName, newPhone, secret, newWallet)
 
         robot
             .seesName(TestAppApplication.FIRST_USER_NAME)
@@ -39,7 +44,12 @@ class SignInFragmentTest : BaseFragmentTest() {
         val activityScenario = ActivityScenario.launch(MainActivity::class.java)
         dataBindingIdlingResource.monitorActivity(activityScenario)
 
-        robot.clickDebugButton()
+        val newName = "Dmitry ${LocalDateTime.now()}"
+        val newPhone = TestAppApplication.FIRST_USER_CONTACT
+        val secret = TestAppApplication.FIRST_USER_SECRET
+        val newWallet = TestAppApplication.FIRST_USER_ADDRESS
+
+        robot.enterCustomDebugData(newName, newPhone, secret, newWallet)
 
         robot
             .seesName(TestAppApplication.FIRST_USER_NAME)

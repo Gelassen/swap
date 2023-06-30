@@ -133,11 +133,26 @@ class RecyclerViewMatcher(private val recyclerId: Int) {
                         return count == occurrences
                     }
                     is PagingDataAdapter<*,*> -> {
-                        val adapter = (view.adapter!! as OffersAdapter)
                         var count = 0
-                        for (idx in 0 until adapter.itemCount) {
-                            val hasItem = adapter.peek(idx)!!.userSecondServiceTitle.contains(text)
-                            if (hasItem) count++
+                        when (view.adapter!!) {
+                            is OffersAdapter -> {
+                                val adapter = view.adapter!! as OffersAdapter
+                                for (idx in 0 until adapter.itemCount) {
+                                    val hasItem = adapter.peek(idx)!!.title.contains(text)
+                                    if (hasItem) count++
+                                }
+                            }
+                            is ChainsAdapter -> {
+                                val adapter = view.adapter!! as ChainsAdapter
+                                for (idx in 0 until adapter.itemCount) {
+                                    val hasItem = adapter.peek(idx)!!.userSecondServiceTitle.contains(text)
+                                    if (hasItem) count++
+                                }
+                            }
+                            else -> {
+                                val txt: String = "This adapter has not been supported yet. " +
+                                        "Is it a time reconsider hasItemWithRequestedText() has been designed?"
+                                throw IllegalStateException(txt)}
                         }
                         return count == occurrences
                     }
