@@ -5,6 +5,7 @@ const profile = require('../controllers/profile');
 const offers = require('../controllers/offers'); 
 const demands = require('../controllers/demands');
 const contacts = require('../controllers/contacts');
+const tests = require('../controllers/tests');
 
 router.get('/', function(req, res) {
     res.redirect('/api/v1');
@@ -45,5 +46,7 @@ router.get('/api/v1/offers', offers.get);
 router.get('/api/v1/demands', demands.get);
 
 router.get('/api/v1/contacts', contacts.get);
+
+router.post('/api/v1/test/environment', tests.setEnvironment);
 
 module.exports = router;

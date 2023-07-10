@@ -1,7 +1,8 @@
 {
     "config" : {
         "webHost": "127.0.0.1", 
-        "webPort":  3000
+        "webPort":  3000,
+        "isProduction": true
     },
     "dbConfig" : {
         "host"     : "127.0.0.1",

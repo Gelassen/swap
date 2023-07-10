@@ -1,4 +1,7 @@
 {
+    "config" : {
+        "isProduction": false
+    },
     "dbConfig" : {
         "host"     : "172.16.254.1",
         "port"     : "3307",

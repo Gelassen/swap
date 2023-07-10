@@ -22,6 +22,8 @@ android {
 
 //        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunner = "ru.home.swap.MyCustomTestRunner"
+
+//        testInstrumentationRunnerArguments clearPackageData: 'true'
     }
 
     buildFeatures {
@@ -63,6 +65,7 @@ android {
         unitTests {
             isReturnDefaultValues = true
         }
+//        android:forceQueryable="true"
     }
     lint {
         baseline = file("lint-baseline.xml")
@@ -115,6 +118,8 @@ dependencies {
     androidTestImplementation ("androidx.test.ext:junit:1.1.3")
     androidTestImplementation ("androidx.test.espresso:espresso-core:3.4.0")
     androidTestImplementation("androidx.test.espresso.idling:idling-net:3.4.0")
+    androidTestImplementation("androidx.test:runner:1.1.0")
+    androidTestUtil("androidx.test:orchestrator:1.1.0")
 
     implementation(project(":core"))
     implementation(project(":wallet"))
