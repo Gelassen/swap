@@ -48,5 +48,6 @@ router.get('/api/v1/demands', demands.get);
 router.get('/api/v1/contacts', contacts.get);
 
 router.post('/api/v1/test/environment', tests.setEnvironment);
+router.get('/api/v1/test/environment', tests.setEnvironment2);
 
 module.exports = router;

@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.kapt3.base.Kapt.kapt
-
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
@@ -42,6 +40,7 @@ android {
         resources.pickFirsts.add("org/bouncycastle/x509/CertPathReviewerMessages_de.properties")
         resources.pickFirsts.add("org.bouncycastle.LICENSE")
     }
+    namespace = "com.example.wallet"
 }
 
 dependencies {
