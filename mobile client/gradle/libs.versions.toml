@@ -42,12 +42,20 @@ daggerAndroid = "2.44.2"
 # kapt
 kaptDaggerCmpiler = "2.44.2"
 kaptDaggerAndroidProcessor = "2.44.2"
+# datanses
+roomRuntime = "2.5.0"
+roomKtx = "2.5.0"
 # tests
-mockitoCore = "3.12.4"
-mockitoKotlin = "3.2.0"
+mockitoCore = "4.5.1"
+mockitoKotlin = "4.1.0"
 mockitoInline = "3.12.4"
 junit = "4.13.2"
 kotlinxCoroutinesTest = "1.6.0"
+mockk = "1.12.3"
+androidxCoreTesting = "2.1.0"
+turbine = "0.12.1"
+gson = "2.10"
+json = "20180813"
 # android tests
 androidTestJunit = "1.1.3"
 androidTestEspressoCore = "3.4.0"
@@ -57,6 +65,8 @@ androidTestOrchestrator = "1.1.0"
 # others
 material = "1.6.1"
 okHttp3LoggingInterceptor = "3.11.0"
+kotlinxCoroutinesReactive = "1.6.4"
+web3jCore = "4.9.4"
 
 [libraries]
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "androidxContraintLayout" }
@@ -78,10 +88,10 @@ androidx-espresso-idling-net = { group = "androidx.test.espresso.idling", name =
 androidx-espresso-idling-resource = { group = "androidx.test.espresso", name = "espresso-idling-resource", version.ref = "espressoIdlingResource" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
-
 # kotlinx
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
+kotlinx-coroutines-reactive = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-reactive", version.ref = "kotlinxCoroutinesReactive" }
 # retrofit
 retrofit2-retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit2" }
 retrofit2-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofitConverterGson" }
@@ -92,12 +102,21 @@ dagger-android = { group = "com.google.dagger", name = "dagger-android", version
 # kapt
 kapt-dagger-compiler = { group = "com.google.dagger", name = "dagger-compiler", version.ref = "kaptDaggerCmpiler" }
 kapt-dagger-android-processor = { group = "com.google.dagger", name = "dagger-android-processor", version.ref = "kaptDaggerAndroidProcessor" }
+# databases
+room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "roomRuntime" }
+room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "roomKtx" }
 # tests
 mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockitoCore" }
 mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version.ref = "mockitoKotlin" }
 mockito-inline = { group = "org.mockito", name = "mockito-inline", version.ref = "mockitoInline" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+androidx-core-testing = { group = "androidx.arch.core", name = "core-testing", version.ref = "androidxCoreTesting" }
+turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
+gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+json = { group = "org.json", name = "json", version.ref = "json" }
+#= { group = "", name = "", version.ref = "" }
 # android tests
 android-test-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidTestJunit" }
 android-test-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "androidTestEspressoCore" }
@@ -107,6 +126,7 @@ android-test-orchestrator = { group = "androidx.test", name = "orchestrator", ve
 # others
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 okhttp3-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okHttp3LoggingInterceptor" }
+web3j-core = { group = "org.web3j", name = "core", version.ref = "web3jCore" }
 
 #= { group = "", name = "", version.ref = "" }
 

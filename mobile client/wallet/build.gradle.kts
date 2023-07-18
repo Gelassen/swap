@@ -5,13 +5,14 @@ plugins {
 }
 
 android {
-    compileSdk = 33
+    namespace = "ru.home.swap.wallet"
+
+    compileSdk = libs.versions.compileSdkVersion.get().toInt()
 
     defaultConfig {
-        minSdk = 21
-        targetSdk = 32
+        minSdk = libs.versions.minSdkVersion.get().toInt()
+        targetSdk = libs.versions.targetSdkVersion.get().toInt()
 
-//        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunner = "ru.home.swap.MyCustomTestRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
@@ -40,56 +41,55 @@ android {
         resources.pickFirsts.add("org/bouncycastle/x509/CertPathReviewerMessages_de.properties")
         resources.pickFirsts.add("org.bouncycastle.LICENSE")
     }
-    namespace = "com.example.wallet"
 }
 
 dependencies {
 
-    implementation("androidx.core:core-ktx:1.9.0")
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1")
-    implementation("androidx.activity:activity-ktx:1.6.1")
-    implementation("androidx.room:room-runtime:2.5.0")
-    implementation("androidx.room:room-ktx:2.5.0")
-    implementation("androidx.paging:paging-runtime:3.1.1")
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.activity.ktx)
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    implementation(libs.androidx.paging.runtime)
+    implementation(libs.androidx.work.runtime)
+    implementation(libs.androidx.work.runtime.ktx)
 
-    implementation("com.google.android.material:material:1.6.1")
-    implementation("com.google.code.gson:gson:2.10")
-    implementation ("com.google.dagger:dagger:2.44.2")
-    implementation ("com.google.dagger:dagger-android-support:2.44.2")
-    implementation("com.google.dagger:dagger-android:2.44.2")
+    implementation(libs.material)
+    implementation(libs.gson)
+    implementation(libs.dagger)
+    implementation(libs.dagger.android.support)
+    implementation(libs.dagger.android)
 
-    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
-    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactive:1.6.4")
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.reactive)
 
-    implementation("org.web3j:core:4.9.4")
-    implementation("androidx.work:work-runtime:2.8.0")
-    implementation("androidx.work:work-runtime-ktx:2.8.0")
+    implementation(libs.web3j.core)
+
 //    implementation("androidx.test:monitor:1.6.1") -- cause android tests issues in 'app' main module
 
 //    annotationProcessor("androidx.room:room-compiler:2.5.0")
 
     kapt("androidx.room:room-compiler:2.5.0")
-    kapt("com.google.dagger:dagger-compiler:2.44.2")
-    kapt("com.google.dagger:dagger-android-processor:2.44.2")
+    kapt(libs.kapt.dagger.compiler)
+    kapt(libs.kapt.dagger.android.processor)
 
     // To use Kotlin Symbol Processing (KSP)
 //    ksp("androidx.room:room-compiler:$room_version")
 
-    testImplementation("junit:junit:4.13.2")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
-    testImplementation("androidx.arch.core:core-testing:2.1.0")
-//    testImplementation("org.mockito:mockito-inline:3.12.4")
-    testImplementation("org.mockito:mockito-core:4.5.1")
-    testImplementation("app.cash.turbine:turbine:0.12.1")
-    testImplementation("com.google.code.gson:gson:2.10")
-    testImplementation("org.json:json:20180813")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
-    testImplementation("io.mockk:mockk:1.12.3")
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.androidx.core.testing)
+    testImplementation(libs.turbine)
+    testImplementation(libs.gson)
+    testImplementation(libs.json)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.kotlin)
+    testImplementation(libs.mockk)
 
-    androidTestImplementation("androidx.test.ext:junit:1.1.30")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
+    androidTestImplementation(libs.android.test.junit)
+    androidTestImplementation(libs.android.test.espresso.core)
 /*    androidTestImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
     androidTestImplementation("androidx.arch.core:core-testing:2.1.0")
     androidTestImplementation("org.mockito:mockito-inline:3.12.4")

@@ -48,7 +48,6 @@ dependencies {
     implementation(libs.dagger)
     implementation(libs.dagger.android.support)
     implementation(libs.dagger.android)
-//    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.androidx.espresso.idling.resource)
