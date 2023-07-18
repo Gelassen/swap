@@ -8,11 +8,13 @@ plugins {
 }
 
 android {
-    compileSdk = 33
+    namespace = "ru.home.swap.core"
+
+    compileSdk = libs.versions.compileSdkVersion.get().toInt()
 
     defaultConfig {
-        minSdk = 21
-        targetSdk = 32
+        minSdk = libs.versions.minSdkVersion.get().toInt()
+        targetSdk = libs.versions.targetSdkVersion.get().toInt()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -31,32 +33,32 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
-    namespace = "ru.home.swap.core"
+
 }
 
 dependencies {
 
-    implementation("androidx.core:core-ktx:1.9.0")
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.6.1")
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
 
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:3.11.0")
-    implementation("com.google.dagger:dagger:2.44.2")
-    implementation("com.google.dagger:dagger-android-support:2.44.2")
-    implementation("com.google.dagger:dagger-android:2.44.2")
+    implementation(libs.retrofit2.retrofit)
+    implementation(libs.retrofit2.converter.gson)
+    implementation(libs.okhttp3.logging.interceptor)
+    implementation(libs.dagger)
+    implementation(libs.dagger.android.support)
+    implementation(libs.dagger.android)
 //    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
-    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
-    implementation ("androidx.test.espresso:espresso-idling-resource:3.4.0")
-    implementation("androidx.test.espresso.idling:idling-net:3.5.1")
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.androidx.espresso.idling.resource)
+    implementation(libs.androidx.espresso.idling.net)
 
-    kapt("com.google.dagger:dagger-compiler:2.44.2")
-    kapt("com.google.dagger:dagger-android-processor:2.44.2")
+    kapt(libs.kapt.dagger.compiler)
+    kapt(libs.kapt.dagger.android.processor)
 
-    testImplementation("junit:junit:4.13.2")
+    testImplementation(libs.junit)
 
-    androidTestImplementation("androidx.test.ext:junit:1.1.3")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
+    androidTestImplementation(libs.android.test.junit)
+    androidTestImplementation(libs.android.test.espresso.core)
 }
