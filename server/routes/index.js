@@ -5,7 +5,6 @@ const profile = require('../controllers/profile');
 const offers = require('../controllers/offers'); 
 const demands = require('../controllers/demands');
 const contacts = require('../controllers/contacts');
-const tests = require('../controllers/tests');
 
 router.get('/', function(req, res) {
     res.redirect('/api/v1');

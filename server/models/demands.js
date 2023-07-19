@@ -19,8 +19,7 @@ exports.getDemands = function(fullProfile, page, size) {
                 LEFT OUTER JOIN ${ChainServicesTable.TABLE_NAME} 
                 ON Service.id = ${ChainServicesTable.TABLE_NAME}.${ChainServicesTable.SERVER_SERVICE_ID} 
                 WHERE profileId != ${fullProfile.id} 
-                AND offer = ${DEMAND} 
-                AND (${prepareWhereClause(fullProfile.offers)})
+                AND offer = ${DEMAND}  
                 ${prepareLimitClause(page, size)}`;
             logger.log("sql query: " + sql);
             connection.query(

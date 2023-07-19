@@ -18,8 +18,7 @@ exports.getOffers = function(fullProfile, page, size) {
             
             const sql = `SELECT * FROM Service 
                 WHERE profileId != ${fullProfile.id} 
-                AND offer = ${OFFER} 
-                AND (${prepareWhereClause(fullProfile.demands)})
+                AND offer = ${OFFER}  
                 ${prepareLimitClause(page, size)}`;
             logger.log("sql query: " + sql);
             connection.query(
@@ -135,6 +134,9 @@ function prepareLimitClause(page, size) {
     return result;
 }
 
+/**
+ * @deprecated since v2 and match moves to 'chains' tab
+ */
 function prepareWhereClause(...conditions) {
     let result = "";
     conditions.forEach((items) => {

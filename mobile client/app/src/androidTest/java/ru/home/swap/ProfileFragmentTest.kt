@@ -176,7 +176,7 @@ class ProfileFragmentTest : BaseFragmentTest() {
      * Several options here:
      * 1. Manually pre-configurate test user here and run single test here
      * 2. Implement /logout option and setup 2nd user over test
-     * 3. Implement a couple of grade tasks which will pre-configurate test environment
+     * 3. Implement a couple of gradle tasks which will pre-configurate test environment
      *    including 2nd user and run test against it.
      * */
     @Ignore("By undiscovered reason open an 'chains' or any other tab doesn't  work smoothly as a part of integration test, " +
