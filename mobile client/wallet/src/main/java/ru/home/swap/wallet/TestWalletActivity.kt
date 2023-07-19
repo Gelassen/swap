@@ -8,7 +8,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.example.wallet.R
 import ru.home.swap.wallet.contract.Value
 import ru.home.swap.wallet.di.WalletDi
 import kotlinx.coroutines.launch
@@ -19,6 +18,8 @@ import ru.home.swap.core.logger.Logger
 import ru.home.swap.core.model.PersonProfile
 import ru.home.swap.core.model.Service
 import ru.home.swap.wallet.contract.Match
+import ru.home.swap.wallet.R
+import java.lang.IllegalStateException
 import java.math.BigInteger
 import javax.inject.Inject
 
@@ -53,6 +54,12 @@ class TestWalletActivity: AppCompatActivity() {
                         }
                         Status.MINT_TOKEN -> {
                             logger.d("Mint a new token")
+                        }
+                        Status.MY_TOKENS -> {
+                            logger.d("my tokens")
+                        }
+                        else -> {
+                            throw IllegalStateException("Did you forget to add a new state hadnler?")
                         }
                     }
                 }

@@ -22,7 +22,7 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "ru.home.swap.MyCustomTestRunner"
-//        testInstrumentationRunnerArguments clearPackageData: 'true'
+        testInstrumentationRunnerArguments["clearPackageData"] = "true"
     }
 
     buildFeatures {
@@ -65,6 +65,8 @@ android {
             isReturnDefaultValues = true
         }
 //        android:forceQueryable="true"
+        execution = "ANDROIDX_TEST_ORCHESTRATOR"
+
     }
     lint {
         baseline = file("lint-baseline.xml")
@@ -72,10 +74,6 @@ android {
 }
 
 dependencies {
-
-//    implementation "androidx.core:core-ktx:1.9.0"
-//    implementation "androidx.appcompat:appcompat:1.4.1"
-//    implementation "com.google.android.material:material:1.6.0"
     //    androidx
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.lifecycle.livedata.ktx)
@@ -113,9 +111,10 @@ dependencies {
     testImplementation (libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     //    android tests
-    androidTestImplementation (libs.android.test.junit)
-    androidTestImplementation (libs.android.test.espresso.core)
+    androidTestImplementation(libs.android.test.junit)
+    androidTestImplementation(libs.android.test.espresso.core)
     androidTestImplementation(libs.android.test.espresso.idling.net)
+    androidTestImplementation(libs.android.test.core.ktx)
     androidTestImplementation(libs.android.test.runner)
     androidTestUtil(libs.android.test.orchestrator)
 

@@ -15,7 +15,7 @@ class DebugProfiles(val context: Context) {
                 contact = "+79207008090",
                 name = "Dmitry",
                 secret = "onemoretime",
-                userWalletAddress =  context.getString(com.example.wallet.R.string.first_account)
+                userWalletAddress =  context.getString(ru.home.swap.wallet.R.string.first_account)
             )
         )
         profiles.add(
@@ -23,7 +23,7 @@ class DebugProfiles(val context: Context) {
                 contact = "+79101000108",
                 name = "Jane",
                 secret = "catchme",
-                userWalletAddress = context.getString(com.example.wallet.R.string.second_account)
+                userWalletAddress = context.getString(ru.home.swap.wallet.R.string.second_account)
             )
         )
         profiles.add(
@@ -38,7 +38,7 @@ class DebugProfiles(val context: Context) {
                 contact = "+79201000989",
                 name = "Julia N.",
                 secret = "wireframes",
-                userWalletAddress = context.getString(com.example.wallet.R.string.third_account)
+                userWalletAddress = context.getString(ru.home.swap.wallet.R.string.third_account)
             )
         )
         profiles.add(
@@ -46,7 +46,7 @@ class DebugProfiles(val context: Context) {
                 contact = "+79202000989",
                 name = "Dmitry K.",
                 secret = "expertise",
-                userWalletAddress = context.getString(com.example.wallet.R.string.fourth_account)
+                userWalletAddress = context.getString(ru.home.swap.wallet.R.string.fourth_account)
             )
         )
         profiles.add(

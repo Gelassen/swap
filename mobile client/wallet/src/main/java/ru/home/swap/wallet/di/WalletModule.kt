@@ -2,7 +2,6 @@ package ru.home.swap.wallet.di
 
 import android.app.Application
 import androidx.work.WorkManager
-import com.example.wallet.R
 import ru.home.swap.wallet.storage.AppDatabase
 import dagger.Module
 import dagger.Provides
@@ -15,6 +14,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import org.web3j.protocol.http.HttpService
 import ru.home.swap.core.model.PersonProfile
 import ru.home.swap.core.network.interceptors.DefaultInterceptor
+import ru.home.swap.wallet.R
 import ru.home.swap.wallet.model.ChainConfig
 import ru.home.swap.wallet.repository.*
 import ru.home.swap.wallet.storage.CacheUtils

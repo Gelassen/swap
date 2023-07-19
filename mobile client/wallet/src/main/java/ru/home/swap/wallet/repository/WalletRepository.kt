@@ -1,7 +1,6 @@
 package ru.home.swap.wallet.repository
 
 import android.content.Context
-import com.example.wallet.R
 import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -30,6 +29,7 @@ import ru.home.swap.wallet.model.ChainConfig
 import ru.home.swap.wallet.model.Token
 import ru.home.swap.wallet.model.TransactionReceiptDomain
 import ru.home.swap.wallet.model.toDomain
+import ru.home.swap.wallet.R
 import java.math.BigInteger
 
 
