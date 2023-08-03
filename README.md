@@ -1,5 +1,7 @@
 # Swap
-The idea behind this project is to give people an option to exchange products and services without money (barter).  
+The idea behind this project is to give people an option to exchange products and services without money (barter).
+
+<a href="https://gelassen.github.io/blog/2023/04/02/swap-tech-notes-part-1.html">Swap tech notes, part 1: smart contracts integration</a>
 
 # Github Actions CI
 Similar to the case of <a href="https://github.com/Gelassen/government-rus">government-rus</a> tests passes locally, but on the server one test has been failing which marks CI run as unsuccessful. The root cause of this is unclear. Build reports created at the end of the build work as 2nd source of confidence as a workaround of this issue.  
