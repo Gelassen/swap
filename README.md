@@ -1,10 +1,10 @@
 # Swap
 The idea behind this project is to give people an option to exchange products and services without money (barter).
 
-<a href="https://gelassen.github.io/blog/2023/04/02/swap-tech-notes-part-1.html">Swap tech notes, part 1: smart contracts integration</a>
-<a href="https://gelassen.github.io/blog/2023/04/08/swap-tech-notes-part-2.html">Swap tech notes, part 2: test coverage</a>
-<a href="https://gelassen.github.io/blog/2023/04/15/swap-tech-notes-part-3.html">Swap tech notes, part 3: server and mobile clients</a>
-<a href="https://gelassen.github.io/blog/2023/04/23/swap-tech-notes-part-4.html">Swap tech notes, part 4: automatization</a>
+<a href="https://gelassen.github.io/blog/2023/04/02/swap-tech-notes-part-1.html">Swap tech notes, part 1: smart contracts integration</a> <br>
+<a href="https://gelassen.github.io/blog/2023/04/08/swap-tech-notes-part-2.html">Swap tech notes, part 2: test coverage</a> <br>
+<a href="https://gelassen.github.io/blog/2023/04/15/swap-tech-notes-part-3.html">Swap tech notes, part 3: server and mobile clients</a> <br>
+<a href="https://gelassen.github.io/blog/2023/04/23/swap-tech-notes-part-4.html">Swap tech notes, part 4: automatization</a> <br>
 <a href="https://gelassen.github.io/blog/2023/07/22/multicomponent-project-deployment-over-docker.html">Docker: multicomponent project deployment</a>
 
 # Github Actions CI
