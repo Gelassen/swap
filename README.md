@@ -1,6 +1,7 @@
 # Swap
 The idea behind this project is to give people an option to exchange products and services without money (barter).
 
+<a href="https://gelassen.github.io/blog/2022/06/11/open-exchange-platform.html">Case study: Open Exchange platform</a> <br>
 <a href="https://gelassen.github.io/blog/2023/04/02/swap-tech-notes-part-1.html">Swap tech notes, part 1: smart contracts integration</a> <br>
 <a href="https://gelassen.github.io/blog/2023/04/08/swap-tech-notes-part-2.html">Swap tech notes, part 2: test coverage</a> <br>
 <a href="https://gelassen.github.io/blog/2023/04/15/swap-tech-notes-part-3.html">Swap tech notes, part 3: server and mobile clients</a> <br>
